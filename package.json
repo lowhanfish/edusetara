@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "vinext dev",
-    "build": "vinext build",
+    "dev": "node scripts/run-vinext.mjs dev",
+    "build": "node scripts/run-vinext.mjs build",
     "start": "wrangler dev --config dist/server/wrangler.json",
     "lint": "oxlint"
   },
