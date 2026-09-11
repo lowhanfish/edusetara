@@ -7,12 +7,12 @@ export function AudienceSection() {
   return (
     <section className="audience-panel" id="layanan">
       <div className="audience-list">
-        {audiences.map(({ icon, label, tone }) => (
-          <a className={`audience ${tone}`} href="#layanan-cepat" key={label}>
+        {audiences.map(({ id, icon, label, tone, href }) => (
+          <a className={`audience ${tone}`} href={href} key={id}>
             <span>{icon}</span>
             <strong>
-              {label.split("\n").map((line) => (
-                <span key={line}>{line}</span>
+              {label.split("\n").map((line, index) => (
+                <span key={`${id}-${index}`}>{line}</span>
               ))}
             </strong>
             <Arrow />

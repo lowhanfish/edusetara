@@ -6,8 +6,8 @@ export function QuickLinksSection() {
     <section className="card quick" id="layanan-cepat">
       <SectionHeading icon="ϟ" title="Layanan Cepat" action="" />
       <div>
-        {quickLinks.map(({ icon, title, description, tone }) => (
-          <a className="quick-link" href="#" key={title}>
+        {quickLinks.map(({ id, icon, title, description, tone, href }) => (
+          <a className="quick-link" href={href} key={id}>
             <span className={`quick-icon ${tone}`}>{icon}</span>
             <span>
               <strong>{title}</strong>

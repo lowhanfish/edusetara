@@ -6,8 +6,8 @@ export function ServiceStandardsSection() {
     <section className="card standards" id="standar-pelayanan">
       <SectionHeading icon="♟" title="Standar Pelayanan" />
       <div>
-        {serviceStandards.map(({ title, size }) => (
-          <a href="#" key={title}>
+        {serviceStandards.map(({ id, title, size, href }) => (
+          <a href={href} key={id}>
             <span className="doc-icon">▤</span>
             <strong>
               {title}

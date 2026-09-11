@@ -10,8 +10,8 @@ export function StatisticsSection() {
         action="Lihat Detail"
       />
       <div className="stats-grid">
-        {educationStats.map(({ icon, value, label, tone }) => (
-          <div className={`stat ${tone}`} key={label}>
+        {educationStats.map(({ id, icon, value, label, tone }) => (
+          <div className={`stat ${tone}`} key={id}>
             <span>{icon}</span>
             <b>{value}</b>
             <small>{label}</small>

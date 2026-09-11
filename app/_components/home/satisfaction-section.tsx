@@ -20,8 +20,8 @@ export function SatisfactionSection() {
         <div className="chart">
           <strong>Grafik Tren IKM</strong>
           <div className="bars">
-            {satisfactionTrend.map(({ value, year, height }) => (
-              <div key={year}>
+            {satisfactionTrend.map(({ id, value, year, height }) => (
+              <div key={id}>
                 <b>{value}</b>
                 <i style={{ height: `${height}px` }} />
                 <span>{year}</span>

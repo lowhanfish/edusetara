@@ -14,8 +14,8 @@ export function CultureSection() {
       <p>Jaga warisan budaya, kuatkan jati diri daerah.</p>
       <div className="culture-body">
         <div>
-          {cultureLinks.map(({ icon, label }) => (
-            <a href="#" key={label}>
+          {cultureLinks.map(({ id, icon, label, href }) => (
+            <a href={href} key={id}>
               <span>{icon}</span>
               {label}
             </a>

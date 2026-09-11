@@ -1,6 +1,10 @@
 import Image from "next/image";
 
-import { footerQuickLinks, footerServices } from "./home-data";
+import {
+  footerQuickLinks,
+  footerServices,
+  type FooterLink,
+} from "./home-data";
 
 export function SiteFooter() {
   return (
@@ -54,13 +58,13 @@ export function SiteFooter() {
   );
 }
 
-function FooterLinkGroup({ title, links }: { title: string; links: string[] }) {
+function FooterLinkGroup({ title, links }: { title: string; links: FooterLink[] }) {
   return (
     <div>
       <h4>{title}</h4>
-      {links.map((link) => (
-        <a href="#" key={link}>
-          › {link}
+      {links.map(({ id, label, href }) => (
+        <a href={href} key={id}>
+          › {label}
         </a>
       ))}
     </div>

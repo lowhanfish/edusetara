@@ -26,8 +26,8 @@ export function NewsSection() {
           <Arrow />
         </article>
         <div className="news-list">
-          {latestNews.map(({ title, date, category }, index) => (
-            <article key={title}>
+          {latestNews.map(({ id, title, date, category }, index) => (
+            <article key={id}>
               <div className={`thumb thumb-${index}`}>
                 <Image src="/img/hero-konsel.png" alt="" fill sizes="100px" />
               </div>

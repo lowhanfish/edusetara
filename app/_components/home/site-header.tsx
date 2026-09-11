@@ -125,16 +125,13 @@ export function SiteHeader() {
         <div className="nav-inner container">
           {navItems.map((item, index) => {
             const hasChildren = Boolean(item.children?.length);
-            const isOpen = openMenu === item.label;
-            const dropdownId = `menu-${item.label
-              .toLowerCase()
-              .replaceAll(" ", "-")
-              .replaceAll("&", "dan")}`;
+            const isOpen = openMenu === item.id;
+            const dropdownId = `menu-${item.id}`;
 
             return (
               <div
                 className={`nav-item${isOpen ? " open" : ""}`}
-                key={item.label}
+                key={item.id}
               >
                 {hasChildren ? (
                   <button
@@ -144,7 +141,7 @@ export function SiteHeader() {
                     aria-controls={dropdownId}
                     onClick={() =>
                       setOpenMenu((current) =>
-                        current === item.label ? null : item.label,
+                        current === item.id ? null : item.id,
                       )
                     }
                   >
@@ -178,7 +175,7 @@ export function SiteHeader() {
                       {item.children?.map((child) => (
                         <a
                           href={child.href}
-                          key={child.label}
+                          key={child.id}
                           onClick={closeMenu}
                           tabIndex={isOpen ? 0 : -1}
                         >

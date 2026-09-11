@@ -6,8 +6,8 @@ export function AnnouncementsSection() {
     <section className="card announcements" id="pengumuman">
       <SectionHeading icon="♟" title="Pengumuman" />
       <div>
-        {announcements.map(({ date, month, title }) => (
-          <a className="announcement" href="#" key={title}>
+        {announcements.map(({ id, date, month, title }) => (
+          <a className="announcement" href="#pengumuman" key={id}>
             <time>
               <b>{date}</b>
               <small>{month}</small>
