@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { navItems } from "./home-data";
 
-export function SiteHeader() {
+export function SiteHeader({ activeSection = "home" }: { activeSection?: "home" | "about" }) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -48,9 +49,9 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <div className="topbar container">
-        <a
+        <Link
           className="brand"
-          href="#beranda"
+          href="/"
           aria-label="Beranda Dinas Pendidikan dan Kebudayaan"
         >
           <Image
@@ -68,7 +69,7 @@ export function SiteHeader() {
             </strong>
             <small>Kabupaten Konawe Selatan</small>
           </span>
-        </a>
+        </Link>
         <span className="motto">
           Cerdas Berkarakter
           <br />
@@ -130,7 +131,7 @@ export function SiteHeader() {
 
             return (
               <div
-                className={`nav-item${isOpen ? " open" : ""}`}
+                className={`nav-item${isOpen ? " open" : ""}${item.id === "nav-about" && activeSection === "about" ? " section-active" : ""}`}
                 key={item.id}
               >
                 {hasChildren ? (
@@ -151,14 +152,14 @@ export function SiteHeader() {
                     </span>
                   </button>
                 ) : (
-                  <a
-                    className={index === 0 ? "active" : ""}
+                  <Link
+                    className={index === 0 && activeSection === "home" ? "active" : ""}
                     href={item.href}
                     onClick={closeMenu}
                   >
                     {index === 0 && <span aria-hidden="true">⌂</span>}
                     {item.label}
-                  </a>
+                  </Link>
                 )}
 
                 {hasChildren && (
@@ -173,7 +174,7 @@ export function SiteHeader() {
                     </div>
                     <div className="dropdown-links">
                       {item.children?.map((child) => (
-                        <a
+                        <Link
                           href={child.href}
                           key={child.id}
                           onClick={closeMenu}
@@ -189,7 +190,7 @@ export function SiteHeader() {
                           <span className="dropdown-arrow" aria-hidden="true">
                             →
                           </span>
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   </div>

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import {
   footerQuickLinks,
@@ -63,9 +64,9 @@ function FooterLinkGroup({ title, links }: { title: string; links: FooterLink[] 
     <div>
       <h4>{title}</h4>
       {links.map(({ id, label, href }) => (
-        <a href={href} key={id}>
+        <Link href={href} key={id}>
           › {label}
-        </a>
+        </Link>
       ))}
     </div>
   );

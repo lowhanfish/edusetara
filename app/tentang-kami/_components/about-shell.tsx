@@ -1,0 +1,87 @@
+import Link from "next/link";
+
+const aboutNavigation = [
+  {
+    id: "profile",
+    label: "Profil Dinas",
+    description: "Arah, peran, dan nilai kerja",
+    href: "/tentang-kami",
+    icon: "⌂",
+  },
+  {
+    id: "standards",
+    label: "Standar Pelayanan",
+    description: "Komitmen layanan publik",
+    href: "/tentang-kami/standar-pelayanan",
+    icon: "▤",
+  },
+  {
+    id: "contact",
+    label: "Kontak & Alamat",
+    description: "Kanal komunikasi resmi",
+    href: "/tentang-kami/kontak",
+    icon: "⌖",
+  },
+] as const;
+
+type AboutPage = (typeof aboutNavigation)[number]["id"];
+
+export function AboutHero({
+  eyebrow,
+  title,
+  description,
+  current,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+  current: string;
+}) {
+  return (
+    <section className="about-hero">
+      <div className="about-hero-orb about-orb-one" />
+      <div className="about-hero-orb about-orb-two" />
+      <div className="container about-hero-inner">
+        <nav className="breadcrumbs" aria-label="Breadcrumb">
+          <Link href="/">Beranda</Link>
+          <span aria-hidden="true">›</span>
+          <Link href="/tentang-kami">Tentang Kami</Link>
+          <span aria-hidden="true">›</span>
+          <strong>{current}</strong>
+        </nav>
+        <div className="about-hero-copy">
+          <p className="about-eyebrow">{eyebrow}</p>
+          <h1>{title}</h1>
+          <p>{description}</p>
+        </div>
+        <div className="about-hero-mark" aria-hidden="true">
+          <span>DIKBUD</span>
+          <strong>KONSEL</strong>
+          <i>✦</i>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function AboutPageNavigation({ active }: { active: AboutPage }) {
+  return (
+    <nav className="container about-page-nav" aria-label="Navigasi Tentang Kami">
+      {aboutNavigation.map((item) => (
+        <Link
+          className={item.id === active ? "active" : ""}
+          href={item.href}
+          key={item.id}
+          aria-current={item.id === active ? "page" : undefined}
+        >
+          <span aria-hidden="true">{item.icon}</span>
+          <span>
+            <strong>{item.label}</strong>
+            <small>{item.description}</small>
+          </span>
+          <b aria-hidden="true">→</b>
+        </Link>
+      ))}
+    </nav>
+  );
+}

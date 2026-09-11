@@ -1,49 +1,49 @@
 {
   "navItems": [
-    { "id": "nav-home", "label": "Beranda", "href": "#beranda" },
+    { "id": "nav-home", "label": "Beranda", "href": "/" },
     {
       "id": "nav-about", "label": "Tentang Kami", "href": "#tentang-kami",
       "children": [
-        { "id": "about-profile", "label": "Profil Dinas", "description": "Mengenal Dikbud Konawe Selatan", "href": "#tentang-kami", "icon": "⌂" },
-        { "id": "about-service-standard", "label": "Standar Pelayanan", "description": "Komitmen dan dokumen pelayanan", "href": "#standar-pelayanan", "icon": "▤" },
-        { "id": "about-contact", "label": "Kontak & Alamat", "description": "Lokasi dan kanal komunikasi resmi", "href": "#footer", "icon": "⌖" }
+        { "id": "about-profile", "label": "Profil Dinas", "description": "Mengenal Dikbud Konawe Selatan", "href": "/tentang-kami", "icon": "⌂" },
+        { "id": "about-service-standard", "label": "Standar Pelayanan", "description": "Komitmen dan dokumen pelayanan", "href": "/tentang-kami/standar-pelayanan", "icon": "▤" },
+        { "id": "about-contact", "label": "Kontak & Alamat", "description": "Lokasi dan kanal komunikasi resmi", "href": "/tentang-kami/kontak", "icon": "⌖" }
       ]
     },
     {
-      "id": "nav-public-services", "label": "Layanan Publik", "href": "#layanan",
+      "id": "nav-public-services", "label": "Layanan Publik", "href": "/#layanan",
       "children": [
-        { "id": "service-by-audience", "label": "Layanan Berdasarkan Pengguna", "description": "Untuk siswa, guru, sekolah, dan operator", "href": "#layanan", "icon": "♙" },
-        { "id": "service-quick-access", "label": "Layanan Cepat", "description": "Dapodik, regulasi, pengaduan, dan unduhan", "href": "#layanan-cepat", "icon": "↗" },
-        { "id": "service-school-finder", "label": "Cari Sekolah", "description": "Temukan sekolah berdasarkan wilayah", "href": "#cari-sekolah", "icon": "⌕" }
+        { "id": "service-by-audience", "label": "Layanan Berdasarkan Pengguna", "description": "Untuk siswa, guru, sekolah, dan operator", "href": "/#layanan", "icon": "♙" },
+        { "id": "service-quick-access", "label": "Layanan Cepat", "description": "Dapodik, regulasi, pengaduan, dan unduhan", "href": "/#layanan-cepat", "icon": "↗" },
+        { "id": "service-school-finder", "label": "Cari Sekolah", "description": "Temukan sekolah berdasarkan wilayah", "href": "/#cari-sekolah", "icon": "⌕" }
       ]
     },
     {
-      "id": "nav-data", "label": "Data & Statistik", "href": "#data-statistik",
+      "id": "nav-data", "label": "Data & Statistik", "href": "/#data-statistik",
       "children": [
-        { "id": "data-education-statistics", "label": "Statistik Pendidikan", "description": "Ringkasan sekolah, siswa, dan tenaga pendidik", "href": "#data-statistik", "icon": "▥" },
-        { "id": "data-satisfaction-index", "label": "Indeks Kepuasan", "description": "Tren kepuasan layanan masyarakat", "href": "#kepuasan-masyarakat", "icon": "↗" },
-        { "id": "data-announcements", "label": "Pengumuman Resmi", "description": "Jadwal dan pemberitahuan terbaru", "href": "#pengumuman", "icon": "◷" }
+        { "id": "data-education-statistics", "label": "Statistik Pendidikan", "description": "Ringkasan sekolah, siswa, dan tenaga pendidik", "href": "/#data-statistik", "icon": "▥" },
+        { "id": "data-satisfaction-index", "label": "Indeks Kepuasan", "description": "Tren kepuasan layanan masyarakat", "href": "/#kepuasan-masyarakat", "icon": "↗" },
+        { "id": "data-announcements", "label": "Pengumuman Resmi", "description": "Jadwal dan pemberitahuan terbaru", "href": "/#pengumuman", "icon": "◷" }
       ]
     },
     {
-      "id": "nav-education", "label": "Pendidikan", "href": "#cari-sekolah",
+      "id": "nav-education", "label": "Pendidikan", "href": "/#cari-sekolah",
       "children": [
-        { "id": "education-school-directory", "label": "Direktori Sekolah", "description": "Informasi SD, SMP, dan PAUD", "href": "#cari-sekolah", "icon": "⌂" },
-        { "id": "education-data", "label": "Data Pendidikan", "description": "Statistik pendidikan Konawe Selatan", "href": "#data-statistik", "icon": "▥" },
-        { "id": "education-service-documents", "label": "Dokumen Layanan", "description": "Standar dan maklumat pelayanan", "href": "#standar-pelayanan", "icon": "▤" }
+        { "id": "education-school-directory", "label": "Direktori Sekolah", "description": "Informasi SD, SMP, dan PAUD", "href": "/#cari-sekolah", "icon": "⌂" },
+        { "id": "education-data", "label": "Data Pendidikan", "description": "Statistik pendidikan Konawe Selatan", "href": "/#data-statistik", "icon": "▥" },
+        { "id": "education-service-documents", "label": "Dokumen Layanan", "description": "Standar dan maklumat pelayanan", "href": "/tentang-kami/standar-pelayanan", "icon": "▤" }
       ]
     },
     {
-      "id": "nav-culture", "label": "Kebudayaan", "href": "#kebudayaan",
+      "id": "nav-culture", "label": "Kebudayaan", "href": "/#kebudayaan",
       "children": [
-        { "id": "culture-heritage", "label": "Warisan Budaya", "description": "Situs, seni, dan tradisi daerah", "href": "#kebudayaan", "icon": "✦" },
-        { "id": "culture-communities", "label": "Sanggar & Komunitas", "description": "Pelaku dan ruang kegiatan budaya", "href": "#kebudayaan", "icon": "♣" },
-        { "id": "culture-news", "label": "Berita Kebudayaan", "description": "Kabar dan agenda budaya terkini", "href": "#berita", "icon": "▣" }
+        { "id": "culture-heritage", "label": "Warisan Budaya", "description": "Situs, seni, dan tradisi daerah", "href": "/#kebudayaan", "icon": "✦" },
+        { "id": "culture-communities", "label": "Sanggar & Komunitas", "description": "Pelaku dan ruang kegiatan budaya", "href": "/#kebudayaan", "icon": "♣" },
+        { "id": "culture-news", "label": "Berita Kebudayaan", "description": "Kabar dan agenda budaya terkini", "href": "/#berita", "icon": "▣" }
       ]
     },
-    { "id": "nav-news", "label": "Berita", "href": "#berita" },
-    { "id": "nav-announcements", "label": "Pengumuman", "href": "#pengumuman" },
-    { "id": "nav-contact", "label": "Hubungi Kami", "href": "#footer" }
+    { "id": "nav-news", "label": "Berita", "href": "/#berita" },
+    { "id": "nav-announcements", "label": "Pengumuman", "href": "/#pengumuman" },
+    { "id": "nav-contact", "label": "Hubungi Kami", "href": "/tentang-kami/kontak" }
   ],
   "audiences": [
     { "id": "audience-students-parents", "icon": "👥", "label": "Siswa &\nOrang Tua", "tone": "gold", "href": "#layanan-cepat" },
@@ -97,12 +97,12 @@
     { "id": "standard-service-decree", "title": "Surat Keputusan Layanan", "size": "PDF · 1.1 MB", "href": "#standar-pelayanan" }
   ],
   "footerQuickLinks": [
-    { "id": "footer-home", "label": "Beranda", "href": "#beranda" },
-    { "id": "footer-about", "label": "Tentang Kami", "href": "#tentang-kami" },
-    { "id": "footer-services", "label": "Layanan Publik", "href": "#layanan" },
-    { "id": "footer-data", "label": "Data & Statistik", "href": "#data-statistik" },
-    { "id": "footer-education", "label": "Pendidikan", "href": "#cari-sekolah" },
-    { "id": "footer-culture", "label": "Kebudayaan", "href": "#kebudayaan" }
+    { "id": "footer-home", "label": "Beranda", "href": "/" },
+    { "id": "footer-about", "label": "Tentang Kami", "href": "/tentang-kami" },
+    { "id": "footer-services", "label": "Layanan Publik", "href": "/#layanan" },
+    { "id": "footer-data", "label": "Data & Statistik", "href": "/#data-statistik" },
+    { "id": "footer-education", "label": "Pendidikan", "href": "/#cari-sekolah" },
+    { "id": "footer-culture", "label": "Kebudayaan", "href": "/#kebudayaan" }
   ],
   "footerServices": [
     { "id": "footer-dapodik", "label": "Dapodik", "href": "#layanan-cepat" },
