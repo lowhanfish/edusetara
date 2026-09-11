@@ -3,7 +3,7 @@ import { SectionHeading } from "./shared";
 
 export function StatisticsSection() {
   return (
-    <section className="card stats" id="data-&-statistik">
+    <section className="card stats" id="data-statistik">
       <SectionHeading
         icon="▥"
         title="Statistik Pendidikan"

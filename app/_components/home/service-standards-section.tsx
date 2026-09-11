@@ -3,7 +3,7 @@ import { SectionHeading } from "./shared";
 
 export function ServiceStandardsSection() {
   return (
-    <section className="card standards">
+    <section className="card standards" id="standar-pelayanan">
       <SectionHeading icon="♟" title="Standar Pelayanan" />
       <div>
         {serviceStandards.map(({ title, size }) => (

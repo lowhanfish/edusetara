@@ -2,7 +2,7 @@ import { SectionHeading } from "./shared";
 
 export function SchoolFinderSection() {
   return (
-    <section className="card school-finder">
+    <section className="card school-finder" id="cari-sekolah">
       <SectionHeading
         icon="⌖"
         title="Cari Sekolah di Konawe Selatan"

@@ -19,7 +19,7 @@ export function AudienceSection() {
           </a>
         ))}
       </div>
-      <a className="welcome-card" href="#tentang-kami">
+      <a className="welcome-card" href="#tentang-kami" id="tentang-kami">
         <div className="welcome-image">
           <Image
             src="/img/hero-konsel.png"

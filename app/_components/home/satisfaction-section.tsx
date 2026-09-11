@@ -3,7 +3,7 @@ import { SectionHeading } from "./shared";
 
 export function SatisfactionSection() {
   return (
-    <section className="card satisfaction">
+    <section className="card satisfaction" id="kepuasan-masyarakat">
       <SectionHeading
         icon="▥"
         title="Indeks Kepuasan Masyarakat"

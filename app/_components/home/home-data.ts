@@ -1,13 +1,139 @@
-export const navItems = [
-  "Beranda",
-  "Tentang Kami",
-  "Layanan Publik",
-  "Data & Statistik",
-  "Pendidikan",
-  "Kebudayaan",
-  "Berita",
-  "Pengumuman",
-  "Hubungi Kami",
+export type NavItem = {
+  label: string;
+  href: string;
+  children?: {
+    label: string;
+    description: string;
+    href: string;
+    icon: string;
+  }[];
+};
+
+export const navItems: NavItem[] = [
+  { label: "Beranda", href: "#beranda" },
+  {
+    label: "Tentang Kami",
+    href: "#tentang-kami",
+    children: [
+      {
+        label: "Profil Dinas",
+        description: "Mengenal Dikbud Konawe Selatan",
+        href: "#tentang-kami",
+        icon: "⌂",
+      },
+      {
+        label: "Standar Pelayanan",
+        description: "Komitmen dan dokumen pelayanan",
+        href: "#standar-pelayanan",
+        icon: "▤",
+      },
+      {
+        label: "Kontak & Alamat",
+        description: "Lokasi dan kanal komunikasi resmi",
+        href: "#footer",
+        icon: "⌖",
+      },
+    ],
+  },
+  {
+    label: "Layanan Publik",
+    href: "#layanan",
+    children: [
+      {
+        label: "Layanan Berdasarkan Pengguna",
+        description: "Untuk siswa, guru, sekolah, dan operator",
+        href: "#layanan",
+        icon: "♙",
+      },
+      {
+        label: "Layanan Cepat",
+        description: "Dapodik, regulasi, pengaduan, dan unduhan",
+        href: "#layanan-cepat",
+        icon: "↗",
+      },
+      {
+        label: "Cari Sekolah",
+        description: "Temukan sekolah berdasarkan wilayah",
+        href: "#cari-sekolah",
+        icon: "⌕",
+      },
+    ],
+  },
+  {
+    label: "Data & Statistik",
+    href: "#data-statistik",
+    children: [
+      {
+        label: "Statistik Pendidikan",
+        description: "Ringkasan sekolah, siswa, dan tenaga pendidik",
+        href: "#data-statistik",
+        icon: "▥",
+      },
+      {
+        label: "Indeks Kepuasan",
+        description: "Tren kepuasan layanan masyarakat",
+        href: "#kepuasan-masyarakat",
+        icon: "↗",
+      },
+      {
+        label: "Pengumuman Resmi",
+        description: "Jadwal dan pemberitahuan terbaru",
+        href: "#pengumuman",
+        icon: "◷",
+      },
+    ],
+  },
+  {
+    label: "Pendidikan",
+    href: "#cari-sekolah",
+    children: [
+      {
+        label: "Direktori Sekolah",
+        description: "Informasi SD, SMP, dan PAUD",
+        href: "#cari-sekolah",
+        icon: "⌂",
+      },
+      {
+        label: "Data Pendidikan",
+        description: "Statistik pendidikan Konawe Selatan",
+        href: "#data-statistik",
+        icon: "▥",
+      },
+      {
+        label: "Dokumen Layanan",
+        description: "Standar dan maklumat pelayanan",
+        href: "#standar-pelayanan",
+        icon: "▤",
+      },
+    ],
+  },
+  {
+    label: "Kebudayaan",
+    href: "#kebudayaan",
+    children: [
+      {
+        label: "Warisan Budaya",
+        description: "Situs, seni, dan tradisi daerah",
+        href: "#kebudayaan",
+        icon: "✦",
+      },
+      {
+        label: "Sanggar & Komunitas",
+        description: "Pelaku dan ruang kegiatan budaya",
+        href: "#kebudayaan",
+        icon: "♣",
+      },
+      {
+        label: "Berita Kebudayaan",
+        description: "Kabar dan agenda budaya terkini",
+        href: "#berita",
+        icon: "▣",
+      },
+    ],
+  },
+  { label: "Berita", href: "#berita" },
+  { label: "Pengumuman", href: "#pengumuman" },
+  { label: "Hubungi Kami", href: "#footer" },
 ];
 
 export const audiences = [
