@@ -7,6 +7,7 @@ import { navItems } from "./home-data";
 
 export function SiteHeader() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -19,6 +20,7 @@ export function SiteHeader() {
     function closeFromKeyboard(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setOpenMenu(null);
+        setMobileMenuOpen(false);
       }
     }
 
@@ -31,8 +33,16 @@ export function SiteHeader() {
     };
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
   function closeMenu() {
     setOpenMenu(null);
+    setMobileMenuOpen(false);
   }
 
   return (
@@ -79,9 +89,39 @@ export function SiteHeader() {
             <span>⌕</span>
           </label>
           <button className="login">Masuk</button>
+          <button
+            className="mobile-menu-toggle"
+            type="button"
+            aria-label="Buka menu navigasi"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
       </div>
-      <nav className="main-nav" aria-label="Navigasi utama" ref={navRef}>
+      <nav
+        className={`main-nav${mobileMenuOpen ? " mobile-open" : ""}`}
+        aria-label="Navigasi utama"
+        id="mobile-navigation"
+        ref={navRef}
+      >
+        <div className="mobile-nav-header">
+          <div>
+            <span>Menu Utama</span>
+            <strong>Dikbud Konawe Selatan</strong>
+          </div>
+          <button
+            type="button"
+            aria-label="Tutup menu navigasi"
+            onClick={closeMenu}
+          >
+            ×
+          </button>
+        </div>
         <div className="nav-inner container">
           {navItems.map((item, index) => {
             const hasChildren = Boolean(item.children?.length);
@@ -95,8 +135,6 @@ export function SiteHeader() {
               <div
                 className={`nav-item${isOpen ? " open" : ""}`}
                 key={item.label}
-                onMouseEnter={() => hasChildren && setOpenMenu(item.label)}
-                onMouseLeave={() => hasChildren && setOpenMenu(null)}
               >
                 {hasChildren ? (
                   <button
@@ -104,7 +142,11 @@ export function SiteHeader() {
                     type="button"
                     aria-expanded={isOpen}
                     aria-controls={dropdownId}
-                    onClick={() => setOpenMenu(isOpen ? null : item.label)}
+                    onClick={() =>
+                      setOpenMenu((current) =>
+                        current === item.label ? null : item.label,
+                      )
+                    }
                   >
                     {item.label}
                     <span className="nav-chevron" aria-hidden="true">
@@ -160,6 +202,13 @@ export function SiteHeader() {
           })}
         </div>
       </nav>
+      <button
+        className={`mobile-nav-backdrop${mobileMenuOpen ? " visible" : ""}`}
+        type="button"
+        aria-label="Tutup menu navigasi"
+        tabIndex={mobileMenuOpen ? 0 : -1}
+        onClick={closeMenu}
+      />
     </header>
   );
 }
