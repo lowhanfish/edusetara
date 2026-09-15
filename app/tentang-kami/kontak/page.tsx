@@ -21,6 +21,7 @@ export default function ContactPage() {
         title="Terhubung lebih dekat dengan Dikbud Konawe Selatan."
         description="Temukan alamat kantor dan kanal komunikasi yang dapat digunakan untuk informasi, konsultasi, maupun pengaduan layanan."
         current="Kontak & Alamat"
+        variant="contact"
       />
       <AboutServiceNavigation active="contact" />
 

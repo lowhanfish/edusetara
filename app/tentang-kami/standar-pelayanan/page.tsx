@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { AboutHero, AboutPageNavigation } from "../_components/about-shell";
+import { AboutServiceHero, AboutServiceNavigation } from "../_components/about-shell";
 
 export const metadata: Metadata = {
   title: "Standar Pelayanan | Dikbud Konawe Selatan",
@@ -25,15 +25,15 @@ const services = [
 export default function ServiceStandardsPage() {
   return (
     <>
-      <AboutHero
-        eyebrow="Standar Pelayanan"
+      <AboutServiceHero
         title="Pelayanan publik yang jelas, setara, dan dapat dipercaya."
         description="Ketahui komitmen, jenis layanan, dan langkah yang perlu ditempuh sebelum mengajukan permohonan kepada Dikbud Konawe Selatan."
         current="Standar Pelayanan"
+        variant="standards"
       />
-      <AboutPageNavigation active="standards" />
+      <AboutServiceNavigation active="standards" />
 
-      <div className="container about-content">
+      <div className="container service-content quick-glass-content standards-glass-content">
         <section className="service-promise">
           <div className="promise-mark" aria-hidden="true">✦</div>
           <div>
@@ -48,8 +48,8 @@ export default function ServiceStandardsPage() {
           <span className="promise-seal">Melayani<br /><strong>Setara</strong></span>
         </section>
 
-        <section className="about-section">
-          <div className="about-section-heading">
+        <section className="service-section standards-principles-section">
+          <div className="service-section-heading">
             <div><p className="section-kicker">Prinsip Pelayanan</p><h2>Pengalaman layanan yang lebih baik</h2></div>
             <p>Prinsip yang menjadi pedoman di setiap titik pelayanan.</p>
           </div>
@@ -60,8 +60,8 @@ export default function ServiceStandardsPage() {
           </div>
         </section>
 
-        <section className="about-section" id="jenis-layanan">
-          <div className="about-section-heading">
+        <section className="service-section standards-services-section" id="jenis-layanan">
+          <div className="service-section-heading">
             <div><p className="section-kicker">Jenis Pelayanan</p><h2>Temukan layanan yang dibutuhkan</h2></div>
             <p>Waktu penyelesaian mengikuti jenis layanan dan kelengkapan dokumen.</p>
           </div>
@@ -92,7 +92,7 @@ export default function ServiceStandardsPage() {
           </ol>
         </section>
 
-        <section className="about-cta service-cta">
+        <section className="about-cta service-cta standards-cta">
           <div><p className="section-kicker">Ada kendala pelayanan?</p><h2>Sampaikan pertanyaan atau pengaduan.</h2><p>Tim kami siap membantu mengarahkan kebutuhan layanan Anda.</p></div>
           <Link className="button primary" href="/tentang-kami/kontak">Hubungi Kami <span>→</span></Link>
         </section>

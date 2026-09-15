@@ -128,13 +128,17 @@ export function AboutServiceHero({
   title,
   description,
   current,
+  variant,
 }: {
   title: string;
   description: string;
   current: string;
+  variant: "contact" | "standards";
 }) {
+  const isStandards = variant === "standards";
+
   return (
-    <section className="service-hero service-hero-glass contact-service-hero">
+    <section className={`service-hero service-hero-glass ${variant}-service-hero`}>
       <div className="service-hero-grid" aria-hidden="true" />
       <div className="container service-hero-inner">
         <nav className="service-breadcrumbs" aria-label="Breadcrumb">
@@ -144,17 +148,29 @@ export function AboutServiceHero({
         </nav>
         <div className="service-hero-layout">
           <div className="service-hero-copy">
-            <p className="service-overline"><span /> Pusat Informasi &amp; Komunikasi</p>
+            <p className="service-overline">
+              <span /> {isStandards ? "Standar Layanan Publik" : "Pusat Informasi & Komunikasi"}
+            </p>
             <h1>{title}</h1>
             <p>{description}</p>
           </div>
-          <aside className="service-hero-aside" aria-label="Informasi pelayanan kontak">
+          <aside
+            className="service-hero-aside"
+            aria-label={isStandards ? "Ringkasan standar pelayanan" : "Informasi pelayanan kontak"}
+          >
             <div className="service-status">
               <span className="service-status-dot" />
-              <div><small>Status pelayanan</small><strong>Petugas siap membantu</strong></div>
+              <div>
+                <small>{isStandards ? "Komitmen pelayanan" : "Status pelayanan"}</small>
+                <strong>{isStandards ? "Standar tersedia dan terbuka" : "Petugas siap membantu"}</strong>
+              </div>
             </div>
             <div className="service-hero-meta">
-              <span>Kanal resmi</span><span>Responsif &amp; terbuka</span><span>Sesuai jam layanan</span>
+              {isStandards ? (
+                <><span>Mudah dipahami</span><span>Proses transparan</span><span>Layanan inklusif</span></>
+              ) : (
+                <><span>Kanal resmi</span><span>Responsif &amp; terbuka</span><span>Sesuai jam layanan</span></>
+              )}
             </div>
           </aside>
         </div>

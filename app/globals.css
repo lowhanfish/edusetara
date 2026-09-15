@@ -476,6 +476,7 @@ footer:before { content:""; position:absolute; left:0; right:0; top:-17px; heigh
 
 /* Kontak & Alamat — mengikuti bahasa visual submenu Layanan Publik */
 .contact-service-hero:after { content:"@"; letter-spacing:0; transform:rotate(-8deg); }
+.standards-service-hero:after { content:"✓"; letter-spacing:0; transform:rotate(-8deg); }
 .contact-glass-content { padding-top:72px; padding-bottom:80px; }
 .contact-glass-content>.contact-grid,
 .contact-glass-content>.service-section,
@@ -527,6 +528,80 @@ footer:before { content:""; position:absolute; left:0; right:0; top:-17px; heigh
 @media (max-width:520px) {
   .contact-channel-grid .quick-service-card { grid-template-columns:66px 1fr; }
   .contact-channel-grid .quick-card-body { padding:23px 18px; }
+}
+
+/* Standar Pelayanan — glass extension dari desain Layanan Publik */
+.standards-glass-content { padding-top:72px; padding-bottom:80px; }
+.standards-glass-content>.service-promise,
+.standards-glass-content>.service-section,
+.standards-glass-content>.process-section,
+.standards-glass-content>.standards-cta { position:relative; z-index:1; }
+.standards-glass-content .service-promise {
+  border:1px solid #ffffff36;
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 88% 20%,rgba(255,216,72,.22),transparent 28%),
+    linear-gradient(125deg,rgba(6,31,70,.96),rgba(8,92,91,.9));
+  box-shadow:inset 0 1px #ffffff35,0 24px 50px #12375a22;
+}
+.standards-glass-content .promise-mark {
+  border:1px solid #fff4bb;
+  background:linear-gradient(145deg,#ffe47f,#ffc928);
+  box-shadow:inset 0 1px #fff,0 10px 22px #00152a32;
+}
+.standards-principles-section { padding-top:78px; }
+.standards-glass-content .service-section-heading { border-bottom-color:#ffffffc9; }
+.standards-glass-content .principle-grid { gap:18px; }
+.standards-glass-content .principle-grid article {
+  min-height:220px;
+  border:1px solid #ffffffc7;
+  border-radius:22px;
+  background:linear-gradient(145deg,rgba(255,255,255,.76),rgba(255,255,255,.48));
+  box-shadow:inset 0 1px #fff,0 18px 36px #12375a12;
+  backdrop-filter:blur(18px) saturate(135%);
+  -webkit-backdrop-filter:blur(18px) saturate(135%);
+}
+.standards-glass-content .principle-grid article:hover { border-color:#fff; box-shadow:inset 0 1px #fff,0 24px 48px #12375a24; transform:translateY(-6px); }
+.standards-glass-content .principle-grid article>span { border-radius:50%; box-shadow:inset 0 1px #ffffffc4; }
+.standards-services-section { padding-top:78px; }
+.standards-glass-content .service-table {
+  border:1px solid #ffffffc7;
+  border-radius:22px;
+  background:rgba(255,255,255,.58);
+  box-shadow:inset 0 1px #fff,0 20px 40px #12375a12;
+  backdrop-filter:blur(16px) saturate(130%);
+  -webkit-backdrop-filter:blur(16px) saturate(130%);
+}
+.standards-glass-content .service-table-head { background:linear-gradient(110deg,#061f46,#08736f); }
+.standards-glass-content .service-row { border-bottom-color:#ffffffc4; background:rgba(255,255,255,.18); }
+.standards-glass-content .service-row:hover { background:rgba(255,255,255,.54); }
+.standards-glass-content .process-section {
+  overflow:hidden;
+  border:1px solid #ffffffbd;
+  border-radius:26px;
+  background:linear-gradient(135deg,rgba(255,255,255,.65),rgba(229,241,238,.48));
+  box-shadow:inset 0 1px #fff,0 24px 50px #12375a12;
+  backdrop-filter:blur(20px) saturate(130%);
+  -webkit-backdrop-filter:blur(20px) saturate(130%);
+}
+.standards-glass-content .process-list li { border-color:#ffffffc9; background:rgba(255,255,255,.62); box-shadow:inset 0 1px #fff; }
+.standards-glass-content .standards-cta {
+  border:1px solid #fff5c5;
+  border-radius:24px;
+  background:linear-gradient(135deg,rgba(255,221,92,.82),rgba(255,244,195,.58));
+  box-shadow:inset 0 1px #fff,0 24px 48px #7b63151a;
+  backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+}
+
+@media (max-width:760px) {
+  .standards-glass-content { padding-top:56px; padding-left:14px; padding-right:14px; }
+  .standards-glass-content .service-promise,
+  .standards-glass-content .process-section,
+  .standards-glass-content .standards-cta { border-radius:20px; }
+  .standards-principles-section,.standards-services-section { padding-top:64px; }
+  .standards-glass-content .principle-grid article { min-height:auto; border-radius:18px; }
+  .standards-glass-content .service-table { border-radius:18px; }
 }
 
 @media (max-width:520px) {
