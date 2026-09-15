@@ -31,11 +31,13 @@ export function AboutHero({
   title,
   description,
   current,
+  section = { label: "Tentang Kami", href: "/tentang-kami" },
 }: {
   eyebrow: string;
   title: string;
   description: string;
   current: string;
+  section?: { label: string; href: string };
 }) {
   return (
     <section className="about-hero">
@@ -45,7 +47,7 @@ export function AboutHero({
         <nav className="breadcrumbs" aria-label="Breadcrumb">
           <Link href="/">Beranda</Link>
           <span aria-hidden="true">›</span>
-          <Link href="/tentang-kami">Tentang Kami</Link>
+          <Link href={section.href}>{section.label}</Link>
           <span aria-hidden="true">›</span>
           <strong>{current}</strong>
         </nav>

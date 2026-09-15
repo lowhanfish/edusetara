@@ -1,0 +1,4046 @@
+{
+  "source": "https://referensi.data.kemendikdasmen.go.id/pendidikan/dikdas/200500/2",
+  "updatedAt": "2026-09-15",
+  "schools": [
+    {
+      "npsn": "70005313",
+      "name": "SD ISLAM TERPADU INSANUL FAIZ",
+      "address": "Jl.Poros Andoolo - Punggaluku",
+      "village": "Potoro",
+      "district": "Andolo",
+      "level": "SD",
+      "status": "SWASTA",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/70005313"
+    },
+    {
+      "npsn": "40402064",
+      "name": "SD NEGERI 11 ANDOOLO",
+      "address": "Blok E",
+      "village": "Alengge Agung",
+      "district": "Andolo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402064"
+    },
+    {
+      "npsn": "40405088",
+      "name": "SD NEGERI 18 ANDOOLO",
+      "address": "Jln. Usaha Tani Desa Lalonggombu",
+      "village": "Lalonggombu",
+      "district": "Andolo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405088"
+    },
+    {
+      "npsn": "40401978",
+      "name": "SD NEGERI 3 ANDOOLO",
+      "address": "Jl. Poros Andoolo - Tinanggea",
+      "village": "Lalobao",
+      "district": "Andolo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401978"
+    },
+    {
+      "npsn": "40401997",
+      "name": "SD NEGERI 4 ANDOOLO",
+      "address": "Alangga",
+      "village": "Alangga",
+      "district": "Andolo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401997"
+    },
+    {
+      "npsn": "40402041",
+      "name": "SD NEGERI 5 ANDOOLO",
+      "address": "Jalan Poros Alengge Agung",
+      "village": "Alangga",
+      "district": "Andolo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402041"
+    },
+    {
+      "npsn": "40401806",
+      "name": "SD NEGERI 6 ANDOOLO",
+      "address": "Kelurahan Potoro",
+      "village": "Potoro",
+      "district": "Andolo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401806"
+    },
+    {
+      "npsn": "40402127",
+      "name": "SD NEGERI 7 ANDOOLO",
+      "address": "Jln.Poros Andoolo - Tinanggea",
+      "village": "Puunggapu Indah",
+      "district": "Andolo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402127"
+    },
+    {
+      "npsn": "40401844",
+      "name": "SD NEGERI 8 ANDOOLO",
+      "address": "Jl. Ahmad. Yani. No. 5",
+      "village": "Bumi Raya",
+      "district": "Andolo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401844"
+    },
+    {
+      "npsn": "40401883",
+      "name": "SD NEGERI 9 ANDOOLO",
+      "address": "JL. TPU SIRNARAGA NO. 04 WUNDUWATU",
+      "village": "Wunduwatu",
+      "district": "Andolo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401883"
+    },
+    {
+      "npsn": "40401900",
+      "name": "SMP NEGERI 23 KONAWE SELATAN",
+      "address": "Jl.poros Andooloandoolo",
+      "village": "Andoolo",
+      "district": "Andolo",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401900"
+    },
+    {
+      "npsn": "40403366",
+      "name": "SMP NEGERI 32 KONAWE SELATAN",
+      "address": "Jl. Jend.Ahmad Yani No.4/A",
+      "village": "Bumi Raya",
+      "district": "Andolo",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403366"
+    },
+    {
+      "npsn": "40404810",
+      "name": "SMP NEGERI 43 KONAWE SELATAN",
+      "address": "Potoro",
+      "village": "Potoro",
+      "district": "Andolo",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404810"
+    },
+    {
+      "npsn": "40402099",
+      "name": "SD NEGERI 1 ANDOOLO",
+      "address": "Anese",
+      "village": "Anese",
+      "district": "Andoolo Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402099"
+    },
+    {
+      "npsn": "40401792",
+      "name": "SD NEGERI 10 ANDOOLO",
+      "address": "Mateupe",
+      "village": "Mataupe",
+      "district": "Andoolo Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401792"
+    },
+    {
+      "npsn": "40401990",
+      "name": "SD NEGERI 12 ANDOOLO",
+      "address": "Desa Watumokala",
+      "village": "Watumokala",
+      "district": "Andoolo Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401990"
+    },
+    {
+      "npsn": "40401840",
+      "name": "SD NEGERI 13 ANDOOLO",
+      "address": "Jln. Ki Hajar Dewantara",
+      "village": "Bimamaroa",
+      "district": "Andoolo Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401840"
+    },
+    {
+      "npsn": "40401795",
+      "name": "SD NEGERI 14 ANDOOLO",
+      "address": "Jln. BUDI UTOMO BLOK. B.",
+      "village": "Lapoa Indah",
+      "district": "Andoolo Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401795"
+    },
+    {
+      "npsn": "40402136",
+      "name": "SD NEGERI 15 ANDOOLO",
+      "address": "Watumokala",
+      "village": "Watumokala",
+      "district": "Andoolo Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402136"
+    },
+    {
+      "npsn": "40401872",
+      "name": "SD NEGERI 16 ANDOOLO",
+      "address": "JL. WAWOBENDE",
+      "village": "Wawobende",
+      "district": "Andoolo Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401872"
+    },
+    {
+      "npsn": "40405066",
+      "name": "SD NEGERI 17 ANDOOLO",
+      "address": "Jln. Poros Mataiwoi-Bumiraya Kecamatan Andoolo Barat Kabupaten Konawe Selatan",
+      "village": "Mataiwoi",
+      "district": "Andoolo Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405066"
+    },
+    {
+      "npsn": "40401965",
+      "name": "SD NEGERI 19 ANDOOLO",
+      "address": "Jln. Poros Bekenggasu - Anese Kec. Andolo Barat Kab. Konawe Selatan",
+      "village": "Bekenggasu",
+      "district": "Andoolo Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401965"
+    },
+    {
+      "npsn": "40401822",
+      "name": "SD NEGERI 2 ANDOOLO",
+      "address": "Jl. Poros Papawu Motaha",
+      "village": "Papawu",
+      "district": "Andoolo Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401822"
+    },
+    {
+      "npsn": "40401912",
+      "name": "SMP NEGERI 19 KONAWE SELATAN",
+      "address": "Jl.abdullah Silondae",
+      "village": "Bimamaroa",
+      "district": "Andoolo Barat",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401912"
+    },
+    {
+      "npsn": "40404842",
+      "name": "SMP NEGERI 41 KONAWE SELATAN",
+      "address": "Jln. Poros Andoolo - Angata",
+      "village": "Anese",
+      "district": "Andoolo Barat",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404842"
+    },
+    {
+      "npsn": "40401971",
+      "name": "SD NEGERI 1 ANGATA",
+      "address": "Motaha",
+      "village": "Motaha",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401971"
+    },
+    {
+      "npsn": "40405039",
+      "name": "SD NEGERI 10 ANGATA",
+      "address": "Desa Pudambu",
+      "village": "Pudambu",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405039"
+    },
+    {
+      "npsn": "40402100",
+      "name": "SD NEGERI 11 ANGATA",
+      "address": "Desa Angata",
+      "village": "Angata",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402100"
+    },
+    {
+      "npsn": "40401934",
+      "name": "SD NEGERI 12 ANGATA",
+      "address": "Pusangguula",
+      "village": "Puusanggula",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401934"
+    },
+    {
+      "npsn": "40401859",
+      "name": "SD NEGERI 13 ANGATA",
+      "address": "Jl. Haluoleo Dusun 2 RT 01 RW 02",
+      "village": "Lamoeri",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401859"
+    },
+    {
+      "npsn": "40405038",
+      "name": "SD NEGERI 14 ANGATA",
+      "address": "DESA PUUNGGONI",
+      "village": "Puunggoni",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405038"
+    },
+    {
+      "npsn": "40401923",
+      "name": "SD NEGERI 15 ANGATA",
+      "address": "Teteasa",
+      "village": "Teteasa",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401923"
+    },
+    {
+      "npsn": "40405040",
+      "name": "SD NEGERI 16 ANGATA",
+      "address": "Matabondu",
+      "village": "Matabondu",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405040"
+    },
+    {
+      "npsn": "40405732",
+      "name": "SD NEGERI 17 ANGATA",
+      "address": "Mokoau",
+      "village": "Mokoau",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405732"
+    },
+    {
+      "npsn": "40401982",
+      "name": "SD NEGERI 2 ANGATA",
+      "address": "Desa Lamooso",
+      "village": "Lamooso",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401982"
+    },
+    {
+      "npsn": "40401808",
+      "name": "SD NEGERI 3 ANGATA",
+      "address": "Desa Puao",
+      "village": "Puao",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401808"
+    },
+    {
+      "npsn": "40402130",
+      "name": "SD NEGERI 4 ANGATA",
+      "address": "Desa Pewutaa",
+      "village": "Pewutaa",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402130"
+    },
+    {
+      "npsn": "40401943",
+      "name": "SD NEGERI 5 ANGATA",
+      "address": "Desa Sandei",
+      "village": "Sandei",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401943"
+    },
+    {
+      "npsn": "40402093",
+      "name": "SD NEGERI 6 ANGATA",
+      "address": "Desa Aopa",
+      "village": "Aopa",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402093"
+    },
+    {
+      "npsn": "40401793",
+      "name": "SD NEGERI 7 ANGATA",
+      "address": "Jln. Poros Kendari - Motaha",
+      "village": "Langgea Indah",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401793"
+    },
+    {
+      "npsn": "40401833",
+      "name": "SD NEGERI 8 ANGATA",
+      "address": "Desa Kosebo",
+      "village": "Kosebo",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401833"
+    },
+    {
+      "npsn": "40405037",
+      "name": "SD NEGERI 9 ANGATA",
+      "address": "Desa Simbangu",
+      "village": "Simbangu",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405037"
+    },
+    {
+      "npsn": "40401922",
+      "name": "SD NEGERI SATU ATAP 4 KONAWE SELATAN",
+      "address": "Jl. Hasanuddin",
+      "village": "Sandarsi Jaya",
+      "district": "Angata",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401922"
+    },
+    {
+      "npsn": "40403327",
+      "name": "SMP NEGERI 33 KONAWE SELATAN",
+      "address": "Jalan Poros Kendari Motaha",
+      "village": "Lamooso",
+      "district": "Angata",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403327"
+    },
+    {
+      "npsn": "40405706",
+      "name": "SMP NEGERI 53 KONAWE SELATAN",
+      "address": "Angata",
+      "village": "Matabondu",
+      "district": "Angata",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405706"
+    },
+    {
+      "npsn": "40401879",
+      "name": "SMP NEGERI 7 KONAWE SELATAN",
+      "address": "Jl. poros Motaha-Lambuya Desa Aopa",
+      "village": "Aopa",
+      "district": "Angata",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401879"
+    },
+    {
+      "npsn": "40404840",
+      "name": "SMP NEGERI SATU ATAP 4 KONAWE SELATAN",
+      "address": "JL. Usaha Tani",
+      "village": "Sandarsi Jaya",
+      "district": "Angata",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404840"
+    },
+    {
+      "npsn": "40403320",
+      "name": "SD NEGERI 1 BAITO",
+      "address": "Jl. Poros Desa Sambahule",
+      "village": "Sambahule",
+      "district": "Baito",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403320"
+    },
+    {
+      "npsn": "40402115",
+      "name": "SD NEGERI 2 BAITO",
+      "address": "Desa Amasara",
+      "village": "Amasara",
+      "district": "Baito",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402115"
+    },
+    {
+      "npsn": "40402092",
+      "name": "SD NEGERI 3 BAITO",
+      "address": "Desa Baito",
+      "village": "B A I T O",
+      "district": "Baito",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402092"
+    },
+    {
+      "npsn": "40401892",
+      "name": "SD NEGERI 4 BAITO",
+      "address": "Desa Wonua Raya",
+      "village": "Wonua Raya",
+      "district": "Baito",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401892"
+    },
+    {
+      "npsn": "40401791",
+      "name": "SD NEGERI 5 BAITO",
+      "address": "Desa Mekar Jaya",
+      "village": "Mekar Jaya",
+      "district": "Baito",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401791"
+    },
+    {
+      "npsn": "40401961",
+      "name": "SD NEGERI 6 BAITO",
+      "address": "Desa Tolihe",
+      "village": "Tolihe",
+      "district": "Baito",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401961"
+    },
+    {
+      "npsn": "40402065",
+      "name": "SD NEGERI 7 BAITO",
+      "address": "Desa Amasara",
+      "village": "Amasara",
+      "district": "Baito",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402065"
+    },
+    {
+      "npsn": "40401924",
+      "name": "SD NEGERI 8 BAITO",
+      "address": "Jln. Poros Blok A, Desa Ahuangguluri.",
+      "village": "Ahuangguluri",
+      "district": "Baito",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401924"
+    },
+    {
+      "npsn": "40405262",
+      "name": "SD NEGERI SATAP 22 KONAWE SELATAN",
+      "address": "Jln. Poros Andoolo-Mowila",
+      "village": "Tolihe",
+      "district": "Baito",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405262"
+    },
+    {
+      "npsn": "40401968",
+      "name": "SD NEGERI SATAP 7 KONAWE SELATAN",
+      "address": "Desa Matabubu",
+      "village": "Matabubu",
+      "district": "Baito",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401968"
+    },
+    {
+      "npsn": "40401907",
+      "name": "SMP NEGERI 10 KONAWE SELATAN",
+      "address": "Mekar Jaya",
+      "village": "Mekar Jaya",
+      "district": "Baito",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401907"
+    },
+    {
+      "npsn": "40404803",
+      "name": "SMP NEGERI SATAP 7 KONAWE SELATAN",
+      "address": "Matabubu",
+      "village": "Matabubu",
+      "district": "Baito",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404803"
+    },
+    {
+      "npsn": "40405049",
+      "name": "SMPN SATAP 22 KONAWE SELATAN",
+      "address": "Jalan Poros Andoolo-Mowila",
+      "village": "Tolihe",
+      "district": "Baito",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405049"
+    },
+    {
+      "npsn": "40402005",
+      "name": "SD NEGERI 1 BASALA",
+      "address": "Basala",
+      "village": "Basala",
+      "district": "Basala",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402005"
+    },
+    {
+      "npsn": "40402152",
+      "name": "SD NEGERI 2 BASALA",
+      "address": "Lipumasagena",
+      "village": "Lipu Masagena",
+      "district": "Basala",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402152"
+    },
+    {
+      "npsn": "40401962",
+      "name": "SD NEGERI 3 BASALA",
+      "address": "Desa Tombekuku",
+      "village": "TOMBEKUKU",
+      "district": "Basala",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401962"
+    },
+    {
+      "npsn": "40401828",
+      "name": "SD NEGERI 4 BASALA",
+      "address": "Desa Iwoi Mendoro",
+      "village": "IWOI MENDORO",
+      "district": "Basala",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401828"
+    },
+    {
+      "npsn": "40401838",
+      "name": "SD NEGERI 5 BASALA",
+      "address": "DESA EPEESI",
+      "village": "Epeesi",
+      "district": "Basala",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401838"
+    },
+    {
+      "npsn": "40403271",
+      "name": "SD NEGERI 6 BASALA",
+      "address": "Desa Polo-pololi",
+      "village": "Polo-Pololi",
+      "district": "Basala",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403271"
+    },
+    {
+      "npsn": "40401854",
+      "name": "SD NEGERI SATAP 17 KONAWE SELATAN",
+      "address": "Jln. Pengairan",
+      "village": "Lambandia",
+      "district": "Basala",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401854"
+    },
+    {
+      "npsn": "40404805",
+      "name": "SMP NEGERI 35 KONAWE SELATAN",
+      "address": "Poros Basala",
+      "village": "Basala",
+      "district": "Basala",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404805"
+    },
+    {
+      "npsn": "40404783",
+      "name": "SMP NEGERI SATU ATAP 17 KONAWE SELATAN",
+      "address": "Jalan Pengairan",
+      "village": "Lambandia",
+      "district": "Basala",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404783"
+    },
+    {
+      "npsn": "40401839",
+      "name": "SD NEGERI 1 BENUA",
+      "address": "Puunggawukawu",
+      "village": "Puunggawu Kawu",
+      "district": "Benua",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401839"
+    },
+    {
+      "npsn": "40405072",
+      "name": "SD NEGERI 10 BENUA",
+      "address": "Desa Kosambi",
+      "village": "Kosambi",
+      "district": "Benua",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405072"
+    },
+    {
+      "npsn": "40403119",
+      "name": "SD NEGERI 2 BENUA",
+      "address": "Jl.Poros Motaha Andoolo",
+      "village": "Lamara",
+      "district": "Benua",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403119"
+    },
+    {
+      "npsn": "40401827",
+      "name": "SD NEGERI 3 BENUA",
+      "address": "Jalan Poros Benua - Andoolo",
+      "village": "Benua",
+      "district": "Benua",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401827"
+    },
+    {
+      "npsn": "40401837",
+      "name": "SD NEGERI 4 BENUA",
+      "address": "Desa Horodopi",
+      "village": "Horodopi",
+      "district": "Benua",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401837"
+    },
+    {
+      "npsn": "40401819",
+      "name": "SD NEGERI 5 BENUA",
+      "address": "Desa Palowewu Kecamatan Benua Kabupaten Konawe Selatan",
+      "village": "PALOWEWU",
+      "district": "Benua",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401819"
+    },
+    {
+      "npsn": "40401825",
+      "name": "SD NEGERI 6 BENUA",
+      "address": "Puosu",
+      "village": "Puosu",
+      "district": "Benua",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401825"
+    },
+    {
+      "npsn": "40405071",
+      "name": "SD NEGERI 7 BENUA",
+      "address": "Jalan Poros Awalo Kosambi",
+      "village": "Awalo Jaya",
+      "district": "Benua",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405071"
+    },
+    {
+      "npsn": "40405074",
+      "name": "SD NEGERI 8 BENUA",
+      "address": "Tapundoi",
+      "village": "Benua Utama",
+      "district": "Benua",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405074"
+    },
+    {
+      "npsn": "40405073",
+      "name": "SD NEGERI 9 BENUA",
+      "address": "Lamara, Waworaha Kecamatan Benua Kabupaten Konawe Selatan",
+      "village": "Lamara",
+      "district": "Benua",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405073"
+    },
+    {
+      "npsn": "40403363",
+      "name": "SMP NEGERI 15 KONAWE SELATAN",
+      "address": "Jln Poros Benua-Basala",
+      "village": "Benua",
+      "district": "Benua",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403363"
+    },
+    {
+      "npsn": "40404843",
+      "name": "SMP NEGERI 50 KONAWE SELATAN",
+      "address": "Lamara",
+      "village": "Lamara",
+      "district": "Benua",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404843"
+    },
+    {
+      "npsn": "40401842",
+      "name": "SD NEGERI 1 BUKE",
+      "address": "Jalan Poros Buke",
+      "village": "Buke",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401842"
+    },
+    {
+      "npsn": "40402102",
+      "name": "SD NEGERI 10 BUKE",
+      "address": "Jalan Poros Anggokoti",
+      "village": "Anggokoti",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402102"
+    },
+    {
+      "npsn": "40402061",
+      "name": "SD NEGERI 11 BUKE",
+      "address": "Jalan Manggis No. 4 Adayu Indah Kec. Buke Kab. Konawe Selatan",
+      "village": "Upt. Adayu Indah",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402061"
+    },
+    {
+      "npsn": "40401824",
+      "name": "SD NEGERI 12 BUKE",
+      "address": "Jalan Poros Pelandia",
+      "village": "Pelandia",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401824"
+    },
+    {
+      "npsn": "40401843",
+      "name": "SD NEGERI 13 BUKE",
+      "address": "Jalan Poros Ranooha Lestari",
+      "village": "Ranooha Lestari",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401843"
+    },
+    {
+      "npsn": "40402090",
+      "name": "SD NEGERI 14 BUKE",
+      "address": "Desa Awalo",
+      "village": "Awalo",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402090"
+    },
+    {
+      "npsn": "40405063",
+      "name": "SD NEGERI 15 BUKE",
+      "address": "Jalan Poros Wonua Maroa",
+      "village": "Wonua Maroa",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405063"
+    },
+    {
+      "npsn": "40405150",
+      "name": "SD NEGERI 16 BUKE",
+      "address": "Wulele Jaya",
+      "village": "Wulele",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405150"
+    },
+    {
+      "npsn": "40401926",
+      "name": "SD NEGERI 2 BUKE",
+      "address": "Jln. Ir Sukarno No. 1",
+      "village": "Silea Jaya",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401926"
+    },
+    {
+      "npsn": "40402086",
+      "name": "SD NEGERI 3 BUKE",
+      "address": "Jalan Poros Asembu Mulya",
+      "village": "Asembu Mulya",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402086"
+    },
+    {
+      "npsn": "40402070",
+      "name": "SD NEGERI 4 BUKE",
+      "address": "Jalan Perintis No.1 Adaka Jaya",
+      "village": "Adaka Jaya",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402070"
+    },
+    {
+      "npsn": "40401957",
+      "name": "SD NEGERI 5 BUKE",
+      "address": "Jln Poros Tetenggolasa",
+      "village": "Tetenggolasa",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401957"
+    },
+    {
+      "npsn": "40402097",
+      "name": "SD NEGERI 6 BUKE",
+      "address": "Andoolo Utama",
+      "village": "Andoolo Utama",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402097"
+    },
+    {
+      "npsn": "40401958",
+      "name": "SD NEGERI 7 BUKE",
+      "address": "Jalan Poros Tirtamartani",
+      "village": "Tirta Wartani",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401958"
+    },
+    {
+      "npsn": "40401936",
+      "name": "SD NEGERI 8 BUKE",
+      "address": "Jalan Poros Rahamenda",
+      "village": "Raha Menda Jaya",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401936"
+    },
+    {
+      "npsn": "40405105",
+      "name": "SD NEGERI 9 BUKE",
+      "address": "Jalan Poros Puduria Jaya",
+      "village": "Puudaria Jaya",
+      "district": "Buke",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405105"
+    },
+    {
+      "npsn": "69900363",
+      "name": "SMP Integral Minhajut Thullab",
+      "address": "Andoolo Utama",
+      "village": "Andoolo Utama",
+      "district": "Buke",
+      "level": "SMP",
+      "status": "SWASTA",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/69900363"
+    },
+    {
+      "npsn": "40403324",
+      "name": "SMP NEGERI 13 KONAWE SELATAN",
+      "address": "Jalan Ahmad Yani",
+      "village": "Andoolo Utama",
+      "district": "Buke",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403324"
+    },
+    {
+      "npsn": "40404811",
+      "name": "SMP NEGERI 44 KONAWE SELATAN",
+      "address": "Anggokoti",
+      "village": "Anggokoti",
+      "district": "Buke",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404811"
+    },
+    {
+      "npsn": "69985081",
+      "name": "SMP Swasta Islam Al Irsyad",
+      "address": "Desa Awalo Kec. Buke, Kab. Konawe Selatan",
+      "village": "Awalo",
+      "district": "Buke",
+      "level": "SMP",
+      "status": "SWASTA",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/69985081"
+    },
+    {
+      "npsn": "40402014",
+      "name": "SD NEGERI 1 KOLONO",
+      "address": "JL. HAFID D.",
+      "village": "Kolono",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402014"
+    },
+    {
+      "npsn": "40402148",
+      "name": "SD NEGERI 10 KOLONO",
+      "address": "Puupi",
+      "village": "Puupi",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402148"
+    },
+    {
+      "npsn": "40401884",
+      "name": "SD NEGERI 13 KOLONO",
+      "address": "Waworano",
+      "village": "Waworano",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401884"
+    },
+    {
+      "npsn": "40401988",
+      "name": "SD NEGERI 14 KOLONO",
+      "address": "Desa Tiraosu",
+      "village": "Tiraosu",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401988"
+    },
+    {
+      "npsn": "40402096",
+      "name": "SD NEGERI 15 KOLONO",
+      "address": "Desa Andinete",
+      "village": "ANDINETE",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402096"
+    },
+    {
+      "npsn": "40405733",
+      "name": "SD NEGERI 17 KOLONO",
+      "address": "Jalan Poros Amolengu-Kendari",
+      "village": "Lamapu",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405733"
+    },
+    {
+      "npsn": "40405053",
+      "name": "SD NEGERI 19 KOLONO",
+      "address": "Jln. Poros Desa Sarandua",
+      "village": "Sarandua",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405053"
+    },
+    {
+      "npsn": "40405051",
+      "name": "SD NEGERI 20 KOLONO",
+      "address": "jalan poros kolono-kendari",
+      "village": "Lamotau",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405051"
+    },
+    {
+      "npsn": "40402091",
+      "name": "SD NEGERI 3 KOLONO",
+      "address": "Jln Poros Kendari - Amolengu",
+      "village": "Awunio",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402091"
+    },
+    {
+      "npsn": "40402125",
+      "name": "SD NEGERI 4 KOLONO",
+      "address": "Kolono",
+      "village": "Kolono",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402125"
+    },
+    {
+      "npsn": "40402004",
+      "name": "SD NEGERI 7 KOLONO",
+      "address": "Jln Poros Kelurahan Kolono - Lainea",
+      "village": "Sawah",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402004"
+    },
+    {
+      "npsn": "40401780",
+      "name": "SD NEGERI 8 KOLONO",
+      "address": "Jl. Poros Kolono - Amolengu",
+      "village": "Meletumbo",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401780"
+    },
+    {
+      "npsn": "40401939",
+      "name": "SD NEGERI 9 KOLONO",
+      "address": "Jln. Poros Roda - Amolengu",
+      "village": "Roda",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401939"
+    },
+    {
+      "npsn": "69830434",
+      "name": "SD Negeri 18 Kolono",
+      "address": "Desa Mataiwoi",
+      "village": "Mataiwoi",
+      "district": "Kolono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/69830434"
+    },
+    {
+      "npsn": "40403164",
+      "name": "SMP NEGERI 34 KONAWE SELATAN",
+      "address": "Jln. Poros Kolono-Kendari",
+      "village": "Alosi",
+      "district": "Kolono",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403164"
+    },
+    {
+      "npsn": "40404806",
+      "name": "SMP NEGERI 47 KONAWE SELATAN",
+      "address": "Jl. Poros Kendari Amolengu",
+      "village": "Roda",
+      "district": "Kolono",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404806"
+    },
+    {
+      "npsn": "40401880",
+      "name": "SMP NEGERI 5 KONAWE SELATAN",
+      "address": "Jln. Gersamata Kolono",
+      "village": "Kolono",
+      "district": "Kolono",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401880"
+    },
+    {
+      "npsn": "40401794",
+      "name": "SD NEGERI 11 KOLONO",
+      "address": "Desa Langgapulu",
+      "village": "Langgapulu",
+      "district": "Kolono Timur",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401794"
+    },
+    {
+      "npsn": "40401931",
+      "name": "SD NEGERI 12 KOLONO",
+      "address": "Desa Rumba-rumba",
+      "village": "Rumba-rumba",
+      "district": "Kolono Timur",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401931"
+    },
+    {
+      "npsn": "40401803",
+      "name": "SD NEGERI 16 KOLONO",
+      "address": "Desa Ngapawali",
+      "village": "Ngapawali",
+      "district": "Kolono Timur",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401803"
+    },
+    {
+      "npsn": "40402083",
+      "name": "SD NEGERI 2 KOLONO",
+      "address": "Jl.Poros Amolengu-Kendari",
+      "village": "Amolengu",
+      "district": "Kolono Timur",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402083"
+    },
+    {
+      "npsn": "40401855",
+      "name": "SD NEGERI 5 KOLONO",
+      "address": "Jl. Poros Kolono - Langgapulu",
+      "village": "Rambu-rambu",
+      "district": "Kolono Timur",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401855"
+    },
+    {
+      "npsn": "40401953",
+      "name": "SD NEGERI 6 KOLONO",
+      "address": "Jalan Poros Kolono-Langgapulu",
+      "village": "Tumbu-tumbu Jaya",
+      "district": "Kolono Timur",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401953"
+    },
+    {
+      "npsn": "40401913",
+      "name": "SMP NEGERI 25 KONAWE SELATAN",
+      "address": "Jl. Poros Amolengu Desa Ngapawali",
+      "village": "Ngapawali",
+      "district": "Kolono Timur",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401913"
+    },
+    {
+      "npsn": "40405099",
+      "name": "SMP NEGERI 52 KONAWE SELATAN",
+      "address": "Jln. Poros Awunio-Langgapulu Desa Ampera Kec. Kolono",
+      "village": "Ampera",
+      "district": "Kolono Timur",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405099"
+    },
+    {
+      "npsn": "40401858",
+      "name": "SD NEGERI 1 KONDA",
+      "address": "Desa Lambusa",
+      "village": "Lambusa",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401858"
+    },
+    {
+      "npsn": "40402113",
+      "name": "SD NEGERI 10 KONDA",
+      "address": "Desa wonua",
+      "village": "Wonua",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402113"
+    },
+    {
+      "npsn": "40402122",
+      "name": "SD NEGERI 11 KONDA",
+      "address": "Jalan Lada",
+      "village": "Cialam Jaya",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402122"
+    },
+    {
+      "npsn": "40401805",
+      "name": "SD NEGERI 12 KONDA",
+      "address": "Pombulaa Jaya",
+      "village": "Pambulaa Jaya",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401805"
+    },
+    {
+      "npsn": "40404786",
+      "name": "SD NEGERI 13 KONDA",
+      "address": "DESA LEBO JAYA",
+      "village": "Lebo Jaya",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404786"
+    },
+    {
+      "npsn": "40404785",
+      "name": "SD NEGERI 14 KONDA",
+      "address": "Desa Amohalo RT. 02 RW. 02",
+      "village": "Amohalo",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404785"
+    },
+    {
+      "npsn": "40401987",
+      "name": "SD NEGERI 2 KONDA",
+      "address": "Desa Puosu Jaya",
+      "village": "Puosu Jaya",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401987"
+    },
+    {
+      "npsn": "40401848",
+      "name": "SD NEGERI 3 KONDA",
+      "address": "Jln. Mayjen Katamso",
+      "village": "Konda",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401848"
+    },
+    {
+      "npsn": "40402047",
+      "name": "SD NEGERI 4 KONDA",
+      "address": "Masagena",
+      "village": "Masagena",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402047"
+    },
+    {
+      "npsn": "40401942",
+      "name": "SD NEGERI 5 KONDA",
+      "address": "Tanea",
+      "village": "T A N E A",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401942"
+    },
+    {
+      "npsn": "40401976",
+      "name": "SD NEGERI 6 KONDA",
+      "address": "Desa Lawoila",
+      "village": "Lawoila",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401976"
+    },
+    {
+      "npsn": "40402063",
+      "name": "SD NEGERI 7 KONDA",
+      "address": "Konda",
+      "village": "Konda",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402063"
+    },
+    {
+      "npsn": "40401826",
+      "name": "SD NEGERI 8 KONDA",
+      "address": "Desa Lamomea",
+      "village": "Lamomea",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401826"
+    },
+    {
+      "npsn": "40402069",
+      "name": "SD NEGERI 9 KONDA",
+      "address": "Ambololi",
+      "village": "Ambololi",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402069"
+    },
+    {
+      "npsn": "40402147",
+      "name": "SD NEGERI SATU ATAP 15 KONAWE SELATAN",
+      "address": "Jl. Laporota",
+      "village": "Lalowiu",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402147"
+    },
+    {
+      "npsn": "70062145",
+      "name": "SDI LABSCHOOL UM KENDARI",
+      "address": "Jl. Poros Desa Konda Satu",
+      "village": "Konda Satu",
+      "district": "Konda",
+      "level": "SD",
+      "status": "SWASTA",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/70062145"
+    },
+    {
+      "npsn": "69816351",
+      "name": "SDN 15 KONDA",
+      "address": "DESA TANEA",
+      "village": "T A N E A",
+      "district": "Konda",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/69816351"
+    },
+    {
+      "npsn": "40401881",
+      "name": "SMP NEGERI 12 KONAWE SELATAN",
+      "address": "Jln. Mayjen Katamso",
+      "village": "Konda",
+      "district": "Konda",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401881"
+    },
+    {
+      "npsn": "40401901",
+      "name": "SMP NEGERI 30 KONAWE SELATAN",
+      "address": "Wonua - Moramo",
+      "village": "Wonua",
+      "district": "Konda",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401901"
+    },
+    {
+      "npsn": "40405010",
+      "name": "SMP NEGERI SATU ATAP 15 KONAWE SELATAN",
+      "address": "Jln. Laporota",
+      "village": "Lalowiu",
+      "district": "Konda",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405010"
+    },
+    {
+      "npsn": "40402049",
+      "name": "SD NEGERI 1 LAEYA",
+      "address": "LAMBAKARA",
+      "village": "Lambakara",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402049"
+    },
+    {
+      "npsn": "40402068",
+      "name": "SD NEGERI 10 LAEYA",
+      "address": "Desa Ambesea",
+      "village": "Ambesea",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402068"
+    },
+    {
+      "npsn": "40401802",
+      "name": "SD NEGERI 11 LAEYA",
+      "address": "Lamong Jaya",
+      "village": "Lamong Jaya",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401802"
+    },
+    {
+      "npsn": "40405734",
+      "name": "SD NEGERI 12 LAEYA",
+      "address": "Desa Torobulu",
+      "village": "Torobulu",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405734"
+    },
+    {
+      "npsn": "40401798",
+      "name": "SD NEGERI 13 LAEYA",
+      "address": "Desa Lerepako",
+      "village": "Lerepako",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401798"
+    },
+    {
+      "npsn": "40402067",
+      "name": "SD NEGERI 14 LAEYA",
+      "address": "Ambakumina",
+      "village": "AMBAKUMINA",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402067"
+    },
+    {
+      "npsn": "40402098",
+      "name": "SD NEGERI 15 LAEYA",
+      "address": "Jln Poros Kendari - Andoolo Desa Anduna",
+      "village": "Anduna",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402098"
+    },
+    {
+      "npsn": "40401959",
+      "name": "SD NEGERI 16 LAEYA",
+      "address": "Desa Ambesea",
+      "village": "Ambesea",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401959"
+    },
+    {
+      "npsn": "40402094",
+      "name": "SD NEGERI 17 LAEYA",
+      "address": "Anggoroboti",
+      "village": "Anggoroboti",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402094"
+    },
+    {
+      "npsn": "40401891",
+      "name": "SD NEGERI 18 LAEYA",
+      "address": "Jln Poros Desa Wonua Kongga",
+      "village": "Wonua Kongga",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401891"
+    },
+    {
+      "npsn": "40401975",
+      "name": "SD NEGERI 2 LAEYA",
+      "address": "Kelurahan Punggaluku",
+      "village": "Punggaluku",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401975"
+    },
+    {
+      "npsn": "40401938",
+      "name": "SD NEGERI 3 LAEYA",
+      "address": "Jl.Poros Kendari-Andoolo",
+      "village": "Rambu-Rambu",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401938"
+    },
+    {
+      "npsn": "40401804",
+      "name": "SD NEGERI 4 LAEYA",
+      "address": "Desa Ombu-ombu Jaya",
+      "village": "Ombu-Ombu Jaya",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401804"
+    },
+    {
+      "npsn": "40401994",
+      "name": "SD NEGERI 5 LAEYA",
+      "address": "Ambalodangge",
+      "village": "Ambalodangge",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401994"
+    },
+    {
+      "npsn": "40401864",
+      "name": "SD NEGERI 6 LAEYA",
+      "address": "Jl. poros kendari-torobulu",
+      "village": "Laeya",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401864"
+    },
+    {
+      "npsn": "40402146",
+      "name": "SD NEGERI 7 LAEYA",
+      "address": "Jln. Poros Andoolo-Kendari",
+      "village": "Punggaluku",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402146"
+    },
+    {
+      "npsn": "40401862",
+      "name": "SD NEGERI 8 LAEYA",
+      "address": "Jln Poros Kendari - Torobulu",
+      "village": "Labokeo",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401862"
+    },
+    {
+      "npsn": "40402062",
+      "name": "SD NEGERI 9 LAEYA",
+      "address": "Jln Poros Andoolo",
+      "village": "Aepodu",
+      "district": "Laeya",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402062"
+    },
+    {
+      "npsn": "40401895",
+      "name": "SMP NEGERI 2 KONAWE SELATAN",
+      "address": "Jl. Alam Ria No. 1",
+      "village": "Punggaluku",
+      "district": "Laeya",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401895"
+    },
+    {
+      "npsn": "40401902",
+      "name": "SMP NEGERI 26 KONAWE SELATAN",
+      "address": "Jln Poros Kendari-Torobulu",
+      "village": "Anggoroboti",
+      "district": "Laeya",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401902"
+    },
+    {
+      "npsn": "40404807",
+      "name": "SMP NEGERI 38 KONAWE SELATAN",
+      "address": "Jl. Poros Kendari Torobulu",
+      "village": "Torobulu",
+      "district": "Laeya",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404807"
+    },
+    {
+      "npsn": "40404844",
+      "name": "SMP NEGERI 45 KONAWE SELATAN",
+      "address": "Jl. Usaha Tani No.5",
+      "village": "AMBAKUMINA",
+      "district": "Laeya",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404844"
+    },
+    {
+      "npsn": "40401966",
+      "name": "SD NEGERI 1 LAINEA",
+      "address": "Lainea",
+      "village": "Lainea",
+      "district": "Lainea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401966"
+    },
+    {
+      "npsn": "40401829",
+      "name": "SD NEGERI 10 LAINEA",
+      "address": "Jln.poros Kendari Kolono",
+      "village": "Kaindi",
+      "district": "Lainea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401829"
+    },
+    {
+      "npsn": "40401821",
+      "name": "SD NEGERI 2 LAINEA",
+      "address": "Desa Pangan Jaya",
+      "village": "Pangan Jaya",
+      "district": "Lainea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401821"
+    },
+    {
+      "npsn": "40401951",
+      "name": "SD NEGERI 3 LAINEA",
+      "address": "Jl. Poros Lainea - Andoola",
+      "village": "Watumeeto",
+      "district": "Lainea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401951"
+    },
+    {
+      "npsn": "40401930",
+      "name": "SD NEGERI 4 LAINEA",
+      "address": "Jalan poros lainea - kolono",
+      "village": "Watumeeto",
+      "district": "Lainea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401930"
+    },
+    {
+      "npsn": "40401820",
+      "name": "SD NEGERI 5 LAINEA",
+      "address": "Pamandati",
+      "village": "Pamandati",
+      "district": "Lainea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401820"
+    },
+    {
+      "npsn": "40402126",
+      "name": "SD NEGERI 6 LAINEA",
+      "address": "Matabubu Jaya",
+      "village": "Matabubu Jaya",
+      "district": "Lainea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402126"
+    },
+    {
+      "npsn": "40401815",
+      "name": "SD NEGERI 7 LAINEA",
+      "address": "Desa Polewali",
+      "village": "Polewali",
+      "district": "Lainea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401815"
+    },
+    {
+      "npsn": "40401781",
+      "name": "SD NEGERI 8 LAINEA",
+      "address": "Desa Bangun Jaya",
+      "village": "Bangun Jaya",
+      "district": "Lainea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401781"
+    },
+    {
+      "npsn": "40401979",
+      "name": "SD NEGERI 9 LAINEA",
+      "address": "Jln. Pendidikan No 1 Desa Lalonggombu",
+      "village": "Lalonggombu",
+      "district": "Lainea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401979"
+    },
+    {
+      "npsn": "40401783",
+      "name": "SD NEGERI SATU ATAP 14 KONAWE SELATAN",
+      "address": "Jalan Poros Kendari - Polewali",
+      "village": "Molinese",
+      "district": "Lainea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401783"
+    },
+    {
+      "npsn": "40401830",
+      "name": "SD NEGERI SATU ATAP 5 KONAWE SELATAN",
+      "address": "Kalo-kalo",
+      "village": "Kalo-Kalo",
+      "district": "Lainea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401830"
+    },
+    {
+      "npsn": "40401915",
+      "name": "SMP NEGERI 11 KONAWE SELATAN",
+      "address": "Jl. Poros Kendari-Lainea",
+      "village": "Kaindi",
+      "district": "Lainea",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401915"
+    },
+    {
+      "npsn": "40405026",
+      "name": "SMP NEGERI 49 KONAWE SELATAN",
+      "address": "JLN. PENDIDIKAN",
+      "village": "Lalonggombu",
+      "district": "Lainea",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405026"
+    },
+    {
+      "npsn": "40405028",
+      "name": "SMP NEGERI SATU ATAP 14 KONAWE SELATAN",
+      "address": "Jalan Poros Kendari - Polewali",
+      "village": "Molinese",
+      "district": "Lainea",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405028"
+    },
+    {
+      "npsn": "40405061",
+      "name": "SMP NEGERI SATU ATAP 5 KONAWE SELATAN",
+      "address": "Kalo-kalo",
+      "village": "Kalo-Kalo",
+      "district": "Lainea",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405061"
+    },
+    {
+      "npsn": "40401856",
+      "name": "SD NEGERI 1 LALEMBUU",
+      "address": "Jl Patimura No. 056",
+      "village": "Lambodi Jaya",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401856"
+    },
+    {
+      "npsn": "40401785",
+      "name": "SD NEGERI 10 LALEMBUU",
+      "address": "Desa Mandoke",
+      "village": "Mandoke",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401785"
+    },
+    {
+      "npsn": "40401955",
+      "name": "SD NEGERI 11 LALEMBUU",
+      "address": "Jln. Pendidikan no. 1",
+      "village": "Teteinea Jaya",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401955"
+    },
+    {
+      "npsn": "40402089",
+      "name": "SD NEGERI 15 LALEMBUU",
+      "address": "Blok F",
+      "village": "Atari Jaya",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402089"
+    },
+    {
+      "npsn": "40404837",
+      "name": "SD NEGERI 16 LALEMBUU",
+      "address": "Padaleu",
+      "village": "Padaleu",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404837"
+    },
+    {
+      "npsn": "40401929",
+      "name": "SD NEGERI 2 LALEMBUU",
+      "address": "Jln. Poros Ds. Sukamukti Kec. Lalembuu",
+      "village": "Suka Mukti",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401929"
+    },
+    {
+      "npsn": "40402006",
+      "name": "SD NEGERI 3 LALEMBUU",
+      "address": "Sumber Jaya",
+      "village": "Sumber Jaya",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402006"
+    },
+    {
+      "npsn": "40401832",
+      "name": "SD NEGERI 4 LALEMBUU",
+      "address": "Jl. Poros Kapuwila, Kecamatan Lalembuu",
+      "village": "Kapuwila",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401832"
+    },
+    {
+      "npsn": "40402088",
+      "name": "SD NEGERI 5 LALEMBUU",
+      "address": "Blok C Atari Indah Kec. Lalembuu",
+      "village": "Atari Indah",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402088"
+    },
+    {
+      "npsn": "40401807",
+      "name": "SD NEGERI 6 LALEMBUU",
+      "address": "Jln.Blok C Desa Potuho Jaya Kec. Lalembuu Kab. Konawe Selatan",
+      "village": "Potuho Jaya",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401807"
+    },
+    {
+      "npsn": "40401869",
+      "name": "SD NEGERI 8 LALEMBUU",
+      "address": "Lalembuu",
+      "village": "Lalembuu Jaya",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401869"
+    },
+    {
+      "npsn": "40401933",
+      "name": "SD NEGERI 9 LALEMBUU",
+      "address": "Jalan Poros Desa Puurema Subur Kecamatan Lalembuu",
+      "village": "Puurema Subur",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401933"
+    },
+    {
+      "npsn": "40401920",
+      "name": "SDN 12 LALEMBUU",
+      "address": "Jl.Poros Puunangga",
+      "village": "Puunangga",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401920"
+    },
+    {
+      "npsn": "40401782",
+      "name": "SDN 13 LALEMBUU",
+      "address": "Lrg. Pendidikan Desa Mokupa jaya",
+      "village": "Makupa Jaya",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401782"
+    },
+    {
+      "npsn": "40402001",
+      "name": "SDN 14 LALEMBUU",
+      "address": "Desa Meronga Raya Kecamatan Lalembuu",
+      "village": "Meronga Raya",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402001"
+    },
+    {
+      "npsn": "40402143",
+      "name": "SDN 7 LALEMBUU",
+      "address": "Sumber Jaya",
+      "village": "Sumber Jaya",
+      "district": "Lalembuu",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402143"
+    },
+    {
+      "npsn": "40401899",
+      "name": "SMP NEGERI 16 KONAWE SELATAN",
+      "address": "Jl.poros Atari Indah",
+      "village": "Atari Indah",
+      "district": "Lalembuu",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401899"
+    },
+    {
+      "npsn": "40404808",
+      "name": "SMP NEGERI 40 KONAWE SELATAN",
+      "address": "Jln. Poros Koltim-Konsel Desa Sumber Jaya Kec. Lalembuu",
+      "village": "Sumber Jaya",
+      "district": "Lalembuu",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404808"
+    },
+    {
+      "npsn": "40404889",
+      "name": "SMP NEGERI 42 KONAWE SELATAN",
+      "address": "Jl.poros Lalembuu",
+      "village": "Meronga Raya",
+      "district": "Lalembuu",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404889"
+    },
+    {
+      "npsn": "40404845",
+      "name": "SMP NEGERI 46 KONAWE SELATAN",
+      "address": "Blok Q SP. 3 KEC. LALEMBUU",
+      "village": "Potuho Jaya",
+      "district": "Lalembuu",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404845"
+    },
+    {
+      "npsn": "40403688",
+      "name": "SMP NEGERI 54 KONAWE SELATAN",
+      "address": "Sukamukti",
+      "village": "Suka Mukti",
+      "district": "Lalembuu",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403688"
+    },
+    {
+      "npsn": "70015368",
+      "name": "SD ISLAM EMBUN PAGI",
+      "address": "Jl. Poros Kendari - Motaha",
+      "village": "Wonua Sangia",
+      "district": "Landono",
+      "level": "SD",
+      "status": "SWASTA",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/70015368"
+    },
+    {
+      "npsn": "40401983",
+      "name": "SD NEGERI 1 LANDONO",
+      "address": "Wonua Sangia",
+      "village": "Wonua Sangia",
+      "district": "Landono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401983"
+    },
+    {
+      "npsn": "40405036",
+      "name": "SD NEGERI 15 LANDONO",
+      "address": "UPT Arongo Desa Arongo Kec. Landono",
+      "village": "Arongo",
+      "district": "Landono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405036"
+    },
+    {
+      "npsn": "40402105",
+      "name": "SD NEGERI 3 LANDONO",
+      "address": "Jln. Poros Abenggi",
+      "village": "Abenggi",
+      "district": "Landono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402105"
+    },
+    {
+      "npsn": "40402011",
+      "name": "SD NEGERI 5 LANDONO",
+      "address": "Desa Tridanamulya",
+      "village": "Tridana Mulya",
+      "district": "Landono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402011"
+    },
+    {
+      "npsn": "40405033",
+      "name": "SD NEGERI 6 LANDONO",
+      "address": "Desa Lakomea",
+      "village": "Lakomea",
+      "district": "Landono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405033"
+    },
+    {
+      "npsn": "40402095",
+      "name": "SD NEGERI 7 LANDONO",
+      "address": "Jln. Poros Kendari-Motaha",
+      "village": "Endanga",
+      "district": "Landono",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402095"
+    },
+    {
+      "npsn": "40401896",
+      "name": "SMP NEGERI 9 KONAWE SELATAN",
+      "address": "Tridanamulya",
+      "village": "Tridana Mulya",
+      "district": "Landono",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401896"
+    },
+    {
+      "npsn": "40402008",
+      "name": "SD NEGERI 1 LAONTI",
+      "address": "Desa Tambeanga",
+      "village": "Tambeanga",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402008"
+    },
+    {
+      "npsn": "40401964",
+      "name": "SD NEGERI 10 LAONTI",
+      "address": "Desa Batu Jaya",
+      "village": "Batu Jaya / Watundolu",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401964"
+    },
+    {
+      "npsn": "40401800",
+      "name": "SD NEGERI 12 LAONTI",
+      "address": "Benu-Benua",
+      "village": "Malaringgi",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401800"
+    },
+    {
+      "npsn": "40401947",
+      "name": "SD NEGERI 13 LAONTI",
+      "address": "Wandaeha",
+      "village": "Wandaeha",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401947"
+    },
+    {
+      "npsn": "40403400",
+      "name": "SD NEGERI 14 LAONTI",
+      "address": "Ulusawa",
+      "village": "Ulu Sawa",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403400"
+    },
+    {
+      "npsn": "40405059",
+      "name": "SD NEGERI 15 LAONTI",
+      "address": "Namu",
+      "village": "Namu",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405059"
+    },
+    {
+      "npsn": "40402002",
+      "name": "SD NEGERI 2 LAONTI",
+      "address": "Desa Sangi-sangi",
+      "village": "Sangi-Sangi",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402002"
+    },
+    {
+      "npsn": "40402109",
+      "name": "SD NEGERI 3 LAONTI",
+      "address": "Desa Peo Indah",
+      "village": "Peo Indah",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402109"
+    },
+    {
+      "npsn": "69830387",
+      "name": "SD NEGERI 4 LAONTI",
+      "address": "Desa Woru-woru",
+      "village": "Woru Woru",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/69830387"
+    },
+    {
+      "npsn": "40402135",
+      "name": "SD NEGERI 6 LAONTI",
+      "address": "Desa Sangi-sangi",
+      "village": "Sangi-Sangi",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402135"
+    },
+    {
+      "npsn": "40402132",
+      "name": "SD NEGERI 7 LAONTI",
+      "address": "Desa Tambolosu",
+      "village": "Tambolosu",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402132"
+    },
+    {
+      "npsn": "40401846",
+      "name": "SD NEGERI 8 LAONTI",
+      "address": "Pulau Cempedak",
+      "village": "Cempedak",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401846"
+    },
+    {
+      "npsn": "40402060",
+      "name": "SD NEGERI 9 LAONTI",
+      "address": "Lawisata",
+      "village": "Lawisata",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402060"
+    },
+    {
+      "npsn": "40401954",
+      "name": "SD NEGERI SATAP 16 KONAWE SELATAN",
+      "address": "Pesisir Timur Sulawesi",
+      "village": "Tue Tue",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401954"
+    },
+    {
+      "npsn": "40401788",
+      "name": "SD NEGERI SATU ATAP 1 KONAWE SELATAN",
+      "address": "Pesisir Timur Sulawesi Desa Namu",
+      "village": "Namu",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401788"
+    },
+    {
+      "npsn": "40401863",
+      "name": "SD NEGERI SATU ATAP 12 KONAWE SELATAN",
+      "address": "Pesisir Utara",
+      "village": "Labuan Beropa",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401863"
+    },
+    {
+      "npsn": "40402009",
+      "name": "SD NEGERI SATU ATAP 6 KONAWE SELATAN",
+      "address": "Tambolosu",
+      "village": "Tambolosu",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402009"
+    },
+    {
+      "npsn": "40402141",
+      "name": "SD Negeri 5 Laonti",
+      "address": "Desa Labotaone",
+      "village": "Labotaone",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402141"
+    },
+    {
+      "npsn": "40405019",
+      "name": "SD-SMPN SATU ATAP 12 KONAWE SELATAN",
+      "address": "Pesisir Utara",
+      "village": "Labuan Beropa",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405019"
+    },
+    {
+      "npsn": "40401985",
+      "name": "SDN 11 Laonti",
+      "address": "Desa Laonti",
+      "village": "Laonti",
+      "district": "Laonti",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401985"
+    },
+    {
+      "npsn": "40401897",
+      "name": "SMP NEGERI 14 KONAWE SELATAN",
+      "address": "Jalan Lembah Raya",
+      "village": "Ulu Sawa",
+      "district": "Laonti",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401897"
+    },
+    {
+      "npsn": "40401917",
+      "name": "SMP NEGERI 28 KONAWE SELATAN",
+      "address": "Jl.pesisir Barat",
+      "village": "Tambeanga",
+      "district": "Laonti",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401917"
+    },
+    {
+      "npsn": "40405069",
+      "name": "SMP NEGERI SATU ATAP 1 KONAWE SELATAN",
+      "address": "Pesisir Timur Sulawesi Desa Namu",
+      "village": "Namu",
+      "district": "Laonti",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405069"
+    },
+    {
+      "npsn": "40405047",
+      "name": "SMP NEGERI SATU ATAP 6 KONAWE SELATAN",
+      "address": "Tambolosu",
+      "village": "Tambolosu",
+      "district": "Laonti",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405047"
+    },
+    {
+      "npsn": "40404997",
+      "name": "SMPN SATAP 16 KONAWE SELATAN",
+      "address": "Pesisir Timur Sulawesi",
+      "village": "Tue Tue",
+      "district": "Laonti",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404997"
+    },
+    {
+      "npsn": "40401977",
+      "name": "SD NEGERI 1 MORAMO",
+      "address": "Desa Landipo",
+      "village": "Landipo",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401977"
+    },
+    {
+      "npsn": "40402114",
+      "name": "SD NEGERI 10 MORAMO",
+      "address": "Moramo",
+      "village": "Marga Cinta",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402114"
+    },
+    {
+      "npsn": "40402112",
+      "name": "SD NEGERI 11 MORAMO",
+      "address": "Lapuko",
+      "village": "Lapuko",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402112"
+    },
+    {
+      "npsn": "40401857",
+      "name": "SD NEGERI 12 MORAMO",
+      "address": "Jl. Air Terjun",
+      "village": "Lamboo",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401857"
+    },
+    {
+      "npsn": "40403492",
+      "name": "SD NEGERI 13 MORAMO",
+      "address": "Wawosunggu",
+      "village": "Wawosunggu",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403492"
+    },
+    {
+      "npsn": "40402080",
+      "name": "SD NEGERI 14 MORAMO",
+      "address": "Tambosupa",
+      "village": "Tambosupa",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402080"
+    },
+    {
+      "npsn": "40402976",
+      "name": "SD NEGERI 16 MORAMO",
+      "address": "BAKUTARU",
+      "village": "Bakutaru",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402976"
+    },
+    {
+      "npsn": "40401811",
+      "name": "SD NEGERI 17 MORAMO",
+      "address": "Dusun 4 Amohola",
+      "village": "Amohola",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401811"
+    },
+    {
+      "npsn": "40401974",
+      "name": "SD NEGERI 2 MORAMO",
+      "address": "Pudaria Jaya",
+      "village": "Pudaria Jaya",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401974"
+    },
+    {
+      "npsn": "40402079",
+      "name": "SD NEGERI 3 MORAMO",
+      "address": "Jln. Poros Air Terjun Moramo",
+      "village": "Sumber Sari",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402079"
+    },
+    {
+      "npsn": "40402129",
+      "name": "SD NEGERI 4 MORAMO",
+      "address": "Desa Moramo",
+      "village": "Moramo",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402129"
+    },
+    {
+      "npsn": "40402145",
+      "name": "SD NEGERI 5 MORAMO",
+      "address": "Pudaria Jaya",
+      "village": "Pudaria Jaya",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402145"
+    },
+    {
+      "npsn": "40401967",
+      "name": "SD NEGERI 6 MORAMO",
+      "address": "Jl. Poros Desa Margacinta",
+      "village": "Marga Cinta",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401967"
+    },
+    {
+      "npsn": "40405060",
+      "name": "SD NEGERI 7 MORAMO",
+      "address": "Jl.Poros Kendari Moramo",
+      "village": "Lakomea",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405060"
+    },
+    {
+      "npsn": "40402072",
+      "name": "SD NEGERI 8 MORAMO",
+      "address": "Lapuko",
+      "village": "Lapuko",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402072"
+    },
+    {
+      "npsn": "40402073",
+      "name": "SD NEGERI 9 MORAMO",
+      "address": "Jl. Desa Ranooha Raya",
+      "village": "Moramo",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402073"
+    },
+    {
+      "npsn": "40401841",
+      "name": "SD NEGERI SATAP 11 KONAWE SELATAN",
+      "address": "Jln Swakarsa",
+      "village": "Bisikori",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401841"
+    },
+    {
+      "npsn": "40402076",
+      "name": "SD NEGERI SATAP 18 KONAWE SELATAN",
+      "address": "Jl. Poros Kendari Kolono Dusun 4",
+      "village": "Pudaria Jaya",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402076"
+    },
+    {
+      "npsn": "40402071",
+      "name": "SD NEGERI SATAP 21 KONAWE SELATAN",
+      "address": "Jl. Markisa No. 20",
+      "village": "Ulusena",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402071"
+    },
+    {
+      "npsn": "40402140",
+      "name": "SD Negeri 15 Moramo",
+      "address": "Jln. Poros Kendari - Moramo",
+      "village": "Amohola",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402140"
+    },
+    {
+      "npsn": "69900369",
+      "name": "SD UPT AMOHOLA SP.2",
+      "address": "Desa Wawondengi",
+      "village": "Wawondengi",
+      "district": "Moramo",
+      "level": "SD",
+      "status": "SWASTA",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/69900369"
+    },
+    {
+      "npsn": "40401904",
+      "name": "SMP NEGERI 27 Konawe Selatan",
+      "address": "Jl. Poros Kendari Moramo No. 06",
+      "village": "Pudaria Jaya",
+      "district": "Moramo",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401904"
+    },
+    {
+      "npsn": "40401909",
+      "name": "SMP NEGERI 4 KONAWE SELATAN",
+      "address": "Jl. Poros Moramo Kendari",
+      "village": "Landipo",
+      "district": "Moramo",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401909"
+    },
+    {
+      "npsn": "40404804",
+      "name": "SMP NEGERI 56 KONAWE SELATAN",
+      "address": "Jl. Persawahan No. 3 Desa Tambosupa",
+      "village": "Tambosupa",
+      "district": "Moramo",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404804"
+    },
+    {
+      "npsn": "40405045",
+      "name": "SMP NEGERI SATU ATAP 11 KONAWE SELATAN",
+      "address": "Jalan Swakarsa",
+      "village": "Bisikori",
+      "district": "Moramo",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405045"
+    },
+    {
+      "npsn": "40405017",
+      "name": "SMP NEGERI SATU ATAP 18 KONAWE SELATAN",
+      "address": "Jl. Poros Kendari-Kolono",
+      "village": "Pudaria Jaya",
+      "district": "Moramo",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405017"
+    },
+    {
+      "npsn": "40405086",
+      "name": "SMP NEGERI SATU ATAP 21 KONAWE SELATAN",
+      "address": "JL. MARKISA NO.20",
+      "village": "Ulusena",
+      "district": "Moramo",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405086"
+    },
+    {
+      "npsn": "40402039",
+      "name": "SD NEGERI 1 MORAMO UTARA",
+      "address": "Jl. Poros Kendari - Moramo",
+      "village": "Lamokula",
+      "district": "Moramo Utara",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402039"
+    },
+    {
+      "npsn": "40403279",
+      "name": "SD NEGERI 10 MORAMO UTARA",
+      "address": "Jl.poros Kendari Moramo",
+      "village": "Puasana",
+      "district": "Moramo Utara",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403279"
+    },
+    {
+      "npsn": "40401980",
+      "name": "SD NEGERI 2 MORAMO UTARA",
+      "address": "Lalowaru",
+      "village": "Tanjung Tiram",
+      "district": "Moramo Utara",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401980"
+    },
+    {
+      "npsn": "40401991",
+      "name": "SD NEGERI 3 MORAMO UTARA",
+      "address": "Jln.Poros Kendari - Moramo",
+      "village": "Wawatu",
+      "district": "Moramo Utara",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401991"
+    },
+    {
+      "npsn": "40402118",
+      "name": "SD NEGERI 4 MORAMO UTARA",
+      "address": "Lalowaru",
+      "village": "Lalowaru",
+      "district": "Moramo Utara",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402118"
+    },
+    {
+      "npsn": "40401925",
+      "name": "SD NEGERI 5 MORAMO UTARA",
+      "address": "Jalan Poros Kendari - Moramo",
+      "village": "Sanggula",
+      "district": "Moramo Utara",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401925"
+    },
+    {
+      "npsn": "40401993",
+      "name": "SD NEGERI 6 MORAMO UTARA",
+      "address": "Jln. Poros Kendari-Moramo",
+      "village": "Mata Lamokula",
+      "district": "Moramo Utara",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401993"
+    },
+    {
+      "npsn": "40402116",
+      "name": "SD NEGERI 7 MORAMO UTARA",
+      "address": "Jln. Poros Moramo Utara-Konda Desa Mekarjaya",
+      "village": "Mekar Jaya",
+      "district": "Moramo Utara",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402116"
+    },
+    {
+      "npsn": "40402137",
+      "name": "SD NEGERI 8 MORAMO UTARA",
+      "address": "Jalan Poros Pantai Wawatu",
+      "village": "Wawatu",
+      "district": "Moramo Utara",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402137"
+    },
+    {
+      "npsn": "40401969",
+      "name": "SD NEGERI 9 MORAMO UTARA",
+      "address": "Jln. Poros Kendari-Moramo Blok A RT.001 RW.001 Kabupaten Konawe Selatan",
+      "village": "Mekar Jaya",
+      "district": "Moramo Utara",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401969"
+    },
+    {
+      "npsn": "40401799",
+      "name": "SD NEGERI LOMBUEA",
+      "address": "Jln Poros Moramo Konda",
+      "village": "Lombuea",
+      "district": "Moramo Utara",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401799"
+    },
+    {
+      "npsn": "40401908",
+      "name": "SMP NEGERI 21 KONAWE SELATAN",
+      "address": "Jl. Poros Kendari-Moramo, Sanggula, Moramo Utara",
+      "village": "Sanggula",
+      "district": "Moramo Utara",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401908"
+    },
+    {
+      "npsn": "40405008",
+      "name": "SMP NEGERI 37 KONAWE SELATAN",
+      "address": "Jl. Poros Kendari Moramo",
+      "village": "Lalowaru",
+      "district": "Moramo Utara",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405008"
+    },
+    {
+      "npsn": "40405011",
+      "name": "SMP NEGERI SATU ATAP 13 KONAWE SELATAN",
+      "address": "Lombuea",
+      "village": "Lombuea",
+      "district": "Moramo Utara",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405011"
+    },
+    {
+      "npsn": "40401972",
+      "name": "SD NEGERI 1 MOWILA",
+      "address": "Mowila",
+      "village": "Mowila",
+      "district": "Mowila",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401972"
+    },
+    {
+      "npsn": "40401871",
+      "name": "SD NEGERI 10 MOWILA",
+      "address": "Desa Lamolori",
+      "village": "LAMOLORI",
+      "district": "Mowila",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401871"
+    },
+    {
+      "npsn": "40405062",
+      "name": "SD NEGERI 11 MOWILA",
+      "address": "JL. Poros Mowila - Andoolo",
+      "village": "Pudahoa",
+      "district": "Mowila",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405062"
+    },
+    {
+      "npsn": "40402131",
+      "name": "SD NEGERI 2 MOWILA",
+      "address": "Desa Mulyasari",
+      "village": "Mulya Sari",
+      "district": "Mowila",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402131"
+    },
+    {
+      "npsn": "40401992",
+      "name": "SD NEGERI 3 MOWILA",
+      "address": "JL. POROS KENDARI-MOTAHA",
+      "village": "Toluwonua",
+      "district": "Mowila",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401992"
+    },
+    {
+      "npsn": "40403218",
+      "name": "SD NEGERI 4 MOWILA",
+      "address": "Jalan Poros Mowila - Sabulakoa",
+      "village": "Kondoano",
+      "district": "Mowila",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403218"
+    },
+    {
+      "npsn": "40402074",
+      "name": "SD NEGERI 5 MOWILA",
+      "address": "Lalosingi",
+      "village": "Lalosingi",
+      "district": "Mowila",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402074"
+    },
+    {
+      "npsn": "40401228",
+      "name": "SD NEGERI 6 MOWILA",
+      "address": "Desa Rakawuta",
+      "village": "Rakawuta",
+      "district": "Mowila",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401228"
+    },
+    {
+      "npsn": "40401813",
+      "name": "SD NEGERI 7 MOWILA",
+      "address": "Desa Ranombayasa Kecamatan Mowila Kabupaten Konawe Selatan",
+      "village": "Rano Mbayasa",
+      "district": "Mowila",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401813"
+    },
+    {
+      "npsn": "40401810",
+      "name": "SD NEGERI 8 MOWILA",
+      "address": "Jln Poros Mowila - Andoolo",
+      "village": "Tetesingi",
+      "district": "Mowila",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401810"
+    },
+    {
+      "npsn": "40401935",
+      "name": "SD NEGERI 9 MOWILA",
+      "address": "JALAN POROS DESA PUWEHUKO",
+      "village": "Puwehuko",
+      "district": "Mowila",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401935"
+    },
+    {
+      "npsn": "40401937",
+      "name": "SD NEGERI SATAP 23 KONAWE SELATAN",
+      "address": "Desa Lamebara",
+      "village": "Lamebara",
+      "district": "Mowila",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401937"
+    },
+    {
+      "npsn": "40401916",
+      "name": "SMP NEGERI 22 KONAWE SELATAN",
+      "address": "Jl. Poros Kendari-motaha",
+      "village": "Toluwonua",
+      "district": "Mowila",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401916"
+    },
+    {
+      "npsn": "69787692",
+      "name": "SMP NEGERI 48 KONAWE SELATAN",
+      "address": "Kondoano",
+      "village": "Kondoano",
+      "district": "Mowila",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/69787692"
+    },
+    {
+      "npsn": "40404784",
+      "name": "SMP NEGERI SATAP 23 KONAWE SELATAN",
+      "address": "Lamebara",
+      "village": "Lamebara",
+      "district": "Mowila",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404784"
+    },
+    {
+      "npsn": "40401973",
+      "name": "SD NEGERI 1 PALANGGA",
+      "address": "Kel. Palangga",
+      "village": "Sanggi-Sanggi",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401973"
+    },
+    {
+      "npsn": "40402075",
+      "name": "SD NEGERI 10 PALANGGA",
+      "address": "Jln. Poros Kendari Andoolo",
+      "village": "Wawonggura",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402075"
+    },
+    {
+      "npsn": "40402044",
+      "name": "SD NEGERI 11 PALANGGA",
+      "address": "Jln. Tosiba",
+      "village": "Palangga",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402044"
+    },
+    {
+      "npsn": "40402106",
+      "name": "SD NEGERI 12 PALANGGA",
+      "address": "Aosole",
+      "village": "Aosole",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402106"
+    },
+    {
+      "npsn": "40401860",
+      "name": "SD NEGERI 13 PALANGGA",
+      "address": "Desa Alakaya",
+      "village": "Alakaya",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401860"
+    },
+    {
+      "npsn": "40402103",
+      "name": "SD NEGERI 14 PALANGGA",
+      "address": "Desa Anggondara",
+      "village": "Anggondara",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402103"
+    },
+    {
+      "npsn": "40401949",
+      "name": "SD NEGERI 15 PALANGGA",
+      "address": "Desa Watudemba",
+      "village": "Watudemba",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401949"
+    },
+    {
+      "npsn": "40402084",
+      "name": "SD NEGERI 16 PALANGGA",
+      "address": "Mekar Sari",
+      "village": "Palangga",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402084"
+    },
+    {
+      "npsn": "69830493",
+      "name": "SD NEGERI 17 PALANGGA",
+      "address": "Jl. Poros Andoolo - Kendari",
+      "village": "Palangga",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/69830493"
+    },
+    {
+      "npsn": "40401816",
+      "name": "SD NEGERI 2 PALANGGA",
+      "address": "Onembute",
+      "village": "Onembute",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401816"
+    },
+    {
+      "npsn": "40402144",
+      "name": "SD NEGERI 3 PALANGGA",
+      "address": "Kelurahan Palangga",
+      "village": "Palangga",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402144"
+    },
+    {
+      "npsn": "40401835",
+      "name": "SD NEGERI 4 PALANGGA",
+      "address": "Desa Kiaea",
+      "village": "Kiaea",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401835"
+    },
+    {
+      "npsn": "40401952",
+      "name": "SD NEGERI 5 PALANGGA",
+      "address": "Desa Watumerembe",
+      "village": "Watumerembe",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401952"
+    },
+    {
+      "npsn": "40401831",
+      "name": "SD NEGERI 6 PALANGGA",
+      "address": "Jln. Poros Kapujaya-Waworaha",
+      "village": "Kapu Jaya",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401831"
+    },
+    {
+      "npsn": "40402048",
+      "name": "SD NEGERI 7 PALANGGA",
+      "address": "Desa wawouru",
+      "village": "Wawouru",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402048"
+    },
+    {
+      "npsn": "40401928",
+      "name": "SD NEGERI 8 PALANGGA",
+      "address": "Desa Waworaha",
+      "village": "Waworaha",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401928"
+    },
+    {
+      "npsn": "40401995",
+      "name": "SD NEGERI 9 PALANGGA",
+      "address": "Desa Mekarsari",
+      "village": "Mekar Sari",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401995"
+    },
+    {
+      "npsn": "40401847",
+      "name": "SDN SATU ATAP 20 KONAWE SELATAN",
+      "address": "Jl. Togoa No. 1",
+      "village": "Eewa",
+      "district": "Palangga",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401847"
+    },
+    {
+      "npsn": "70043223",
+      "name": "SMP KESEHATAN KONAWE SELATAN",
+      "address": "Jl. Pendidikan No. 01 Desa Aosole",
+      "village": "Aosole",
+      "district": "Palangga",
+      "level": "SMP",
+      "status": "SWASTA",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/70043223"
+    },
+    {
+      "npsn": "40401905",
+      "name": "SMP NEGERI 17 KONAWE SELATAN",
+      "address": "Jl. Poros Andoolo",
+      "village": "Anggondara",
+      "district": "Palangga",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401905"
+    },
+    {
+      "npsn": "40403325",
+      "name": "SMP NEGERI 6 KONAWE SELATAN",
+      "address": "jln poros kendari andoolo",
+      "village": "Palangga",
+      "district": "Palangga",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403325"
+    },
+    {
+      "npsn": "40404841",
+      "name": "SMP NEGERI SATU ATAP 20 KONAWE SELATAN",
+      "address": "Jl. Togoa No. 01",
+      "village": "Eewa",
+      "district": "Palangga",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404841"
+    },
+    {
+      "npsn": "40401823",
+      "name": "SD NEGERI 1 PALANGGA SELATAN",
+      "address": "Desa Parasi",
+      "village": "Parasi",
+      "district": "Palangga Selatan",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401823"
+    },
+    {
+      "npsn": "40402040",
+      "name": "SD NEGERI 2 PALANGGA SELATAN",
+      "address": "Desa Koeono",
+      "village": "Koeono",
+      "district": "Palangga Selatan",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402040"
+    },
+    {
+      "npsn": "40401866",
+      "name": "SD NEGERI 3 PALANGGA SELATAN",
+      "address": "Desa Lakara",
+      "village": "Lakara",
+      "district": "Palangga Selatan",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401866"
+    },
+    {
+      "npsn": "40405068",
+      "name": "SD NEGERI 4 PALANGGA SELATAN",
+      "address": "Mondoe",
+      "village": "Mondoe",
+      "district": "Palangga Selatan",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405068"
+    },
+    {
+      "npsn": "40401950",
+      "name": "SD NEGERI 5 PALANGGA SELATAN",
+      "address": "Desa Watumbohoti",
+      "village": "Watumbohoti",
+      "district": "Palangga Selatan",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401950"
+    },
+    {
+      "npsn": "40401836",
+      "name": "SD NEGERI 6 PALANGGA SELATAN",
+      "address": "Desa Ululakara",
+      "village": "Ululakara",
+      "district": "Palangga Selatan",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401836"
+    },
+    {
+      "npsn": "40401851",
+      "name": "SD NEGERI 7 PALANGGA SELATAN",
+      "address": "Desa Lalowua",
+      "village": "Lalowua",
+      "district": "Palangga Selatan",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401851"
+    },
+    {
+      "npsn": "40402101",
+      "name": "SD NEGERI 8 PALANGGA SELATAN",
+      "address": "Jln.Poros Desa Waturapa",
+      "village": "Waturapa",
+      "district": "Palangga Selatan",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402101"
+    },
+    {
+      "npsn": "40401996",
+      "name": "SD NEGERI 9 PALANGGA SELATAN",
+      "address": "Amondo",
+      "village": "Amondo",
+      "district": "Palangga Selatan",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401996"
+    },
+    {
+      "npsn": "40401945",
+      "name": "SD NEGERI SATU ATAP 8 KONAWE SELATAN",
+      "address": "Desa Ululakara",
+      "village": "Ululakara",
+      "district": "Palangga Selatan",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401945"
+    },
+    {
+      "npsn": "40401887",
+      "name": "SD NEGERI SATU ATAP 9 KONAWE SELATAN",
+      "address": "Wawowonua",
+      "village": "Wawo Wonua",
+      "district": "Palangga Selatan",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401887"
+    },
+    {
+      "npsn": "40405057",
+      "name": "SMP NEGERI SATU ATAP 9 KONAWE SELATAN",
+      "address": "Wawowonua",
+      "village": "Wawo Wonua",
+      "district": "Palangga Selatan",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405057"
+    },
+    {
+      "npsn": "40401918",
+      "name": "SMPN 18 KONAWE SELATAN",
+      "address": "Jl.Pasar Lama Amondo",
+      "village": "Amondo",
+      "district": "Palangga Selatan",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401918"
+    },
+    {
+      "npsn": "40405058",
+      "name": "SMPN SATAP 8 KONAWE SELATAN",
+      "address": "Jalan Poros Torobulu-Tinanggea",
+      "village": "Ululakara",
+      "district": "Palangga Selatan",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405058"
+    },
+    {
+      "npsn": "70062152",
+      "name": "SD IT BAITUL QUR’AN",
+      "address": "Jln. Melati Desa Kota Bangun Kec. Ranomeeto",
+      "village": "Kota Bangun",
+      "district": "Ranomeeto",
+      "level": "SD",
+      "status": "SWASTA",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/70062152"
+    },
+    {
+      "npsn": "40401984",
+      "name": "SD NEGERI 1 RANOMEETO",
+      "address": "Jln. Poros Bandara Haluoleo",
+      "village": "Langgea",
+      "district": "Ranomeeto",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401984"
+    },
+    {
+      "npsn": "40402046",
+      "name": "SD NEGERI 10 RANOMEETO",
+      "address": "Desa Rambu-Rambu Jaya",
+      "village": "Rambu-Rambu Jaya",
+      "district": "Ranomeeto",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402046"
+    },
+    {
+      "npsn": "40403690",
+      "name": "SD NEGERI 11 RANOMEETO",
+      "address": "Kota Bangun",
+      "village": "Kota Bangun",
+      "district": "Ranomeeto",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403690"
+    },
+    {
+      "npsn": "40401817",
+      "name": "SD NEGERI 2 RANOMEETO",
+      "address": "Jl. Poros Ranomeeto-kendari",
+      "village": "Onewila",
+      "district": "Ranomeeto",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401817"
+    },
+    {
+      "npsn": "40402119",
+      "name": "SD NEGERI 3 RANOMEETO",
+      "address": "Jln. Poros Kendari - Motaha",
+      "village": "Duduria",
+      "district": "Ranomeeto",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402119"
+    },
+    {
+      "npsn": "40402108",
+      "name": "SD NEGERI 4 RANOMEETO",
+      "address": "Langgea",
+      "village": "Langgea",
+      "district": "Ranomeeto",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402108"
+    },
+    {
+      "npsn": "40402042",
+      "name": "SD NEGERI 5 RANOMEETO",
+      "address": "Jln Bandara Halu Oleo Desa Ambaipua Kec.Ranomeeto Kab.Konawe Selatan",
+      "village": "Ambaipua",
+      "district": "Ranomeeto",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402042"
+    },
+    {
+      "npsn": "40402081",
+      "name": "SD NEGERI 6 RANOMEETO",
+      "address": "Desa Amoito",
+      "village": "Amoito",
+      "district": "Ranomeeto",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402081"
+    },
+    {
+      "npsn": "40402149",
+      "name": "SD NEGERI 7 RANOMEETO",
+      "address": "Ranomeeto",
+      "village": "Ranooha",
+      "district": "Ranomeeto",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402149"
+    },
+    {
+      "npsn": "40401989",
+      "name": "SD NEGERI 8 RANOMEETO",
+      "address": "Jln.Gersamata",
+      "village": "Laikaaha",
+      "district": "Ranomeeto",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401989"
+    },
+    {
+      "npsn": "40401893",
+      "name": "SD NEGERI 9 RANOMEETO",
+      "address": "Kompleks Asmil Yonif 725 Woroagi",
+      "village": "Rambu-Rambu Jaya",
+      "district": "Ranomeeto",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401893"
+    },
+    {
+      "npsn": "79565400",
+      "name": "SDIT UMMU SALAMAH",
+      "address": "Jl. Poros Kelurahan Ranomeeto",
+      "village": "Ranomeeto",
+      "district": "Ranomeeto",
+      "level": "SD",
+      "status": "SWASTA",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/79565400"
+    },
+    {
+      "npsn": "70027923",
+      "name": "SMP AL QUR’AN DARUR RAIHANUN NW",
+      "address": "Jl. Poros Ambaipua",
+      "village": "Ambaipua",
+      "district": "Ranomeeto",
+      "level": "SMP",
+      "status": "SWASTA",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/70027923"
+    },
+    {
+      "npsn": "40401910",
+      "name": "SMP NEGERI 1 KONAWE SELATAN",
+      "address": "JL. LANUD WOLTER MONGINSIDI No. 9 KEL. RANOMEETO KEC. RANOMEETO",
+      "village": "Ranomeeto",
+      "district": "Ranomeeto",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401910"
+    },
+    {
+      "npsn": "40401906",
+      "name": "SMP NEGERI 29 KONAWE SELATAN",
+      "address": "Jl.Poros Boro-Boro Lameuru Kec. Ranomeeto Barat",
+      "village": "Boro-Boro R",
+      "district": "Ranomeeto",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401906"
+    },
+    {
+      "npsn": "40403692",
+      "name": "SMP NEGERI 36 KONAWE SELATAN",
+      "address": "Jl. Poros Kendari Motaha",
+      "village": "Boro-Boro R",
+      "district": "Ranomeeto",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403692"
+    },
+    {
+      "npsn": "40401898",
+      "name": "SMP NEGERI 8 KONAWE SELATAN",
+      "address": "Jl. Poros Bandara Haluoleo",
+      "village": "Ambaipua",
+      "district": "Ranomeeto",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401898"
+    },
+    {
+      "npsn": "40402117",
+      "name": "SD NEGERI 2 RANOMEETO BARAT",
+      "address": "Desa Lameuru",
+      "village": "Lameuru",
+      "district": "Ranomeeto Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402117"
+    },
+    {
+      "npsn": "40402059",
+      "name": "SD NEGERI 3 RANOMEETO BARAT",
+      "address": "Desa Jati Bali",
+      "village": "Jati Bali",
+      "district": "Ranomeeto Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402059"
+    },
+    {
+      "npsn": "40402124",
+      "name": "SD NEGERI 4 RANOMEETO BARAT",
+      "address": "Jati Bali",
+      "village": "Jati Bali",
+      "district": "Ranomeeto Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402124"
+    },
+    {
+      "npsn": "40401981",
+      "name": "SD NEGERI 5 RANOMEETO BARAT",
+      "address": "JL.R.A KARTINI",
+      "village": "Opaasi",
+      "district": "Ranomeeto Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401981"
+    },
+    {
+      "npsn": "40402066",
+      "name": "SD NEGERI 6 RANOMEETO BARAT",
+      "address": "Desa Abeko",
+      "village": "Abeko",
+      "district": "Ranomeeto Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402066"
+    },
+    {
+      "npsn": "40401865",
+      "name": "SD NEGERI 7 RANOMEETO BARAT",
+      "address": "Desa Laikandonga Kec. Ranometo Barat",
+      "village": "Laikandonga",
+      "district": "Ranomeeto Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401865"
+    },
+    {
+      "npsn": "40402082",
+      "name": "SD NEGERI 8 RANOMEETO BARAT",
+      "address": "Desa Amokuni Kecamatan Ranomeeto Barat",
+      "village": "Amokuni",
+      "district": "Ranomeeto Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402082"
+    },
+    {
+      "npsn": "40401944",
+      "name": "SD NEGERI 9 RANOMEETO BARAT",
+      "address": "Desa Tunduno",
+      "village": "Tunduno",
+      "district": "Ranomeeto Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401944"
+    },
+    {
+      "npsn": "40401927",
+      "name": "SD NEGERI SATAP 2 KONAWE SELATAN",
+      "address": "Sindangkasih",
+      "village": "Sindang Kasih",
+      "district": "Ranomeeto Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401927"
+    },
+    {
+      "npsn": "40402045",
+      "name": "SD Negeri 1 Ranomeeto Barat",
+      "address": "DESA BORO-BORO LAMEURU",
+      "village": "BORO-BORO LAMEURU",
+      "district": "Ranomeeto Barat",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402045"
+    },
+    {
+      "npsn": "40403691",
+      "name": "SMP NEGERI SATAP 2 KONAWE SELATAN",
+      "address": "Jl. Poros Desa Sindangkasih, Kec. Ranomeeto Barat",
+      "village": "Sindang Kasih",
+      "district": "Ranomeeto Barat",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403691"
+    },
+    {
+      "npsn": "40401919",
+      "name": "SD NEGERI 10 LANDONO",
+      "address": "Jln. Poros Asaria",
+      "village": "Asaria",
+      "district": "Sabulakoa",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401919"
+    },
+    {
+      "npsn": "40401956",
+      "name": "SD NEGERI 11 LANDONO",
+      "address": "Tetenggabo",
+      "village": "Tetenggabo",
+      "district": "Sabulakoa",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401956"
+    },
+    {
+      "npsn": "40401948",
+      "name": "SD NEGERI 12 LANDONO",
+      "address": "Desa Wonuakoa",
+      "village": "Wonua Koa",
+      "district": "Sabulakoa",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401948"
+    },
+    {
+      "npsn": "40401849",
+      "name": "SD NEGERI 13 LANDONO",
+      "address": "Desa Koroonua",
+      "village": "Wonua Koa",
+      "district": "Sabulakoa",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401849"
+    },
+    {
+      "npsn": "40405044",
+      "name": "SD NEGERI 14 LANDONO",
+      "address": "Landono",
+      "village": "Sabulakoa",
+      "district": "Sabulakoa",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405044"
+    },
+    {
+      "npsn": "40402003",
+      "name": "SD NEGERI 2 LANDONO",
+      "address": "Jln. Poros Sabulakoa",
+      "village": "Sabulakoa",
+      "district": "Sabulakoa",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402003"
+    },
+    {
+      "npsn": "40402150",
+      "name": "SD NEGERI 4 LANDONO",
+      "address": "Jl. Poros Mowila - Sabulakoa",
+      "village": "Watu-watu",
+      "district": "Sabulakoa",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402150"
+    },
+    {
+      "npsn": "40402078",
+      "name": "SD NEGERI 8 LANDONO",
+      "address": "Desa Talumbinga",
+      "village": "Sabulakoa",
+      "district": "Sabulakoa",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402078"
+    },
+    {
+      "npsn": "40402085",
+      "name": "SD NEGERI 9 LANDONO",
+      "address": "Wawobende",
+      "village": "Wawobende",
+      "district": "Sabulakoa",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402085"
+    },
+    {
+      "npsn": "40401903",
+      "name": "SMP NEGERI 20 Konawe Selatan",
+      "address": "Jln. Poros Sabulakoa",
+      "village": "Sabulakoa",
+      "district": "Sabulakoa",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401903"
+    },
+    {
+      "npsn": "40405116",
+      "name": "SMP NEGERI 39 KONAWE SELATAN",
+      "address": "Desa Asaria, Kec. Sabulakoa",
+      "village": "Asaria",
+      "district": "Sabulakoa",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405116"
+    },
+    {
+      "npsn": "40401940",
+      "name": "SD NEGERI 1 TINANGGEA",
+      "address": "Jln. Poros Tinanggea - Bombana",
+      "village": "Roraya",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401940"
+    },
+    {
+      "npsn": "40402087",
+      "name": "SD NEGERI 10 TINANGGEA",
+      "address": "Asingi",
+      "village": "Asingi",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402087"
+    },
+    {
+      "npsn": "69787693",
+      "name": "SD NEGERI 11 TINANGGEA",
+      "address": "Jl.poros Lalonggasu",
+      "village": "Palo Tawo",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/69787693"
+    },
+    {
+      "npsn": "40402121",
+      "name": "SD NEGERI 12 TINANGGEA",
+      "address": "Wundumbolo",
+      "village": "Wundumbolo",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402121"
+    },
+    {
+      "npsn": "40403689",
+      "name": "SD NEGERI 13 TINANGGEA",
+      "address": "Wadonggo",
+      "village": "Wadonggo",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403689"
+    },
+    {
+      "npsn": "40405735",
+      "name": "SD NEGERI 14 TINANGGEA",
+      "address": "Jln Poros Andoolo - Tinanggea",
+      "village": "Lalowatu",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405735"
+    },
+    {
+      "npsn": "40401790",
+      "name": "SD NEGERI 2 TINANGGEA",
+      "address": "Rt.01 Rw. 02 Lingkungan II",
+      "village": "Ngapaaha",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401790"
+    },
+    {
+      "npsn": "40401986",
+      "name": "SD NEGERI 3 TINANGGEA",
+      "address": "Jln Poros Lapoa- Tinanggea",
+      "village": "Lapoa",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401986"
+    },
+    {
+      "npsn": "40402110",
+      "name": "SD NEGERI 4 TINANGGEA",
+      "address": "Desa Lapoa",
+      "village": "Lapoa",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402110"
+    },
+    {
+      "npsn": "40402010",
+      "name": "SD NEGERI 5 TINANGGEA",
+      "address": "Tinanggea",
+      "village": "Tinanggea",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402010"
+    },
+    {
+      "npsn": "40402133",
+      "name": "SD NEGERI 6 TINANGGEA",
+      "address": "Jl. Aspol Lama",
+      "village": "Tinanggea",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402133"
+    },
+    {
+      "npsn": "40401796",
+      "name": "SD NEGERI 7 TINANGGEA",
+      "address": "Lapulu",
+      "village": "Lapulu",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401796"
+    },
+    {
+      "npsn": "40401786",
+      "name": "SD NEGERI 8 TINANGGEA",
+      "address": "Jl. Tongkol No. 01",
+      "village": "Moolo Indah",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401786"
+    },
+    {
+      "npsn": "40401963",
+      "name": "SD NEGERI 9 TINANGGEA",
+      "address": "Jl. Poros Pelabuhan Torokeku",
+      "village": "Lapulu",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401963"
+    },
+    {
+      "npsn": "40401941",
+      "name": "SD NEGERI SATU ATAP 10 KONAWE SELATAN",
+      "address": "Desa Lanowulu",
+      "village": "Lanowulu",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401941"
+    },
+    {
+      "npsn": "40403109",
+      "name": "SD NEGERI SATU ATAP 3 KONAWE SELATAN",
+      "address": "Lalonggasu",
+      "village": "Lalonggasu",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403109"
+    },
+    {
+      "npsn": "70015763",
+      "name": "SD TQ MUADZ BIN JABAL",
+      "address": "Blok A, Dusun 1",
+      "village": "Lapoa",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "SWASTA",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/70015763"
+    },
+    {
+      "npsn": "40401845",
+      "name": "SDN SATAP 19 KONAWE SELATAN",
+      "address": "Jl.Bungin Permai",
+      "village": "Bungin Permai",
+      "district": "Tinanggea",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401845"
+    },
+    {
+      "npsn": "40401911",
+      "name": "SMP NEGERI 3 KONAWE SELATAN",
+      "address": "Jl. Poros Lapulu",
+      "village": "Tinanggea",
+      "district": "Tinanggea",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401911"
+    },
+    {
+      "npsn": "40403328",
+      "name": "SMP NEGERI 31 KONAWE SELATAN",
+      "address": "Jalan Mangga Butu No. 1",
+      "village": "Moolo Indah",
+      "district": "Tinanggea",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40403328"
+    },
+    {
+      "npsn": "40405031",
+      "name": "SMP NEGERI 51 KONAWE SELATAN",
+      "address": "Jl. Bendungan",
+      "village": "Bomba-Bomba",
+      "district": "Tinanggea",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405031"
+    },
+    {
+      "npsn": "40405024",
+      "name": "SMP NEGERI SATU ATAP 19 KONAWE SELATAN",
+      "address": "Bungin Permai",
+      "village": "Bungin Permai",
+      "district": "Tinanggea",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405024"
+    },
+    {
+      "npsn": "40405080",
+      "name": "SMP NEGERI SATU ATAP 3 KONAWE SELATAN",
+      "address": "Jl.poros Andoolo Tinanggea",
+      "village": "Lalonggasu",
+      "district": "Tinanggea",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405080"
+    },
+    {
+      "npsn": "40405016",
+      "name": "SMP SATU ATAP 10 KONAWE SELATAN",
+      "address": "Lanowulu",
+      "village": "Lanowulu",
+      "district": "Tinanggea",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405016"
+    },
+    {
+      "npsn": "70010126",
+      "name": "SMP SWASTA WAHDAH ISLAMIYAH",
+      "address": "Jl. Poros Tinanggea-Lapulu",
+      "village": "Tinanggea",
+      "district": "Tinanggea",
+      "level": "SMP",
+      "status": "SWASTA",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/70010126"
+    },
+    {
+      "npsn": "69967642",
+      "name": "SMP-TQ MUADZ BIN JABAL KONAWE SELATAN",
+      "address": "Blok A",
+      "village": "Lapoa",
+      "district": "Tinanggea",
+      "level": "SMP",
+      "status": "SWASTA",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/69967642"
+    },
+    {
+      "npsn": "40401886",
+      "name": "SD NEGERI 1 WOLASI",
+      "address": "Jl. Poros Kendari-Andoolo",
+      "village": "Mata Wolasi",
+      "district": "Wolasi",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401886"
+    },
+    {
+      "npsn": "40402043",
+      "name": "SD NEGERI 2 WOLASI",
+      "address": "Jln. Poros Kendari - Punggaluku, Desa Lelekaa, Kec. Wolasi, Kab. Konawe Selatan",
+      "village": "LELEKAA",
+      "district": "Wolasi",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402043"
+    },
+    {
+      "npsn": "40402013",
+      "name": "SD NEGERI 3 WOLASI",
+      "address": "Jl. Poros Kendari-Punggaluku",
+      "village": "Aoma",
+      "district": "Wolasi",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402013"
+    },
+    {
+      "npsn": "40401797",
+      "name": "SD NEGERI 4 WOLASI",
+      "address": "JL.Poros Kendari - Punggaluku",
+      "village": "LELEKAA",
+      "district": "Wolasi",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401797"
+    },
+    {
+      "npsn": "40405081",
+      "name": "SD NEGERI 5 WOLASI",
+      "address": "Jln Jeruk",
+      "village": "AUNUPE",
+      "district": "Wolasi",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405081"
+    },
+    {
+      "npsn": "40405035",
+      "name": "SD NEGERI 6 WOLASI",
+      "address": "Lorong Pasar Wolasi Desa Ranowila",
+      "village": "Ranowila",
+      "district": "Wolasi",
+      "level": "SD",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40405035"
+    },
+    {
+      "npsn": "40401914",
+      "name": "SMP NEGERI 24 KONAWE SELATAN",
+      "address": "Jalan Perkantoran Kec. Wolasi",
+      "village": "Wolasi",
+      "district": "Wolasi",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40401914"
+    },
+    {
+      "npsn": "40404812",
+      "name": "SMP NEGERI 55 KONAWE SELATAN",
+      "address": "Jl. Poros Kendari-Andoolo Lorong Mesikola",
+      "village": "LELEKAA",
+      "district": "Wolasi",
+      "level": "SMP",
+      "status": "NEGERI",
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40404812"
+    }
+  ]
+}

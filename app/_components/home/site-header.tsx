@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { navItems } from "./home-data";
 
-export function SiteHeader({ activeSection = "home" }: { activeSection?: "home" | "about" }) {
+export function SiteHeader({ activeSection = "home" }: { activeSection?: "home" | "about" | "public-services" }) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -131,7 +131,7 @@ export function SiteHeader({ activeSection = "home" }: { activeSection?: "home" 
 
             return (
               <div
-                className={`nav-item${isOpen ? " open" : ""}${item.id === "nav-about" && activeSection === "about" ? " section-active" : ""}`}
+                className={`nav-item${isOpen ? " open" : ""}${item.id === `nav-${activeSection}` ? " section-active" : ""}`}
                 key={item.id}
               >
                 {hasChildren ? (
