@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
-import { AboutHero, AboutPageNavigation } from "../_components/about-shell";
+import { AboutServiceHero, AboutServiceNavigation } from "../_components/about-shell";
 
 export const metadata: Metadata = {
   title: "Kontak & Alamat | Dikbud Konawe Selatan",
@@ -8,24 +9,23 @@ export const metadata: Metadata = {
 };
 
 const channels = [
-  { icon: "☎", label: "Telepon", value: "(0408) 123 4567", note: "Pada jam layanan" },
-  { icon: "✉", label: "Email", value: "dikbud@konaweselatankab.go.id", note: "Untuk informasi dan persuratan" },
-  { icon: "⌖", label: "Kunjungan", value: "Kompleks Perkantoran Bupati", note: "Andoolo, Konawe Selatan" },
+  { icon: "☎", label: "Telepon", value: "(0408) 123 4567", note: "Hubungi petugas pada jam layanan kantor.", href: "tel:+624081234567", action: "Hubungi sekarang" },
+  { icon: "✉", label: "Email", value: "dikbud@konaweselatankab.go.id", note: "Untuk informasi, konsultasi, dan persuratan resmi.", href: "mailto:dikbud@konaweselatankab.go.id", action: "Kirim email" },
+  { icon: "⌖", label: "Kunjungan", value: "Kompleks Perkantoran Bupati", note: "Andoolo, Kabupaten Konawe Selatan.", href: "#lokasi-kantor", action: "Lihat lokasi kantor" },
 ];
 
 export default function ContactPage() {
   return (
     <>
-      <AboutHero
-        eyebrow="Kontak & Alamat"
+      <AboutServiceHero
         title="Terhubung lebih dekat dengan Dikbud Konawe Selatan."
         description="Temukan alamat kantor dan kanal komunikasi yang dapat digunakan untuk informasi, konsultasi, maupun pengaduan layanan."
         current="Kontak & Alamat"
       />
-      <AboutPageNavigation active="contact" />
+      <AboutServiceNavigation active="contact" />
 
-      <div className="container about-content">
-        <section className="contact-grid">
+      <div className="container service-content quick-glass-content contact-glass-content">
+        <section className="contact-grid" id="lokasi-kantor">
           <div className="contact-main">
             <p className="section-kicker">Kantor Dinas</p>
             <h2>Kami siap membantu kebutuhan informasi Anda.</h2>
@@ -48,18 +48,28 @@ export default function ContactPage() {
           </div>
         </section>
 
-        <section className="about-section contact-channel-section">
-          <div className="about-section-heading">
+        <section className="service-section contact-channel-section">
+          <div className="service-section-heading">
             <div><p className="section-kicker">Kanal Komunikasi</p><h2>Pilih cara yang paling nyaman</h2></div>
             <p>Sertakan identitas dan pokok kebutuhan agar kami dapat membantu dengan tepat.</p>
           </div>
-          <div className="channel-grid">
-            {channels.map((channel) => (
-              <article key={channel.label}>
-                <span aria-hidden="true">{channel.icon}</span>
-                <small>{channel.label}</small>
-                <strong>{channel.value}</strong>
-                <p>{channel.note}</p>
+          <div className="public-quick-grid contact-channel-grid">
+            {channels.map((channel, index) => (
+              <article className="quick-service-card" key={channel.label}>
+                <div className="quick-card-rail">
+                  <span>0{index + 1}</span>
+                  <i aria-hidden="true">{channel.icon}</i>
+                </div>
+                <div className="quick-card-body">
+                  <span className="public-card-label">{channel.label}</span>
+                  <h3>{channel.value}</h3>
+                  <p>{channel.note}</p>
+                  <Link className="public-card-action" href={channel.href}>
+                    <span className="public-action-row">
+                      <span>{channel.action}</span><span aria-hidden="true">→</span>
+                    </span>
+                  </Link>
+                </div>
               </article>
             ))}
           </div>

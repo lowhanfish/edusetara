@@ -474,6 +474,61 @@ footer:before { content:""; position:absolute; left:0; right:0; top:-17px; heigh
   .school-stat-card:first-child { grid-column:1/-1; }
 }
 
+/* Kontak & Alamat — mengikuti bahasa visual submenu Layanan Publik */
+.contact-service-hero:after { content:"@"; letter-spacing:0; transform:rotate(-8deg); }
+.contact-glass-content { padding-top:72px; padding-bottom:80px; }
+.contact-glass-content>.contact-grid,
+.contact-glass-content>.service-section,
+.contact-glass-content>.contact-note { position:relative; z-index:1; }
+.contact-glass-content .contact-grid {
+  overflow:hidden;
+  border:1px solid #ffffffc7;
+  border-radius:26px;
+  background:linear-gradient(145deg,rgba(255,255,255,.78),rgba(255,255,255,.5));
+  box-shadow:inset 0 1px #fff,0 24px 48px #12375a16;
+  backdrop-filter:blur(18px) saturate(135%);
+  -webkit-backdrop-filter:blur(18px) saturate(135%);
+}
+.contact-glass-content .contact-main { background:linear-gradient(145deg,rgba(255,255,255,.42),rgba(237,245,243,.25)); }
+.contact-glass-content .contact-address { border-left-color:#08736f; }
+.contact-glass-content .contact-map { border-left:1px solid #ffffffb8; }
+.contact-glass-content .contact-channel-section { padding-top:78px; }
+.contact-glass-content .service-section-heading { border-bottom-color:#ffffffc9; }
+.contact-channel-grid { grid-template-columns:repeat(3,1fr)!important; gap:18px!important; }
+.contact-channel-grid .quick-service-card { grid-template-columns:66px 1fr; min-height:290px; }
+.contact-channel-grid .quick-card-rail { padding-inline:10px; }
+.contact-channel-grid .quick-card-body { padding:25px 22px; }
+.contact-channel-grid .quick-card-body h3 { font-size:1.08rem; line-height:1.45; overflow-wrap:anywhere; }
+.contact-glass-content .contact-note {
+  margin-top:34px;
+  border:1px solid #ffffffbd;
+  border-left:4px solid #08736f;
+  border-radius:16px;
+  background:rgba(232,238,235,.72);
+  box-shadow:inset 0 1px #fff;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+
+@media (max-width:1000px) {
+  .contact-channel-grid { grid-template-columns:1fr 1fr!important; }
+  .contact-channel-grid article:last-child { grid-column:1/-1; }
+}
+
+@media (max-width:760px) {
+  .contact-glass-content { padding-top:56px; padding-left:14px; padding-right:14px; }
+  .contact-glass-content .contact-grid { border-radius:20px; }
+  .contact-glass-content .contact-map { border-top:1px solid #ffffffb8; border-left:0; }
+  .contact-glass-content .contact-channel-section { padding-top:64px; }
+  .contact-channel-grid { grid-template-columns:1fr!important; }
+  .contact-channel-grid article:last-child { grid-column:auto; }
+}
+
+@media (max-width:520px) {
+  .contact-channel-grid .quick-service-card { grid-template-columns:66px 1fr; }
+  .contact-channel-grid .quick-card-body { padding:23px 18px; }
+}
+
 @media (max-width:520px) {
   .service-overline { font-size:.625rem!important; }
   .service-hero-copy h1 { font-size:2.25rem; }
