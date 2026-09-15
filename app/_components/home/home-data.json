@@ -64,27 +64,27 @@
     {
       "id": "nav-data",
       "label": "Data & Statistik",
-      "href": "/#data-statistik",
+      "href": "/data-statistik",
       "children": [
         {
           "id": "data-education-statistics",
           "label": "Statistik Pendidikan",
           "description": "Ringkasan sekolah, siswa, dan tenaga pendidik",
-          "href": "/#data-statistik",
+          "href": "/data-statistik",
           "icon": "▥"
         },
         {
           "id": "data-satisfaction-index",
           "label": "Indeks Kepuasan",
           "description": "Tren kepuasan layanan masyarakat",
-          "href": "/#kepuasan-masyarakat",
+          "href": "/data-statistik/indeks-kepuasan",
           "icon": "↗"
         },
         {
           "id": "data-announcements",
           "label": "Pengumuman Resmi",
           "description": "Jadwal dan pemberitahuan terbaru",
-          "href": "/#pengumuman",
+          "href": "/data-statistik/pengumuman",
           "icon": "◷"
         }
       ]
@@ -427,7 +427,7 @@
     {
       "id": "footer-data",
       "label": "Data & Statistik",
-      "href": "/#data-statistik"
+      "href": "/data-statistik"
     },
     {
       "id": "footer-education",

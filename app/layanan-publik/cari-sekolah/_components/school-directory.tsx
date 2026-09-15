@@ -283,19 +283,30 @@ export function SchoolDirectory({ schools }: SchoolDirectoryProps) {
       {currentSchools.length > 0 ? (
         <div className="school-cards-grid">
           {currentSchools.map((school) => (
-            <article className="school-card" key={school.npsn}>
+            <article
+              className={`school-card school-card-${school.level.toLowerCase()}`}
+              key={school.npsn}
+            >
+              <span className="school-card-glow" aria-hidden="true" />
               <div className="school-card-top">
-                <div className="school-badges">
-                  <span
-                    className={`school-badge badge-${school.level.toLowerCase()}`}
-                  >
-                    <span className="badge-dot" />
-                    {school.level}
+                <div className="school-card-identity">
+                  <span className="school-card-emblem" aria-hidden="true">
+                    {school.level === "SD" ? (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                        <path d="M9 6h7M9 10h5" />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                        <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
+                      </svg>
+                    )}
                   </span>
-                  <span
-                    className={`school-badge badge-${school.status.toLowerCase()}`}
-                  >
-                    {school.status}
+                  <span className="school-card-type">
+                    <small>Satuan Pendidikan</small>
+                    <strong>{school.level === "SD" ? "Sekolah Dasar" : "Sekolah Menengah Pertama"}</strong>
                   </span>
                 </div>
                 <span className="school-npsn">
@@ -305,6 +316,15 @@ export function SchoolDirectory({ schools }: SchoolDirectoryProps) {
               </div>
 
               <h3 className="school-name">{school.name}</h3>
+
+              <div className="school-badges">
+                <span className={`school-badge badge-${school.level.toLowerCase()}`}>
+                  <span className="badge-dot" />{school.level}
+                </span>
+                <span className={`school-badge badge-${school.status.toLowerCase()}`}>
+                  {school.status === "NEGERI" ? "Sekolah Negeri" : "Sekolah Swasta"}
+                </span>
+              </div>
 
               <div className="school-meta">
                 <p className="school-location">
@@ -356,7 +376,7 @@ export function SchoolDirectory({ schools }: SchoolDirectoryProps) {
                   rel="noopener noreferrer"
                   className="school-external-link"
                 >
-                  <span>Data Referensi Kemendikdasmen</span>
+                  <span><small>Profil resmi</small>Data Referensi Kemendikdasmen</span>
                   <svg
                     className="arrow-svg-icon"
                     viewBox="0 0 24 24"

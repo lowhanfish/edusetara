@@ -23,15 +23,16 @@ export default function SchoolFinderPage() {
     <>
       <ServiceHero
         current="Cari Sekolah"
-        title="Temukan direktori satuan pendidikan di Konawe Selatan."
-        description="Telusuri data resmi 404 sekolah dasar dan sekolah menengah pertama di 25 kecamatan, lengkap dengan NPSN, alamat, status akreditasi kelembagaan, dan tautan referensi Kemendikdasmen."
+        title="Temukan sekolah dari nama, NPSN, atau wilayah."
+        description={`Telusuri ${totalSchools} satuan pendidikan SD dan SMP di ${districtsCount} kecamatan, lalu buka data referensi resminya langsung dari hasil pencarian.`}
+        variant="glass"
       />
       <ServiceNavigation active="service-school-finder" />
 
-      <div className="container about-content">
+      <div className="container service-content school-service-content quick-glass-content school-glass-content">
         {/* Quick Stats Grid */}
-        <section className="about-section" style={{ paddingTop: 0 }}>
-          <div className="about-section-heading">
+        <section className="service-section school-summary-section">
+          <div className="service-section-heading">
             <div>
               <p className="section-kicker">Data Kelembagaan</p>
               <h2>Ringkasan Satuan Pendidikan</h2>
@@ -107,8 +108,8 @@ export default function SchoolFinderPage() {
         </section>
 
         {/* Interactive Directory Section */}
-        <section className="about-section" id="direktori-sekolah">
-          <div className="about-section-heading">
+        <section className="service-section school-directory-section" id="direktori-sekolah">
+          <div className="service-section-heading">
             <div>
               <p className="section-kicker">Pencarian & Filter</p>
               <h2>Direktori Sekolah Konawe Selatan</h2>

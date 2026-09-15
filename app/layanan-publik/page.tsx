@@ -119,29 +119,33 @@ export default function PublicServicesPage() {
     <>
       <ServiceHero
         current="Layanan Berdasarkan Pengguna"
-        title="Layanan yang dekat dengan kebutuhan Anda."
-        description="Pilih kelompok pengguna untuk menemukan informasi, panduan, dan kanal bantuan yang sesuai di lingkungan Dikbud Konawe Selatan."
+        title="Mulai dari siapa Anda. Kami arahkan layanannya."
+        description="Jalur cepat untuk siswa, orang tua, pendidik, satuan pendidikan, operator, dan masyarakat yang membutuhkan layanan Dikbud Konawe Selatan."
+        variant="glass"
       />
       <ServiceNavigation active="service-by-audience" />
 
-      <div className="container about-content">
-        <section aria-labelledby="audience-heading">
-          <div className="about-section-heading">
+      <div className="container service-content quick-glass-content audience-glass-content">
+        <section className="service-section" aria-labelledby="audience-heading">
+          <div className="service-section-heading">
             <div>
-              <p className="section-kicker">Mulai dari sini</p>
-              <h2 id="audience-heading">Anda membutuhkan layanan apa?</h2>
+              <p className="section-kicker">Pilih profil pengguna</p>
+              <h2 id="audience-heading">Satu pintu, jalur yang lebih jelas.</h2>
             </div>
-            <p>Jalur informasi terstruktur untuk seluruh warga pendidikan dan masyarakat.</p>
+            <p>Setiap profil berisi tiga rute utama yang paling sering dibutuhkan.</p>
           </div>
 
           <div className="public-audience-grid">
-            {groups.map((group) => (
-              <article className="public-service-card" key={group.id} id={group.id}>
-                <span className="public-card-icon" aria-hidden="true">
-                  {group.icon}
-                </span>
-                <h3>{group.title}</h3>
-                <p>{group.description}</p>
+            {groups.map((group, index) => (
+              <article className="public-service-card audience-card" key={group.id} id={group.id}>
+                <div className="audience-card-head">
+                  <span className="public-card-icon" aria-hidden="true">{group.icon}</span>
+                  <span className="audience-index">0{index + 1}</span>
+                </div>
+                <div className="audience-card-copy">
+                  <h3>{group.title}</h3>
+                  <p>{group.description}</p>
+                </div>
                 <ul className="public-link-list">
                   {group.links.map((link) => (
                     <li key={link.label}>
@@ -152,38 +156,38 @@ export default function PublicServicesPage() {
                     </li>
                   ))}
                 </ul>
-                <p className="public-card-note">{group.note}</p>
+                <p className="public-card-note"><strong>Siapkan sebelum mulai</strong>{group.note}</p>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="process-section">
+        <section className="service-process">
           <div>
-            <p className="section-kicker">Sebelum mengakses layanan</p>
-            <h2>Tiga langkah untuk memulai</h2>
-            <p>Persyaratan mengikuti jenis layanan. Konfirmasikan kebutuhan dokumen kepada petugas.</p>
+            <p className="section-kicker">Cara menggunakan portal</p>
+            <h2>Dari kebutuhan menuju layanan.</h2>
+            <p>Alur sederhana untuk membantu Anda sampai ke kanal resmi tanpa berputar-putar.</p>
           </div>
-          <ol className="process-list public-steps">
+          <ol className="service-process-list">
             <li>
               <span>1</span>
               <div>
-                <strong>Pilih kelompok kebutuhan</strong>
-                <small>Temukan jenis layanan dari kelompok pengguna yang paling sesuai.</small>
+                <strong>Kenali jalur Anda</strong>
+                <small>Pilih profil pengguna yang paling mendekati kebutuhan.</small>
               </div>
             </li>
             <li>
               <span>2</span>
               <div>
-                <strong>Pelajari panduan</strong>
-                <small>Periksa persyaratan dokumen pendukung sebelum mengajukan permohonan.</small>
+                <strong>Periksa persiapan</strong>
+                <small>Baca catatan dan siapkan identitas atau dokumen pendukung.</small>
               </div>
             </li>
             <li>
               <span>3</span>
               <div>
-                <strong>Gunakan kanal resmi</strong>
-                <small>Buka portal layanan atau hubungi petugas melalui kanal yang tersedia.</small>
+                <strong>Lanjutkan ke layanan</strong>
+                <small>Buka portal rujukan atau hubungi petugas bila perlu arahan.</small>
               </div>
             </li>
           </ol>

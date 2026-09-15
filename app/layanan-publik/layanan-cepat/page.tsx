@@ -145,51 +145,52 @@ export default function QuickServicesPage() {
     <>
       <ServiceHero
         current="Layanan Cepat"
-        title="Akses layanan penting dalam satu tempat."
-        description="Temukan portal pendataan, dokumen regulasi rujukan, dan kanal bantuan cepat untuk mempercepat pencarian kebutuhan informasi Anda."
+        title="Enam akses penting. Tanpa pencarian panjang."
+        description="Portal pendataan, standar pelayanan, kanal pengaduan, regulasi, unduhan, dan pusat bantuan yang telah dirangkum dalam satu halaman."
+        variant="glass"
       />
       <ServiceNavigation active="service-quick-access" />
 
-      <div className="container about-content">
-        <section aria-labelledby="quick-heading">
-          <div className="about-section-heading">
+      <div className="container service-content quick-glass-content">
+        <section className="service-section" aria-labelledby="quick-heading">
+          <div className="service-section-heading">
             <div>
-              <p className="section-kicker">Tautan Pilihan</p>
-              <h2 id="quick-heading">Langsung menuju layanan</h2>
+              <p className="section-kicker">Akses langsung</p>
+              <h2 id="quick-heading">Pilih, periksa, lalu lanjutkan.</h2>
             </div>
-            <p>Tautan berlabel portal eksternal akan dibuka pada tab baru browser Anda.</p>
+            <p>Tanda ↗ menunjukkan portal resmi di luar situs Dikbud Konawe Selatan.</p>
           </div>
 
           <div className="public-quick-grid">
-            {services.map((service) => (
-              <article className="public-service-card" id={service.id} key={service.id}>
-                <span className="public-card-icon" aria-hidden="true">
-                  {service.icon}
-                </span>
-                <span className="public-card-label">{service.label}</span>
-                <h3>{service.title}</h3>
-                <p>{service.text}</p>
+            {services.map((service, index) => (
+              <article className="quick-service-card" id={service.id} key={service.id}>
+                <div className="quick-card-rail"><span>0{index + 1}</span><i aria-hidden="true">{service.icon}</i></div>
+                <div className="quick-card-body">
+                  <span className="public-card-label">{service.label}</span>
+                  <h3>{service.title}</h3>
+                  <p>{service.text}</p>
                 <Link
                   className="public-card-action"
                   href={service.href}
                   target={service.external ? "_blank" : undefined}
                   rel={service.external ? "noopener noreferrer" : undefined}
                 >
-                  <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span className="public-action-row">
                     <span>{service.action}</span>
-                    <span aria-hidden="true" style={{ fontSize: "1.1rem" }}>
+                    <span aria-hidden="true">
                       {service.external ? "↗" : "→"}
                     </span>
                   </span>
                   {service.external && <small>Portal eksternal · tab baru</small>}
                 </Link>
+                </div>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="about-section" id="faq">
-          <div className="about-section-heading">
+        <section className="service-section service-faq-section" id="faq">
+          <div className="service-section-heading">
             <div>
               <p className="section-kicker">Pertanyaan Umum</p>
               <h2>Informasi sebelum menggunakan layanan</h2>
