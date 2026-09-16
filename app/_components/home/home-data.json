@@ -148,7 +148,7 @@
     {
       "id": "nav-news",
       "label": "Berita",
-      "href": "/#berita"
+      "href": "/berita"
     },
     {
       "id": "nav-announcements",
@@ -201,19 +201,22 @@
   "latestNews": [
     {
       "id": "news-cultural-festival-2026",
+      "slug": "festival-budaya-daerah-2026",
       "title": "Konawe Selatan Gelar Festival Budaya Daerah 2026",
       "date": "4 September 2026",
       "category": "Budaya"
     },
     {
       "id": "news-independent-curriculum",
+      "slug": "sosialisasi-kurikulum-merdeka-guru",
       "title": "Sosialisasi Kurikulum Merdeka bagi Guru se-Konawe Selatan",
       "date": "3 September 2026",
       "category": "Pendidikan"
     },
     {
       "id": "news-school-facilities",
-      "title": "Dinas Pendidikan Salurkan Bantuan Sarana untuk Sekolah",
+      "slug": "bantuan-sarana-sekolah-pelosok",
+      "title": "Dinas Pendidikan Salurkan Bantuan Sarana untuk Sekolah Daerah Terluar",
       "date": "2 September 2026",
       "category": "Sarpras"
     }
@@ -432,12 +435,17 @@
     {
       "id": "footer-education",
       "label": "Pendidikan",
-      "href": "/#cari-sekolah"
+      "href": "/pendidikan"
     },
     {
       "id": "footer-culture",
       "label": "Kebudayaan",
       "href": "/kebudayaan"
+    },
+    {
+      "id": "footer-news",
+      "label": "Berita",
+      "href": "/berita"
     }
   ],
   "footerServices": [
