@@ -277,7 +277,7 @@ footer:before { content:""; position:absolute; left:0; right:0; top:-17px; heigh
 /* ========================================================================== */
 /* LAYANAN PUBLIK — reference design system                                   */
 /* ========================================================================== */
-.public-services, .data-layout, .education-layout { overflow-x:clip; background:#f4f6f3; }
+.public-services, .data-layout, .education-layout, .culture-layout { overflow-x:clip; background:#f4f6f3; }
 .service-hero { min-height:430px; position:relative; overflow:hidden; color:#fff; background:#06264b; isolation:isolate; }
 .service-hero:before { content:""; position:absolute; inset:0; z-index:-2; background:radial-gradient(circle at 78% 26%,#167f7a 0 2px,transparent 3px),radial-gradient(circle at 82% 32%,#ffc928 0 120px,transparent 121px),linear-gradient(112deg,#06264b 0 58%,#0a3d67 58% 74%,#08736f 74%); }
 .service-hero:after { content:"LP"; position:absolute; right:4vw; bottom:-78px; z-index:-1; color:#ffffff0b; font-size:290px; font-weight:950; line-height:1; letter-spacing:-24px; }
@@ -4338,3 +4338,41 @@ footer:before { content:""; position:absolute; left:0; right:0; top:-17px; heigh
   }
 }
 
+
+/* ========================================================================== */
+/* KEBUDAYAAN — Modern Fluid Glass Design System                              */
+/* ========================================================================== */
+
+.culture-glass-content {
+  background:
+    radial-gradient(circle at 4% 10%, rgba(245, 158, 11, 0.22), transparent 22%),
+    radial-gradient(circle at 96% 26%, rgba(20, 184, 166, 0.2), transparent 24%),
+    radial-gradient(circle at 14% 75%, rgba(234, 88, 12, 0.16), transparent 22%),
+    linear-gradient(145deg, #f7f5ed 0%, #fbfaf4 46%, #eff5f2 100%);
+}
+
+.culture-service-hero:after {
+  content: "BUDAYA";
+  right: 4%;
+  bottom: -40px;
+  color: rgba(255, 255, 255, 0.05);
+  font-size: 155px;
+  font-weight: 900;
+  letter-spacing: 4px;
+}
+
+.culture-glass-content .culture-help-box {
+  overflow: hidden;
+  border: 1px solid #fff5c5;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255, 221, 92, 0.82), rgba(255, 244, 195, 0.58));
+  box-shadow: inset 0 1px #fff, 0 24px 48px rgba(123, 99, 21, 0.1);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+@media (max-width: 760px) {
+  .culture-glass-content .culture-help-box {
+    border-radius: 18px;
+  }
+}

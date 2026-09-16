@@ -120,27 +120,27 @@
     {
       "id": "nav-culture",
       "label": "Kebudayaan",
-      "href": "/#kebudayaan",
+      "href": "/kebudayaan",
       "children": [
         {
           "id": "culture-heritage",
-          "label": "Warisan Budaya",
-          "description": "Situs, seni, dan tradisi daerah",
-          "href": "/#kebudayaan",
+          "label": "Warisan & Cagar Budaya",
+          "description": "Situs, tradisi lisan, dan WBTb daerah",
+          "href": "/kebudayaan",
           "icon": "✦"
         },
         {
           "id": "culture-communities",
-          "label": "Sanggar & Komunitas",
-          "description": "Pelaku dan ruang kegiatan budaya",
-          "href": "/#kebudayaan",
+          "label": "Sanggar & Komunitas Seni",
+          "description": "Pelaku seni, pembinaan, & fasilitasi",
+          "href": "/kebudayaan/sanggar-komunitas",
           "icon": "♣"
         },
         {
-          "id": "culture-news",
-          "label": "Berita Kebudayaan",
-          "description": "Kabar dan agenda budaya terkini",
-          "href": "/#berita",
+          "id": "culture-agenda",
+          "label": "Agenda & Festival Budaya",
+          "description": "Pekan Kebudayaan Daerah & kalender seni",
+          "href": "/kebudayaan/agenda-festival",
           "icon": "▣"
         }
       ]
@@ -437,7 +437,7 @@
     {
       "id": "footer-culture",
       "label": "Kebudayaan",
-      "href": "/#kebudayaan"
+      "href": "/kebudayaan"
     }
   ],
   "footerServices": [
