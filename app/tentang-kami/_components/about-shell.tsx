@@ -133,9 +133,25 @@ export function AboutServiceHero({
   title: string;
   description: string;
   current: string;
-  variant: "contact" | "standards";
+  variant: "contact" | "standards" | "profile";
 }) {
   const isStandards = variant === "standards";
+  const isProfile = variant === "profile";
+  const overline = isProfile
+    ? "Profil Organisasi & Layanan"
+    : isStandards
+      ? "Standar Layanan Publik"
+      : "Pusat Informasi & Komunikasi";
+  const asideLabel = isProfile
+    ? "Mandat organisasi"
+    : isStandards
+      ? "Komitmen pelayanan"
+      : "Status pelayanan";
+  const asideValue = isProfile
+    ? "Pendidikan dan kebudayaan"
+    : isStandards
+      ? "Standar tersedia dan terbuka"
+      : "Petugas siap membantu";
 
   return (
     <section className={`service-hero service-hero-glass ${variant}-service-hero`}>
@@ -149,24 +165,26 @@ export function AboutServiceHero({
         <div className="service-hero-layout">
           <div className="service-hero-copy">
             <p className="service-overline">
-              <span /> {isStandards ? "Standar Layanan Publik" : "Pusat Informasi & Komunikasi"}
+              <span /> {overline}
             </p>
             <h1>{title}</h1>
             <p>{description}</p>
           </div>
           <aside
             className="service-hero-aside"
-            aria-label={isStandards ? "Ringkasan standar pelayanan" : "Informasi pelayanan kontak"}
+            aria-label={isProfile ? "Ringkasan profil dinas" : isStandards ? "Ringkasan standar pelayanan" : "Informasi pelayanan kontak"}
           >
             <div className="service-status">
               <span className="service-status-dot" />
               <div>
-                <small>{isStandards ? "Komitmen pelayanan" : "Status pelayanan"}</small>
-                <strong>{isStandards ? "Standar tersedia dan terbuka" : "Petugas siap membantu"}</strong>
+                <small>{asideLabel}</small>
+                <strong>{asideValue}</strong>
               </div>
             </div>
             <div className="service-hero-meta">
-              {isStandards ? (
+              {isProfile ? (
+                <><span>Berbasis data</span><span>Kolaboratif</span><span>Berorientasi warga</span></>
+              ) : isStandards ? (
                 <><span>Mudah dipahami</span><span>Proses transparan</span><span>Layanan inklusif</span></>
               ) : (
                 <><span>Kanal resmi</span><span>Responsif &amp; terbuka</span><span>Sesuai jam layanan</span></>

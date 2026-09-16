@@ -92,28 +92,28 @@
     {
       "id": "nav-education",
       "label": "Pendidikan",
-      "href": "/#cari-sekolah",
+      "href": "/pendidikan",
       "children": [
         {
-          "id": "education-school-directory",
-          "label": "Direktori Sekolah",
-          "description": "Informasi SD, SMP, dan PAUD",
-          "href": "/#cari-sekolah",
-          "icon": "⌂"
+          "id": "education-levels",
+          "label": "Jenjang & Satuan Pendidikan",
+          "description": "Profil PAUD, SD, SMP, dan Kesetaraan",
+          "href": "/pendidikan",
+          "icon": "🏫"
         },
         {
-          "id": "education-data",
-          "label": "Data Pendidikan",
-          "description": "Statistik pendidikan Konawe Selatan",
-          "href": "/#data-statistik",
-          "icon": "▥"
+          "id": "education-curriculum",
+          "label": "Kurikulum & Pembelajaran",
+          "description": "Kurikulum Merdeka, ANBK, & Kalender",
+          "href": "/pendidikan/kurikulum",
+          "icon": "📖"
         },
         {
-          "id": "education-service-documents",
-          "label": "Dokumen Layanan",
-          "description": "Standar dan maklumat pelayanan",
-          "href": "/tentang-kami/standar-pelayanan",
-          "icon": "▤"
+          "id": "education-teachers",
+          "label": "Pendidik & Tenaga Kependidikan",
+          "description": "Kompetensi, sertifikasi, & karir GTK",
+          "href": "/pendidikan/tenaga-kependidikan",
+          "icon": "🧑‍🏫"
         }
       ]
     },

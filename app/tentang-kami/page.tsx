@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { AboutHero, AboutPageNavigation } from "./_components/about-shell";
+import { AboutServiceHero, AboutServiceNavigation } from "./_components/about-shell";
 
 export const metadata: Metadata = {
   title: "Profil Dinas | Dikbud Konawe Selatan",
@@ -26,16 +26,16 @@ const functions = [
 export default function AboutPage() {
   return (
     <>
-      <AboutHero
-        eyebrow="Profil Dinas"
+      <AboutServiceHero
         title="Bergerak untuk pendidikan, bertumbuh bersama kebudayaan."
         description="Kami hadir untuk memastikan setiap warga Konawe Selatan memperoleh layanan pendidikan yang bermutu sekaligus ruang untuk menjaga identitas budayanya."
         current="Profil Dinas"
+        variant="profile"
       />
-      <AboutPageNavigation active="profile" />
+      <AboutServiceNavigation active="profile" />
 
-      <div className="container about-content">
-        <section className="about-intro">
+      <div className="container service-content quick-glass-content profile-glass-content">
+        <section className="about-intro profile-intro">
           <div>
             <p className="section-kicker">Tentang Dikbud Konsel</p>
             <h2>Melayani hari ini, menyiapkan generasi masa depan.</h2>
@@ -80,8 +80,8 @@ export default function AboutPage() {
           </article>
         </section>
 
-        <section className="about-section">
-          <div className="about-section-heading">
+        <section className="service-section profile-functions-section">
+          <div className="service-section-heading">
             <div>
               <p className="section-kicker">Ruang Kerja Kami</p>
               <h2>Tugas dan fungsi utama</h2>
@@ -99,7 +99,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="about-cta">
+        <section className="about-cta profile-cta">
           <div>
             <p className="section-kicker">Layanan yang dapat diandalkan</p>
             <h2>Kenali standar pelayanan kami.</h2>

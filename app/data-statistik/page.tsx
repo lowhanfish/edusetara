@@ -180,10 +180,10 @@ export default function EducationStatisticsPage() {
       />
       <DataNavigation active="data-education-statistics" />
 
-      <div className="container about-content">
+      <div className="container service-content quick-glass-content data-glass-content">
         {/* Section 1: Main Metric Cards */}
-        <section aria-labelledby="metrics-heading">
-          <div className="about-section-heading">
+        <section className="service-section" aria-labelledby="metrics-heading">
+          <div className="service-section-heading">
             <div>
               <p className="section-kicker">Indikator Utama 2026</p>
               <h2 id="metrics-heading">Potret Pendidikan Daerah</h2>
@@ -209,8 +209,8 @@ export default function EducationStatisticsPage() {
         </section>
 
         {/* Section 2: Breakdown by Level */}
-        <section className="about-section" id="sebaran-jenjang">
-          <div className="about-section-heading">
+        <section className="service-section" id="sebaran-jenjang">
+          <div className="service-section-heading">
             <div>
               <p className="section-kicker">Komposisi Jenjang</p>
               <h2>Sebaran Satuan Pendidikan</h2>
@@ -259,8 +259,8 @@ export default function EducationStatisticsPage() {
         </section>
 
         {/* Section 3: Quality Indicators */}
-        <section className="about-section" id="indikator-mutu">
-          <div className="about-section-heading">
+        <section className="service-section" id="indikator-mutu">
+          <div className="service-section-heading">
             <div>
               <p className="section-kicker">Standar Pelayanan Minimal</p>
               <h2>Indikator Mutu Pembelajaran</h2>
@@ -283,8 +283,8 @@ export default function EducationStatisticsPage() {
         </section>
 
         {/* Section 4: Regional Distribution Summary */}
-        <section className="about-section" id="sebaran-wilayah">
-          <div className="about-section-heading">
+        <section className="service-section" id="sebaran-wilayah">
+          <div className="service-section-heading">
             <div>
               <p className="section-kicker">Sebaran Geografis</p>
               <h2>Distribusi per Kecamatan</h2>
@@ -325,8 +325,8 @@ export default function EducationStatisticsPage() {
         </section>
 
         {/* Section 5: Data Downloads & Publications */}
-        <section className="about-section" id="unduh-data">
-          <div className="about-section-heading">
+        <section className="service-section" id="unduh-data">
+          <div className="service-section-heading">
             <div>
               <p className="section-kicker">Katalog Data</p>
               <h2>Publikasi & Dokumen Statistik</h2>

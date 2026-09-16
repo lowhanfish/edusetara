@@ -100,9 +100,9 @@ export default function AnnouncementsPage() {
       />
       <DataNavigation active="data-announcements" />
 
-      <div className="container about-content">
-        <section aria-labelledby="announcements-heading">
-          <div className="about-section-heading">
+      <div className="container service-content quick-glass-content data-glass-content">
+        <section className="service-section" aria-labelledby="announcements-heading">
+          <div className="service-section-heading">
             <div>
               <p className="section-kicker">Warta Kedinasan</p>
               <h2 id="announcements-heading">Pengumuman & Surat Edaran</h2>

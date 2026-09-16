@@ -92,10 +92,10 @@ export default function SatisfactionIndexPage() {
       />
       <DataNavigation active="data-satisfaction-index" />
 
-      <div className="container about-content">
+      <div className="container service-content quick-glass-content data-glass-content">
         {/* Section 1: Hero Score & Overview */}
-        <section aria-labelledby="ikm-overview-heading">
-          <div className="about-section-heading">
+        <section className="service-section" aria-labelledby="ikm-overview-heading">
+          <div className="service-section-heading">
             <div>
               <p className="section-kicker">Laporan Hasil Evaluasi</p>
               <h2 id="ikm-overview-heading">Skor Mutu Pelayanan Terkini</h2>
@@ -151,8 +151,8 @@ export default function SatisfactionIndexPage() {
         </section>
 
         {/* Section 2: Historical Trend Bar Chart */}
-        <section className="about-section" id="tren-historis">
-          <div className="about-section-heading">
+        <section className="service-section" id="tren-historis">
+          <div className="service-section-heading">
             <div>
               <p className="section-kicker">Tren Kinerja 5 Tahun</p>
               <h2>Grafik Perkembangan Nilai IKM</h2>
@@ -191,8 +191,8 @@ export default function SatisfactionIndexPage() {
         </section>
 
         {/* Section 3: 9 Service Elements */}
-        <section className="about-section" id="unsur-pelayanan">
-          <div className="about-section-heading">
+        <section className="service-section" id="unsur-pelayanan">
+          <div className="service-section-heading">
             <div>
               <p className="section-kicker">Rincian Komponen Evaluasi</p>
               <h2>9 Unsur Penilaian Pelayanan Publik</h2>
@@ -224,7 +224,7 @@ export default function SatisfactionIndexPage() {
         </section>
 
         {/* Section 4: Citizen Participation & Action */}
-        <section className="ikm-participate-section">
+        <section className="service-section ikm-participate-section">
           <div className="ikm-participate-box">
             <div className="participate-copy">
               <span className="section-kicker" style={{ color: "#ffd23b" }}>Suara Anda Membangun Kami</span>
