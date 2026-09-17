@@ -9,6 +9,12 @@ import {
   Modal,
   PageHeader,
   Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Textarea,
 } from "../../_components/ui";
 
@@ -153,86 +159,84 @@ export default function KontakAdminPage() {
       </div>
 
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold text-[#58708d] uppercase tracking-wider">
-                <th className="py-3 px-4">Pengirim & Kontak</th>
-                <th className="py-3 px-4">Kategori</th>
-                <th className="py-3 px-4">Perihal / Subjek</th>
-                <th className="py-3 px-4">Waktu Masuk</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filtered.map((item) => (
-                <tr key={item.id} className="hover:bg-amber-50/30 transition-colors">
-                  <td className="py-3.5 px-4">
-                    <div className="flex flex-col">
-                      <span className="font-bold text-[#052552]">
-                        {item.senderName}
-                      </span>
-                      <span className="text-xs text-[#58708d]">
-                        {item.email} • {item.phone}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <Badge variant="neutral">{item.category}</Badge>
-                  </td>
-                  <td className="py-3.5 px-4 max-w-xs">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-slate-800 line-clamp-1">
-                        {item.subject}
-                      </span>
-                      <span className="text-xs text-slate-500 line-clamp-1">
-                        {item.message}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap text-xs text-slate-500">
-                    {item.date}
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <Badge
-                      variant={
-                        item.status === "Selesai"
-                          ? "success"
-                          : item.status === "Diproses"
-                          ? "info"
-                          : "warning"
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Pengirim & Kontak</TableHead>
+              <TableHead>Kategori</TableHead>
+              <TableHead>Perihal / Subjek</TableHead>
+              <TableHead>Waktu Masuk</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-[#052552]">
+                      {item.senderName}
+                    </span>
+                    <span className="text-xs text-[#58708d]">
+                      {item.email} • {item.phone}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <Badge variant="neutral">{item.category}</Badge>
+                </TableCell>
+                <TableCell className="max-w-xs">
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-slate-800 line-clamp-1">
+                      {item.subject}
+                    </span>
+                    <span className="text-xs text-slate-500 line-clamp-1">
+                      {item.message}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-xs text-slate-500">
+                  {item.date}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <Badge
+                    variant={
+                      item.status === "Selesai"
+                        ? "success"
+                        : item.status === "Diproses"
+                        ? "info"
+                        : "warning"
+                    }
+                  >
+                    {item.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-right">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setSelectedMessage(item)}
+                    >
+                      Buka & Balas
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="hover:text-red-600 hover:bg-red-50"
+                      onClick={() =>
+                        setMessages(messages.filter((m) => m.id !== item.id))
                       }
                     >
-                      {item.status}
-                    </Badge>
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setSelectedMessage(item)}
-                      >
-                        Buka & Balas
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="hover:text-red-600 hover:bg-red-50"
-                        onClick={() =>
-                          setMessages(messages.filter((m) => m.id !== item.id))
-                        }
-                      >
-                        🗑️
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      🗑️
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </Card>
 
       {/* Modal Balas Pesan */}

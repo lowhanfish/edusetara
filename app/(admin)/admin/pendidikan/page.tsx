@@ -9,6 +9,12 @@ import {
   Modal,
   PageHeader,
   Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Textarea,
 } from "../../_components/ui";
 
@@ -138,76 +144,74 @@ export default function PendidikanAdminPage() {
 
       {/* Data Table */}
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold text-[#58708d] uppercase tracking-wider">
-                <th className="py-3 px-4">Nama Program / Satuan</th>
-                <th className="py-3 px-4">Kategori</th>
-                <th className="py-3 px-4">Wilayah / Sasaran</th>
-                <th className="py-3 px-4">Jumlah / Kapasitas</th>
-                <th className="py-3 px-4">Kurikulum / Sistem</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filtered.map((item) => (
-                <tr key={item.id} className="hover:bg-amber-50/30 transition-colors">
-                  <td className="py-3.5 px-4 font-bold text-[#052552]">
-                    {item.name}
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <Badge variant="neutral">{item.category}</Badge>
-                  </td>
-                  <td className="py-3.5 px-4 text-xs text-slate-600">
-                    {item.scope}
-                  </td>
-                  <td className="py-3.5 px-4 text-xs text-slate-600 whitespace-nowrap">
-                    {item.totalUnits}
-                  </td>
-                  <td className="py-3.5 px-4 text-xs text-slate-600">
-                    {item.curriculum}
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <Badge
-                      variant={
-                        item.status === "Aktif"
-                          ? "success"
-                          : item.status === "Dalam Proses"
-                          ? "info"
-                          : "warning"
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nama Program / Satuan</TableHead>
+              <TableHead>Kategori</TableHead>
+              <TableHead>Wilayah / Sasaran</TableHead>
+              <TableHead>Jumlah / Kapasitas</TableHead>
+              <TableHead>Kurikulum / Sistem</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="font-bold text-[#052552]">
+                  {item.name}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <Badge variant="neutral">{item.category}</Badge>
+                </TableCell>
+                <TableCell className="text-xs text-slate-600">
+                  {item.scope}
+                </TableCell>
+                <TableCell className="text-xs text-slate-600 whitespace-nowrap">
+                  {item.totalUnits}
+                </TableCell>
+                <TableCell className="text-xs text-slate-600">
+                  {item.curriculum}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <Badge
+                    variant={
+                      item.status === "Aktif"
+                        ? "success"
+                        : item.status === "Dalam Proses"
+                        ? "info"
+                        : "warning"
+                    }
+                  >
+                    {item.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-right">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => alert(`Edit: ${item.name}`)}
+                    >
+                      ✏️
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="hover:text-red-600 hover:bg-red-50"
+                      onClick={() =>
+                        setItems(items.filter((x) => x.id !== item.id))
                       }
                     >
-                      {item.status}
-                    </Badge>
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => alert(`Edit: ${item.name}`)}
-                      >
-                        ✏️
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="hover:text-red-600 hover:bg-red-50"
-                        onClick={() =>
-                          setItems(items.filter((x) => x.id !== item.id))
-                        }
-                      >
-                        🗑️
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      🗑️
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </Card>
 
       {/* Modal Form */}

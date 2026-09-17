@@ -9,6 +9,12 @@ import {
   Modal,
   PageHeader,
   Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Textarea,
 } from "../../_components/ui";
 
@@ -205,89 +211,82 @@ export default function BeritaAdminPage() {
 
       {/* News Table */}
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold text-[#58708d] uppercase tracking-wider">
-                <th className="py-3 px-4">Judul & Ringkasan</th>
-                <th className="py-3 px-4">Kategori</th>
-                <th className="py-3 px-4">Penulis</th>
-                <th className="py-3 px-4">Tanggal</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Aksi</th>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Judul & Ringkasan</TableHead>
+              <TableHead>Kategori</TableHead>
+              <TableHead>Penulis</TableHead>
+              <TableHead>Tanggal</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredNews.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="text-center py-12 text-slate-400">
+                  Tidak ada artikel yang sesuai dengan pencarian.
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredNews.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-10 text-slate-400">
-                    Tidak ada artikel yang sesuai dengan pencarian.
-                  </td>
-                </tr>
-              ) : (
-                filteredNews.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-amber-50/30 transition-colors"
-                  >
-                    <td className="py-3.5 px-4 max-w-md">
-                      <div className="flex items-start gap-3">
-                        <div className="flex flex-col gap-1">
-                          <span className="font-bold text-[#052552] line-clamp-1">
-                            {item.title}
-                          </span>
-                          <span className="text-xs text-[#58708d] line-clamp-1">
-                            {item.excerpt}
-                          </span>
-                          {item.featured && (
-                            <span className="inline-block text-[10px] text-amber-700 font-bold">
-                              ★ Berita Utama (Featured)
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <Badge variant="neutral">{item.category}</Badge>
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap text-xs text-slate-600">
-                      {item.author}
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap text-xs text-slate-500">
-                      {item.date}
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <Badge
-                        variant={item.status === "Terbit" ? "success" : "warning"}
+            ) : (
+              filteredNews.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="max-w-md">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-bold text-[#052552] line-clamp-1">
+                        {item.title}
+                      </span>
+                      <span className="text-xs text-[#58708d] line-clamp-1">
+                        {item.excerpt}
+                      </span>
+                      {item.featured && (
+                        <span className="inline-block text-[10px] text-amber-700 font-bold">
+                          ★ Berita Utama (Featured)
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <Badge variant="neutral">{item.category}</Badge>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-xs text-slate-600">
+                    {item.author}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-xs text-slate-500">
+                    {item.date}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <Badge
+                      variant={item.status === "Terbit" ? "success" : "warning"}
+                    >
+                      {item.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => alert(`Edit artikel: ${item.title}`)}
                       >
-                        {item.status}
-                      </Badge>
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => alert(`Edit artikel: ${item.title}`)}
-                        >
-                          ✏️
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDelete(item.id)}
-                        >
-                          🗑️
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                        ✏️
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="hover:text-red-600 hover:bg-red-50"
+                        onClick={() => handleDelete(item.id)}
+                      >
+                        🗑️
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </Card>
 
       {/* Modal Tambah Berita */}

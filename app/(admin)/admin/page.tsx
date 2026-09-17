@@ -1,154 +1,298 @@
 import Link from "next/link";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../_components/ui";
 
 const stats = [
-  { label: "Total Sekolah", value: "287", change: "+3", icon: "🏫", color: "#e8f5e9" },
-  { label: "Tenaga Pendidik", value: "4.231", change: "+45", icon: "👨‍🏫", color: "#e3f2fd" },
-  { label: "Peserta Didik", value: "52.847", change: "+312", icon: "🎓", color: "#fff3e0" },
-  { label: "Pengumuman Aktif", value: "12", change: "+2", icon: "📢", color: "#fce4ec" },
-];
-
-const recentNews = [
-  { id: 1, title: "Pelaksanaan ANBK 2026 Berjalan Lancar di Seluruh Konawe Selatan", date: "17 Sep 2026", status: "Terbit" },
-  { id: 2, title: "Workshop Kurikulum Merdeka untuk Guru SD dan SMP", date: "16 Sep 2026", status: "Terbit" },
-  { id: 3, title: "Pendaftaran Beasiswa Prestasi Semester Genap", date: "15 Sep 2026", status: "Draft" },
-  { id: 4, title: "Festival Budaya Tolaki Meriahkan HUT Konawe Selatan", date: "14 Sep 2026", status: "Terbit" },
-  { id: 5, title: "Rapat Koordinasi Peningkatan Mutu Pendidikan Dasar", date: "13 Sep 2026", status: "Draft" },
-];
-
-const recentAnnouncements = [
-  { id: 1, title: "Jadwal Pelaksanaan Asesmen Nasional 2026", priority: "Tinggi", date: "17 Sep" },
-  { id: 2, title: "Surat Edaran Libur Nasional dan Cuti Bersama", priority: "Normal", date: "15 Sep" },
-  { id: 3, title: "Pemutakhiran Data Pokok Pendidikan (Dapodik)", priority: "Tinggi", date: "14 Sep" },
-  { id: 4, title: "Seleksi Calon Kepala Sekolah Tahun 2026", priority: "Normal", date: "12 Sep" },
+  {
+    label: "Total Satuan Sekolah",
+    value: "287",
+    change: "+3 baru",
+    icon: "🏫",
+    color: "bg-emerald-100 text-emerald-800",
+  },
+  {
+    label: "Tenaga Pendidik & Guru",
+    value: "4.231",
+    change: "+45 sertifikasi",
+    icon: "👨‍🏫",
+    color: "bg-sky-100 text-sky-800",
+  },
+  {
+    label: "Peserta Didik Aktif",
+    value: "52.847",
+    change: "+312 Dapodik",
+    icon: "🎓",
+    color: "bg-amber-100 text-amber-800",
+  },
+  {
+    label: "Pengumuman Aktif",
+    value: "12",
+    change: "3 penting",
+    icon: "📢",
+    color: "bg-rose-100 text-rose-800",
+  },
 ];
 
 const quickActions = [
-  { label: "Tulis Berita", icon: "✏️", href: "/admin/berita" },
-  { label: "Buat Pengumuman", icon: "📝", href: "/admin/pengumuman" },
-  { label: "Tambah Sekolah", icon: "➕", href: "/admin/sekolah" },
-  { label: "Lihat Statistik", icon: "📊", href: "/admin/statistik" },
+  { label: "Tulis Berita", icon: "✍️", href: "/admin/berita" },
+  { label: "Buat Pengumuman", icon: "📣", href: "/admin/pengumuman" },
+  { label: "Kurikulum & Satuan", icon: "🎓", href: "/admin/pendidikan" },
+  { label: "Layanan Publik", icon: "🏛️", href: "/admin/layanan" },
+];
+
+const recentNews = [
+  {
+    id: 1,
+    title: "Dikbud Konsel Dorong Pemanfaatan Teknologi & Perangkat Digital",
+    category: "Pendidikan",
+    date: "05 Sep 2026",
+    status: "Terbit",
+  },
+  {
+    id: 2,
+    title: "Pelestarian Seni Musik Tradisional Tolaki Melalui Ekstrakurikuler",
+    category: "Kebudayaan",
+    date: "28 Agu 2026",
+    status: "Terbit",
+  },
+  {
+    id: 3,
+    title: "Diseminasi Praktik Baik Pembelajaran Berdiferensiasi Jenjang SMP",
+    category: "GTK & Guru",
+    date: "14 Agu 2026",
+    status: "Draft",
+  },
+  {
+    id: 4,
+    title: "Revitalisasi Ruang Kelas & Laboratorium IPA 15 SMP Negeri",
+    category: "Sarpras",
+    date: "02 Agu 2026",
+    status: "Terbit",
+  },
+];
+
+const recentAnnouncements = [
+  {
+    id: 1,
+    title: "Petunjuk Teknis Pelaksanaan ANBK Jenjang SD & SMP",
+    category: "Akademik",
+    deadline: "28 Sep",
+    urgent: true,
+  },
+  {
+    id: 2,
+    title: "Verifikasi Berkas Seleksi Calon Kepala Sekolah Tahap II",
+    category: "Kepegawaian",
+    deadline: "30 Sep",
+    urgent: false,
+  },
+  {
+    id: 3,
+    title: "Batas Sinkronisasi Dapodik Semester Ganjil TA 2026/2027",
+    category: "Dapodik",
+    deadline: "Selesai",
+    urgent: true,
+  },
 ];
 
 export default function AdminDashboard() {
   return (
-    <>
-      {/* Welcome Banner */}
-      <div className="admin-welcome">
-        <div>
-          <h2>Selamat Datang, Admin! 👋</h2>
-          <p>Berikut ringkasan data terkini dari sistem Dinas Pendidikan dan Kebudayaan.</p>
+    <div className="space-y-6">
+      {/* ── Welcome Banner ── */}
+      <div className="bg-gradient-to-r from-[#fff8dd] via-[#ffedaa] to-[#ffe082] rounded-2xl p-6 sm:p-7 border border-[#ffd54f] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-xl sm:text-2xl font-black text-[#052552] tracking-tight">
+            Selamat Datang di Portal Admin! 👋
+          </h2>
+          <p className="text-xs sm:text-sm text-[#314a6e] font-medium max-w-xl">
+            Pusat manajemen konten publikasi, warta kedinasan, layanan publik, dan data pendidikan Kabupaten Konawe Selatan.
+          </p>
         </div>
-        <div className="admin-welcome-date">
+        <div className="flex items-center gap-2 bg-white/80 backdrop-blur-xs px-3.5 py-2 rounded-xl text-xs font-bold text-[#052552] shadow-xs border border-white/60 shrink-0">
           <span>📅</span>
           <span>Rabu, 17 September 2026</span>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="admin-stats-grid">
+      {/* ── 4 Stat Cards ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {stats.map((stat) => (
-          <div key={stat.label} className="admin-stat-card">
-            <div className="admin-stat-icon" style={{ background: stat.color }}>
+          <div
+            key={stat.label}
+            className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between hover:shadow-md transition-all duration-150"
+          >
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                {stat.label}
+              </span>
+              <span className="text-2xl sm:text-3xl font-black text-[#052552] tracking-tight block">
+                {stat.value}
+              </span>
+              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded inline-block">
+                {stat.change}
+              </span>
+            </div>
+            <div
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 ${stat.color}`}
+            >
               {stat.icon}
             </div>
-            <div className="admin-stat-info">
-              <span className="admin-stat-value">{stat.value}</span>
-              <span className="admin-stat-label">{stat.label}</span>
-            </div>
-            <span className="admin-stat-change">
-              {stat.change}
-            </span>
           </div>
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="admin-quick-actions">
+      {/* ── Quick Action Shortcuts ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {quickActions.map((action) => (
-          <Link key={action.label} href={action.href} className="admin-quick-btn">
-            <span>{action.icon}</span>
-            {action.label}
+          <Link
+            key={action.label}
+            href={action.href}
+            className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200/80 hover:border-[#ffc400] hover:bg-amber-50/30 text-xs font-bold text-[#052552] transition-all shadow-xs"
+          >
+            <span className="text-lg">{action.icon}</span>
+            <span>{action.label}</span>
+            <span className="ml-auto text-slate-300">›</span>
           </Link>
         ))}
       </div>
 
-      {/* Content Grid */}
-      <div className="admin-grid-2">
-        {/* Recent News */}
-        <div className="admin-card">
-          <div className="admin-card-header">
-            <h3>📰 Berita Terbaru</h3>
-            <Link href="/admin/berita" className="admin-card-link">Lihat Semua →</Link>
-          </div>
-          <div className="admin-table-wrap">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Judul</th>
-                  <th>Tanggal</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentNews.map((item) => (
-                  <tr key={item.id}>
-                    <td className="admin-table-title">{item.title}</td>
-                    <td className="admin-table-date">{item.date}</td>
-                    <td>
-                      <span className={`admin-badge ${item.status === "Terbit" ? "badge-green" : "badge-yellow"}`}>
-                        {item.status}
-                      </span>
-                    </td>
-                  </tr>
+      {/* ── 2-Column Content Area ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left 8 Cols: Recent News Table */}
+        <div className="lg:col-span-8">
+          <Card>
+            <CardHeader className="bg-slate-50/50">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📰</span>
+                <CardTitle>Publikasi Berita Terkini</CardTitle>
+              </div>
+              <Link
+                href="/admin/berita"
+                className="text-xs font-bold text-[#0b3b73] hover:text-[#ffc400] transition-colors"
+              >
+                Lihat Semua →
+              </Link>
+            </CardHeader>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Judul Artikel</TableHead>
+                  <TableHead>Kategori</TableHead>
+                  <TableHead>Tanggal</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentNews.map((news) => (
+                  <TableRow key={news.id}>
+                    <TableCell className="font-bold text-[#052552] max-w-sm truncate">
+                      {news.title}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="neutral">{news.category}</Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-slate-500 whitespace-nowrap">
+                      {news.date}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={news.status === "Terbit" ? "success" : "warning"}
+                      >
+                        {news.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </Card>
         </div>
 
-        {/* Announcements */}
-        <div className="admin-card">
-          <div className="admin-card-header">
-            <h3>📢 Pengumuman Aktif</h3>
-            <Link href="/admin/pengumuman" className="admin-card-link">Lihat Semua →</Link>
-          </div>
-          <div className="admin-announcement-list">
-            {recentAnnouncements.map((item) => (
-              <div key={item.id} className="admin-announcement-item">
-                <div className="admin-announcement-content">
-                  <strong>{item.title}</strong>
-                  <small>{item.date}</small>
-                </div>
-                <span className={`admin-badge ${item.priority === "Tinggi" ? "badge-red" : "badge-blue"}`}>
-                  {item.priority}
-                </span>
+        {/* Right 4 Cols: Active Announcements */}
+        <div className="lg:col-span-4">
+          <Card className="h-full flex flex-col">
+            <CardHeader className="bg-slate-50/50">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📢</span>
+                <CardTitle>Pengumuman Aktif</CardTitle>
               </div>
-            ))}
-          </div>
+              <Link
+                href="/admin/pengumuman"
+                className="text-xs font-bold text-[#0b3b73] hover:text-[#ffc400] transition-colors"
+              >
+                Semua →
+              </Link>
+            </CardHeader>
+            <CardContent className="space-y-3 flex-1">
+              {recentAnnouncements.map((ann) => (
+                <div
+                  key={ann.id}
+                  className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-amber-50/30 transition-colors space-y-1.5"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge variant="neutral">{ann.category}</Badge>
+                    {ann.urgent ? (
+                      <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
+                        PENTING
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        Batas: {ann.deadline}
+                      </span>
+                    )}
+                  </div>
+                  <h4 className="text-xs font-bold text-[#052552] leading-snug line-clamp-2">
+                    {ann.title}
+                  </h4>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      {/* Activity log */}
-      <div className="admin-card">
-        <div className="admin-card-header">
-          <h3>🕐 Aktivitas Terakhir</h3>
-        </div>
-        <div className="admin-activity-list">
+      {/* ── System Activity Log ── */}
+      <Card>
+        <CardHeader className="bg-slate-50/50">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">🕐</span>
+            <CardTitle>Riwayat Aktivitas & Pembaruan Sistem</CardTitle>
+          </div>
+        </CardHeader>
+        <div className="divide-y divide-slate-100">
           {[
-            { text: "Admin memperbarui berita \"Pelaksanaan ANBK 2026\"", time: "10 menit lalu", icon: "✏️" },
-            { text: "Sistem mempublikasikan pengumuman jadwal asesmen", time: "1 jam lalu", icon: "📢" },
-            { text: "Admin menambahkan data sekolah baru: SDN 5 Andoolo", time: "3 jam lalu", icon: "🏫" },
-            { text: "Admin memperbarui data tenaga pendidik", time: "5 jam lalu", icon: "👨‍🏫" },
-            { text: "Laporan statistik bulanan berhasil dibuat", time: "Kemarin", icon: "📊" },
-          ].map((activity, i) => (
-            <div key={i} className="admin-activity-item">
-              <span className="admin-activity-icon">{activity.icon}</span>
-              <span className="admin-activity-text">{activity.text}</span>
-              <span className="admin-activity-time">{activity.time}</span>
+            { text: "Admin menerbitkan artikel: 'Dikbud Konsel Dorong Pemanfaatan Teknologi Digital'", time: "10 menit lalu", icon: "✍️" },
+            { text: "Sistem menyinkronkan data Dapodik Semester Ganjil 2026", time: "1 jam lalu", icon: "🔄" },
+            { text: "Surat Edaran Petunjuk Teknis ANBK 2026 diunggah ke portal", time: "3 jam lalu", icon: "📢" },
+            { text: "Data direktori SDN 12 Andoolo diperbarui", time: "Kemarin", icon: "🏫" },
+          ].map((act, i) => (
+            <div
+              key={i}
+              className="px-6 py-3.5 flex items-center justify-between gap-4 text-xs hover:bg-slate-50/50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-sm">
+                  {act.icon}
+                </span>
+                <span className="font-semibold text-[#052552]">{act.text}</span>
+              </div>
+              <span className="text-slate-400 whitespace-nowrap">{act.time}</span>
             </div>
           ))}
         </div>
-      </div>
-    </>
+      </Card>
+    </div>
   );
 }

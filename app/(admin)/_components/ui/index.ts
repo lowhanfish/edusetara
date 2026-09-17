@@ -6,3 +6,4 @@ export * from "./modal";
 export * from "./badge";
 export * from "./card";
 export * from "./page-header";
+export * from "./table";

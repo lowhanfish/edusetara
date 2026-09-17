@@ -9,6 +9,12 @@ import {
   Modal,
   PageHeader,
   Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Textarea,
 } from "../../_components/ui";
 
@@ -152,82 +158,80 @@ export default function PengumumanAdminPage() {
       </div>
 
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold text-[#58708d] uppercase tracking-wider">
-                <th className="py-3 px-4">No. Surat & Judul</th>
-                <th className="py-3 px-4">Kategori</th>
-                <th className="py-3 px-4">Sasaran Penerima</th>
-                <th className="py-3 px-4">Batas Waktu</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filtered.map((item) => (
-                <tr key={item.id} className="hover:bg-amber-50/30 transition-colors">
-                  <td className="py-3.5 px-4 max-w-md">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs font-mono font-semibold text-[#0b3b73]">
-                        {item.number}
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>No. Surat & Judul</TableHead>
+              <TableHead>Kategori</TableHead>
+              <TableHead>Sasaran Penerima</TableHead>
+              <TableHead>Batas Waktu</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="max-w-md">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs font-mono font-semibold text-[#0b3b73]">
+                      {item.number}
+                    </span>
+                    <span className="font-bold text-[#052552] line-clamp-2">
+                      {item.title}
+                    </span>
+                    {item.important && (
+                      <span className="inline-block text-[10px] text-red-600 font-bold">
+                        ⚡ PENTING / SEGERA
                       </span>
-                      <span className="font-bold text-[#052552] line-clamp-2">
-                        {item.title}
-                      </span>
-                      {item.important && (
-                        <span className="inline-block text-[10px] text-red-600 font-bold">
-                          ⚡ PENTING / SEGERA
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <Badge variant="neutral">{item.category}</Badge>
-                  </td>
-                  <td className="py-3.5 px-4 text-xs text-slate-600">
-                    {item.targetAudience}
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap text-xs text-slate-500">
-                    {item.deadline}
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <Badge
-                      variant={
-                        item.status === "Aktif"
-                          ? "success"
-                          : item.status === "Draft"
-                          ? "warning"
-                          : "neutral"
-                      }
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <Badge variant="neutral">{item.category}</Badge>
+                </TableCell>
+                <TableCell className="text-xs text-slate-600">
+                  {item.targetAudience}
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-xs text-slate-500">
+                  {item.deadline}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <Badge
+                    variant={
+                      item.status === "Aktif"
+                        ? "success"
+                        : item.status === "Draft"
+                        ? "warning"
+                        : "neutral"
+                    }
+                  >
+                    {item.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-right">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => alert(`Edit edaran: ${item.number}`)}
                     >
-                      {item.status}
-                    </Badge>
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => alert(`Edit edaran: ${item.number}`)}
-                      >
-                        ✏️
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="hover:text-red-600 hover:bg-red-50"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        🗑️
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      ✏️
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="hover:text-red-600 hover:bg-red-50"
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      🗑️
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </Card>
 
       <Modal

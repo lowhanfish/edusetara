@@ -9,6 +9,12 @@ import {
   Modal,
   PageHeader,
   Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Textarea,
 } from "../../_components/ui";
 
@@ -114,64 +120,62 @@ export default function LayananAdminPage() {
       />
 
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold text-[#58708d] uppercase tracking-wider">
-                <th className="py-3 px-4">Nama Layanan</th>
-                <th className="py-3 px-4">Sasaran Pengguna</th>
-                <th className="py-3 px-4">Estimasi Waktu</th>
-                <th className="py-3 px-4">Biaya</th>
-                <th className="py-3 px-4">Moda Layanan</th>
-                <th className="py-3 px-4 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {services.map((item) => (
-                <tr key={item.id} className="hover:bg-amber-50/30 transition-colors">
-                  <td className="py-3.5 px-4 font-bold text-[#052552] max-w-sm">
-                    {item.name}
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <Badge variant="neutral">{item.category}</Badge>
-                  </td>
-                  <td className="py-3.5 px-4 text-xs text-slate-600 whitespace-nowrap">
-                    ⏱️ {item.processingTime}
-                  </td>
-                  <td className="py-3.5 px-4 text-xs font-semibold text-emerald-700 whitespace-nowrap">
-                    {item.fee}
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <Badge variant={item.status === "Online" ? "success" : "info"}>
-                      {item.status}
-                    </Badge>
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => alert(`Edit SOP: ${item.name}`)}
-                      >
-                        ✏️
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="hover:text-red-600 hover:bg-red-50"
-                        onClick={() =>
-                          setServices(services.filter((s) => s.id !== item.id))
-                        }
-                      >
-                        🗑️
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nama Layanan</TableHead>
+              <TableHead>Sasaran Pengguna</TableHead>
+              <TableHead>Estimasi Waktu</TableHead>
+              <TableHead>Biaya</TableHead>
+              <TableHead>Moda Layanan</TableHead>
+              <TableHead className="text-right">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {services.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="font-bold text-[#052552] max-w-sm">
+                  {item.name}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <Badge variant="neutral">{item.category}</Badge>
+                </TableCell>
+                <TableCell className="text-xs text-slate-600 whitespace-nowrap">
+                  ⏱️ {item.processingTime}
+                </TableCell>
+                <TableCell className="text-xs font-semibold text-emerald-700 whitespace-nowrap">
+                  {item.fee}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <Badge variant={item.status === "Online" ? "success" : "info"}>
+                    {item.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-right">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => alert(`Edit SOP: ${item.name}`)}
+                    >
+                      ✏️
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="hover:text-red-600 hover:bg-red-50"
+                      onClick={() =>
+                        setServices(services.filter((s) => s.id !== item.id))
+                      }
+                    >
+                      🗑️
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </Card>
 
       <Modal

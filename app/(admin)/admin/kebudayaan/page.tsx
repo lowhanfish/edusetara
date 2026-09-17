@@ -9,6 +9,12 @@ import {
   Modal,
   PageHeader,
   Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Textarea,
 } from "../../_components/ui";
 
@@ -134,70 +140,68 @@ export default function KebudayaanAdminPage() {
       </div>
 
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold text-[#58708d] uppercase tracking-wider">
-                <th className="py-3 px-4">Nama Objek / Sanggar</th>
-                <th className="py-3 px-4">Jenis Kebudayaan</th>
-                <th className="py-3 px-4">Lokasi / Kecamatan</th>
-                <th className="py-3 px-4">Deskripsi</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filtered.map((item) => (
-                <tr key={item.id} className="hover:bg-amber-50/30 transition-colors">
-                  <td className="py-3.5 px-4 font-bold text-[#052552]">
-                    {item.name}
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <Badge variant="neutral">{item.type}</Badge>
-                  </td>
-                  <td className="py-3.5 px-4 text-xs text-slate-600">
-                    {item.location}
-                  </td>
-                  <td className="py-3.5 px-4 text-xs text-slate-600 max-w-xs truncate">
-                    {item.description}
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <Badge
-                      variant={
-                        item.status === "Terverifikasi" || item.status === "Aktif"
-                          ? "success"
-                          : "warning"
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nama Objek / Sanggar</TableHead>
+              <TableHead>Jenis Kebudayaan</TableHead>
+              <TableHead>Lokasi / Kecamatan</TableHead>
+              <TableHead>Deskripsi</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="font-bold text-[#052552]">
+                  {item.name}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <Badge variant="neutral">{item.type}</Badge>
+                </TableCell>
+                <TableCell className="text-xs text-slate-600">
+                  {item.location}
+                </TableCell>
+                <TableCell className="text-xs text-slate-600 max-w-xs truncate">
+                  {item.description}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <Badge
+                    variant={
+                      item.status === "Terverifikasi" || item.status === "Aktif"
+                        ? "success"
+                        : "warning"
+                    }
+                  >
+                    {item.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-right">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => alert(`Edit: ${item.name}`)}
+                    >
+                      ✏️
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="hover:text-red-600 hover:bg-red-50"
+                      onClick={() =>
+                        setItems(items.filter((x) => x.id !== item.id))
                       }
                     >
-                      {item.status}
-                    </Badge>
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => alert(`Edit: ${item.name}`)}
-                      >
-                        ✏️
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="hover:text-red-600 hover:bg-red-50"
-                        onClick={() =>
-                          setItems(items.filter((x) => x.id !== item.id))
-                        }
-                      >
-                        🗑️
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      🗑️
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </Card>
 
       <Modal

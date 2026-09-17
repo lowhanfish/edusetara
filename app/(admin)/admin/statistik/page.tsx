@@ -9,6 +9,12 @@ import {
   Modal,
   PageHeader,
   Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "../../_components/ui";
 
 interface StatRecord {
@@ -143,53 +149,51 @@ export default function StatistikAdminPage() {
       </div>
 
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-bold text-[#58708d] uppercase tracking-wider">
-                <th className="py-3 px-4">Nama Indikator</th>
-                <th className="py-3 px-4">Kategori</th>
-                <th className="py-3 px-4">Nilai Data</th>
-                <th className="py-3 px-4">Periode</th>
-                <th className="py-3 px-4">Tren / Capaian</th>
-                <th className="py-3 px-4 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {stats.map((item) => (
-                <tr key={item.id} className="hover:bg-amber-50/30 transition-colors">
-                  <td className="py-3.5 px-4 font-bold text-[#052552]">
-                    {item.indicator}
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <Badge variant="neutral">{item.category}</Badge>
-                  </td>
-                  <td className="py-3.5 px-4 font-bold text-[#0b3b73] whitespace-nowrap">
-                    {item.value} <span className="text-xs font-normal text-slate-500">{item.unit}</span>
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap text-xs text-slate-600">
-                    {item.period}
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap text-xs text-emerald-700 font-semibold">
-                    {item.trend}
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="hover:text-red-600 hover:bg-red-50"
-                      onClick={() =>
-                        setStats(stats.filter((s) => s.id !== item.id))
-                      }
-                    >
-                      🗑️
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nama Indikator</TableHead>
+              <TableHead>Kategori</TableHead>
+              <TableHead>Nilai Data</TableHead>
+              <TableHead>Periode</TableHead>
+              <TableHead>Tren / Capaian</TableHead>
+              <TableHead className="text-right">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {stats.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="font-bold text-[#052552]">
+                  {item.indicator}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <Badge variant="neutral">{item.category}</Badge>
+                </TableCell>
+                <TableCell className="font-bold text-[#0b3b73] whitespace-nowrap">
+                  {item.value} <span className="text-xs font-normal text-slate-500">{item.unit}</span>
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-xs text-slate-600">
+                  {item.period}
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-xs text-emerald-700 font-semibold">
+                  {item.trend}
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-right">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hover:text-red-600 hover:bg-red-50"
+                    onClick={() =>
+                      setStats(stats.filter((s) => s.id !== item.id))
+                    }
+                  >
+                    🗑️
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </Card>
 
       <Modal
