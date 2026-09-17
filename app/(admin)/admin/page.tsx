@@ -48,7 +48,7 @@ const stats = [
 const quickActions = [
   { label: "Tulis Berita", icon: "✍️", href: "/admin/berita" },
   { label: "Buat Pengumuman", icon: "📣", href: "/admin/pengumuman" },
-  { label: "Kurikulum & Satuan", icon: "🎓", href: "/admin/pendidikan" },
+  { label: "Data Sekolah", icon: "🏫", href: "/admin/sekolah" },
   { label: "Layanan Publik", icon: "🏛️", href: "/admin/layanan" },
 ];
 
