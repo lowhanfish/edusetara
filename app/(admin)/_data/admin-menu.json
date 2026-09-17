@@ -8,7 +8,7 @@
   {
     "title": "Publish",
     "path": null,
-    "icon": "📝",
+    "icon": "🌐",
     "children": [
       {
         "title": "Berita",
@@ -23,9 +23,9 @@
         "children": null
       },
       {
-        "title": "Halaman",
-        "path": "/admin/halaman",
-        "icon": "📄",
+        "title": "Pendidikan",
+        "path": "/admin/pendidikan",
+        "icon": "🎓",
         "children": null
       },
       {
@@ -37,13 +37,31 @@
       {
         "title": "Layanan Publik",
         "path": "/admin/layanan",
-        "icon": "🏛",
+        "icon": "🏛️",
         "children": null
       },
       {
-        "title": "Pendidikan",
-        "path": "/admin/pendidikan",
-        "icon": "🎓",
+        "title": "Data & Statistik",
+        "path": "/admin/statistik",
+        "icon": "📈",
+        "children": null
+      },
+      {
+        "title": "Profil & Standar Layanan",
+        "path": "/admin/profil",
+        "icon": "📋",
+        "children": null
+      },
+      {
+        "title": "Banner & Slider",
+        "path": "/admin/banner",
+        "icon": "🖼️",
+        "children": null
+      },
+      {
+        "title": "Pesan & Kontak Masuk",
+        "path": "/admin/kontak",
+        "icon": "💬",
         "children": null
       }
     ]

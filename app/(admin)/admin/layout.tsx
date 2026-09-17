@@ -4,32 +4,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { adminMenu, type MenuItem } from "../_data/admin-menu";
+import { adminMenu } from "../_data/admin-menu";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-    Publish: true,
-  });
+  const [publishOpen, setPublishOpen] = useState(true);
 
-  const toggleGroup = (title: string) => {
-    setOpenGroups((prev) => ({
-      ...prev,
-      [title]: !prev[title],
-    }));
-  };
-
-  // Determine current page title from menu data
-  const getActiveTitle = (): string => {
+  // Cari judul halaman aktif berdasarkan pathname saat ini
+  const getPageTitle = (): string => {
     for (const item of adminMenu) {
-      if (item.path && pathname === item.path) return item.title;
+      if (item.path && item.path === pathname) return item.title;
       if (item.children) {
-        const activeChild = item.children.find((c) => c.path === pathname);
-        if (activeChild) return `${item.title} - ${activeChild.title}`;
+        const matched = item.children.find((c) => c.path === pathname);
+        if (matched) return matched.title;
       }
     }
-    return "Admin";
+    return "Admin Panel";
   };
 
   return (
@@ -41,10 +32,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             src="/img/logo_loght.png"
             width={40}
             height={40}
-            alt="Logo"
+            alt="Logo Dikbud"
           />
           <span>
-            <strong>Dikbud</strong>
+            <strong>Dikbud Admin</strong>
             <small>Konawe Selatan</small>
           </span>
         </div>
@@ -54,27 +45,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {adminMenu.map((item) => {
             const hasChildren = Boolean(item.children && item.children.length > 0);
-            const isGroupOpen = openGroups[item.title] ?? false;
-            const isChildActive = item.children?.some((c) => c.path === pathname);
 
+            // Menu grup yang punya sub-menu (seperti Publish)
             if (hasChildren && item.children) {
+              const isChildActive = item.children.some((c) => c.path === pathname);
+
               return (
                 <div key={item.title} className="admin-nav-group">
                   <button
                     type="button"
                     className={`admin-nav-item admin-nav-trigger${isChildActive ? " active-parent" : ""}`}
-                    onClick={() => toggleGroup(item.title)}
+                    onClick={() => setPublishOpen((prev) => !prev)}
+                    aria-expanded={publishOpen}
                   >
                     <div className="admin-nav-trigger-left">
                       <span className="admin-nav-icon">{item.icon}</span>
                       <span>{item.title}</span>
                     </div>
-                    <span className={`admin-nav-chevron${isGroupOpen ? " open" : ""}`}>
-                      ▼
+                    <span className={`admin-nav-chevron${publishOpen ? " open" : ""}`}>
+                      ▾
                     </span>
                   </button>
 
-                  {isGroupOpen && (
+                  {publishOpen && (
                     <div className="admin-submenu">
                       {item.children.map((child) => {
                         const isActive = pathname === child.path;
@@ -96,6 +89,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               );
             }
 
+            // Menu tunggal (seperti Dashboard)
             const isActive = pathname === item.path;
             return (
               <Link
@@ -144,7 +138,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             <span /><span /><span />
           </button>
-          <h1 className="admin-topbar-title">{getActiveTitle()}</h1>
+
+          <h1 className="admin-topbar-title">{getPageTitle()}</h1>
+
           <div className="admin-topbar-actions">
             <button className="admin-topbar-btn" type="button" aria-label="Notifikasi">
               🔔
