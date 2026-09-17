@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -61,7 +63,7 @@ export default function LoginPage() {
             className="login-form"
             onSubmit={(e) => {
               e.preventDefault();
-              // TODO: Handle login
+              router.push("/admin");
             }}
           >
             <div className="login-field">

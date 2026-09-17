@@ -4,25 +4,33 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-
-const sidebarMenu = [
-  { id: "dashboard", label: "Dashboard", icon: "📊", href: "/admin" },
-  { id: "berita", label: "Berita", icon: "📰", href: "/admin/berita" },
-  { id: "pengumuman", label: "Pengumuman", icon: "📢", href: "/admin/pengumuman" },
-  { id: "sekolah", label: "Data Sekolah", icon: "🏫", href: "/admin/sekolah" },
-  { id: "guru", label: "Tenaga Pendidik", icon: "👨‍🏫", href: "/admin/guru" },
-  { id: "kebudayaan", label: "Kebudayaan", icon: "🎭", href: "/admin/kebudayaan" },
-  { id: "statistik", label: "Statistik", icon: "📈", href: "/admin/statistik" },
-  { id: "layanan", label: "Layanan Publik", icon: "🏛", href: "/admin/layanan" },
-  { id: "pengguna", label: "Pengguna", icon: "👥", href: "/admin/pengguna" },
-  { id: "pengaturan", label: "Pengaturan", icon: "⚙", href: "/admin/pengaturan" },
-];
+import { adminMenu, type MenuItem } from "../_data/admin-menu";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    Publish: true,
+  });
 
-  const activeItem = sidebarMenu.find((m) => pathname === m.href) ?? sidebarMenu[0];
+  const toggleGroup = (title: string) => {
+    setOpenGroups((prev) => ({
+      ...prev,
+      [title]: !prev[title],
+    }));
+  };
+
+  // Determine current page title from menu data
+  const getActiveTitle = (): string => {
+    for (const item of adminMenu) {
+      if (item.path && pathname === item.path) return item.title;
+      if (item.children) {
+        const activeChild = item.children.find((c) => c.path === pathname);
+        if (activeChild) return `${item.title} - ${activeChild.title}`;
+      }
+    }
+    return "Admin";
+  };
 
   return (
     <div className="admin-shell">
@@ -42,30 +50,65 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         <nav className="admin-sidebar-nav">
-          <span className="admin-nav-label">Menu Utama</span>
-          {sidebarMenu.slice(0, 8).map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`admin-nav-item${pathname === item.href ? " active" : ""}`}
-              onClick={() => setSidebarOpen(false)}
-            >
-              <span className="admin-nav-icon">{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
-          <span className="admin-nav-label">Sistem</span>
-          {sidebarMenu.slice(8).map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`admin-nav-item${pathname === item.href ? " active" : ""}`}
-              onClick={() => setSidebarOpen(false)}
-            >
-              <span className="admin-nav-icon">{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
+          <span className="admin-nav-label">Menu Navigasi</span>
+
+          {adminMenu.map((item) => {
+            const hasChildren = Boolean(item.children && item.children.length > 0);
+            const isGroupOpen = openGroups[item.title] ?? false;
+            const isChildActive = item.children?.some((c) => c.path === pathname);
+
+            if (hasChildren && item.children) {
+              return (
+                <div key={item.title} className="admin-nav-group">
+                  <button
+                    type="button"
+                    className={`admin-nav-item admin-nav-trigger${isChildActive ? " active-parent" : ""}`}
+                    onClick={() => toggleGroup(item.title)}
+                  >
+                    <div className="admin-nav-trigger-left">
+                      <span className="admin-nav-icon">{item.icon}</span>
+                      <span>{item.title}</span>
+                    </div>
+                    <span className={`admin-nav-chevron${isGroupOpen ? " open" : ""}`}>
+                      ▼
+                    </span>
+                  </button>
+
+                  {isGroupOpen && (
+                    <div className="admin-submenu">
+                      {item.children.map((child) => {
+                        const isActive = pathname === child.path;
+                        return (
+                          <Link
+                            key={child.title}
+                            href={child.path ?? "#"}
+                            className={`admin-submenu-item${isActive ? " active" : ""}`}
+                            onClick={() => setSidebarOpen(false)}
+                          >
+                            <span className="admin-submenu-icon">{child.icon}</span>
+                            <span>{child.title}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            const isActive = pathname === item.path;
+            return (
+              <Link
+                key={item.title}
+                href={item.path ?? "#"}
+                className={`admin-nav-item${isActive ? " active" : ""}`}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <span className="admin-nav-icon">{item.icon}</span>
+                <span>{item.title}</span>
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="admin-sidebar-footer">
@@ -101,7 +144,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             <span /><span /><span />
           </button>
-          <h1 className="admin-topbar-title">{activeItem?.label ?? "Admin"}</h1>
+          <h1 className="admin-topbar-title">{getActiveTitle()}</h1>
           <div className="admin-topbar-actions">
             <button className="admin-topbar-btn" type="button" aria-label="Notifikasi">
               🔔

@@ -1,0 +1,51 @@
+[
+  {
+    "title": "Dashboard",
+    "path": "/admin",
+    "icon": "📊",
+    "children": null
+  },
+  {
+    "title": "Publish",
+    "path": null,
+    "icon": "📝",
+    "children": [
+      {
+        "title": "Berita",
+        "path": "/admin/berita",
+        "icon": "📰",
+        "children": null
+      },
+      {
+        "title": "Pengumuman",
+        "path": "/admin/pengumuman",
+        "icon": "📢",
+        "children": null
+      },
+      {
+        "title": "Halaman",
+        "path": "/admin/halaman",
+        "icon": "📄",
+        "children": null
+      },
+      {
+        "title": "Kebudayaan",
+        "path": "/admin/kebudayaan",
+        "icon": "🎭",
+        "children": null
+      },
+      {
+        "title": "Layanan Publik",
+        "path": "/admin/layanan",
+        "icon": "🏛",
+        "children": null
+      },
+      {
+        "title": "Pendidikan",
+        "path": "/admin/pendidikan",
+        "icon": "🎓",
+        "children": null
+      }
+    ]
+  }
+]
