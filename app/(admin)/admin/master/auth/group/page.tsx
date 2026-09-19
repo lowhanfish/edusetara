@@ -1,31 +1,10 @@
-import { AdminPageScaffold } from "../../../../_components/admin-page-scaffold";
+import { GroupManagement } from "./group-management";
 
 export const metadata = {
   title: "Group | Admin Dikbud Konawe Selatan",
-  description: "Manajemen Group Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
+  description: "Pengaturan role group dan hak akses menu admin Dikbud Konawe Selatan",
 };
 
 export default function GroupPage() {
-  return (
-    <AdminPageScaffold
-      title="Group"
-      category="Data Master"
-      description="Kelola dan konfigurasi data Group secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="👥"
-      breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Auth",
-              "href": null
-      },
-      {
-              "label": "Group",
-              "href": "/admin/master/auth/group"
-      }
-]}
-    />
-  );
+  return <GroupManagement />;
 }
