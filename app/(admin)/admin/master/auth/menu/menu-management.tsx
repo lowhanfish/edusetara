@@ -12,6 +12,8 @@ type MenuRecord = {
   path: string;
   index: number;
   children: MenuRecord[];
+  created_at: string;
+  created_by: string;
 };
 
 type FormState = {
@@ -32,6 +34,18 @@ const emptyForm: FormState = {
   parentId: "",
 };
 
+const CURRENT_USER_ID = "USR-ADMIN-001";
+const INITIAL_CREATED_AT = "2026-09-17T08:00:00.000Z";
+const INITIAL_CREATED_BY = "USR-SYSTEM-001";
+
+function formatAuditDate(value: string) {
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
 function makeInitialMenus(items: MenuItem[]): MenuRecord[] {
   let sequence = 0;
 
@@ -45,6 +59,8 @@ function makeInitialMenus(items: MenuItem[]): MenuRecord[] {
         path: item.path ?? "",
         index: index + 1,
         children: item.children ? mapItems(item.children) : [],
+        created_at: INITIAL_CREATED_AT,
+        created_by: INITIAL_CREATED_BY,
       };
     });
 
@@ -213,6 +229,9 @@ function MenuTreeRow({
             <p className="mt-0.5 text-[10px] font-medium text-slate-400">
               {item.id} · {item.children.length} submenu
             </p>
+            <p className="mt-0.5 truncate text-[9px] text-slate-400">
+              {formatAuditDate(item.created_at)} · {item.created_by}
+            </p>
           </div>
         </div>
 
@@ -347,6 +366,8 @@ export function MenuManagement() {
         path: form.path.trim(),
         index: Math.max(1, Number(form.index) || 1),
         children: [],
+        created_at: new Date().toISOString(),
+        created_by: CURRENT_USER_ID,
       };
       setMenus((current) => addMenu(current, form.parentId, newItem));
       if (form.parentId) {

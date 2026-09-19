@@ -17,7 +17,12 @@ type AsnRecord = {
   unit: string;
   position: string;
   groupId: string | null;
+  created_at: string;
+  created_by: string;
 };
+
+const INITIAL_CREATED_AT = "2026-09-17T08:00:00.000Z";
+const INITIAL_CREATED_BY = "USR-SYSTEM-001";
 
 const groups: GroupOption[] = [
   { id: "GRP-001", title: "Super Administrator", level: 1 },
@@ -27,15 +32,17 @@ const groups: GroupOption[] = [
 ];
 
 const initialAsn: AsnRecord[] = [
-  { id: "REG-001", nip: "19870412 201001 2 001", name: "Nur Aisyah, S.Pd.", unit: "Dinas Pendidikan dan Kebudayaan", position: "Analis Kebijakan", groupId: "GRP-002" },
-  { id: "REG-002", nip: "19821108 200604 1 004", name: "La Ode Rahmat, S.Pd.", unit: "SMP Negeri 1 Andoolo", position: "Kepala Sekolah", groupId: "GRP-004" },
-  { id: "REG-003", nip: "19900321 201503 2 006", name: "Wa Ode Sari, S.Pd.", unit: "SD Negeri 4 Palangga", position: "Guru Kelas", groupId: "GRP-003" },
-  { id: "REG-004", nip: "19850917 200902 1 003", name: "Muhammad Fajar, S.Kom.", unit: "Dinas Pendidikan dan Kebudayaan", position: "Pranata Komputer", groupId: "GRP-001" },
-  { id: "REG-005", nip: "19910614 201902 2 008", name: "Sri Wahyuni, S.Pd.", unit: "TK Negeri Pembina Tinanggea", position: "Guru PAUD", groupId: null },
-  { id: "REG-006", nip: "19881203 201101 1 009", name: "Arman, S.Pd., M.Pd.", unit: "SMP Negeri 2 Ranomeeto", position: "Guru Mata Pelajaran", groupId: "GRP-003" },
-  { id: "REG-007", nip: "19920525 202012 2 012", name: "Dewi Lestari, S.Pd.", unit: "SD Negeri 2 Laeya", position: "Guru Kelas", groupId: null },
-  { id: "REG-008", nip: "19840309 200801 1 005", name: "Hasanuddin, S.Pd.", unit: "Dinas Pendidikan dan Kebudayaan", position: "Pengawas Sekolah", groupId: "GRP-004" },
+  { id: "REG-001", nip: "19870412 201001 2 001", name: "Nur Aisyah, S.Pd.", unit: "Dinas Pendidikan dan Kebudayaan", position: "Analis Kebijakan", groupId: "GRP-002", created_at: INITIAL_CREATED_AT, created_by: INITIAL_CREATED_BY },
+  { id: "REG-002", nip: "19821108 200604 1 004", name: "La Ode Rahmat, S.Pd.", unit: "SMP Negeri 1 Andoolo", position: "Kepala Sekolah", groupId: "GRP-004", created_at: INITIAL_CREATED_AT, created_by: INITIAL_CREATED_BY },
+  { id: "REG-003", nip: "19900321 201503 2 006", name: "Wa Ode Sari, S.Pd.", unit: "SD Negeri 4 Palangga", position: "Guru Kelas", groupId: "GRP-003", created_at: INITIAL_CREATED_AT, created_by: INITIAL_CREATED_BY },
+  { id: "REG-004", nip: "19850917 200902 1 003", name: "Muhammad Fajar, S.Kom.", unit: "Dinas Pendidikan dan Kebudayaan", position: "Pranata Komputer", groupId: "GRP-001", created_at: INITIAL_CREATED_AT, created_by: INITIAL_CREATED_BY },
+  { id: "REG-005", nip: "19910614 201902 2 008", name: "Sri Wahyuni, S.Pd.", unit: "TK Negeri Pembina Tinanggea", position: "Guru PAUD", groupId: null, created_at: INITIAL_CREATED_AT, created_by: INITIAL_CREATED_BY },
+  { id: "REG-006", nip: "19881203 201101 1 009", name: "Arman, S.Pd., M.Pd.", unit: "SMP Negeri 2 Ranomeeto", position: "Guru Mata Pelajaran", groupId: "GRP-003", created_at: INITIAL_CREATED_AT, created_by: INITIAL_CREATED_BY },
+  { id: "REG-007", nip: "19920525 202012 2 012", name: "Dewi Lestari, S.Pd.", unit: "SD Negeri 2 Laeya", position: "Guru Kelas", groupId: null, created_at: INITIAL_CREATED_AT, created_by: INITIAL_CREATED_BY },
+  { id: "REG-008", nip: "19840309 200801 1 005", name: "Hasanuddin, S.Pd.", unit: "Dinas Pendidikan dan Kebudayaan", position: "Pengawas Sekolah", groupId: "GRP-004", created_at: INITIAL_CREATED_AT, created_by: INITIAL_CREATED_BY },
 ];
+
+const PAGE_SIZE = 5;
 
 function getGroup(groupId: string | null) {
   return groups.find((group) => group.id === groupId) ?? null;
@@ -43,6 +50,14 @@ function getGroup(groupId: string | null) {
 
 function initials(name: string) {
   return name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+}
+
+function formatAuditDate(value: string) {
+  return new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Makassar",
+  }).format(new Date(value));
 }
 
 export function RegistrationManagement() {
@@ -53,6 +68,7 @@ export function RegistrationManagement() {
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [modalMode, setModalMode] = useState<"access" | "detail" | null>(null);
   const [notice, setNotice] = useState("");
+  const [page, setPage] = useState(1);
 
   const filteredRecords = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -66,6 +82,15 @@ export function RegistrationManagement() {
       return matchesQuery && matchesGroup;
     });
   }, [records, query, groupFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredRecords.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedRecords = filteredRecords.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+  const rangeStart = filteredRecords.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(currentPage * PAGE_SIZE, filteredRecords.length);
 
   const assigned = records.filter((record) => record.groupId).length;
   const units = new Set(records.map((record) => record.unit)).size;
@@ -135,8 +160,8 @@ export function RegistrationManagement() {
         <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50/70 p-4 lg:flex-row lg:items-center lg:justify-between">
           <div><h2 className="text-sm font-extrabold text-[#052552]">Daftar ASN Terintegrasi</h2><p className="mt-0.5 text-[11px] text-slate-500">Data contoh digunakan untuk rancangan antarmuka integrasi SIMPEG.</p></div>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cari nama, NIP, atau satuan pendidikan..." className="h-9 min-w-0 rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-[#ffc400] sm:w-72" />
-            <select value={groupFilter} onChange={(event) => setGroupFilter(event.target.value)} className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 outline-none focus:border-[#ffc400]">
+            <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Cari nama, NIP, atau satuan pendidikan..." className="h-9 min-w-0 rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-[#ffc400] sm:w-72" />
+            <select value={groupFilter} onChange={(event) => { setGroupFilter(event.target.value); setPage(1); }} className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 outline-none focus:border-[#ffc400]">
               <option value="all">Semua Group</option><option value="unassigned">Belum Diatur</option>
               {groups.map((group) => <option key={group.id} value={group.id}>{group.title}</option>)}
             </select>
@@ -149,7 +174,7 @@ export function RegistrationManagement() {
               <tr><th className="px-5 py-3">ASN</th><th className="px-4 py-3">NIP</th><th className="px-4 py-3">Satuan Pendidikan</th><th className="px-4 py-3">Role Group</th><th className="px-5 py-3 text-right">Aksi</th></tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredRecords.map((record) => {
+              {paginatedRecords.map((record) => {
                 const group = getGroup(record.groupId);
                 return (
                   <tr key={record.id} className="hover:bg-slate-50/70">
@@ -165,7 +190,48 @@ export function RegistrationManagement() {
             </tbody>
           </table>
         </div>
-        <div className="flex flex-col gap-1 border-t border-slate-100 bg-slate-50/60 px-5 py-3 text-[11px] text-slate-500 sm:flex-row sm:justify-between"><span>Menampilkan {filteredRecords.length} dari {records.length} ASN.</span><span className="font-semibold text-amber-700">Mode desain · belum terhubung SIMPEG/API</span></div>
+        <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/60 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-[11px] text-slate-500">
+            <span>Menampilkan {rangeStart}–{rangeEnd} dari {filteredRecords.length} hasil</span>
+            <span className="mx-1.5 text-slate-300">·</span>
+            <span>{records.length} total ASN</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-1 text-[10px] font-semibold text-amber-700">Mode desain · belum terhubung SIMPEG/API</span>
+            <button
+              type="button"
+              onClick={() => setPage((value) => Math.max(1, value - 1))}
+              disabled={currentPage === 1}
+              className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-600 hover:border-slate-300 hover:text-[#052552] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              ‹ Sebelumnya
+            </button>
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+              <button
+                key={pageNumber}
+                type="button"
+                onClick={() => setPage(pageNumber)}
+                className={`grid h-8 min-w-8 place-items-center rounded-lg border px-2 text-[11px] font-extrabold ${
+                  currentPage === pageNumber
+                    ? "border-[#052552] bg-[#052552] text-white"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-[#ffc400]"
+                }`}
+                aria-label={`Halaman ${pageNumber}`}
+                aria-current={currentPage === pageNumber ? "page" : undefined}
+              >
+                {pageNumber}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+              disabled={currentPage === totalPages}
+              className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-600 hover:border-slate-300 hover:text-[#052552] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Berikutnya ›
+            </button>
+          </div>
+        </div>
       </section>
 
       <Modal
@@ -187,7 +253,7 @@ export function RegistrationManagement() {
       </Modal>
 
       <Modal isOpen={modalMode === "detail"} onClose={() => setModalMode(null)} title="Detail ASN" description="Informasi referensi akun yang diterima dari sumber data kepegawaian." maxWidth="md" footer={<Button type="button" variant="primary" onClick={() => setModalMode(null)}>Tutup</Button>}>
-        {selectedRecord && <div className="space-y-5"><div className="flex items-center gap-4"><span className="grid h-14 w-14 place-items-center rounded-2xl bg-[#052552] text-sm font-black text-white">{initials(selectedRecord.name)}</span><div><h3 className="text-base font-extrabold text-[#052552]">{selectedRecord.name}</h3><p className="text-xs text-slate-500">{selectedRecord.position}</p></div></div><dl className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2"><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">NIP</dt><dd className="mt-1 text-xs font-bold text-[#052552]">{selectedRecord.nip}</dd></div><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">ID Registrasi</dt><dd className="mt-1 text-xs font-bold text-[#052552]">{selectedRecord.id}</dd></div><div className="sm:col-span-2"><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Satuan Pendidikan</dt><dd className="mt-1 text-xs font-bold text-[#052552]">{selectedRecord.unit}</dd></div><div className="sm:col-span-2"><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Role Group</dt><dd className="mt-1">{getGroup(selectedRecord.groupId) ? <Badge variant="info">{getGroup(selectedRecord.groupId)?.title}</Badge> : <Badge variant="warning">Belum diatur</Badge>}</dd></div></dl></div>}
+        {selectedRecord && <div className="space-y-5"><div className="flex items-center gap-4"><span className="grid h-14 w-14 place-items-center rounded-2xl bg-[#052552] text-sm font-black text-white">{initials(selectedRecord.name)}</span><div><h3 className="text-base font-extrabold text-[#052552]">{selectedRecord.name}</h3><p className="text-xs text-slate-500">{selectedRecord.position}</p></div></div><dl className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2"><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">NIP</dt><dd className="mt-1 text-xs font-bold text-[#052552]">{selectedRecord.nip}</dd></div><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">ID Registrasi</dt><dd className="mt-1 text-xs font-bold text-[#052552]">{selectedRecord.id}</dd></div><div className="sm:col-span-2"><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Satuan Pendidikan</dt><dd className="mt-1 text-xs font-bold text-[#052552]">{selectedRecord.unit}</dd></div><div className="sm:col-span-2"><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Role Group</dt><dd className="mt-1">{getGroup(selectedRecord.groupId) ? <Badge variant="info">{getGroup(selectedRecord.groupId)?.title}</Badge> : <Badge variant="warning">Belum diatur</Badge>}</dd></div><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Dibuat pada</dt><dd className="mt-1 text-xs font-bold text-[#052552]">{formatAuditDate(selectedRecord.created_at)}</dd></div><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Dibuat oleh</dt><dd className="mt-1 text-xs font-bold text-[#052552]">{selectedRecord.created_by}</dd></div></dl></div>}
       </Modal>
     </div>
   );

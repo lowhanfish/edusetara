@@ -10,7 +10,11 @@ type CrudPermission = {
   read: boolean;
   update: boolean;
   delete: boolean;
+  created_at: string;
+  created_by: string;
 };
+
+type PermissionAction = "create" | "read" | "update" | "delete";
 
 type PermissionMap = Record<string, CrudPermission>;
 
@@ -26,14 +30,30 @@ type GroupRecord = {
   title: string;
   level: 1 | 2;
   permissions: PermissionMap;
+  created_at: string;
+  created_by: string;
 };
+
+const CURRENT_USER_ID = "USR-ADMIN-001";
+const INITIAL_CREATED_AT = "2026-09-17T08:00:00.000Z";
+const INITIAL_CREATED_BY = "USR-SYSTEM-001";
 
 const emptyPermission: CrudPermission = {
   create: false,
   read: false,
   update: false,
   delete: false,
+  created_at: INITIAL_CREATED_AT,
+  created_by: INITIAL_CREATED_BY,
 };
+
+function formatAuditDate(value: string) {
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
 
 function buildPermissionMenus(items: MenuItem[], prefix = "menu"): PermissionMenu[] {
   return items.map((item, index) => {
@@ -55,24 +75,28 @@ function flattenMenus(items: PermissionMenu[]): PermissionMenu[] {
 
 const allPermissionMenus = flattenMenus(permissionMenus);
 
-function makePermissions(mode: "all" | "read" | "operator"): PermissionMap {
+function makePermissions(
+  mode: "all" | "read" | "operator",
+  createdAt = INITIAL_CREATED_AT,
+  createdBy = INITIAL_CREATED_BY,
+): PermissionMap {
   return Object.fromEntries(
     allPermissionMenus.map((item) => [
       item.id,
       mode === "all"
-        ? { create: true, read: true, update: true, delete: true }
+        ? { create: true, read: true, update: true, delete: true, created_at: createdAt, created_by: createdBy }
         : mode === "operator"
-          ? { create: true, read: true, update: true, delete: false }
-          : { create: false, read: true, update: false, delete: false },
+          ? { create: true, read: true, update: true, delete: false, created_at: createdAt, created_by: createdBy }
+          : { create: false, read: true, update: false, delete: false, created_at: createdAt, created_by: createdBy },
     ]),
   );
 }
 
 const initialGroups: GroupRecord[] = [
-  { id: "GRP-001", title: "Super Administrator", level: 1, permissions: makePermissions("all") },
-  { id: "GRP-002", title: "Admin Dinas", level: 1, permissions: makePermissions("operator") },
-  { id: "GRP-003", title: "Operator Satuan Pendidikan", level: 2, permissions: makePermissions("operator") },
-  { id: "GRP-004", title: "Viewer Pimpinan", level: 1, permissions: makePermissions("read") },
+  { id: "GRP-001", title: "Super Administrator", level: 1, permissions: makePermissions("all"), created_at: INITIAL_CREATED_AT, created_by: INITIAL_CREATED_BY },
+  { id: "GRP-002", title: "Admin Dinas", level: 1, permissions: makePermissions("operator"), created_at: INITIAL_CREATED_AT, created_by: INITIAL_CREATED_BY },
+  { id: "GRP-003", title: "Operator Satuan Pendidikan", level: 2, permissions: makePermissions("operator"), created_at: INITIAL_CREATED_AT, created_by: INITIAL_CREATED_BY },
+  { id: "GRP-004", title: "Viewer Pimpinan", level: 1, permissions: makePermissions("read"), created_at: INITIAL_CREATED_AT, created_by: INITIAL_CREATED_BY },
 ];
 
 function countGranted(permissions: PermissionMap): number {
@@ -106,7 +130,7 @@ function PermissionRow({
   expandedIds: Set<string>;
   query: string;
   onToggleExpanded: (id: string) => void;
-  onTogglePermission: (id: string, action: keyof CrudPermission) => void;
+  onTogglePermission: (id: string, action: PermissionAction) => void;
 }) {
   const hasChildren = item.children.length > 0;
   const expanded = query.trim() ? true : expandedIds.has(item.id);
@@ -188,7 +212,7 @@ export function GroupManagement() {
     setEditingId(null);
     setTitle("");
     setLevel(1);
-    setPermissions(makePermissions("read"));
+    setPermissions(makePermissions("read", new Date().toISOString(), CURRENT_USER_ID));
     setQuery("");
     setIsModalOpen(true);
   };
@@ -202,7 +226,7 @@ export function GroupManagement() {
     setIsModalOpen(true);
   };
 
-  const togglePermission = (menuId: string, action: keyof CrudPermission) => {
+  const togglePermission = (menuId: string, action: PermissionAction) => {
     setPermissions((current) => ({
       ...current,
       [menuId]: {
@@ -213,11 +237,18 @@ export function GroupManagement() {
   };
 
   const setAllPermissions = (checked: boolean) => {
-    setPermissions(
+    setPermissions((current) =>
       Object.fromEntries(
         allPermissionMenus.map((item) => [
           item.id,
-          { create: checked, read: checked, update: checked, delete: checked },
+          {
+            create: checked,
+            read: checked,
+            update: checked,
+            delete: checked,
+            created_at: current[item.id]?.created_at ?? new Date().toISOString(),
+            created_by: current[item.id]?.created_by ?? CURRENT_USER_ID,
+          },
         ]),
       ),
     );
@@ -236,7 +267,7 @@ export function GroupManagement() {
     } else {
       setGroups((current) => [
         ...current,
-        { id: nextGroupId(current), title: cleanTitle, level, permissions },
+        { id: nextGroupId(current), title: cleanTitle, level, permissions, created_at: new Date().toISOString(), created_by: CURRENT_USER_ID },
       ]);
       setNotice(`Group “${cleanTitle}” ditambahkan pada simulasi tampilan.`);
     }
@@ -305,7 +336,7 @@ export function GroupManagement() {
                 const granted = countGranted(group.permissions);
                 return (
                   <tr key={group.id} className="hover:bg-slate-50/70">
-                    <td className="px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#fff7d6]">🔐</span><div><p className="text-sm font-bold text-[#052552]">{group.title}</p><p className="text-[10px] font-medium text-slate-400">{group.id}</p></div></div></td>
+                    <td className="px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#fff7d6]">🔐</span><div><p className="text-sm font-bold text-[#052552]">{group.title}</p><p className="text-[10px] font-medium text-slate-400">{group.id}</p><p className="mt-0.5 text-[9px] text-slate-400">{formatAuditDate(group.created_at)} · {group.created_by}</p></div></div></td>
                     <td className="px-4 py-4"><Badge variant={group.level === 1 ? "info" : "success"}>{group.level === 1 ? "1 · Semua Satuan Pendidikan" : "2 · Unit Pengguna"}</Badge></td>
                     <td className="px-4 py-4"><div className="w-44"><div className="flex justify-between text-[10px] font-semibold text-slate-500"><span>{granted} izin</span><span>{Math.round((granted / totalSlots) * 100)}%</span></div><div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#ffc400]" style={{ width: `${(granted / totalSlots) * 100}%` }} /></div></div></td>
                     <td className="px-5 py-4"><div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={() => openEdit(group)}>Atur Akses</Button><Button size="sm" variant="ghost" onClick={() => handleDelete(group)} className="text-rose-600 hover:bg-rose-50">Hapus</Button></div></td>

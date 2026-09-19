@@ -8,7 +8,7 @@ Dokumen ini menjadi acuan utama penyusunan manual penggunaan Portal Admin Edu Se
 | --- | --- |
 | Nama aplikasi | Edu Setara |
 | Area | Portal Admin |
-| Versi dokumen | 0.1 |
+| Versi dokumen | 0.2 |
 | Pembaruan terakhir | 19 September 2026 |
 | Status | Dokumen berkembang |
 | Pembaca | Administrator, operator dinas, operator satuan pendidikan, dan pengelola sistem |
@@ -20,6 +20,19 @@ Dokumen ini menjadi acuan utama penyusunan manual penggunaan Portal Admin Edu Se
 3. Bagian berstatus **Kerangka** baru mencatat ruang lingkup modul dan akan dilengkapi setelah desain modul selesai.
 4. Keterangan **Mode desain** berarti aksi berjalan pada state lokal browser dan belum menyimpan data ke backend.
 5. Kontrak API pada dokumen ini adalah acuan integrasi. Nama field akhir harus diselaraskan kembali dengan backend sebelum implementasi produksi.
+
+### Standar Metadata Pembuatan Data
+
+Setiap data yang dibuat pada aplikasi memiliki dua metadata yang diisi otomatis oleh backend:
+
+```ts
+{
+  created_at: string; // waktu pembuatan dalam format ISO 8601 UTC
+  created_by: string; // ID pengguna atau proses sistem yang membuat data
+}
+```
+
+Kedua field bersifat baca-saja pada antarmuka dan tidak dikirim sebagai input bebas oleh pengguna. `created_at` dan `created_by` tetap mempertahankan nilai awal ketika data diedit. Riwayat perubahan lain dicatat pada tabel history atau audit terpisah di backend, sehingga kontrak modul dalam manual ini tidak menambahkan metadata perubahan atau penghapusan.
 
 ## Daftar Modul
 
@@ -238,6 +251,8 @@ Halaman menampilkan:
   path: string;     // rute halaman; boleh kosong untuk menu induk
   index: number;    // urutan tampil di antara menu satu level
   children: Menu[]; // default kosong atau null, menggunakan struktur yang sama
+  created_at: string; // dibuat otomatis oleh backend
+  created_by: string; // ID pembuat, diisi otomatis oleh backend
 }
 ```
 
@@ -252,7 +267,7 @@ Halaman menampilkan:
 7. Biarkan **Menu induk** pada pilihan `Tanpa induk`.
 8. Tekan **Tambahkan Menu**.
 
-ID dibuat otomatis. Children dimulai dalam keadaan kosong.
+ID, `created_at`, dan `created_by` dibuat otomatis. Children dimulai dalam keadaan kosong.
 
 ##### Menambah Submenu
 
@@ -295,6 +310,7 @@ Penghapusan menu induk juga menghapus seluruh children di bawahnya. Backend perl
 - Path halaman harus unik jika diisi.
 - Menu induk tidak boleh menjadi child dari dirinya sendiri.
 - ID harus dibuat backend dan tidak dapat diedit pengguna.
+- `created_at` dan `created_by` harus diisi backend serta tidak dapat diedit pengguna.
 - Penghapusan induk dengan children memerlukan konfirmasi tambahan.
 
 #### 16.1.2 Group
@@ -325,6 +341,8 @@ Level membatasi cakupan data. Checkbox CRUD membatasi tindakan pada menu. Keduan
   id: string;    // dibuat otomatis oleh backend
   title: string; // nama role
   level: number; // 1 atau 2
+  created_at: string; // dibuat otomatis oleh backend
+  created_by: string; // ID pembuat, diisi otomatis oleh backend
 }
 ```
 
@@ -338,6 +356,8 @@ Level membatasi cakupan data. Checkbox CRUD membatasi tindakan pada menu. Keduan
   read: boolean;
   update: boolean;
   delete: boolean;
+  created_at: string; // dibuat otomatis oleh backend
+  created_by: string; // ID pembuat, diisi otomatis oleh backend
 }
 ```
 
@@ -365,7 +385,7 @@ Halaman menampilkan:
 6. Gunakan pencarian jika daftar menu panjang.
 7. Tekan **Tambahkan Group**.
 
-Form identitas Group dan matriks izin ditampilkan serta disimpan sebagai satu kesatuan.
+Form identitas Group dan matriks izin ditampilkan serta disimpan sebagai satu kesatuan. ID dan metadata pembuatan diisi otomatis oleh backend.
 
 ##### Mengatur Matriks Hak Akses
 
@@ -400,6 +420,7 @@ Sebelum Group dihapus, backend harus memeriksa apakah masih ada ASN yang menggun
 - Level hanya menerima nilai 1 atau 2.
 - Group minimal memiliki hak Read pada satu menu.
 - Delete sebaiknya tidak aktif tanpa Read.
+- `created_at` dan `created_by` pada Group serta setiap relasi izin harus diisi backend dan tidak dapat diedit pengguna.
 - Perubahan hak akses harus dicatat dalam audit log.
 - Perubahan izin pengguna yang sedang login harus berlaku setelah token atau sesi diperbarui.
 
@@ -430,6 +451,8 @@ Data yang tampil pada rancangan saat ini adalah data contoh untuk keperluan anta
   id: string;       // dibuat otomatis oleh backend
   nip: string;      // unik dan dipilih otomatis dari data ASN
   group_id: string; // dipilih dari daftar Group
+  created_at: string; // dibuat otomatis oleh backend
+  created_by: string; // ID pembuat, diisi otomatis oleh backend
 }
 ```
 
@@ -446,12 +469,16 @@ Halaman menampilkan:
 - Satuan pendidikan.
 - Title Role Group dan levelnya.
 - Tombol **Atur Akses** dan **Lihat**.
+- Paginasi daftar ASN, termasuk rentang data dan jumlah hasil filter.
 
 ##### Mencari dan Memfilter ASN
 
 1. Gunakan kotak pencarian untuk mencari nama, NIP, jabatan, atau satuan pendidikan.
 2. Gunakan filter Group untuk menampilkan role tertentu.
 3. Pilih **Belum Diatur** untuk menemukan ASN yang belum memiliki hak akses.
+4. Gunakan nomor halaman atau tombol **Sebelumnya** dan **Berikutnya** untuk berpindah antarhalaman.
+
+Pencarian atau perubahan filter selalu mengembalikan daftar ke halaman pertama. Pada rancangan saat ini, setiap halaman menampilkan maksimal lima ASN.
 
 ##### Mengatur Akses ASN
 
@@ -468,7 +495,7 @@ NIP dipilih otomatis dari baris ASN dan tidak dapat diketik atau diganti pada fo
 
 ##### Melihat Detail ASN
 
-Tekan **Lihat** untuk menampilkan nama, jabatan, NIP, ID registrasi, satuan pendidikan, dan Group aktif tanpa membuka form pengaturan.
+Tekan **Lihat** untuk menampilkan nama, jabatan, NIP, ID registrasi, satuan pendidikan, Group aktif, serta metadata pembuatannya tanpa membuka form pengaturan.
 
 ##### Perubahan Satuan Pendidikan
 
@@ -480,6 +507,7 @@ Jika ASN berpindah unit, data satuan pendidikan harus diperbarui dari SIMPEG. Un
 - Group harus masih aktif dan tersedia.
 - Satu ASN hanya memiliki satu Group aktif kecuali backend mendukung banyak role.
 - Pengguna tidak boleh menaikkan hak akses di atas kewenangannya sendiri.
+- `created_at` dan `created_by` harus diisi backend serta tidak dapat diedit pengguna.
 - Perubahan Group harus dicatat dalam audit log.
 - Data ASN yang sudah tidak aktif tidak boleh memperoleh akses baru.
 
@@ -504,11 +532,146 @@ Status: **Kerangka**
 
 ### 16.4 Master Usulan
 
-Status: **Kerangka**
+Status: **Lengkap untuk rancangan antarmuka**
 
-- 16.4.1 Triwulan
-- 16.4.2 Jenis Penerima
-- 16.4.3 Kelas Penerima
+Master Usulan menampung data acuan yang digunakan pada proses pengajuan dan penyaluran tunjangan guru. Bagian ini terdiri dari Triwulan, Jenis Penerima, dan Kelas Penerima. Ketiganya menggunakan pola pengelolaan yang sama: pencarian, daftar data, tambah, edit, hapus, paginasi, serta metadata pembuatan.
+
+Kontrak dasar ketiga master:
+
+```ts
+{
+  id: string;         // dibuat otomatis oleh backend
+  title: string;      // nama data master
+  desc: string;       // penjelasan singkat
+  created_at: string; // waktu pembuatan, ISO 8601 UTC dari backend
+  created_by: string; // ID pengguna atau proses pembuat dari backend
+}
+```
+
+`id`, `created_at`, dan `created_by` bersifat baca-saja. Form pengguna hanya mengirim `title` dan `desc`. Ketika data diedit, metadata pembuatan awal tidak berubah.
+
+#### 16.4.1 Triwulan
+
+Status: **Lengkap**
+
+##### Tujuan
+
+Triwulan adalah master tetap periodisasi pencairan atau penyaluran tunjangan guru. Satu periode mewakili tiga bulan. Master ini tidak menyimpan tahun anggaran; data tahun dikelola pada tabel terpisah dan mengacu pada master Triwulan.
+
+##### Lokasi
+
+`Data Master → Master Usulan → Triwulan`
+
+##### Data Awal
+
+| Nama | Periode | Perkiraan Awal Pencairan |
+| --- | --- | --- |
+| Triwulan I | Januari–Maret | Maret |
+| Triwulan II | April–Juni | Juni |
+| Triwulan III | Juli–September | September |
+| Triwulan IV | Oktober–Desember | November |
+
+Keterangan waktu pencairan merupakan penjelasan pada master, bukan tanggal transaksi. Jadwal aktual dapat mengikuti kebijakan dan data tahun anggaran terkait.
+
+##### Menambah atau Mengedit Triwulan
+
+1. Buka halaman Triwulan.
+2. Tekan **Tambah Triwulan** untuk data baru atau **Edit** pada baris yang tersedia.
+3. Isi nama periodisasi pada **Nama Triwulan**.
+4. Isi bulan periode dan penjelasan pencairan pada **Penjelasan Singkat**.
+5. Tekan **Tambah Triwulan** atau **Simpan Perubahan**.
+
+##### Validasi
+
+- Title dan desc wajib diisi.
+- Nama Triwulan tidak boleh duplikat tanpa membedakan huruf besar dan kecil.
+- Backend membuat ID dan metadata pembuatan.
+- Backend harus mencegah penghapusan jika Triwulan sudah digunakan oleh data tahun anggaran atau transaksi usulan.
+
+#### 16.4.2 Jenis Penerima
+
+Status: **Lengkap**
+
+##### Tujuan
+
+Jenis Penerima menyimpan kategori tunjangan atau tambahan penghasilan resmi bagi guru, baik dari jalur Kemendikdasmen maupun Kementerian Agama.
+
+##### Lokasi
+
+`Data Master → Master Usulan → Jenis Penerima`
+
+##### Data Awal
+
+| Nama | Ringkasan |
+| --- | --- |
+| Tunjangan Profesi Guru (TPG) | Tunjangan bagi guru ASN atau Non-ASN yang telah memiliki sertifikat pendidik. |
+| Tunjangan Khusus Guru (TKG) | Tunjangan bagi guru yang bertugas di daerah khusus. |
+| Tambahan Penghasilan (TAMSIL) | Tambahan penghasilan bagi guru ASN yang belum memiliki sertifikat pendidik. |
+| Tamsil Khusus Pendidikan Agama / Bantuan Insentif Guru Agama | Insentif bagi guru pendidikan agama Non-ASN yang belum bersertifikasi. |
+
+##### Menambah atau Mengedit Jenis Penerima
+
+1. Buka halaman Jenis Penerima.
+2. Tekan **Tambah Jenis Penerima** atau **Edit** pada baris data.
+3. Isi nama penerimaan.
+4. Isi definisi dan sasaran penerima pada penjelasan singkat.
+5. Simpan data.
+
+##### Validasi
+
+- Title dan desc wajib diisi.
+- Nama jenis penerimaan harus unik tanpa membedakan huruf besar dan kecil.
+- Singkatan resmi seperti TPG, TKG, dan TAMSIL sebaiknya dipertahankan pada title agar mudah dikenali.
+- Backend harus memeriksa relasi sebelum data yang telah digunakan dapat dihapus.
+
+#### 16.4.3 Kelas Penerima
+
+Status: **Lengkap**
+
+##### Tujuan
+
+Kelas Penerima menyimpan jabatan fungsional atau profesi pendidik yang menjadi sasaran tunjangan dan tambahan penghasilan.
+
+##### Lokasi
+
+`Data Master → Master Usulan → Kelas Penerima`
+
+##### Data Awal
+
+| Nama | Penjelasan |
+| --- | --- |
+| Guru | Pendidik profesional yang mendidik, mengajar, membimbing, dan mengevaluasi peserta didik. |
+| Kepala Sekolah | Guru yang diberi tugas tambahan untuk memimpin dan mengelola satuan pendidikan. |
+| Pengawas | Guru ASN dalam jabatan fungsional pengawasan akademik dan manajerial. |
+
+##### Menambah atau Mengedit Kelas Penerima
+
+1. Buka halaman Kelas Penerima.
+2. Tekan **Tambah Kelas Penerima** atau **Edit** pada baris data.
+3. Isi nama jabatan atau profesi sasaran.
+4. Isi penjelasan tugas atau ruang lingkup sasaran.
+5. Simpan data.
+
+##### Validasi
+
+- Title dan desc wajib diisi.
+- Nama kelas penerima harus unik tanpa membedakan huruf besar dan kecil.
+- Backend harus memeriksa relasi sebelum data yang telah digunakan dapat dihapus.
+
+#### Panduan Daftar Master Usulan
+
+- Kotak pencarian menerima ID, title, atau isi desc.
+- Pencarian selalu mengembalikan daftar ke halaman pertama.
+- Daftar menampilkan maksimal lima data per halaman pada mode desain.
+- Kolom **Dibuat** menampilkan `created_at` dan `created_by` sebagai informasi baca-saja.
+- Tombol **Hapus** selalu meminta konfirmasi.
+- Pada mode desain, perubahan hanya tersimpan pada state browser dan akan kembali ke data awal setelah halaman dimuat ulang.
+
+#### Kondisi Kosong dan Integrasi
+
+- Jika pencarian tidak menemukan data, halaman menampilkan pesan data tidak ditemukan.
+- Jika API gagal dimuat, implementasi produksi harus menampilkan status gangguan dan menyediakan aksi coba lagi.
+- Backend harus menerapkan validasi unik, validasi relasi, otorisasi CRUD, dan pencatatan history pada tabel audit terpisah.
 
 ### 16.5 Master Jurnal
 
