@@ -6,6 +6,563 @@
     "children": null
   },
   {
+    "title": "Sarana dan Prasarana",
+    "path": null,
+    "icon": "🏢",
+    "children": [
+      {
+        "title": "Tanah Sekolah",
+        "path": "/admin/sarpras/tanah",
+        "icon": "🗺️",
+        "children": null
+      },
+      {
+        "title": "Bangunan",
+        "path": "/admin/sarpras/bangunan",
+        "icon": "🏫",
+        "children": null
+      },
+      {
+        "title": "Ruang",
+        "path": "/admin/sarpras/ruang",
+        "icon": "🚪",
+        "children": null
+      },
+      {
+        "title": "Peralatan / Aset",
+        "path": "/admin/sarpras/peralatan",
+        "icon": "🖥️",
+        "children": null
+      }
+    ]
+  },
+  {
+    "title": "Usulan Sekolah",
+    "path": null,
+    "icon": "📝",
+    "children": [
+      {
+        "title": "Usulan Tunjangan Guru",
+        "path": "/admin/usulan/tunjangan-guru",
+        "icon": "💰",
+        "children": null
+      },
+      {
+        "title": "Usulan Bantuan PIP",
+        "path": null,
+        "icon": "💳",
+        "children": [
+          {
+            "title": "Data Pendukung",
+            "path": "/admin/usulan/pip/data-pendukung",
+            "icon": "📁",
+            "children": null
+          },
+          {
+            "title": "Data Penerima",
+            "path": "/admin/usulan/pip/data-penerima",
+            "icon": "👥",
+            "children": null
+          }
+        ]
+      },
+      {
+        "title": "Usulan Data Assessment",
+        "path": "/admin/usulan/assessment",
+        "icon": "📊",
+        "children": null
+      },
+      {
+        "title": "Usulan Rekonsiliasi Dana BOSP",
+        "path": "/admin/usulan/rekonsiliasi-bosp",
+        "icon": "🧾",
+        "children": null
+      }
+    ]
+  },
+  {
+    "title": "Kegiatan Sekolah",
+    "path": "/admin/kegiatan-sekolah",
+    "icon": "🎯",
+    "children": null
+  },
+  {
+    "title": "Rombel",
+    "path": null,
+    "icon": "📚",
+    "children": [
+      {
+        "title": "Jenjang PAUD",
+        "path": "/admin/rombel/paud",
+        "icon": "🧸",
+        "children": null
+      },
+      {
+        "title": "Jenjang SD",
+        "path": "/admin/rombel/sd",
+        "icon": "🎒",
+        "children": null
+      },
+      {
+        "title": "Jenjang SMP",
+        "path": "/admin/rombel/smp",
+        "icon": "🏫",
+        "children": null
+      }
+    ]
+  },
+  {
+    "title": "Komunitas Belajar",
+    "path": "/admin/komunitas-belajar",
+    "icon": "🤝",
+    "children": null
+  },
+  {
+    "title": "Jurnal V2",
+    "path": null,
+    "icon": "📓",
+    "children": [
+      {
+        "title": "Jurnal Guru Kelas",
+        "path": "/admin/jurnal/guru-kelas",
+        "icon": "👨‍🏫",
+        "children": null
+      },
+      {
+        "title": "Jurnal Kepala Sekolah",
+        "path": "/admin/jurnal/kepala-sekolah",
+        "icon": "👔",
+        "children": null
+      },
+      {
+        "title": "Jurnal Pengawas",
+        "path": "/admin/jurnal/pengawas",
+        "icon": "🔍",
+        "children": null
+      },
+      {
+        "title": "Jurnal BK",
+        "path": "/admin/jurnal/bk",
+        "icon": "🧑‍⚕️",
+        "children": null
+      }
+    ]
+  },
+  {
+    "title": "Gallery",
+    "path": null,
+    "icon": "📸",
+    "children": [
+      {
+        "title": "Sekolah Penggerak",
+        "path": "/admin/gallery/sekolah-penggerak",
+        "icon": "🚀",
+        "children": null
+      },
+      {
+        "title": "Gallery Program Guru Penggerak",
+        "path": "/admin/gallery/guru-penggerak",
+        "icon": "🌟",
+        "children": null
+      },
+      {
+        "title": "Gallery Program Organisasi Penggerak",
+        "path": "/admin/gallery/organisasi-penggerak",
+        "icon": "🏛️",
+        "children": null
+      },
+      {
+        "title": "Gallery Kegiatan Kepala Sekolah",
+        "path": "/admin/gallery/kegiatan-kepala-sekolah",
+        "icon": "👔",
+        "children": null
+      },
+      {
+        "title": "Gallery Kegiatan KKG SD",
+        "path": "/admin/gallery/kegiatan-kkg-sd",
+        "icon": "🎨",
+        "children": null
+      },
+      {
+        "title": "Gallery Kegiatan Guru MGMP",
+        "path": "/admin/gallery/kegiatan-guru-mgmp",
+        "icon": "🔬",
+        "children": null
+      },
+      {
+        "title": "Gallery Kegiatan TK & PAUD",
+        "path": "/admin/gallery/kegiatan-tk-paud",
+        "icon": "🎈",
+        "children": null
+      },
+      {
+        "title": "Gallery Kegiatan Pengawas Satdik",
+        "path": "/admin/gallery/kegiatan-pengawas",
+        "icon": "📋",
+        "children": null
+      },
+      {
+        "title": "Video Testimoni",
+        "path": "/admin/gallery/video-testimoni",
+        "icon": "🎬",
+        "children": null
+      }
+    ]
+  },
+  {
+    "title": "Piagam Sertifikat",
+    "path": "/admin/piagam-sertifikat",
+    "icon": "🏆",
+    "children": null
+  },
+  {
+    "title": "Verifikasi",
+    "path": null,
+    "icon": "✅",
+    "children": [
+      {
+        "title": "Verifikasi Tunjangan Guru",
+        "path": "/admin/verifikasi/tunjangan-guru",
+        "icon": "💰",
+        "children": null
+      },
+      {
+        "title": "Verifikasi Usulan Rekonsiliasi Dana BOSP",
+        "path": "/admin/verifikasi/rekonsiliasi-bosp",
+        "icon": "📑",
+        "children": null
+      }
+    ]
+  },
+  {
+    "title": "Regulasi dan Info GTK",
+    "path": null,
+    "icon": "📢",
+    "children": [
+      {
+        "title": "Pengumuman GTK",
+        "path": "/admin/regulasi-gtk/pengumuman",
+        "icon": "📣",
+        "children": null
+      },
+      {
+        "title": "Modul dan Materi Pelatihan",
+        "path": "/admin/regulasi-gtk/modul-materi",
+        "icon": "📖",
+        "children": null
+      },
+      {
+        "title": "Regulasi",
+        "path": "/admin/regulasi-gtk/regulasi",
+        "icon": "⚖️",
+        "children": null
+      }
+    ]
+  },
+  {
+    "title": "PPDB",
+    "path": null,
+    "icon": "📋",
+    "children": [
+      {
+        "title": "PPDB PAUD",
+        "path": "/admin/ppdb/paud",
+        "icon": "🧸",
+        "children": null
+      },
+      {
+        "title": "PPDB SD",
+        "path": "/admin/ppdb/sd",
+        "icon": "🎒",
+        "children": null
+      },
+      {
+        "title": "PPDB SMP",
+        "path": "/admin/ppdb/smp",
+        "icon": "🏫",
+        "children": null
+      }
+    ]
+  },
+  {
+    "title": "Kuota PPDB",
+    "path": "/admin/kuota-ppdb",
+    "icon": "🔢",
+    "children": null
+  },
+  {
+    "title": "Profile",
+    "path": null,
+    "icon": "🏛️",
+    "children": [
+      {
+        "title": "Renstra",
+        "path": "/admin/profile/renstra",
+        "icon": "📈",
+        "children": null
+      },
+      {
+        "title": "Tugas Dan Fungsi",
+        "path": "/admin/profile/tugas-fungsi",
+        "icon": "⚖️",
+        "children": null
+      },
+      {
+        "title": "Visi dan Misi",
+        "path": "/admin/profile/visi-misi",
+        "icon": "🎯",
+        "children": null
+      }
+    ]
+  },
+  {
+    "title": "Data Master",
+    "path": null,
+    "icon": "💾",
+    "children": [
+      {
+        "title": "Auth",
+        "path": null,
+        "icon": "🔐",
+        "children": [
+          {
+            "title": "Group",
+            "path": "/admin/master/auth/group",
+            "icon": "👥",
+            "children": null
+          },
+          {
+            "title": "Menu",
+            "path": "/admin/master/auth/menu",
+            "icon": "📑",
+            "children": null
+          },
+          {
+            "title": "Registrasi",
+            "path": "/admin/master/auth/registrasi",
+            "icon": "👤",
+            "children": null
+          }
+        ]
+      },
+      {
+        "title": "Master Siswa",
+        "path": "/admin/master/siswa",
+        "icon": "🎓",
+        "children": null
+      },
+      {
+        "title": "Master Sekolah",
+        "path": null,
+        "icon": "🏫",
+        "children": [
+          {
+            "title": "Master SD",
+            "path": "/admin/master/sekolah/sd",
+            "icon": "🎒",
+            "children": null
+          },
+          {
+            "title": "Master SMP",
+            "path": "/admin/master/sekolah/smp",
+            "icon": "🏫",
+            "children": null
+          },
+          {
+            "title": "Master TK",
+            "path": "/admin/master/sekolah/tk",
+            "icon": "🧸",
+            "children": null
+          },
+          {
+            "title": "Master PKBM",
+            "path": "/admin/master/sekolah/pkbm",
+            "icon": "📖",
+            "children": null
+          }
+        ]
+      },
+      {
+        "title": "Master Usulan",
+        "path": null,
+        "icon": "📝",
+        "children": [
+          {
+            "title": "Triwulan",
+            "path": "/admin/master/usulan/triwulan",
+            "icon": "📅",
+            "children": null
+          },
+          {
+            "title": "Jenis Penerima",
+            "path": "/admin/master/usulan/jenis-penerima",
+            "icon": "👥",
+            "children": null
+          },
+          {
+            "title": "Kelas Penerima",
+            "path": "/admin/master/usulan/kelas-penerima",
+            "icon": "🏷️",
+            "children": null
+          }
+        ]
+      },
+      {
+        "title": "Master Jurnal",
+        "path": null,
+        "icon": "📓",
+        "children": [
+          {
+            "title": "Bahan Ajar",
+            "path": "/admin/master/jurnal/bahan-ajar",
+            "icon": "📄",
+            "children": null
+          },
+          {
+            "title": "Materi Ajar",
+            "path": "/admin/master/jurnal/materi-ajar",
+            "icon": "📚",
+            "children": null
+          },
+          {
+            "title": "Kelas",
+            "path": "/admin/master/jurnal/kelas",
+            "icon": "🏷️",
+            "children": null
+          },
+          {
+            "title": "Mata Pelajaran",
+            "path": "/admin/master/jurnal/mata-pelajaran",
+            "icon": "📐",
+            "children": null
+          }
+        ]
+      },
+      {
+        "title": "Master Jenjang",
+        "path": "/admin/master/jenjang",
+        "icon": "📊",
+        "children": null
+      },
+      {
+        "title": "Master PPDB",
+        "path": null,
+        "icon": "📋",
+        "children": [
+          {
+            "title": "Agama",
+            "path": "/admin/master/ppdb/agama",
+            "icon": "🕌",
+            "children": null
+          },
+          {
+            "title": "Tempat Tinggal",
+            "path": "/admin/master/ppdb/tempat-tinggal",
+            "icon": "🏠",
+            "children": null
+          },
+          {
+            "title": "Mode Transportasi",
+            "path": "/admin/master/ppdb/transportasi",
+            "icon": "🚌",
+            "children": null
+          },
+          {
+            "title": "Pendidikan",
+            "path": "/admin/master/ppdb/pendidikan",
+            "icon": "🎓",
+            "children": null
+          },
+          {
+            "title": "Pekerjaan",
+            "path": "/admin/master/ppdb/pekerjaan",
+            "icon": "💼",
+            "children": null
+          },
+          {
+            "title": "Penghasilan",
+            "path": "/admin/master/ppdb/penghasilan",
+            "icon": "💵",
+            "children": null
+          }
+        ]
+      },
+      {
+        "title": "Master Sarpras",
+        "path": null,
+        "icon": "🏢",
+        "children": [
+          {
+            "title": "Bangunan",
+            "path": "/admin/master/sarpras/bangunan",
+            "icon": "🏫",
+            "children": null
+          },
+          {
+            "title": "Kepemilikan",
+            "path": "/admin/master/sarpras/kepemilikan",
+            "icon": "📜",
+            "children": null
+          },
+          {
+            "title": "Sumber Dana",
+            "path": "/admin/master/sarpras/sumber-dana",
+            "icon": "💰",
+            "children": null
+          },
+          {
+            "title": "Kondisi Alat",
+            "path": "/admin/master/sarpras/kondisi-alat",
+            "icon": "🔧",
+            "children": null
+          },
+          {
+            "title": "Jenis Bantuan",
+            "path": "/admin/master/sarpras/jenis-bantuan",
+            "icon": "🎁",
+            "children": null
+          }
+        ]
+      },
+      {
+        "title": "Master BK Jenis Layanan",
+        "path": "/admin/master/bk-jenis-layanan",
+        "icon": "🧑‍⚕️",
+        "children": null
+      },
+      {
+        "title": "Master BK Kegiatan Layanan",
+        "path": "/admin/master/bk-kegiatan-layanan",
+        "icon": "🩺",
+        "children": null
+      },
+      {
+        "title": "Master Model Pembelajaran",
+        "path": "/admin/master/model-pembelajaran",
+        "icon": "💡",
+        "children": null
+      },
+      {
+        "title": "Master Pendampingan",
+        "path": "/admin/master/pendampingan",
+        "icon": "🤝",
+        "children": null
+      },
+      {
+        "title": "Master Tugas",
+        "path": "/admin/master/tugas",
+        "icon": "📌",
+        "children": null
+      },
+      {
+        "title": "Master Kategori",
+        "path": "/admin/master/kategori",
+        "icon": "🗂️",
+        "children": null
+      }
+    ]
+  },
+  {
     "title": "Publish",
     "path": null,
     "icon": "🌐",

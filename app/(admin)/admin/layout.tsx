@@ -3,25 +3,164 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
-import { adminMenu } from "../_data/admin-menu";
+import React, { useEffect, useState } from "react";
+import { adminMenu, MenuItem } from "../_data/admin-menu";
+
+function isItemActive(item: MenuItem, pathname: string): boolean {
+  if (item.path && item.path === pathname) return true;
+  if (item.children) {
+    return item.children.some((child) => isItemActive(child, pathname));
+  }
+  return false;
+}
+
+function findPageTitle(items: MenuItem[], pathname: string): string | null {
+  for (const item of items) {
+    if (item.path && item.path === pathname) {
+      return item.title;
+    }
+    if (item.children) {
+      const found = findPageTitle(item.children, pathname);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function MenuItemRenderer({
+  item,
+  level = 1,
+  pathname,
+  openMenus,
+  toggleMenu,
+  onItemClick,
+}: {
+  item: MenuItem;
+  level?: number;
+  pathname: string;
+  openMenus: Record<string, boolean>;
+  toggleMenu: (key: string) => void;
+  onItemClick: () => void;
+}) {
+  const hasChildren = Boolean(item.children && item.children.length > 0);
+  const isActive = isItemActive(item, pathname);
+  const isExactActive = item.path === pathname;
+  const menuKey = `${level}-${item.title}`;
+  const isOpen = openMenus[menuKey] ?? isActive;
+
+  const baseClass =
+    level === 1
+      ? `w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-150 cursor-pointer select-none text-left appearance-none border-0 bg-transparent ${
+          isExactActive
+            ? "bg-[#ffc400] text-[#052552] font-bold shadow-sm"
+            : isActive
+            ? "text-white bg-white/10 font-semibold"
+            : "text-slate-200 hover:text-white hover:bg-white/5 font-semibold"
+        }`
+      : `w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer select-none text-left appearance-none border-0 bg-transparent ${
+          isExactActive
+            ? "bg-[#ffc400] text-[#052552] shadow-xs font-bold"
+            : isActive
+            ? "text-[#ffc400] bg-white/5 font-semibold"
+            : "text-slate-300 hover:text-white hover:bg-white/10 font-medium"
+        }`;
+
+  const innerContent = (
+    <>
+      <span className={level === 1 ? "text-base shrink-0 leading-none" : "text-sm shrink-0 leading-none"}>
+        {item.icon}
+      </span>
+      <span className="flex-1 truncate leading-normal text-left">{item.title}</span>
+      {hasChildren && (
+        <span
+          className={`text-[10px] text-slate-400 transition-transform duration-200 shrink-0 ml-1 leading-none ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        >
+          ▲
+        </span>
+      )}
+    </>
+  );
+
+  if (hasChildren && item.children) {
+    return (
+      <div className="space-y-1">
+        <button
+          type="button"
+          onClick={() => toggleMenu(menuKey)}
+          className={baseClass}
+        >
+          {innerContent}
+        </button>
+
+        {isOpen && (
+          <div
+            className={`space-y-1 pt-0.5 pb-1 ${
+              level === 1
+                ? "ml-4 pl-3 border-l-2 border-white/15"
+                : "ml-3 pl-2.5 border-l border-white/10"
+            }`}
+          >
+            {item.children.map((child) => (
+              <MenuItemRenderer
+                key={child.title}
+                item={child}
+                level={level + 1}
+                pathname={pathname}
+                openMenus={openMenus}
+                toggleMenu={toggleMenu}
+                onItemClick={onItemClick}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={item.path ?? "#"}
+      onClick={onItemClick}
+      className={baseClass}
+    >
+      {innerContent}
+    </Link>
+  );
+}
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [publishOpen, setPublishOpen] = useState(true);
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
 
-  // Cari judul halaman aktif berdasarkan pathname
-  const getPageTitle = (): string => {
-    for (const item of adminMenu) {
-      if (item.path && item.path === pathname) return item.title;
-      if (item.children) {
-        const matched = item.children.find((c) => c.path === pathname);
-        if (matched) return matched.title;
-      }
-    }
-    return "Dashboard";
+  // Auto-expand any active menu section when pathname changes
+  useEffect(() => {
+    setOpenMenus((prev) => {
+      const next = { ...prev };
+      const markActive = (items: MenuItem[], level = 1) => {
+        for (const item of items) {
+          const key = `${level}-${item.title}`;
+          if (item.children && isItemActive(item, pathname)) {
+            next[key] = true;
+            markActive(item.children, level + 1);
+          }
+        }
+      };
+      markActive(adminMenu);
+      return next;
+    });
+  }, [pathname]);
+
+  const toggleMenu = (key: string) => {
+    setOpenMenus((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
   };
+
+  const pageTitle = findPageTitle(adminMenu, pathname) ?? "Dashboard";
 
   return (
     <div className="min-h-screen bg-[#f8fafd] text-[#052552] flex flex-col antialiased">
@@ -36,12 +175,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* ── Sidebar ── */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-[#052552] text-white flex flex-col shadow-2xl transition-transform duration-200 ease-in-out border-r border-[#0a356e] ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#052552] text-white flex flex-col shadow-2xl transition-transform duration-200 ease-in-out border-r border-[#0a356e] ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-5 bg-[#031b3c] border-b border-white/10">
+        <div className="h-16 flex items-center justify-between px-5 bg-[#031b3c] border-b border-white/10 shrink-0">
           <Link href="/admin" className="flex items-center gap-3">
             <div className="w-9 h-9 relative flex-shrink-0">
               <Image
@@ -81,86 +220,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             Menu Utama
           </div>
 
-          {adminMenu.map((item) => {
-            const hasChildren = Boolean(item.children && item.children.length > 0);
-
-            // Group menu dengan sub-menu (Publish)
-            if (hasChildren && item.children) {
-              const isChildActive = item.children.some((c) => c.path === pathname);
-
-              return (
-                <div key={item.title} className="space-y-1">
-                  <button
-                    type="button"
-                    onClick={() => setPublishOpen((v) => !v)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer select-none ${
-                      isChildActive
-                        ? "text-white bg-white/10"
-                        : "text-slate-300 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-base">{item.icon}</span>
-                      <span>{item.title}</span>
-                    </div>
-                    <span
-                      className={`text-[10px] text-slate-400 transition-transform duration-200 ${
-                        publishOpen ? "rotate-180" : ""
-                      }`}
-                    >
-                      ▲
-                    </span>
-                  </button>
-
-                  {/* Sub-menu accordion items */}
-                  {publishOpen && (
-                    <div className="ml-4 pl-3 border-l-2 border-white/15 space-y-1 pt-1 pb-1">
-                      {item.children.map((child) => {
-                        const isActive = pathname === child.path;
-                        return (
-                          <Link
-                            key={child.title}
-                            href={child.path ?? "#"}
-                            onClick={() => setSidebarOpen(false)}
-                            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 ${
-                              isActive
-                                ? "bg-[#ffc400] text-[#052552] shadow-sm font-bold"
-                                : "text-slate-300 hover:text-white hover:bg-white/10"
-                            }`}
-                          >
-                            <span className="text-sm">{child.icon}</span>
-                            <span className="truncate">{child.title}</span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            }
-
-            // Standalone menu item (Dashboard)
-            const isActive = pathname === item.path;
-            return (
-              <Link
-                key={item.title}
-                href={item.path ?? "#"}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-150 ${
-                  isActive
-                    ? "bg-[#ffc400] text-[#052552] shadow-sm font-bold"
-                    : "text-slate-300 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <span className="text-base">{item.icon}</span>
-                <span>{item.title}</span>
-              </Link>
-            );
-          })}
+          {adminMenu.map((item) => (
+            <MenuItemRenderer
+              key={item.title}
+              item={item}
+              level={1}
+              pathname={pathname}
+              openMenus={openMenus}
+              toggleMenu={toggleMenu}
+              onItemClick={() => setSidebarOpen(false)}
+            />
+          ))}
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-3 bg-[#031b3c] border-t border-white/10 space-y-1">
+        <div className="p-3 bg-[#031b3c] border-t border-white/10 space-y-1 shrink-0">
           <Link
             href="/"
             className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
@@ -179,7 +253,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* ── Main Area ── */}
-      <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
+      <div className="flex-1 lg:pl-72 flex flex-col min-w-0">
         {/* Topbar */}
         <header className="h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 px-4 sm:px-8 flex items-center justify-between shadow-xs">
           {/* Left: Mobile Toggle & Page Title */}
@@ -197,10 +271,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
                 <Link href="/admin" className="hover:text-slate-600">Admin</Link>
                 <span>›</span>
-                <span className="text-slate-600 font-bold">{getPageTitle()}</span>
+                <span className="text-slate-600 font-bold">{pageTitle}</span>
               </div>
               <h1 className="text-base sm:text-lg font-black text-[#052552] tracking-tight">
-                {getPageTitle()}
+                {pageTitle}
               </h1>
             </div>
           </div>
