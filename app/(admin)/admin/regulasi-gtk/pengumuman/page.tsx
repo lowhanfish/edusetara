@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Pengumuman GTK | Admin Dikbud Konawe Selatan",
@@ -7,21 +7,16 @@ export const metadata = {
 
 export default function PengumumanGTKPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Pengumuman GTK"
       category="Regulasi dan Info GTK"
       description="Kelola dan konfigurasi data Pengumuman GTK secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="📣"
-      breadcrumbs={[
-      {
-              "label": "Regulasi dan Info GTK",
-              "href": null
-      },
-      {
-              "label": "Pengumuman GTK",
-              "href": "/admin/regulasi-gtk/pengumuman"
-      }
-]}
+      fields={[
+        {"name": "judul", "label": "Judul Pengumuman GTK", "type": "text"},
+        {"name": "deskripsi", "label": "Uraian Lengkap Surat Edaran", "type": "textarea"},
+        {"name": "file", "label": "Lampiran Surat Edaran (PDF)", "type": "text", "placeholder": "edaran.pdf"},
+      ]}
+      columns={["judul", "deskripsi", "file"]}
     />
   );
 }

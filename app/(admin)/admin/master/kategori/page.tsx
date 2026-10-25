@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Master Kategori | Admin Dikbud Konawe Selatan",
@@ -7,21 +7,15 @@ export const metadata = {
 
 export default function MasterKategoriPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Master Kategori"
       category="Data Master"
       description="Kelola dan konfigurasi data Master Kategori secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="🗂️"
-      breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master Kategori",
-              "href": "/admin/master/kategori"
-      }
-]}
+      fields={[
+        {"name": "title", "label": "Kategori Dokumen SPJ BOSP", "type": "text"},
+        {"name": "desc", "label": "Deskripsi Instrumen Laporan", "type": "textarea"},
+      ]}
+      columns={["title", "desc"]}
     />
   );
 }

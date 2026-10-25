@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Renstra | Admin Dikbud Konawe Selatan",
@@ -7,21 +7,14 @@ export const metadata = {
 
 export default function RenstraPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Renstra"
       category="Profile"
       description="Kelola dan konfigurasi data Renstra secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="📈"
-      breadcrumbs={[
-      {
-              "label": "Profile",
-              "href": null
-      },
-      {
-              "label": "Renstra",
-              "href": "/admin/profile/renstra"
-      }
-]}
+      fields={[
+        {"name": "isi", "label": "Uraian Kebijakan & Sasaran Renstra", "type": "textarea"},
+      ]}
+      columns={["isi"]}
     />
   );
 }

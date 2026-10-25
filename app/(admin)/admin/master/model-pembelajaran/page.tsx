@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Master Model Pembelajaran | Admin Dikbud Konawe Selatan",
@@ -7,21 +7,15 @@ export const metadata = {
 
 export default function MasterModelPembelajaranPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Master Model Pembelajaran"
       category="Data Master"
       description="Kelola dan konfigurasi data Master Model Pembelajaran secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="💡"
-      breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master Model Pembelajaran",
-              "href": "/admin/master/model-pembelajaran"
-      }
-]}
+      fields={[
+        {"name": "title", "label": "Model Pembelajaran", "type": "text"},
+        {"name": "desc", "label": "Sintaks Strategi Pembelajaran", "type": "textarea"},
+      ]}
+      columns={["title", "desc"]}
     />
   );
 }

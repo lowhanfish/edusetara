@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Master Tugas | Admin Dikbud Konawe Selatan",
@@ -7,21 +7,15 @@ export const metadata = {
 
 export default function MasterTugasPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Master Tugas"
       category="Data Master"
       description="Kelola dan konfigurasi data Master Tugas secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="📌"
-      breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master Tugas",
-              "href": "/admin/master/tugas"
-      }
-]}
+      fields={[
+        {"name": "title", "label": "Nama Penugasan Formal", "type": "text"},
+        {"name": "desc", "label": "Deskripsi Peran / Fungsi", "type": "textarea"},
+      ]}
+      columns={["title", "desc"]}
     />
   );
 }

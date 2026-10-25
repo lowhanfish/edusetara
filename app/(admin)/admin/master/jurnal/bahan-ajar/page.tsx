@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Bahan Ajar | Admin Dikbud Konawe Selatan",
@@ -7,25 +7,15 @@ export const metadata = {
 
 export default function BahanAjarPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Bahan Ajar"
       category="Data Master"
       description="Kelola dan konfigurasi data Bahan Ajar secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="📄"
-      breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master Jurnal",
-              "href": null
-      },
-      {
-              "label": "Bahan Ajar",
-              "href": "/admin/master/jurnal/bahan-ajar"
-      }
-]}
+      fields={[
+        {"name": "title", "label": "Bahan Ajar", "type": "text"},
+        {"name": "desc", "label": "Keterangan Metode Instruksional", "type": "textarea"},
+      ]}
+      columns={["title", "desc"]}
     />
   );
 }

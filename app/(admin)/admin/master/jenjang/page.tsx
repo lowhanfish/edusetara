@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Master Jenjang | Admin Dikbud Konawe Selatan",
@@ -7,21 +7,15 @@ export const metadata = {
 
 export default function MasterJenjangPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Master Jenjang"
       category="Data Master"
       description="Kelola dan konfigurasi data Master Jenjang secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="📊"
-      breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master Jenjang",
-              "href": "/admin/master/jenjang"
-      }
-]}
+      fields={[
+        {"name": "title", "label": "Jenjang Pendidikan", "type": "text"},
+        {"name": "desc", "label": "Keterangan Jenjang", "type": "textarea"},
+      ]}
+      columns={["title", "desc"]}
     />
   );
 }

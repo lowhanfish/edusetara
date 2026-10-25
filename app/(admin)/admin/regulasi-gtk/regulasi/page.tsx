@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Regulasi | Admin Dikbud Konawe Selatan",
@@ -7,21 +7,17 @@ export const metadata = {
 
 export default function RegulasiPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Regulasi"
       category="Regulasi dan Info GTK"
       description="Kelola dan konfigurasi data Regulasi secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="⚖️"
-      breadcrumbs={[
-      {
-              "label": "Regulasi dan Info GTK",
-              "href": null
-      },
-      {
-              "label": "Regulasi",
-              "href": "/admin/regulasi-gtk/regulasi"
-      }
-]}
+      fields={[
+        {"name": "judul", "label": "Nama / Nomor Peraturan Resmi", "type": "text"},
+        {"name": "deskripsi", "label": "Konsideran / Tentang Regulasi", "type": "textarea"},
+        {"name": "tahun", "label": "Tahun Penetapan", "type": "number"},
+        {"name": "file", "label": "Salinan Lembaran Hukum (PDF)", "type": "text", "placeholder": "perbup_juknis.pdf"},
+      ]}
+      columns={["judul", "tahun", "deskripsi", "file"]}
     />
   );
 }

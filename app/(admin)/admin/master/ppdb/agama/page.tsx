@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Agama | Admin Dikbud Konawe Selatan",
@@ -7,25 +7,15 @@ export const metadata = {
 
 export default function AgamaPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Agama"
       category="Data Master"
       description="Kelola dan konfigurasi data Agama secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="🕌"
-      breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master PPDB",
-              "href": null
-      },
-      {
-              "label": "Agama",
-              "href": "/admin/master/ppdb/agama"
-      }
-]}
+      fields={[
+        {"name": "title", "label": "Nama Agama", "type": "text"},
+        {"name": "desc", "label": "Deskripsi", "type": "textarea"},
+      ]}
+      columns={["title", "desc"]}
     />
   );
 }

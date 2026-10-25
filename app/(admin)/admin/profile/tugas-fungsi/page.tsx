@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Tugas Dan Fungsi | Admin Dikbud Konawe Selatan",
@@ -7,21 +7,14 @@ export const metadata = {
 
 export default function TugasDanFungsiPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Tugas Dan Fungsi"
       category="Profile"
       description="Kelola dan konfigurasi data Tugas Dan Fungsi secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="⚖️"
-      breadcrumbs={[
-      {
-              "label": "Profile",
-              "href": null
-      },
-      {
-              "label": "Tugas Dan Fungsi",
-              "href": "/admin/profile/tugas-fungsi"
-      }
-]}
+      fields={[
+        {"name": "isi", "label": "Uraian Tugas Pokok & Fungsi Struktural", "type": "textarea"},
+      ]}
+      columns={["isi"]}
     />
   );
 }

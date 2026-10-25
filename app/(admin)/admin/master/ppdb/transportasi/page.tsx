@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Mode Transportasi | Admin Dikbud Konawe Selatan",
@@ -7,25 +7,15 @@ export const metadata = {
 
 export default function ModeTransportasiPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Mode Transportasi"
       category="Data Master"
       description="Kelola dan konfigurasi data Mode Transportasi secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="🚌"
-      breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master PPDB",
-              "href": null
-      },
-      {
-              "label": "Mode Transportasi",
-              "href": "/admin/master/ppdb/transportasi"
-      }
-]}
+      fields={[
+        {"name": "title", "label": "Mode Transportasi", "type": "text"},
+        {"name": "desc", "label": "Deskripsi", "type": "textarea"},
+      ]}
+      columns={["title", "desc"]}
     />
   );
 }

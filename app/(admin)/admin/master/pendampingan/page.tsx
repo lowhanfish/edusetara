@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Master Pendampingan | Admin Dikbud Konawe Selatan",
@@ -7,21 +7,15 @@ export const metadata = {
 
 export default function MasterPendampinganPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Master Pendampingan"
       category="Data Master"
       description="Kelola dan konfigurasi data Master Pendampingan secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="🤝"
-      breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master Pendampingan",
-              "href": "/admin/master/pendampingan"
-      }
-]}
+      fields={[
+        {"name": "title", "label": "Tahapan Pendampingan", "type": "text"},
+        {"name": "desc", "label": "Deskripsi Siklus Pendampingan", "type": "textarea"},
+      ]}
+      columns={["title", "desc"]}
     />
   );
 }

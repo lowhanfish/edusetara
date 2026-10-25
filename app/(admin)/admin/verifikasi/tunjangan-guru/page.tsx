@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Verifikasi Tunjangan Guru | Admin Dikbud Konawe Selatan",
@@ -7,21 +7,16 @@ export const metadata = {
 
 export default function VerifikasiTunjanganGuruPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Verifikasi Tunjangan Guru"
       category="Verifikasi"
       description="Kelola dan konfigurasi data Verifikasi Tunjangan Guru secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="💰"
-      breadcrumbs={[
-      {
-              "label": "Verifikasi",
-              "href": null
-      },
-      {
-              "label": "Verifikasi Tunjangan Guru",
-              "href": "/admin/verifikasi/tunjangan-guru"
-      }
-]}
+      fields={[
+        {"name": "id", "label": "ID Usulan Guru", "type": "text", "placeholder": "usul-tpg-2026-001"},
+        {"name": "status", "label": "Status Verifikasi", "type": "select", "options": [{"value": "1", "label": "Diterima / Disetujui"}, {"value": "2", "label": "Dikembalikan / Ditolak"}]},
+        {"name": "pesan", "label": "Catatan Verifikasi / Alasan", "type": "textarea"},
+      ]}
+      columns={["id", "status", "pesan"]}
     />
   );
 }

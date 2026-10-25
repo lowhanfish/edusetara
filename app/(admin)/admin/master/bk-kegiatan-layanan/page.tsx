@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Master BK Kegiatan Layanan | Admin Dikbud Konawe Selatan",
@@ -7,21 +7,15 @@ export const metadata = {
 
 export default function MasterBKKegiatanLayananPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Master BK Kegiatan Layanan"
       category="Data Master"
       description="Kelola dan konfigurasi data Master BK Kegiatan Layanan secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="🩺"
-      breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master BK Kegiatan Layanan",
-              "href": "/admin/master/bk-kegiatan-layanan"
-      }
-]}
+      fields={[
+        {"name": "title", "label": "Bentuk Kegiatan Layanan BK", "type": "text"},
+        {"name": "desc", "label": "Deskripsi Operasional", "type": "textarea"},
+      ]}
+      columns={["title", "desc"]}
     />
   );
 }

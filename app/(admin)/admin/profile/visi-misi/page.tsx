@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Visi dan Misi | Admin Dikbud Konawe Selatan",
@@ -7,21 +7,14 @@ export const metadata = {
 
 export default function VisiDanMisiPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Visi dan Misi"
       category="Profile"
       description="Kelola dan konfigurasi data Visi dan Misi secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="🎯"
-      breadcrumbs={[
-      {
-              "label": "Profile",
-              "href": null
-      },
-      {
-              "label": "Visi dan Misi",
-              "href": "/admin/profile/visi-misi"
-      }
-]}
+      fields={[
+        {"name": "isi", "label": "Rumusan Visi & Misi Dinas Pendidikan", "type": "textarea"},
+      ]}
+      columns={["isi"]}
     />
   );
 }

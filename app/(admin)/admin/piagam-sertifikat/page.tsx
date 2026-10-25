@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Piagam Sertifikat | Admin Dikbud Konawe Selatan",
@@ -7,17 +7,19 @@ export const metadata = {
 
 export default function PiagamSertifikatPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Piagam Sertifikat"
       category="Piagam Sertifikat"
       description="Kelola dan konfigurasi data Piagam Sertifikat secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="🏆"
-      breadcrumbs={[
-      {
-              "label": "Piagam Sertifikat",
-              "href": "/admin/piagam-sertifikat"
-      }
-]}
+      fields={[
+        {"name": "kegiatan", "label": "Nama Pelatihan / Bimtek / Lomba", "type": "text"},
+        {"name": "penyelenggara", "label": "Lembaga / Instansi Penyelenggara", "type": "text"},
+        {"name": "tahun", "label": "Tahun Perolehan", "type": "number"},
+        {"name": "tempat_pelaksana", "label": "Lokasi Pelaksanaan", "type": "text"},
+        {"name": "sebagai", "label": "Peran (Peserta / Narasumber / Juara)", "type": "text"},
+        {"name": "file", "label": "Berkas Piagam/Sertifikat (PDF)", "type": "text", "placeholder": "sertifikat.pdf"},
+      ]}
+      columns={["kegiatan", "penyelenggara", "tahun", "sebagai", "file"]}
     />
   );
 }

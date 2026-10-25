@@ -31,6 +31,14 @@
 24. Kegiatan Sekolah (`/admin/kegiatan-sekolah`)
 25. Rombel PAUD / SD / SMP (`/admin/rombel/{paud|sd|smp}`)
 26. Komunitas Belajar (`/admin/komunitas-belajar`)
+27. Jurnal V2 (`/admin/jurnal/*`)
+28. Modul Gallery Publikasi (`/admin/gallery/*`)
+29. Piagam & Sertifikat PTK (`/admin/piagam-sertifikat`)
+30. Modul Verifikasi Kedinasan (`/admin/verifikasi/*`)
+31. Regulasi & Info GTK (`/admin/regulasi-gtk/*`)
+32. Modul PPDB & Kuota (`/admin/ppdb/*`, `/admin/kuota-ppdb`)
+33. Profil Kelembagaan (`/admin/profile/*`)
+34. Data Master Pelengkap (`/admin/master/*`)
 
 ---
 
@@ -830,6 +838,14 @@ Mengelola aspirasi publik, aduan pelayanan, serta pengiriman balasan resmi admin
 ---
 
 ## 26. Komunitas Belajar (`/admin/komunitas-belajar`)
+27. Jurnal V2 (`/admin/jurnal/*`)
+28. Modul Gallery Publikasi (`/admin/gallery/*`)
+29. Piagam & Sertifikat PTK (`/admin/piagam-sertifikat`)
+30. Modul Verifikasi Kedinasan (`/admin/verifikasi/*`)
+31. Regulasi & Info GTK (`/admin/regulasi-gtk/*`)
+32. Modul PPDB & Kuota (`/admin/ppdb/*`, `/admin/kuota-ppdb`)
+33. Profil Kelembagaan (`/admin/profile/*`)
+34. Data Master Pelengkap (`/admin/master/*`)
 
 - **List**: `GET /api/v1/admin/komunitas-belajar` (query: `page`, `limit`, `search`)
 - **Tambah**: `POST /api/v1/admin/komunitas-belajar`
@@ -848,6 +864,153 @@ Mengelola aspirasi publik, aduan pelayanan, serta pengiriman balasan resmi admin
 
 ---
 
+
+## 27. Jurnal V2 (`/admin/jurnal/*`)
+
+### 27.1 Jurnal Guru Kelas (`/admin/jurnal/guru-kelas`)
+- **Endpoint**: `GET /api/v1/admin/jurnal/guru-kelas` | `POST` | `PUT /:id` | `DELETE /:id`
+- **Fields**:
+  - `tema` (string, required): Tema pembelajaran
+  - `materi_pokok` (string, required): Materi pokok atau subtema
+  - `pertemuan_ke` (number, required): Nomor urut pertemuan
+  - `tgl` (date, required): Tanggal pelaksanaan KBM
+  - `model_pembelajaran` (string option): Problem Based Learning, Project Based Learning, Discovery
+  - `metode_pembelajaran` (string option): Ceramah, Diskusi, Tanya Jawab, Demonstrasi, Penugasan
+  - `kegiatan` (text HTML): Uraian tahapan kegiatan KBM
+  - `penilaian` (string option): Sikap, Pengetahuan, Keterampilan
+  - `siswa_hadir`, `siswa_izin`, `siswa_sakit`, `siswa_alpa` (number): Rekap presensi
+  - `persentase` (number): Persentase kehadiran (contoh: 95)
+  - `keterangan` (text): Refleksi pembelajaran
+  - `file` (string file): Lampiran foto dokumentasi kelas
+
+### 27.2 Jurnal Kepala Sekolah (`/admin/jurnal/kepala-sekolah`)
+- **Endpoint**: `GET /api/v1/admin/jurnal/kepala-sekolah` | `POST` | `PUT /:id` | `DELETE /:id`
+- **Fields**:
+  - `uraian` (string, required): Uraian agenda manajerial / supervisi
+  - `target` (string, required): Target atau sasaran capaian
+  - `hasil` (string, required): Output nyata terealisasi
+  - `keterlibatan` (string): Pihak yang dilibatkan (Dewan Guru, Pengawas, Komite)
+  - `tgl` (date, required): Tanggal pelaksanaan
+  - `keterangan` (text HTML): Catatan evaluasi / arahan tindak lanjut
+  - `file` (string file): Lampiran notula rapat / foto bukti
+
+### 27.3 Jurnal Pengawas (`/admin/jurnal/pengawas`)
+- **Endpoint**: `GET /api/v1/admin/jurnal/pengawas` | `POST` | `PUT /:id` | `DELETE /:id`
+- **Fields**:
+  - `unit_kerja` (string option): Sekolah binaan dikunjungi
+  - `kepsek` (string option): Kepala sekolah yang didampingi
+  - `pendampingan_id` (string option): Relasi Master Pendampingan
+  - `temuan_akademik` (string): Catatan proses belajar perangkat guru
+  - `temuan_manajerial` (string): Catatan administrasi & sarpras
+  - `tindak_lanjut` (text): Arahan rekomendasi perbaikan
+  - `tugas_id` (string option): Relasi Master Tugas
+  - `tgl` (date, required): Tanggal visitasi
+  - `file` (string file): Foto visitasi / lembar instrumen
+
+### 27.4 Jurnal Bimbingan Konseling (BK) (`/admin/jurnal/bk`)
+- **Endpoint**: `GET /api/v1/admin/jurnal/bk` | `POST` | `PUT /:id` | `DELETE /:id`
+- **Fields**:
+  - `nm_siswa` (string, required): Nama siswa penerima layanan (relasi Master Siswa)
+  - `kelas_id` (string option): Relasi Master Kelas
+  - `tgl` (date, required): Tanggal sesi bimbingan
+  - `materi_layanan` (text): Topik/materi bimbingan
+  - `permasalahan` (text): Uraian masalah / gejala konseling
+  - `mdl_kegiatan_id` (string option): Relasi Model Kegiatan BK
+  - `jns_layanan_id` (string option): Relasi Bidang Layanan (Pribadi, Sosial, Belajar, Karir)
+  - `hasil` (text): Hasil konseling / komitmen siswa
+  - `rnc_tindak_lanjut` (text): Rencana pemantauan tindak lanjut
+  - `keterangan` (text): Catatan perkembangan
+  - `file` (string file): Dokumentasi sesi
+
+---
+
+## 28. Modul Gallery Publikasi (`/admin/gallery/*`)
+- **Sub-Modul**:
+  1. Sekolah Penggerak (`/admin/gallery/sekolah-penggerak`)
+  2. Guru Penggerak (`/admin/gallery/guru-penggerak`)
+  3. Organisasi Penggerak (`/admin/gallery/organisasi-penggerak`)
+  4. Kegiatan Kepala Sekolah (`/admin/gallery/kegiatan-kepala-sekolah`)
+  5. Kegiatan KKG SD (`/admin/gallery/kegiatan-kkg-sd`)
+  6. Kegiatan Guru MGMP (`/admin/gallery/kegiatan-guru-mgmp`)
+  7. Kegiatan TK & PAUD (`/admin/gallery/kegiatan-tk-paud`)
+  8. Kegiatan Pengawas Satdik (`/admin/gallery/kegiatan-pengawas`)
+- **Fields Standar Gallery**:
+  - `kategori` (string, auto/hidden): Nama sub-program gallery
+  - `judul` (string, required): Judul kegiatan / aksi nyata
+  - `tujuan` (text, required): Maksud dan tujuan kegiatan
+  - `proses` (text, required): Alur / tahapan pelaksanaan
+  - `hasil` (text, required): Capaian positif / dampak nyata
+  - `link` (string url, optional): Tautan video YouTube jika ada
+  - `file` (string file, required): Foto dokumentasi pelaksanaan
+
+### 28.1 Video Testimoni (`/admin/gallery/video-testimoni`)
+- **Endpoint**: `GET /api/v1/admin/gallery/video-testimoni` | `POST` | `PUT /:id` | `DELETE /:id`
+- **Fields**:
+  - `judul` (string, required): Narasi pokok / tajuk testimoni
+  - `file` (string file, required): Berkas video testimoni (MP4/WebM)
+
+---
+
+## 29. Piagam & Sertifikat PTK (`/admin/piagam-sertifikat`)
+- **Endpoint**: `GET /api/v1/admin/piagam-sertifikat` | `POST` | `PUT /:id` | `DELETE /:id`
+- **Fields**:
+  - `kegiatan` (string/text, required): Nama pelatihan, bimtek, seminar, atau lomba
+  - `penyelenggara` (string/text, required): Instansi/organisasi penyelenggara
+  - `tahun` (number, required): Tahun perolehan sertifikat
+  - `tempat_pelaksana` (string, required): Lokasi kegiatan
+  - `sebagai` (string, required): Peran (Peserta, Narasumber, Juri, Juara)
+  - `file` (string file, required): Berkas digital PDF scan piagam/sertifikat
+
+---
+
+## 30. Modul Verifikasi Kedinasan (`/admin/verifikasi/*`)
+
+### 30.1 Verifikasi Tunjangan Guru (`/admin/verifikasi/tunjangan-guru`)
+- **Endpoint**: `POST /api/v1/admin/verifikasi/tunjangan-guru/:usulan_id`
+- **Fields**:
+  - `id` (string): ID usulan yang diverifikasi
+  - `status` (number): 1 = Diterima / Disetujui, 2 = Dikembalikan / Ditolak
+  - `pesan` (text): Catatan verifikator kelengkapan dokumen / alasan penolakan
+
+### 30.2 Verifikasi Dual-Tahap Rekonsiliasi Dana BOSP (`/admin/verifikasi/rekonsiliasi-bosp`)
+- **Endpoint**: `POST /api/v1/admin/verifikasi/rekon-bosp/:lampiran_id`
+- **Tahap 1 - Cek Benar**:
+  - `status_1` (number): 1 = Terverifikasi Benar, 2 = Penolakan / Perbaikan
+  - `pesan_1` (text): Koreksi keabsahan kuitansi, faktur, NTPN
+- **Tahap 2 - Cek Lengkap**:
+  - `status_2` (number): 1 = Terverifikasi Lengkap, 2 = Belum Lengkap
+  - `pesan_2` (text): Koreksi kelengkapan 26 instrumen pelaporan BOSP
+
+---
+
+## 31. Regulasi & Info GTK (`/admin/regulasi-gtk/*`)
+- **Pengumuman GTK**: `judul`, `deskripsi`, `file` (PDF edaran resmi)
+- **Modul & Materi**: `judul`, `deskripsi` (silabus/kompetensi), `file` (PDF handout materi)
+- **Regulasi Hukum**: `judul` (nama & nomor peraturan), `deskripsi` (konsideran/tentang), `tahun`, `file` (PDF lembaran hukum)
+
+---
+
+## 32. Modul PPDB & Kuota (`/admin/ppdb/*`, `/admin/kuota-ppdb`)
+- **PPDB PAUD, SD, SMP**: Data biodata calon siswa (`nama`, `jns_kelamin`, `nisn`, `nik`, `tmp_lahir`, `tgl_lahir`, `agama`, `alamat`, `tmp_tinggal`, `moda_transportasi`, data orang tua/wali `nama_ayah`, `nama_ibu`, `pekerjaan`, `file` pasfoto).
+- **Kuota PPDB**: Monitoring kalkulasi daya tampung (`nama_sekolah`, `jenjang`, `jml_ruang_tersedia`, `standar_maks_rombel`, `total_daya_tampung`, `siswa_terdaftar`, `sisa_kuota`, `status_kuota`).
+
+---
+
+## 33. Profil Kelembagaan (`/admin/profile/*`)
+- **Renstra**: `isi` (uraian rencana strategis 5 tahunan)
+- **Tugas Dan Fungsi**: `isi` (tupoksi struktural dinas sesuai SOTK Perbup)
+- **Visi Misi**: `isi` (rumusan visi dan misi pendidikan daerah)
+
+---
+
+## 34. Data Master Pelengkap (`/admin/master/*`)
+- **Master Siswa**: `nama`, `nisn`, `nik`, `jns_kelamin`, `tmp_lahir`, `tgl_lahir`, `alamat`
+- **Master Jurnal**: Bahan Ajar, Materi Ajar, Tingkat Kelas, Mata Pelajaran
+- **Master PPDB**: Agama, Tempat Tinggal, Moda Transportasi, Kualifikasi Pendidikan, Pekerjaan, Skala Penghasilan
+- **Master BK**: Bidang Jenis Layanan, Bentuk Kegiatan Layanan
+- **Master Umum**: Model Pembelajaran, Tahapan Pendampingan, Nama Tugas, Kategori Dokumen BOSP, Master Jenjang
+
+---
 ## 🔒 Catatan Keamanan & File Upload
 1. **Upload File (Gambar & PDF Lampiran)**:
    - Endpoint upload: `POST /api/v1/upload` (tipe `multipart/form-data`).

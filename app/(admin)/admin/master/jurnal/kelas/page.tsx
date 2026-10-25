@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Kelas | Admin Dikbud Konawe Selatan",
@@ -7,25 +7,15 @@ export const metadata = {
 
 export default function KelasPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Kelas"
       category="Data Master"
       description="Kelola dan konfigurasi data Kelas secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="🏷️"
-      breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master Jurnal",
-              "href": null
-      },
-      {
-              "label": "Kelas",
-              "href": "/admin/master/jurnal/kelas"
-      }
-]}
+      fields={[
+        {"name": "title", "label": "Tingkat Kelas", "type": "text"},
+        {"name": "desc", "label": "Keterangan Kelas", "type": "textarea"},
+      ]}
+      columns={["title", "desc"]}
     />
   );
 }
