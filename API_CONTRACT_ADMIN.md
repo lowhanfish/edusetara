@@ -18,6 +18,19 @@
 11. [Modul Profil, Maklumat & Regulasi (`/admin/profil`)](#11-modul-profil-maklumat--regulasi-adminprofil)
 12. [Modul Banner & Slider Homepage (`/admin/banner`)](#12-modul-banner--slider-homepage-adminbanner)
 13. [Modul Pesan Masuk & Aspirasi (`/admin/kontak`)](#13-modul-pesan-masuk--aspirasi-adminkontak)
+14. Sarana & Prasarana: Tanah Sekolah (`/admin/sarpras/tanah`)
+15. Sarana & Prasarana: Bangunan (`/admin/sarpras/bangunan`)
+16. Sarana & Prasarana: Ruang (`/admin/sarpras/ruang`)
+17. Sarana & Prasarana: Peralatan / Aset (`/admin/sarpras/peralatan`)
+18. Master Sarpras (Bangunan, Kepemilikan, Sumber Dana, Kondisi Alat, Jenis Bantuan) (`/admin/master/sarpras/{bangunan|kepemilikan|sumber-dana|kondisi-alat|jenis-bantuan}`)
+19. Usulan Tunjangan Guru (`/admin/usulan/tunjangan-guru`)
+20. Usulan Asesmen (`/admin/usulan/assessment`)
+21. Usulan Rekonsiliasi BOSP (`/admin/usulan/rekonsiliasi-bosp`)
+22. Usulan PIP: Data Pendukung (`/admin/usulan/pip/data-pendukung`)
+23. Usulan PIP: Data Penerima (`/admin/usulan/pip/data-penerima`)
+24. Kegiatan Sekolah (`/admin/kegiatan-sekolah`)
+25. Rombel PAUD / SD / SMP (`/admin/rombel/{paud|sd|smp}`)
+26. Komunitas Belajar (`/admin/komunitas-belajar`)
 
 ---
 
@@ -591,6 +604,247 @@ Mengelola aspirasi publik, aduan pelayanan, serta pengiriman balasan resmi admin
   "message": "Balasan berhasil dikirimkan ke email pemohon"
 }
 ```
+
+---
+
+## 14. Sarana & Prasarana: Tanah Sekolah (`/admin/sarpras/tanah`)
+
+- **List**: `GET /api/v1/admin/sarpras/tanah` (query: `page`, `limit`, `search`)
+- **Tambah**: `POST /api/v1/admin/sarpras/tanah`
+- **Ubah**: `PUT /api/v1/admin/sarpras/tanah/:id`
+- **Hapus**: `DELETE /api/v1/admin/sarpras/tanah/:id`
+- Response mengikuti envelope standar (bagian 1). `id`, `created_at`, `created_by` (+ `nip`, `unit_kerja` bila tertulis) diisi otomatis oleh backend.
+
+| Field | Tipe | Input User | Keterangan |
+|---|---|---|---|
+| `title` | number | ya | Luas tanah (m²) |
+| `file` | string | ya | Berkas bukti kepemilikan / URL |
+| `file_type` | string | auto | Ekstensi berkas (pdf/jpg/png) |
+| `nip` | string | auto | NIP pengisi |
+| `unit_kerja` | string | auto | Unit kerja pengisi |
+
+---
+
+## 15. Sarana & Prasarana: Bangunan (`/admin/sarpras/bangunan`)
+
+- **List**: `GET /api/v1/admin/sarpras/bangunan` (query: `page`, `limit`, `search`)
+- **Tambah**: `POST /api/v1/admin/sarpras/bangunan`
+- **Ubah**: `PUT /api/v1/admin/sarpras/bangunan/:id`
+- **Hapus**: `DELETE /api/v1/admin/sarpras/bangunan/:id`
+- Response mengikuti envelope standar (bagian 1). `id`, `created_at`, `created_by` (+ `nip`, `unit_kerja` bila tertulis) diisi otomatis oleh backend.
+
+| Field | Tipe | Input User | Keterangan |
+|---|---|---|---|
+| `nama` | string | ya | Nama bangunan |
+| `luas` | string | ya | Luas bangunan |
+| `kepemilikan_id` | string (option) | ya | Relasi Master Kepemilikan |
+| `tahun` | string | ya | Tahun bangunan |
+| `persentase` | number | ya | Persentase kerusakan |
+| `kondisi_id` | string (option) | ya | Relasi Master Kondisi (Bangunan) |
+| `jns_bantuan_id` | string (option) | ya | Relasi Master Jenis Bantuan |
+| `sumber_id` | string (option) | ya | Relasi Master Sumber Dana |
+| `nip / unit_kerja` | string | auto | Dari sesi pengguna |
+
+---
+
+## 16. Sarana & Prasarana: Ruang (`/admin/sarpras/ruang`)
+
+- **List**: `GET /api/v1/admin/sarpras/ruang` (query: `page`, `limit`, `search`)
+- **Tambah**: `POST /api/v1/admin/sarpras/ruang`
+- **Ubah**: `PUT /api/v1/admin/sarpras/ruang/:id`
+- **Hapus**: `DELETE /api/v1/admin/sarpras/ruang/:id`
+- Response mengikuti envelope standar (bagian 1). `id`, `created_at`, `created_by` (+ `nip`, `unit_kerja` bila tertulis) diisi otomatis oleh backend.
+
+| Field | Tipe | Input User | Keterangan |
+|---|---|---|---|
+| `bangunan_id` | string (option) | ya | Relasi Bangunan |
+| `kelas_id` | string (option) | ya | Relasi Master Kelas |
+| `nama` | string | ya | Nama ruangan |
+| `luas` | string | ya | Luas ruangan |
+| `kondisi_id` | string (option) | ya | Relasi Master Kondisi |
+| `nip / unit_kerja` | string | auto | Dari sesi pengguna |
+
+---
+
+## 17. Sarana & Prasarana: Peralatan / Aset (`/admin/sarpras/peralatan`)
+
+- **List**: `GET /api/v1/admin/sarpras/peralatan` (query: `page`, `limit`, `search`)
+- **Tambah**: `POST /api/v1/admin/sarpras/peralatan`
+- **Ubah**: `PUT /api/v1/admin/sarpras/peralatan/:id`
+- **Hapus**: `DELETE /api/v1/admin/sarpras/peralatan/:id`
+- Response mengikuti envelope standar (bagian 1). `id`, `created_at`, `created_by` (+ `nip`, `unit_kerja` bila tertulis) diisi otomatis oleh backend.
+
+| Field | Tipe | Input User | Keterangan |
+|---|---|---|---|
+| `ruang_id` | string (option) | ya | Relasi Ruang |
+| `nama` | string | ya | Nama peralatan/aset |
+| `jml_alat` | number | ya | Jumlah |
+| `kondisi_id` | string (option) | ya | Relasi Master Kondisi Alat |
+| `tahun` | number | ya | Tahun pengadaan |
+| `sumber_id` | string (option) | ya | Relasi Master Sumber Dana |
+| `nip / unit_kerja` | string | auto | Dari sesi pengguna |
+
+---
+
+## 18. Master Sarpras (Bangunan, Kepemilikan, Sumber Dana, Kondisi Alat, Jenis Bantuan) (`/admin/master/sarpras/{bangunan|kepemilikan|sumber-dana|kondisi-alat|jenis-bantuan}`)
+
+- **List**: `GET /api/v1/admin/master/sarpras/{bangunan|kepemilikan|sumber-dana|kondisi-alat|jenis-bantuan}` (query: `page`, `limit`, `search`)
+- **Tambah**: `POST /api/v1/admin/master/sarpras/{bangunan|kepemilikan|sumber-dana|kondisi-alat|jenis-bantuan}`
+- **Ubah**: `PUT /api/v1/admin/master/sarpras/{bangunan|kepemilikan|sumber-dana|kondisi-alat|jenis-bantuan}/:id`
+- **Hapus**: `DELETE /api/v1/admin/master/sarpras/{bangunan|kepemilikan|sumber-dana|kondisi-alat|jenis-bantuan}/:id`
+- Response mengikuti envelope standar (bagian 1). `id`, `created_at`, `created_by` (+ `nip`, `unit_kerja` bila tertulis) diisi otomatis oleh backend.
+
+| Field | Tipe | Input User | Keterangan |
+|---|---|---|---|
+| `title` | string | ya | Nama |
+| `desc` | string | ya | Penjelasan singkat |
+
+---
+
+## 19. Usulan Tunjangan Guru (`/admin/usulan/tunjangan-guru`)
+
+- **List**: `GET /api/v1/admin/usulan/tunjangan-guru` (query: `page`, `limit`, `search`)
+- **Tambah**: `POST /api/v1/admin/usulan/tunjangan-guru`
+- **Ubah**: `PUT /api/v1/admin/usulan/tunjangan-guru/:id`
+- **Hapus**: `DELETE /api/v1/admin/usulan/tunjangan-guru/:id`
+- Response mengikuti envelope standar (bagian 1). `id`, `created_at`, `created_by` (+ `nip`, `unit_kerja` bila tertulis) diisi otomatis oleh backend.
+
+| Field | Tipe | Input User | Keterangan |
+|---|---|---|---|
+| `tahun` | string (option) | ya | `2025` / `2026` |
+| `triwulan_id` | string (option) | ya | 1-4 (Triwulan I-IV) |
+| `jns_penerimaan_id` | string (option) | ya | TPG PNS, TPG PPPK, Tamsil PNS, Tamsil PPPK, Tunjangan Khusus |
+| `kelas_penerima_id` | string (option) | ya | Guru Kelas TK/SD, Guru Mapel SMP, Guru BK, Kepala Sekolah |
+| `nama` | string | auto | Readonly dari SIMPEG |
+| `nip` | string | auto | Readonly dari SIMPEG |
+
+---
+
+## 20. Usulan Asesmen (`/admin/usulan/assessment`)
+
+- **List**: `GET /api/v1/admin/usulan/assessment` (query: `page`, `limit`, `search`)
+- **Tambah**: `POST /api/v1/admin/usulan/assessment`
+- **Ubah**: `PUT /api/v1/admin/usulan/assessment/:id`
+- **Hapus**: `DELETE /api/v1/admin/usulan/assessment/:id`
+- Response mengikuti envelope standar (bagian 1). `id`, `created_at`, `created_by` (+ `nip`, `unit_kerja` bila tertulis) diisi otomatis oleh backend.
+
+| Field | Tipe | Input User | Keterangan |
+|---|---|---|---|
+| `status_sekolah_id` | string (option) | ya | 0=Negeri, 1=Swasta, 2=Satuan Pendidikan Kerjasama |
+| `jml_siswa` | number | ya | Total peserta |
+| `jml_laki` | number | ya | Peserta laki-laki |
+| `jml_perempuan` | number | ya | Peserta perempuan |
+| `kurikulum_k13` | number | ya | Peserta Kurikulum 2013 |
+| `kurikulum_kurmer` | number | ya | Peserta Kurikulum Merdeka |
+| `file` | string | ya | Lampiran Excel nominasi |
+
+---
+
+## 21. Usulan Rekonsiliasi BOSP (`/admin/usulan/rekonsiliasi-bosp`)
+
+- **List**: `GET /api/v1/admin/usulan/rekonsiliasi-bosp` (query: `page`, `limit`, `search`)
+- **Tambah**: `POST /api/v1/admin/usulan/rekonsiliasi-bosp`
+- **Ubah**: `PUT /api/v1/admin/usulan/rekonsiliasi-bosp/:id`
+- **Hapus**: `DELETE /api/v1/admin/usulan/rekonsiliasi-bosp/:id`
+- Response mengikuti envelope standar (bagian 1). `id`, `created_at`, `created_by` (+ `nip`, `unit_kerja` bila tertulis) diisi otomatis oleh backend.
+
+| Field | Tipe | Input User | Keterangan |
+|---|---|---|---|
+| `tahun` | string (option) | ya | `2025` / `2026` |
+| `semester_id` | string (option) | ya | 1=Semester I, 2=Semester II |
+
+---
+
+## 22. Usulan PIP: Data Pendukung (`/admin/usulan/pip/data-pendukung`)
+
+- **List**: `GET /api/v1/admin/usulan/pip/data-pendukung` (query: `page`, `limit`, `search`)
+- **Tambah**: `POST /api/v1/admin/usulan/pip/data-pendukung`
+- **Ubah**: `PUT /api/v1/admin/usulan/pip/data-pendukung/:id`
+- **Hapus**: `DELETE /api/v1/admin/usulan/pip/data-pendukung/:id`
+- Response mengikuti envelope standar (bagian 1). `id`, `created_at`, `created_by` (+ `nip`, `unit_kerja` bila tertulis) diisi otomatis oleh backend.
+
+| Field | Tipe | Input User | Keterangan |
+|---|---|---|---|
+| `uraian` | string | ya | Nama dokumen (SK / Berita Acara) |
+| `jenjang_id` | string (option) | ya | Relasi Master Jenjang |
+| `nominal` | number | ya | Nominal bantuan |
+| `tahun` | number | ya | Tahun anggaran |
+| `file` | string | ya | Lampiran PDF |
+
+---
+
+## 23. Usulan PIP: Data Penerima (`/admin/usulan/pip/data-penerima`)
+
+- **List**: `GET /api/v1/admin/usulan/pip/data-penerima` (query: `page`, `limit`, `search`)
+- **Tambah**: `POST /api/v1/admin/usulan/pip/data-penerima`
+- **Ubah**: `PUT /api/v1/admin/usulan/pip/data-penerima/:id`
+- **Hapus**: `DELETE /api/v1/admin/usulan/pip/data-penerima/:id`
+- Response mengikuti envelope standar (bagian 1). `id`, `created_at`, `created_by` (+ `nip`, `unit_kerja` bila tertulis) diisi otomatis oleh backend.
+
+| Field | Tipe | Input User | Keterangan |
+|---|---|---|---|
+| `pendukung_id` | string (option) | ya | Relasi Data Pendukung PIP |
+| `siswa_id` | string (option) | ya | Relasi Master Siswa |
+
+---
+
+## 24. Kegiatan Sekolah (`/admin/kegiatan-sekolah`)
+
+- **List**: `GET /api/v1/admin/kegiatan-sekolah` (query: `page`, `limit`, `search`)
+- **Tambah**: `POST /api/v1/admin/kegiatan-sekolah`
+- **Ubah**: `PUT /api/v1/admin/kegiatan-sekolah/:id`
+- **Hapus**: `DELETE /api/v1/admin/kegiatan-sekolah/:id`
+- Response mengikuti envelope standar (bagian 1). `id`, `created_at`, `created_by` (+ `nip`, `unit_kerja` bila tertulis) diisi otomatis oleh backend.
+
+| Field | Tipe | Input User | Keterangan |
+|---|---|---|---|
+| `judul` | string | ya | Judul kegiatan |
+| `deskripsi` | string | ya | Deskripsi |
+| `tanggal` | date | ya | Tanggal kegiatan |
+| `tahun` | number | ya | Tahun |
+| `file` | string | ya | Foto / berkas dokumentasi |
+| `link` | string | tidak | Link YouTube |
+| `nip / unit_kerja` | string | auto | Dari sesi pengguna |
+
+---
+
+## 25. Rombel PAUD / SD / SMP (`/admin/rombel/{paud|sd|smp}`)
+
+- **List**: `GET /api/v1/admin/rombel/{paud|sd|smp}` (query: `page`, `limit`, `search`)
+- **Tambah**: `POST /api/v1/admin/rombel/{paud|sd|smp}`
+- **Ubah**: `PUT /api/v1/admin/rombel/{paud|sd|smp}/:id`
+- **Hapus**: `DELETE /api/v1/admin/rombel/{paud|sd|smp}/:id`
+- Response mengikuti envelope standar (bagian 1). `id`, `created_at`, `created_by` (+ `nip`, `unit_kerja` bila tertulis) diisi otomatis oleh backend.
+
+| Field | Tipe | Input User | Keterangan |
+|---|---|---|---|
+| `kategori` | string | auto | Diisi frontend: `Jenjang PAUD` / `Jenjang SD` / `Jenjang SMP` |
+| `jns_rombel` | number (option) | ya | 0=Kelas, 1=Kelas Jauh/Kecil, 2=Kelas Terbuka |
+| `tgkt_pendidikan` | string (option) | ya | Relasi Master Jenjang |
+| `kurikulum` | string | ya | Kurikulum |
+| `nama` | string | ya | Nama rombel |
+| `wali_kelas` | string (option) | ya | Guru/pegawai dari SIMPEG |
+| `ruang_kelas` | string (option) | ya | Relasi Ruang |
+| `nip / unit_kerja` | string | auto | Dari sesi pengguna |
+
+---
+
+## 26. Komunitas Belajar (`/admin/komunitas-belajar`)
+
+- **List**: `GET /api/v1/admin/komunitas-belajar` (query: `page`, `limit`, `search`)
+- **Tambah**: `POST /api/v1/admin/komunitas-belajar`
+- **Ubah**: `PUT /api/v1/admin/komunitas-belajar/:id`
+- **Hapus**: `DELETE /api/v1/admin/komunitas-belajar/:id`
+- Response mengikuti envelope standar (bagian 1). `id`, `created_at`, `created_by` (+ `nip`, `unit_kerja` bila tertulis) diisi otomatis oleh backend.
+
+| Field | Tipe | Input User | Keterangan |
+|---|---|---|---|
+| `uraian` | string | ya | Nama komunitas belajar |
+| `jns_kegiatan` | string (option) | ya | 0=Refleksi Awal, 1=Perencanaan, 2=Implementasi, 3=Evaluasi |
+| `deskripsi` | string (HTML/Text) | ya | Deskripsi kegiatan |
+| `file` | file (upload) | ya | Foto atau PDF |
+| `type` | string | auto | Tipe berkas |
+| `nip / unit_kerja` | string | auto | Dari sesi pengguna |
 
 ---
 

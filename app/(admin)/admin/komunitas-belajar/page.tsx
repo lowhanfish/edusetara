@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Komunitas Belajar | Admin Dikbud Konawe Selatan",
@@ -7,17 +7,17 @@ export const metadata = {
 
 export default function KomunitasBelajarPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Komunitas Belajar"
       category="Komunitas Belajar"
       description="Kelola dan konfigurasi data Komunitas Belajar secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="🤝"
-      breadcrumbs={[
-      {
-              "label": "Komunitas Belajar",
-              "href": "/admin/komunitas-belajar"
-      }
-]}
+      fields={[
+        {"name": "uraian", "label": "Nama Komunitas Belajar", "type": "text"},
+        {"name": "jns_kegiatan", "label": "Jenis Kegiatan", "type": "select", "options": [{"value": "0", "label": "Siklus Refleksi Awal"}, {"value": "1", "label": "Siklus Perencanaan"}, {"value": "2", "label": "Siklus Implementasi"}, {"value": "3", "label": "Siklus Evaluasi"}]},
+        {"name": "deskripsi", "label": "Deskripsi Kegiatan", "type": "textarea"},
+        {"name": "file", "label": "Lampiran (Foto / PDF)", "type": "text", "placeholder": "nama berkas"},
+      ]}
+      columns={["uraian", "jns_kegiatan", "deskripsi", "file"]}
     />
   );
 }
