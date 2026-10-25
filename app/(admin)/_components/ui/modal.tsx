@@ -9,7 +9,7 @@ export interface ModalProps {
   description?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
+  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "full";
 }
 
 export function Modal({
@@ -41,6 +41,8 @@ export function Modal({
 
   if (!isOpen) return null;
 
+  const isFull = maxWidth === "full";
+
   const maxWidthClasses = {
     sm: "max-w-md",
     md: "max-w-lg",
@@ -48,20 +50,33 @@ export function Modal({
     xl: "max-w-3xl",
     "2xl": "max-w-4xl",
     "3xl": "max-w-5xl",
+    "4xl": "max-w-6xl",
+    "5xl": "max-w-7xl",
+    full: "w-screen h-screen max-w-none max-h-none",
   }[maxWidth];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center ${
+        isFull ? "p-0" : "p-2 sm:p-4"
+      } overflow-y-auto animate-in fade-in duration-150`}
+    >
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      {!isFull && (
+        <div
+          className="fixed inset-0 bg-black/55 backdrop-blur-xs transition-opacity"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Modal Dialog */}
       <div
-        className={`relative w-full ${maxWidthClasses} bg-white/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/80 overflow-hidden z-10 flex flex-col max-h-[90vh] my-auto`}
+        className={`relative w-full ${
+          isFull
+            ? "w-screen h-screen max-w-none max-h-none rounded-none border-0 shadow-none m-0"
+            : `${maxWidthClasses} rounded-3xl shadow-2xl border border-white/80 max-h-[90vh] my-auto`
+        } bg-white/95 backdrop-blur-2xl overflow-hidden z-10 flex flex-col`}
         role="dialog"
         aria-modal="true"
       >

@@ -1,12 +1,206 @@
 "use client";
 
-import React, { useEffect, useCallback, useRef } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
+import React, { useEffect, useCallback, useRef, useState } from "react";
+import {
+  useEditor,
+  EditorContent,
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+  type NodeViewProps,
+} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import { Icon } from "../admin-icons";
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NODE VIEW GAMBAR INTERAKTIF: RESIZE DRAG + PRESET 25/50/75/100% + ALIGNMENT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+function ResizableImageNodeView({
+  node,
+  updateAttributes,
+  deleteNode,
+  selected,
+}: NodeViewProps) {
+  const { src, alt, width = "100%", alignment = "center" } = node.attrs;
+  const [hovered, setHovered] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleDragStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const parent = containerRef.current?.parentElement;
+    const parentWidth = parent ? parent.clientWidth : 700;
+    const currentWidthPx = containerRef.current?.offsetWidth || parentWidth;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const targetWidth = Math.max(120, Math.min(parentWidth, currentWidthPx + deltaX));
+      const percent = Math.round((targetWidth / parentWidth) * 100);
+      updateAttributes({ width: `${percent}%` });
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  const alignClass =
+    alignment === "left"
+      ? "mr-auto ml-0"
+      : alignment === "right"
+      ? "ml-auto mr-0"
+      : "mx-auto";
+
+  return (
+    <NodeViewWrapper
+      className={`relative my-4 transition-all block ${alignClass}`}
+      style={{ width, maxWidth: "100%" }}
+    >
+      <div
+        ref={containerRef}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className={`group relative rounded-2xl transition-all duration-150 ${
+          selected || hovered
+            ? "ring-2 ring-amber-500 ring-offset-2 ring-offset-amber-50/50"
+            : ""
+        }`}
+      >
+        {/* Floating Quick Action Bar when selected or hovered */}
+        {(hovered || selected) && (
+          <div
+            className="absolute -top-11 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 bg-[#241e12]/95 backdrop-blur-md px-2.5 py-1 rounded-xl shadow-lg border border-amber-400/40 text-white text-[11px] font-semibold whitespace-nowrap"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Width Presets */}
+            <span className="text-[10px] text-amber-300 font-bold uppercase mr-1">
+              Ukuran:
+            </span>
+            {(["25%", "50%", "75%", "100%"] as const).map((sz) => (
+              <button
+                key={sz}
+                type="button"
+                onClick={() => updateAttributes({ width: sz })}
+                className={`px-1.5 py-0.5 rounded-md transition-colors cursor-pointer ${
+                  width === sz
+                    ? "bg-amber-400 text-amber-950 font-bold"
+                    : "hover:bg-white/20 text-white/90"
+                }`}
+              >
+                {sz}
+              </button>
+            ))}
+
+            <span className="w-px h-3.5 bg-white/30 mx-1" />
+
+            {/* Alignment */}
+            <span className="text-[10px] text-amber-300 font-bold uppercase mr-1">
+              Posisi:
+            </span>
+            {(
+              [
+                { id: "left", label: "Kiri" },
+                { id: "center", label: "Tengah" },
+                { id: "right", label: "Kanan" },
+              ] as const
+            ).map((al) => (
+              <button
+                key={al.id}
+                type="button"
+                onClick={() => updateAttributes({ alignment: al.id })}
+                className={`px-1.5 py-0.5 rounded-md transition-colors cursor-pointer ${
+                  alignment === al.id
+                    ? "bg-amber-400 text-amber-950 font-bold"
+                    : "hover:bg-white/20 text-white/90"
+                }`}
+              >
+                {al.label}
+              </button>
+            ))}
+
+            <span className="w-px h-3.5 bg-white/30 mx-1" />
+
+            {/* Delete button */}
+            <button
+              type="button"
+              title="Hapus Gambar"
+              onClick={() => deleteNode()}
+              className="p-1 text-rose-300 hover:text-white hover:bg-rose-600 rounded-md transition-colors cursor-pointer"
+            >
+              <Icon name="trash" size={12} />
+            </button>
+          </div>
+        )}
+
+        {/* The Image Element */}
+        <img
+          src={src}
+          alt={alt || "Gambar artikel"}
+          className="w-full h-auto rounded-2xl block border border-amber-200/80 shadow-sm"
+        />
+
+        {/* Drag-to-resize handle (bottom right) */}
+        {(hovered || selected) && (
+          <div
+            onMouseDown={handleDragStart}
+            title="Tarik sudut ini untuk mengubah ukuran gambar secara bebas"
+            className="absolute -bottom-2 -right-2 w-5 h-5 rounded-full bg-amber-500 border-2 border-white shadow-md cursor-nwse-resize z-20 flex items-center justify-center hover:scale-125 transition-transform"
+          >
+            <span className="w-1.5 h-1.5 bg-white rounded-full pointer-events-none" />
+          </div>
+        )}
+      </div>
+    </NodeViewWrapper>
+  );
+}
+
+const CustomResizableImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: "100%",
+        parseHTML: (element) =>
+          element.getAttribute("data-width") ||
+          element.style.width ||
+          "100%",
+        renderHTML: (attributes) => ({
+          "data-width": attributes.width,
+          style: `width: ${attributes.width}; max-width: 100%; height: auto;`,
+        }),
+      },
+      alignment: {
+        default: "center",
+        parseHTML: (element) =>
+          element.getAttribute("data-alignment") || "center",
+        renderHTML: (attributes) => ({
+          "data-alignment": attributes.alignment,
+          class:
+            attributes.alignment === "left"
+              ? "mr-auto ml-0 block my-4"
+              : attributes.alignment === "right"
+              ? "ml-auto mr-0 block my-4"
+              : "mx-auto block my-4",
+        }),
+      },
+    };
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(ResizableImageNodeView);
+  },
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MAIN RICH TEXT EDITOR COMPONENT
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 export interface RichTextEditorProps {
   label?: string;
@@ -49,13 +243,9 @@ export function RichTextEditor({
           rel: "noopener noreferrer",
         },
       }),
-      Image.configure({
+      CustomResizableImage.configure({
         inline: false,
         allowBase64: true,
-        HTMLAttributes: {
-          class:
-            "rounded-2xl max-w-full my-4 shadow-sm border border-amber-200/80 mx-auto block",
-        },
       }),
     ],
     content: value,
@@ -175,7 +365,6 @@ export function RichTextEditor({
       }
     };
     reader.readAsDataURL(file);
-    // Reset file input agar file yang sama bisa dipilih ulang jika diinginkan
     if (imageInputRef.current) {
       imageInputRef.current.value = "";
     }
