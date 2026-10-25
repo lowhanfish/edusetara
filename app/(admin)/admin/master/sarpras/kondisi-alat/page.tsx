@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Kondisi Alat | Admin Dikbud Konawe Selatan",
@@ -7,25 +7,15 @@ export const metadata = {
 
 export default function KondisiAlatPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Kondisi Alat"
       category="Data Master"
       description="Kelola dan konfigurasi data Kondisi Alat secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="🔧"
-      breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master Sarpras",
-              "href": null
-      },
-      {
-              "label": "Kondisi Alat",
-              "href": "/admin/master/sarpras/kondisi-alat"
-      }
-]}
+      fields={[
+        {"name": "title", "label": "Nama", "type": "text"},
+        {"name": "desc", "label": "Penjelasan Singkat", "type": "textarea"},
+      ]}
+      initialData={[{"id": "seed-ka-0", "title": "Baik", "desc": "Peralatan berfungsi normal dan siap digunakan.", "created_at": "2026-01-01", "created_by": "admin"}, {"id": "seed-ka-1", "title": "Rusak Ringan", "desc": "Penurunan fungsi parsial, masih dapat diperbaiki.", "created_at": "2026-01-01", "created_by": "admin"}, {"id": "seed-ka-2", "title": "Rusak Berat", "desc": "Malfungsi permanen, masuk usulan afkir.", "created_at": "2026-01-01", "created_by": "admin"}]}
     />
   );
 }

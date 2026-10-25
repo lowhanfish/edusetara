@@ -67,7 +67,7 @@ function makeInitialMenus(items: MenuItem[]): MenuRecord[] {
   return mapItems(items);
 }
 
-function countMenus(items: MenuRecord[]) {
+function countMenus(items: MenuRecord[]): number {
   return items.reduce(
     (total, item) => total + 1 + countMenus(item.children),
     0,

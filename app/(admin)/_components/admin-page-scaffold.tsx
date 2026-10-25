@@ -7,7 +7,7 @@ export interface AdminPageScaffoldProps {
   category?: string;
   description?: string;
   icon?: string;
-  breadcrumbs?: { label: string; href?: string }[];
+  breadcrumbs?: { label: string; href?: string | null }[];
 }
 
 export function AdminPageScaffold({
@@ -44,7 +44,7 @@ export function AdminPageScaffold({
       <PageHeader
         title={`${icon} ${title}`}
         description={description}
-        badge={<Badge variant="primary">{category}</Badge>}
+        badge={<Badge variant="info">{category}</Badge>}
         action={
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm">

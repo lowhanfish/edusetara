@@ -67,11 +67,13 @@ export function TableHead({
 export function TableCell({
   children,
   className = "",
+  colSpan,
 }: {
   children: React.ReactNode;
   className?: string;
+  colSpan?: number;
 }) {
-  return <td className={`py-3.5 px-4 align-middle text-slate-700 ${className}`}>{children}</td>;
+  return <td colSpan={colSpan} className={`py-3.5 px-4 align-middle text-slate-700 ${className}`}>{children}</td>;
 }
 
 export function TableEmpty({

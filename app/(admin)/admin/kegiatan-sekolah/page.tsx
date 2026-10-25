@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Kegiatan Sekolah | Admin Dikbud Konawe Selatan",
@@ -7,17 +7,19 @@ export const metadata = {
 
 export default function KegiatanSekolahPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Kegiatan Sekolah"
       category="Kegiatan Sekolah"
       description="Kelola dan konfigurasi data Kegiatan Sekolah secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="🎯"
-      breadcrumbs={[
-      {
-              "label": "Kegiatan Sekolah",
-              "href": "/admin/kegiatan-sekolah"
-      }
-]}
+      fields={[
+        {"name": "judul", "label": "Judul Kegiatan", "type": "text"},
+        {"name": "deskripsi", "label": "Deskripsi", "type": "textarea"},
+        {"name": "tanggal", "label": "Tanggal", "type": "date"},
+        {"name": "tahun", "label": "Tahun", "type": "number"},
+        {"name": "file", "label": "Berkas Dokumen", "type": "text", "placeholder": "nama berkas / URL"},
+        {"name": "link", "label": "Link YouTube", "type": "text", "placeholder": "https://youtube.com/...", "required": false},
+      ]}
+      columns={["judul", "tanggal", "tahun", "link"]}
     />
   );
 }

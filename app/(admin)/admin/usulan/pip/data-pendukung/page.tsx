@@ -1,4 +1,4 @@
-import { AdminPageScaffold } from "../../../../_components/admin-page-scaffold";
+import { ContractCrudPage } from "../../../../_components/contract-crud-page";
 
 export const metadata = {
   title: "Data Pendukung | Admin Dikbud Konawe Selatan",
@@ -7,25 +7,18 @@ export const metadata = {
 
 export default function DataPendukungPage() {
   return (
-    <AdminPageScaffold
+    <ContractCrudPage
       title="Data Pendukung"
-      category="Usulan Sekolah"
-      description="Kelola dan konfigurasi data Data Pendukung secara berkala untuk mendukung tata kelola pendidikan terpadu."
-      icon="📁"
-      breadcrumbs={[
-      {
-              "label": "Usulan Sekolah",
-              "href": null
-      },
-      {
-              "label": "Usulan Bantuan PIP",
-              "href": null
-      },
-      {
-              "label": "Data Pendukung",
-              "href": "/admin/usulan/pip/data-pendukung"
-      }
-]}
+      category="Usulan Bantuan PIP"
+      description="Dokumen pendukung alokasi PIP (SK / Berita Acara): uraian, jenjang, nominal, tahun, dan lampiran."
+      fields={[
+        {name:"uraian",label:"Uraian",type:"textarea"},
+        {name:"jenjang_id",label:"Jenjang",type:"select",options:[{value:"2",label:"SD"},{value:"3",label:"SMP"}]},
+        {name:"nominal",label:"Nominal (Rp)",type:"number"},
+        {name:"tahun",label:"Tahun Anggaran",type:"number"},
+        {name:"file",label:"Lampiran (PDF)",type:"text",placeholder:"nama berkas, misal: sk_pip.pdf"},
+      ]}
+      columns={["uraian","jenjang_id","nominal","tahun","file"]}
     />
   );
 }

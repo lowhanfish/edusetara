@@ -28,6 +28,7 @@ interface NewsItem {
   date: string;
   status: "Terbit" | "Draft";
   image: string;
+  content?: string;
   featured: boolean;
 }
 
@@ -125,6 +126,7 @@ export default function BeritaAdminPage() {
       date: "17 Sep 2026",
       status: formData.status,
       image: formData.image,
+      content: formData.content,
       featured: formData.featured,
     };
 
@@ -359,8 +361,9 @@ export default function BeritaAdminPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label="Penulis / Redaksi"
-              placeholder="Nama penulis atau bidang..."
+              label="Sumber"
+              placeholder="Misal: Humas Sekolah, Dinas Pendidikan"
+              required
               value={formData.author}
               onChange={(e) =>
                 setFormData({ ...formData, author: e.target.value })
@@ -383,7 +386,7 @@ export default function BeritaAdminPage() {
           </div>
 
           <Textarea
-            label="Ringkasan (Excerpt)"
+            label="Deskripsi (Ringkasan)"
             placeholder="Ringkasan singkat 1-2 kalimat yang tampil pada kartu beranda..."
             rows={2}
             value={formData.excerpt}
@@ -392,8 +395,18 @@ export default function BeritaAdminPage() {
             }
           />
 
+          <Input
+            label="Foto"
+            placeholder="URL / nama berkas, misal: prestasi_olimpiade_sains_2026.jpg"
+            value={formData.image}
+            onChange={(e) =>
+              setFormData({ ...formData, image: e.target.value })
+            }
+            helperText="Berkas gambar banner/thumbnail berita atau URL foto"
+          />
+
           <Textarea
-            label="Isi Konten Berita"
+            label="Isi Berita"
             placeholder="Tuliskan isi berita lengkap di sini..."
             rows={5}
             value={formData.content}
