@@ -168,7 +168,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* ── Sidebar ── */}
       <aside
-        className={`glass fixed top-3 bottom-3 left-3 z-50 w-72 rounded-[28px] flex flex-col transition-transform duration-200 ease-in-out ${
+        className={`glass fixed top-3 bottom-3 left-3 z-50 w-[268px] rounded-[24px] flex flex-col transition-transform duration-200 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-[110%] lg:translate-x-0"
         }`}
       >
@@ -231,9 +231,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* ── Main Area ── */}
-      <div className="flex-1 lg:pl-[312px] flex flex-col min-w-0">
+      <div className="flex-1 lg:pl-[284px] flex flex-col min-w-0 pr-3">
         {/* Topbar */}
-        <header className="glass sticky top-3 z-30 mx-3 lg:mx-4 mt-3 h-16 rounded-[24px] px-4 sm:px-6 flex items-center justify-between">
+        <header className="glass sticky top-3 z-30 ml-1 mr-0 mt-3 h-16 rounded-[22px] px-5 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
@@ -279,7 +279,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Content Shell */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+        <main className="flex-1 ml-1 mr-0 py-4 space-y-5 w-full">
           {children}
         </main>
         {/* ── AI Assistant Mascot Floating Pill (Modern SaaS Inspiration) ── */}
