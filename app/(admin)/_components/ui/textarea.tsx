@@ -25,7 +25,7 @@ export function Textarea({
       {label && (
         <label
           htmlFor={textareaId}
-          className="text-xs font-bold text-[#052552] uppercase tracking-wider flex items-center gap-1"
+          className="text-xs font-semibold text-[#6b6f8f] flex items-center gap-1"
         >
           {label}
           {required && <span className="text-red-500">*</span>}
@@ -36,17 +36,17 @@ export function Textarea({
         id={textareaId}
         rows={rows}
         required={required}
-        className={`w-full p-3 text-sm bg-white text-[#052552] placeholder:text-slate-400 border rounded-xl outline-none transition-all duration-150 resize-y ${
+        className={`w-full p-3 text-sm bg-white/70 backdrop-blur text-[#1f1b4d] placeholder:text-slate-400 border rounded-xl outline-none transition-all duration-150 resize-y ${
           error
             ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100"
-            : "border-[#d8dfeb] focus:border-[#ffc400] focus:ring-3 focus:ring-[#ffc400]/20"
+            : "border-[#dcdcf2] focus:border-[#7c5cff] focus:ring-3 focus:ring-[#7c5cff]/20"
         } ${className}`}
         {...props}
       />
 
       {error && <span className="text-xs text-red-600 font-medium">{error}</span>}
       {helperText && !error && (
-        <span className="text-xs text-[#58708d]">{helperText}</span>
+        <span className="text-xs text-[#6b6f8f]">{helperText}</span>
       )}
     </div>
   );

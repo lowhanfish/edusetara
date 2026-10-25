@@ -61,18 +61,18 @@ export function Modal({
 
       {/* Modal Dialog */}
       <div
-        className={`relative w-full ${maxWidthClasses} bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-10 flex flex-col max-h-[90vh] my-auto`}
+        className={`relative w-full ${maxWidthClasses} bg-white/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/80 overflow-hidden z-10 flex flex-col max-h-[90vh] my-auto`}
         role="dialog"
         aria-modal="true"
       >
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-5 border-b border-slate-100 bg-[#fffdf8]">
+        <div className="flex items-start justify-between px-6 py-5 border-b border-white/70 bg-white/40">
           <div className="flex flex-col gap-1 pr-6">
-            <h2 className="text-lg font-extrabold text-[#052552] tracking-tight">
+            <h2 className="text-lg font-extrabold text-[#1f1b4d] tracking-tight">
               {title}
             </h2>
             {description && (
-              <p className="text-xs text-[#58708d] leading-relaxed">
+              <p className="text-xs text-[#6b6f8f] leading-relaxed">
                 {description}
               </p>
             )}
@@ -88,13 +88,13 @@ export function Modal({
         </div>
 
         {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-4 flex-1 text-sm text-[#052552]">
+        <div className="p-6 overflow-y-auto space-y-4 flex-1 text-sm text-[#1f1b4d]">
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/70 bg-white/40">
             {footer}
           </div>
         )}

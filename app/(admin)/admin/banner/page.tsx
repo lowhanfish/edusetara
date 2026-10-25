@@ -110,19 +110,19 @@ export default function BannerAdminPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {banners.map((item) => (
           <Card key={item.id} className="flex flex-col justify-between">
-            <div className="p-6 bg-gradient-to-br from-[#fff8dd] to-[#fff3c7] border-b border-amber-200/50 flex flex-col gap-2">
+            <div className="p-6 bg-gradient-to-br from-[#f1edff] to-[#ece7ff] border-b border-amber-200/50 flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#052552] bg-white/70 px-2.5 py-1 rounded-md">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#1f1b4d] bg-white/70 px-2.5 py-1 rounded-md">
                   Urutan #{item.order}
                 </span>
                 <Badge variant={item.status === "Aktif" ? "success" : "neutral"}>
                   {item.status}
                 </Badge>
               </div>
-              <span className="text-xs text-[#0b3b73] font-bold">
+              <span className="text-xs text-[#5b3fe0] font-bold">
                 {item.badgeText}
               </span>
-              <h3 className="text-lg font-extrabold text-[#052552]">
+              <h3 className="text-lg font-extrabold text-[#1f1b4d]">
                 {item.title}
               </h3>
               <p className="text-xs text-slate-700 line-clamp-2">
@@ -132,7 +132,7 @@ export default function BannerAdminPage() {
 
             <div className="p-5 flex items-center justify-between bg-white text-xs text-slate-600">
               <div className="flex flex-col">
-                <span className="font-semibold text-[#052552]">
+                <span className="font-semibold text-[#1f1b4d]">
                   Tombol: {item.primaryButtonLabel}
                 </span>
                 <span className="text-slate-400 font-mono text-[11px]">

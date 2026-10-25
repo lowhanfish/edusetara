@@ -17,6 +17,7 @@ import {
   TableRow,
   Textarea,
 } from "./ui";
+import { Icon } from "./admin-icons";
 
 export interface CrudField {
   /** Nama field sesuai Contract API */
@@ -157,7 +158,7 @@ export function ContractCrudPage({
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Button variant="ghost" size="sm" onClick={() => openEdit(r)}>
-                        ✏️
+                        <Icon name="edit" size={15} />
                       </Button>
                       <Button
                         variant="ghost"
@@ -165,7 +166,7 @@ export function ContractCrudPage({
                         className="hover:text-red-600 hover:bg-red-50"
                         onClick={() => handleDelete(r.id)}
                       >
-                        🗑️
+                        <Icon name="trash" size={15} />
                       </Button>
                     </div>
                   </TableCell>

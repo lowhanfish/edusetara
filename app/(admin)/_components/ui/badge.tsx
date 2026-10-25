@@ -19,17 +19,17 @@ export function Badge({
   }[size];
 
   const variantClasses = {
-    success: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-    warning: "bg-amber-50 text-amber-700 border border-amber-200",
-    danger: "bg-rose-50 text-rose-700 border border-rose-200",
-    info: "bg-sky-50 text-sky-700 border border-sky-200",
-    gold: "bg-[#fff8dd] text-[#052552] border border-[#ffc400]/40 font-bold",
-    neutral: "bg-slate-100 text-slate-700 border border-slate-200",
+    success: "bg-emerald-500/15 text-emerald-700",
+    warning: "bg-amber-400/20 text-amber-700",
+    danger: "bg-rose-500/15 text-rose-600",
+    info: "bg-violet-500/15 text-violet-700",
+    gold: "bg-violet-500/15 text-violet-700 font-bold",
+    neutral: "bg-white/60 text-slate-600 border border-white/80",
   }[variant];
 
   return (
     <span
-      className={`inline-flex items-center gap-1 font-semibold rounded-lg tracking-wide select-none ${sizeClasses} ${variantClasses} ${className}`}
+      className={`inline-flex items-center gap-1 font-semibold rounded-full tracking-wide select-none ${sizeClasses} ${variantClasses} ${className}`}
     >
       {children}
     </span>

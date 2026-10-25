@@ -9,7 +9,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`bg-white rounded-2xl border border-slate-200/70 shadow-xs overflow-hidden ${className}`}
+      className={`glass rounded-3xl overflow-hidden ${className}`}
     >
       {children}
     </div>
@@ -25,7 +25,7 @@ export function CardHeader({
 }) {
   return (
     <div
-      className={`flex items-center justify-between px-6 py-4 border-b border-slate-100 ${className}`}
+      className={`flex items-center justify-between px-6 py-4 border-b border-white/60 ${className}`}
     >
       {children}
     </div>
@@ -40,7 +40,7 @@ export function CardTitle({
   className?: string;
 }) {
   return (
-    <h3 className={`text-base font-bold text-[#052552] ${className}`}>
+    <h3 className={`text-base font-bold text-[#1f1b4d] ${className}`}>
       {children}
     </h3>
   );

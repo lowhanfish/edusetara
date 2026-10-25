@@ -17,6 +17,7 @@ import {
   TableRow,
   Textarea,
 } from "../../_components/ui";
+import { Icon } from "../../_components/admin-icons";
 
 interface NewsItem {
   id: string;
@@ -169,7 +170,7 @@ export default function BeritaAdminPage() {
         action={
           <Button
             variant="gold"
-            icon="✍️"
+            icon={<Icon name="plus" size={16} />}
             onClick={() => setIsModalOpen(true)}
           >
             Tambah Berita
@@ -182,7 +183,7 @@ export default function BeritaAdminPage() {
         <div className="w-full sm:w-80">
           <Input
             placeholder="Cari judul berita atau penulis..."
-            leftIcon="🔍"
+            leftIcon={<Icon name="search" size={16} />}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -201,7 +202,7 @@ export default function BeritaAdminPage() {
               onClick={() => setCategoryFilter(cat)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                 categoryFilter === cat
-                  ? "bg-[#052552] text-white"
+                  ? "bg-[#7c5cff] text-white"
                   : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
               }`}
             >
@@ -236,10 +237,10 @@ export default function BeritaAdminPage() {
                 <TableRow key={item.id}>
                   <TableCell className="max-w-md">
                     <div className="flex flex-col gap-1">
-                      <span className="font-bold text-[#052552] line-clamp-1">
+                      <span className="font-bold text-[#1f1b4d] line-clamp-1">
                         {item.title}
                       </span>
-                      <span className="text-xs text-[#58708d] line-clamp-1">
+                      <span className="text-xs text-[#6b6f8f] line-clamp-1">
                         {item.excerpt}
                       </span>
                       {item.featured && (
@@ -272,7 +273,7 @@ export default function BeritaAdminPage() {
                         size="sm"
                         onClick={() => alert(`Edit artikel: ${item.title}`)}
                       >
-                        ✏️
+                        <Icon name="edit" size={15} />
                       </Button>
                       <Button
                         variant="ghost"
@@ -280,7 +281,7 @@ export default function BeritaAdminPage() {
                         className="hover:text-red-600 hover:bg-red-50"
                         onClick={() => handleDelete(item.id)}
                       >
-                        🗑️
+                        <Icon name="trash" size={15} />
                       </Button>
                     </div>
                   </TableCell>
@@ -427,7 +428,7 @@ export default function BeritaAdminPage() {
             />
             <label
               htmlFor="featured-check"
-              className="text-xs font-semibold text-[#052552] cursor-pointer"
+              className="text-xs font-semibold text-[#1f1b4d] cursor-pointer"
             >
               Jadikan sebagai Berita Utama (Tampil di carousel/highlight beranda)
             </label>

@@ -126,7 +126,7 @@ export default function StatistikAdminPage() {
             className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between gap-3"
           >
             <div className="flex items-start justify-between gap-2">
-              <span className="text-[11px] font-bold text-[#58708d] uppercase tracking-wider">
+              <span className="text-[11px] font-bold text-[#6b6f8f] uppercase tracking-wider">
                 {item.category}
               </span>
               <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
@@ -134,10 +134,10 @@ export default function StatistikAdminPage() {
               </span>
             </div>
             <div>
-              <span className="text-3xl font-black text-[#052552] tracking-tight">
+              <span className="text-3xl font-black text-[#1f1b4d] tracking-tight">
                 {item.value}
               </span>
-              <span className="text-xs text-[#58708d] ml-1.5 font-medium">
+              <span className="text-xs text-[#6b6f8f] ml-1.5 font-medium">
                 {item.unit}
               </span>
             </div>
@@ -163,13 +163,13 @@ export default function StatistikAdminPage() {
           <TableBody>
             {stats.map((item) => (
               <TableRow key={item.id}>
-                <TableCell className="font-bold text-[#052552]">
+                <TableCell className="font-bold text-[#1f1b4d]">
                   {item.indicator}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
                   <Badge variant="neutral">{item.category}</Badge>
                 </TableCell>
-                <TableCell className="font-bold text-[#0b3b73] whitespace-nowrap">
+                <TableCell className="font-bold text-[#5b3fe0] whitespace-nowrap">
                   {item.value} <span className="text-xs font-normal text-slate-500">{item.unit}</span>
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-xs text-slate-600">

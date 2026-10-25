@@ -24,7 +24,7 @@ export function TableHeader({
   className?: string;
 }) {
   return (
-    <thead className={`border-b border-slate-200 bg-slate-50/80 text-xs font-bold text-slate-500 uppercase tracking-wider ${className}`}>
+    <thead className={`border-b border-white/60 bg-white/30 text-xs font-semibold text-[#6b6f8f] ${className}`}>
       {children}
     </thead>
   );
@@ -37,7 +37,7 @@ export function TableBody({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <tbody className={`divide-y divide-slate-100 bg-white ${className}`}>{children}</tbody>;
+  return <tbody className={`divide-y divide-white/60 bg-transparent ${className}`}>{children}</tbody>;
 }
 
 export function TableRow({
@@ -48,7 +48,7 @@ export function TableRow({
   className?: string;
 }) {
   return (
-    <tr className={`hover:bg-slate-50/70 transition-colors duration-150 ${className}`}>
+    <tr className={`hover:bg-white/50 transition-colors duration-150 ${className}`}>
       {children}
     </tr>
   );

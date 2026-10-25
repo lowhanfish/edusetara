@@ -149,7 +149,7 @@ function PermissionRow({
             {hasChildren ? (expanded ? "▼" : "▶") : "•"}
           </button>
           <span className="mr-2 text-base">{item.icon}</span>
-          <span className="truncate text-xs font-semibold text-[#052552]">{item.title}</span>
+          <span className="truncate text-xs font-semibold text-[#1f1b4d]">{item.title}</span>
           {level > 0 && <span className="ml-2 text-[9px] font-bold text-slate-400">L{level + 1}</span>}
         </div>
 
@@ -159,7 +159,7 @@ function PermissionRow({
               type="checkbox"
               checked={permission[action]}
               onChange={() => onTogglePermission(item.id, action)}
-              className="h-4 w-4 cursor-pointer accent-[#052552]"
+              className="h-4 w-4 cursor-pointer accent-[#1f1b4d]"
               aria-label={`${action} ${item.title}`}
             />
           </label>
@@ -283,19 +283,19 @@ export function GroupManagement() {
   return (
     <div className="space-y-6">
       <nav className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-slate-500" aria-label="Breadcrumb">
-        <Link href="/admin" className="hover:text-[#052552]">Dashboard</Link><span>/</span>
+        <Link href="/admin" className="hover:text-[#1f1b4d]">Dashboard</Link><span>/</span>
         <span>Data Master</span><span>/</span><span>Auth</span><span>/</span>
-        <span className="font-bold text-[#052552]">Group</span>
+        <span className="font-bold text-[#1f1b4d]">Group</span>
       </nav>
 
       <div className="flex flex-col gap-4 border-b border-slate-200/80 pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="mb-2 flex items-center gap-2">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#ffc400] text-xl shadow-sm">👥</span>
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#7c5cff] text-xl shadow-sm">👥</span>
             <Badge variant="gold">Data Master · Auth</Badge>
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-[#052552]">Role Group & Hak Akses</h1>
-          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-[#58708d]">
+          <h1 className="text-2xl font-black tracking-tight text-[#1f1b4d]">Role Group & Hak Akses</h1>
+          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-[#6b6f8f]">
             Tentukan cakupan pengguna dan izin Create, Read, Update, Delete pada setiap menu admin.
           </p>
         </div>
@@ -310,7 +310,7 @@ export function GroupManagement() {
         ].map((stat) => (
           <div key={stat.label} className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
             <span className={`grid h-10 w-10 place-items-center rounded-xl text-lg ${stat.tone}`}>{stat.icon}</span>
-            <div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{stat.label}</p><p className="text-xl font-black text-[#052552]">{stat.value}</p></div>
+            <div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{stat.label}</p><p className="text-xl font-black text-[#1f1b4d]">{stat.value}</p></div>
           </div>
         ))}
       </section>
@@ -323,7 +323,7 @@ export function GroupManagement() {
 
       <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
         <div className="border-b border-slate-200 bg-slate-50/70 px-5 py-4">
-          <h2 className="text-sm font-extrabold text-[#052552]">Daftar Group</h2>
+          <h2 className="text-sm font-extrabold text-[#1f1b4d]">Daftar Group</h2>
           <p className="mt-0.5 text-[11px] text-slate-500">Pilih edit untuk mengatur level dan matriks izin menu.</p>
         </div>
         <div className="overflow-x-auto">
@@ -336,9 +336,9 @@ export function GroupManagement() {
                 const granted = countGranted(group.permissions);
                 return (
                   <tr key={group.id} className="hover:bg-slate-50/70">
-                    <td className="px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#fff7d6]">🔐</span><div><p className="text-sm font-bold text-[#052552]">{group.title}</p><p className="text-[10px] font-medium text-slate-400">{group.id}</p><p className="mt-0.5 text-[9px] text-slate-400">{formatAuditDate(group.created_at)} · {group.created_by}</p></div></div></td>
+                    <td className="px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f1edff]">🔐</span><div><p className="text-sm font-bold text-[#1f1b4d]">{group.title}</p><p className="text-[10px] font-medium text-slate-400">{group.id}</p><p className="mt-0.5 text-[9px] text-slate-400">{formatAuditDate(group.created_at)} · {group.created_by}</p></div></div></td>
                     <td className="px-4 py-4"><Badge variant={group.level === 1 ? "info" : "success"}>{group.level === 1 ? "1 · Semua Satuan Pendidikan" : "2 · Unit Pengguna"}</Badge></td>
-                    <td className="px-4 py-4"><div className="w-44"><div className="flex justify-between text-[10px] font-semibold text-slate-500"><span>{granted} izin</span><span>{Math.round((granted / totalSlots) * 100)}%</span></div><div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#ffc400]" style={{ width: `${(granted / totalSlots) * 100}%` }} /></div></div></td>
+                    <td className="px-4 py-4"><div className="w-44"><div className="flex justify-between text-[10px] font-semibold text-slate-500"><span>{granted} izin</span><span>{Math.round((granted / totalSlots) * 100)}%</span></div><div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#7c5cff]" style={{ width: `${(granted / totalSlots) * 100}%` }} /></div></div></td>
                     <td className="px-5 py-4"><div className="flex justify-end gap-2"><Button size="sm" variant="outline" onClick={() => openEdit(group)}>Atur Akses</Button><Button size="sm" variant="ghost" onClick={() => handleDelete(group)} className="text-rose-600 hover:bg-rose-50">Hapus</Button></div></td>
                   </tr>
                 );
@@ -368,8 +368,8 @@ export function GroupManagement() {
 
           <div className="overflow-hidden rounded-2xl border border-slate-200">
             <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50/80 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div><h3 className="text-sm font-extrabold text-[#052552]">Matriks Hak Akses Menu</h3><p className="text-[11px] text-slate-500">Centang tindakan yang diizinkan untuk setiap menu atau submenu.</p></div>
-              <div className="flex flex-wrap gap-2"><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cari menu..." className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-[#ffc400]" /><Button type="button" size="sm" variant="outline" onClick={() => setAllPermissions(true)}>Pilih Semua</Button><Button type="button" size="sm" variant="outline" onClick={() => setAllPermissions(false)}>Kosongkan</Button></div>
+              <div><h3 className="text-sm font-extrabold text-[#1f1b4d]">Matriks Hak Akses Menu</h3><p className="text-[11px] text-slate-500">Centang tindakan yang diizinkan untuk setiap menu atau submenu.</p></div>
+              <div className="flex flex-wrap gap-2"><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cari menu..." className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-[#7c5cff]" /><Button type="button" size="sm" variant="outline" onClick={() => setAllPermissions(true)}>Pilih Semua</Button><Button type="button" size="sm" variant="outline" onClick={() => setAllPermissions(false)}>Kosongkan</Button></div>
             </div>
             <div className="max-h-[44vh] overflow-auto">
               <div className="sticky top-0 z-10 grid min-w-[650px] grid-cols-[minmax(260px,1fr)_repeat(4,72px)] border-b border-slate-200 bg-white text-[9px] font-extrabold uppercase tracking-wider text-slate-400">

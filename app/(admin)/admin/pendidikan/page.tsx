@@ -133,7 +133,7 @@ export default function PendidikanAdminPage() {
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === tab
-                ? "bg-[#052552] text-white shadow-sm"
+                ? "bg-[#1f1b4d] text-white shadow-sm"
                 : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
             }`}
           >
@@ -159,7 +159,7 @@ export default function PendidikanAdminPage() {
           <TableBody>
             {filtered.map((item) => (
               <TableRow key={item.id}>
-                <TableCell className="font-bold text-[#052552]">
+                <TableCell className="font-bold text-[#1f1b4d]">
                   {item.name}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Icon } from "../_components/admin-icons";
 import {
   Badge,
   Button,
@@ -19,37 +20,37 @@ const stats = [
     label: "Total Satuan Sekolah",
     value: "287",
     change: "+3 baru",
-    icon: "🏫",
-    color: "bg-emerald-100 text-emerald-800",
+    icon: "school",
+    color: "bg-emerald-500/15 text-emerald-600",
   },
   {
     label: "Tenaga Pendidik & Guru",
     value: "4.231",
     change: "+45 sertifikasi",
-    icon: "👨‍🏫",
-    color: "bg-sky-100 text-sky-800",
+    icon: "users",
+    color: "bg-violet-500/15 text-violet-600",
   },
   {
     label: "Peserta Didik Aktif",
     value: "52.847",
     change: "+312 Dapodik",
-    icon: "🎓",
-    color: "bg-amber-100 text-amber-800",
+    icon: "award",
+    color: "bg-amber-400/20 text-amber-600",
   },
   {
     label: "Pengumuman Aktif",
     value: "12",
     change: "3 penting",
-    icon: "📢",
-    color: "bg-rose-100 text-rose-800",
+    icon: "megaphone",
+    color: "bg-rose-500/15 text-rose-600",
   },
 ];
 
 const quickActions = [
-  { label: "Tulis Berita", icon: "✍️", href: "/admin/berita" },
-  { label: "Buat Pengumuman", icon: "📣", href: "/admin/pengumuman" },
-  { label: "Data Sekolah", icon: "🏫", href: "/admin/sekolah" },
-  { label: "Layanan Publik", icon: "🏛️", href: "/admin/layanan" },
+  { label: "Tulis Berita", icon: "edit", href: "/admin/berita" },
+  { label: "Buat Pengumuman", icon: "megaphone", href: "/admin/pengumuman" },
+  { label: "Data Sekolah", icon: "school", href: "/admin/sekolah" },
+  { label: "Layanan Publik", icon: "landmark", href: "/admin/layanan" },
 ];
 
 const recentNews = [
@@ -111,17 +112,17 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* ── Welcome Banner ── */}
-      <div className="bg-gradient-to-r from-[#fff8dd] via-[#ffedaa] to-[#ffe082] rounded-2xl p-6 sm:p-7 border border-[#ffd54f] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="glass rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h2 className="text-xl sm:text-2xl font-black text-[#052552] tracking-tight">
-            Selamat Datang di Portal Admin! 👋
+          <h2 className="text-xl sm:text-2xl font-semibold text-[#1f1b4d] tracking-tight">
+            Selamat datang di Portal Admin
           </h2>
-          <p className="text-xs sm:text-sm text-[#314a6e] font-medium max-w-xl">
+          <p className="text-xs sm:text-sm text-[#6b6f8f] max-w-xl">
             Pusat manajemen konten publikasi, warta kedinasan, layanan publik, dan data pendidikan Kabupaten Konawe Selatan.
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-white/80 backdrop-blur-xs px-3.5 py-2 rounded-xl text-xs font-bold text-[#052552] shadow-xs border border-white/60 shrink-0">
-          <span>📅</span>
+        <div className="flex items-center gap-2 bg-white/70 px-3.5 py-2 rounded-2xl text-xs font-medium text-[#4a4770] border border-white/80 shrink-0">
+          <Icon name="calendar" size={15} />
           <span>Rabu, 17 September 2026</span>
         </div>
       </div>
@@ -131,23 +132,19 @@ export default function AdminDashboard() {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between hover:shadow-md transition-all duration-150"
+            className="glass rounded-3xl p-5 flex items-center justify-between hover:-translate-y-0.5 transition-all duration-150"
           >
-            <div className="space-y-1">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                {stat.label}
-              </span>
-              <span className="text-2xl sm:text-3xl font-black text-[#052552] tracking-tight block">
+            <div className="space-y-1.5">
+              <span className="text-xs font-medium text-[#6b6f8f] block">{stat.label}</span>
+              <span className="text-2xl sm:text-3xl font-semibold text-[#1f1b4d] tracking-tight block">
                 {stat.value}
               </span>
-              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded inline-block">
+              <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-500/15 px-2 py-0.5 rounded-full inline-block">
                 {stat.change}
               </span>
             </div>
-            <div
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 ${stat.color}`}
-            >
-              {stat.icon}
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${stat.color}`}>
+              <Icon name={stat.icon} size={22} />
             </div>
           </div>
         ))}
@@ -159,11 +156,11 @@ export default function AdminDashboard() {
           <Link
             key={action.label}
             href={action.href}
-            className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200/80 hover:border-[#ffc400] hover:bg-amber-50/30 text-xs font-bold text-[#052552] transition-all shadow-xs"
+            className="glass flex items-center gap-3 p-3.5 rounded-2xl hover:bg-white/80 text-xs font-semibold text-[#1f1b4d] transition-all"
           >
-            <span className="text-lg">{action.icon}</span>
+            <span className="w-8 h-8 rounded-xl bg-violet-500/15 text-violet-600 flex items-center justify-center"><Icon name={action.icon} size={16} /></span>
             <span>{action.label}</span>
-            <span className="ml-auto text-slate-300">›</span>
+            <Icon name="arrow" size={14} className="ml-auto text-[#b9b6dc]" />
           </Link>
         ))}
       </div>
@@ -173,16 +170,16 @@ export default function AdminDashboard() {
         {/* Left 8 Cols: Recent News Table */}
         <div className="lg:col-span-8">
           <Card>
-            <CardHeader className="bg-slate-50/50">
+            <CardHeader>
               <div className="flex items-center gap-2">
-                <span className="text-lg">📰</span>
+                <Icon name="news" size={18} className="text-violet-600" />
                 <CardTitle>Publikasi Berita Terkini</CardTitle>
               </div>
               <Link
                 href="/admin/berita"
-                className="text-xs font-bold text-[#0b3b73] hover:text-[#ffc400] transition-colors"
+                className="text-xs font-bold text-[#5b3fe0] hover:text-[#7c5cff] transition-colors"
               >
-                Lihat Semua →
+                Lihat semua
               </Link>
             </CardHeader>
             <Table>
@@ -197,7 +194,7 @@ export default function AdminDashboard() {
               <TableBody>
                 {recentNews.map((news) => (
                   <TableRow key={news.id}>
-                    <TableCell className="font-bold text-[#052552] max-w-sm truncate">
+                    <TableCell className="font-semibold text-[#1f1b4d] max-w-sm truncate">
                       {news.title}
                     </TableCell>
                     <TableCell>
@@ -223,28 +220,28 @@ export default function AdminDashboard() {
         {/* Right 4 Cols: Active Announcements */}
         <div className="lg:col-span-4">
           <Card className="h-full flex flex-col">
-            <CardHeader className="bg-slate-50/50">
+            <CardHeader>
               <div className="flex items-center gap-2">
-                <span className="text-lg">📢</span>
+                <Icon name="megaphone" size={18} className="text-violet-600" />
                 <CardTitle>Pengumuman Aktif</CardTitle>
               </div>
               <Link
                 href="/admin/pengumuman"
-                className="text-xs font-bold text-[#0b3b73] hover:text-[#ffc400] transition-colors"
+                className="text-xs font-bold text-[#5b3fe0] hover:text-[#7c5cff] transition-colors"
               >
-                Semua →
+                Semua
               </Link>
             </CardHeader>
             <CardContent className="space-y-3 flex-1">
               {recentAnnouncements.map((ann) => (
                 <div
                   key={ann.id}
-                  className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-amber-50/30 transition-colors space-y-1.5"
+                  className="p-3.5 rounded-2xl border border-white/80 bg-white/50 hover:bg-white/80 transition-colors space-y-1.5"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <Badge variant="neutral">{ann.category}</Badge>
                     {ann.urgent ? (
-                      <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-semibold text-rose-600 bg-rose-500/15 px-2 py-0.5 rounded-full">
                         PENTING
                       </span>
                     ) : (
@@ -253,7 +250,7 @@ export default function AdminDashboard() {
                       </span>
                     )}
                   </div>
-                  <h4 className="text-xs font-bold text-[#052552] leading-snug line-clamp-2">
+                  <h4 className="text-xs font-semibold text-[#1f1b4d] leading-snug line-clamp-2">
                     {ann.title}
                   </h4>
                 </div>
@@ -265,28 +262,28 @@ export default function AdminDashboard() {
 
       {/* ── System Activity Log ── */}
       <Card>
-        <CardHeader className="bg-slate-50/50">
+        <CardHeader>
           <div className="flex items-center gap-2">
-            <span className="text-lg">🕐</span>
+            <Icon name="clock" size={18} className="text-violet-600" />
             <CardTitle>Riwayat Aktivitas & Pembaruan Sistem</CardTitle>
           </div>
         </CardHeader>
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-white/60">
           {[
-            { text: "Admin menerbitkan artikel: 'Dikbud Konsel Dorong Pemanfaatan Teknologi Digital'", time: "10 menit lalu", icon: "✍️" },
-            { text: "Sistem menyinkronkan data Dapodik Semester Ganjil 2026", time: "1 jam lalu", icon: "🔄" },
-            { text: "Surat Edaran Petunjuk Teknis ANBK 2026 diunggah ke portal", time: "3 jam lalu", icon: "📢" },
-            { text: "Data direktori SDN 12 Andoolo diperbarui", time: "Kemarin", icon: "🏫" },
+            { text: "Admin menerbitkan artikel: 'Dikbud Konsel Dorong Pemanfaatan Teknologi Digital'", time: "10 menit lalu", icon: "edit" },
+            { text: "Sistem menyinkronkan data Dapodik Semester Ganjil 2026", time: "1 jam lalu", icon: "refresh" },
+            { text: "Surat Edaran Petunjuk Teknis ANBK 2026 diunggah ke portal", time: "3 jam lalu", icon: "megaphone" },
+            { text: "Data direktori SDN 12 Andoolo diperbarui", time: "Kemarin", icon: "school" },
           ].map((act, i) => (
             <div
               key={i}
-              className="px-6 py-3.5 flex items-center justify-between gap-4 text-xs hover:bg-slate-50/50 transition-colors"
+              className="px-6 py-3.5 flex items-center justify-between gap-4 text-xs hover:bg-white/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <span className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-sm">
-                  {act.icon}
+                <span className="w-8 h-8 rounded-xl bg-violet-500/15 text-violet-600 flex items-center justify-center">
+                  <Icon name={act.icon} size={15} />
                 </span>
-                <span className="font-semibold text-[#052552]">{act.text}</span>
+                <span className="font-semibold text-[#1f1b4d]">{act.text}</span>
               </div>
               <span className="text-slate-400 whitespace-nowrap">{act.time}</span>
             </div>

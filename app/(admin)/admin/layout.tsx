@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { adminMenu, MenuItem } from "../_data/admin-menu";
+import { EMOJI_ICON, Icon } from "../_components/admin-icons";
 
 function isItemActive(item: MenuItem, pathname: string): boolean {
   if (item.path && item.path === pathname) return true;
@@ -50,35 +51,37 @@ function MenuItemRenderer({
 
   const baseClass =
     level === 1
-      ? `w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-150 cursor-pointer select-none text-left appearance-none border-0 bg-transparent ${
+      ? `w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-[13px] transition-all duration-150 cursor-pointer select-none text-left ${
           isExactActive
-            ? "bg-[#ffc400] text-[#052552] font-bold shadow-sm"
+            ? "bg-white text-[#5b3fe0] font-semibold shadow-[0_4px_14px_rgba(88,76,200,.14)]"
             : isActive
-            ? "text-white bg-white/10 font-semibold"
-            : "text-slate-200 hover:text-white hover:bg-white/5 font-semibold"
+            ? "text-[#5b3fe0] font-semibold"
+            : "text-[#4a4770] font-medium hover:bg-white/60"
         }`
-      : `w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer select-none text-left appearance-none border-0 bg-transparent ${
+      : `w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-150 cursor-pointer select-none text-left ${
           isExactActive
-            ? "bg-[#ffc400] text-[#052552] shadow-xs font-bold"
-            : isActive
-            ? "text-[#ffc400] bg-white/5 font-semibold"
-            : "text-slate-300 hover:text-white hover:bg-white/10 font-medium"
+            ? "bg-white text-[#5b3fe0] font-semibold shadow-[0_2px_10px_rgba(88,76,200,.12)]"
+            : "text-[#6b6f8f] font-medium hover:bg-white/60 hover:text-[#5b3fe0]"
         }`;
 
   const innerContent = (
     <>
-      <span className={level === 1 ? "text-base shrink-0 leading-none" : "text-sm shrink-0 leading-none"}>
-        {item.icon}
-      </span>
+      {level === 1 ? (
+        <Icon name={EMOJI_ICON[item.icon] ?? "dot"} size={18} />
+      ) : (
+        <span
+          className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+            isExactActive ? "bg-[#7c5cff]" : "bg-[#b9b6dc]"
+          }`}
+        />
+      )}
       <span className="flex-1 truncate leading-normal text-left">{item.title}</span>
       {hasChildren && (
-        <span
-          className={`text-[10px] text-slate-400 transition-transform duration-200 shrink-0 ml-1 leading-none ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        >
-          ▲
-        </span>
+        <Icon
+          name="chevron"
+          size={14}
+          className={`text-[#9a97c0] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        />
       )}
     </>
   );
@@ -86,20 +89,14 @@ function MenuItemRenderer({
   if (hasChildren && item.children) {
     return (
       <div className="space-y-1">
-        <button
-          type="button"
-          onClick={() => toggleMenu(menuKey)}
-          className={baseClass}
-        >
+        <button type="button" onClick={() => toggleMenu(menuKey)} className={baseClass}>
           {innerContent}
         </button>
 
         {isOpen && (
           <div
             className={`space-y-1 pt-0.5 pb-1 ${
-              level === 1
-                ? "ml-4 pl-3 border-l-2 border-white/15"
-                : "ml-3 pl-2.5 border-l border-white/10"
+              level === 1 ? "ml-5 pl-3 border-l border-[#d9d6f3]" : "ml-3 pl-2.5 border-l border-[#e3e0f6]"
             }`}
           >
             {item.children.map((child) => (
@@ -120,11 +117,7 @@ function MenuItemRenderer({
   }
 
   return (
-    <Link
-      href={item.path ?? "#"}
-      onClick={onItemClick}
-      className={baseClass}
-    >
+    <Link href={item.path ?? "#"} onClick={onItemClick} className={baseClass}>
       {innerContent}
     </Link>
   );
@@ -163,11 +156,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pageTitle = findPageTitle(adminMenu, pathname) ?? "Dashboard";
 
   return (
-    <div className="min-h-screen bg-[#f8fafd] text-[#052552] flex flex-col antialiased">
+    <div className="admin-shell min-h-screen flex flex-col antialiased">
       {/* ── Mobile Sidebar Overlay ── */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 lg:hidden"
+          className="fixed inset-0 bg-[#1f1b4d]/30 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
           aria-hidden="true"
         />
@@ -175,50 +168,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* ── Sidebar ── */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#052552] text-white flex flex-col shadow-2xl transition-transform duration-200 ease-in-out border-r border-[#0a356e] ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        className={`glass fixed top-3 bottom-3 left-3 z-50 w-72 rounded-[28px] flex flex-col transition-transform duration-200 ease-in-out ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-[110%] lg:translate-x-0"
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-5 bg-[#031b3c] border-b border-white/10 shrink-0">
-          <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-9 h-9 relative flex-shrink-0">
-              <Image
-                src="/img/logo_loght.png"
-                width={36}
-                height={36}
-                alt="Logo Dikbud"
-                className="object-contain"
-              />
+        <div className="h-[72px] flex items-center justify-between px-5 shrink-0">
+          <Link href="/admin" className="flex items-center gap-3 rounded-2xl bg-white/60 border border-white/80 px-3 py-2 flex-1 mr-2 shadow-[0_2px_10px_rgba(88,76,200,.08)]">
+            <div className="w-8 h-8 relative flex-shrink-0">
+              <Image src="/img/logo_loght.png" width={32} height={32} alt="Logo Dikbud" className="object-contain" />
             </div>
-            <div className="flex flex-col leading-tight">
-              <span className="font-extrabold text-sm tracking-tight text-white flex items-center gap-1.5">
-                Dikbud Admin
-                <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-[#ffc400] text-[#052552]">
-                  PRO
-                </span>
-              </span>
-              <span className="text-[10px] text-slate-400 font-medium">
-                Kab. Konawe Selatan
-              </span>
+            <div className="flex flex-col leading-tight min-w-0">
+              <span className="font-semibold text-sm text-[#1f1b4d] truncate">Dikbud Admin</span>
+              <span className="text-[10px] text-[#8a87ad] truncate">Kab. Konawe Selatan</span>
             </div>
           </Link>
 
-          {/* Close button on mobile */}
           <button
             type="button"
-            className="lg:hidden w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10"
+            className="lg:hidden w-8 h-8 rounded-xl flex items-center justify-center text-[#6b6f8f] hover:bg-white/70"
             onClick={() => setSidebarOpen(false)}
+            aria-label="Tutup menu"
           >
-            ✕
+            <Icon name="close" size={16} />
           </button>
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1.5 scrollbar-thin">
-          <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            Menu Utama
-          </div>
+        <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
+          <div className="px-3 py-1.5 text-[11px] font-medium text-[#9a97c0]">Menu utama</div>
 
           {adminMenu.map((item) => (
             <MenuItemRenderer
@@ -234,73 +212,67 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-3 bg-[#031b3c] border-t border-white/10 space-y-1 shrink-0">
+        <div className="p-3 border-t border-white/60 space-y-1 shrink-0">
           <Link
             href="/"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+            className="flex items-center gap-3 px-3 py-2 rounded-2xl text-xs font-medium text-[#4a4770] hover:bg-white/60 transition-colors"
           >
-            <span>🌐</span>
+            <Icon name="globe" size={16} />
             <span>Lihat Website Publik</span>
           </Link>
           <Link
             href="/login"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-300 hover:text-white hover:bg-rose-600 transition-colors"
+            className="flex items-center gap-3 px-3 py-2 rounded-2xl text-xs font-medium text-rose-500 hover:bg-rose-500/10 transition-colors"
           >
-            <span>🚪</span>
+            <Icon name="logout" size={16} />
             <span>Keluar Akun</span>
           </Link>
         </div>
       </aside>
 
       {/* ── Main Area ── */}
-      <div className="flex-1 lg:pl-72 flex flex-col min-w-0">
+      <div className="flex-1 lg:pl-[312px] flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 px-4 sm:px-8 flex items-center justify-between shadow-xs">
-          {/* Left: Mobile Toggle & Page Title */}
-          <div className="flex items-center gap-3">
+        <header className="glass sticky top-3 z-30 mx-3 lg:mx-4 mt-3 h-16 rounded-[24px] px-4 sm:px-6 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
-              className="lg:hidden w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 hover:bg-slate-200 transition-colors"
+              className="lg:hidden w-10 h-10 rounded-2xl bg-white/70 flex items-center justify-center text-[#4a4770] hover:bg-white transition-colors"
               onClick={() => setSidebarOpen(true)}
               aria-label="Buka Menu"
             >
-              ☰
+              <Icon name="menu" size={18} />
             </button>
 
-            <div className="flex flex-col">
-              <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
-                <Link href="/admin" className="hover:text-slate-600">Admin</Link>
-                <span>›</span>
-                <span className="text-slate-600 font-bold">{pageTitle}</span>
+            <div className="flex flex-col min-w-0">
+              <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-medium text-[#9a97c0]">
+                <Link href="/admin" className="hover:text-[#5b3fe0]">Admin</Link>
+                <span>/</span>
+                <span className="text-[#6b6f8f]">{pageTitle}</span>
               </div>
-              <h1 className="text-base sm:text-lg font-black text-[#052552] tracking-tight">
+              <h1 className="text-base sm:text-lg font-semibold text-[#1f1b4d] tracking-tight truncate">
                 {pageTitle}
               </h1>
             </div>
           </div>
 
-          {/* Right: Notifications & User Profile */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3">
             <button
               type="button"
-              className="relative w-9 h-9 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center text-sm transition-colors cursor-pointer"
+              className="relative w-10 h-10 rounded-2xl bg-white/70 text-[#4a4770] hover:bg-white flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Notifikasi"
             >
-              🔔
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white" />
+              <Icon name="bell" size={18} />
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
             </button>
 
-            <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
-              <div className="w-9 h-9 rounded-xl bg-[#ffc400] text-[#052552] font-black text-sm flex items-center justify-center shadow-xs">
+            <div className="flex items-center gap-2.5 pl-3 border-l border-white/70">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-b from-[#8b6dff] to-[#6a49f0] text-white font-semibold text-sm flex items-center justify-center shadow-[0_4px_12px_rgba(124,92,255,.35)]">
                 A
               </div>
               <div className="hidden sm:flex flex-col leading-none">
-                <span className="text-xs font-bold text-[#052552]">
-                  Administrator
-                </span>
-                <span className="text-[10px] text-slate-400 mt-1">
-                  Dikbud Konsel
-                </span>
+                <span className="text-xs font-semibold text-[#1f1b4d]">Administrator</span>
+                <span className="text-[10px] text-[#8a87ad] mt-1">Dikbud Konsel</span>
               </div>
             </div>
           </div>

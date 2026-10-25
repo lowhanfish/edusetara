@@ -120,18 +120,18 @@ export function RegistrationManagement() {
   return (
     <div className="space-y-6">
       <nav className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-slate-500" aria-label="Breadcrumb">
-        <Link href="/admin" className="hover:text-[#052552]">Dashboard</Link><span>/</span>
+        <Link href="/admin" className="hover:text-[#1f1b4d]">Dashboard</Link><span>/</span>
         <span>Data Master</span><span>/</span><span>Auth</span><span>/</span>
-        <span className="font-bold text-[#052552]">Registrasi</span>
+        <span className="font-bold text-[#1f1b4d]">Registrasi</span>
       </nav>
 
       <div className="border-b border-slate-200/80 pb-5">
         <div className="mb-2 flex items-center gap-2">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#ffc400] text-xl shadow-sm">👤</span>
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#7c5cff] text-xl shadow-sm">👤</span>
           <Badge variant="gold">Data Master · Auth</Badge>
         </div>
-        <h1 className="text-2xl font-black tracking-tight text-[#052552]">Registrasi Akses ASN</h1>
-        <p className="mt-1 max-w-3xl text-xs leading-relaxed text-[#58708d]">
+        <h1 className="text-2xl font-black tracking-tight text-[#1f1b4d]">Registrasi Akses ASN</h1>
+        <p className="mt-1 max-w-3xl text-xs leading-relaxed text-[#6b6f8f]">
           Data ASN berasal dari SIMPEG. Modul ini hanya mengatur group dan cakupan akses; akun tidak dibuat ulang di aplikasi ini.
         </p>
       </div>
@@ -145,7 +145,7 @@ export function RegistrationManagement() {
         ].map((stat) => (
           <div key={stat.label} className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
             <span className={`grid h-10 w-10 place-items-center rounded-xl text-lg font-black ${stat.tone}`}>{stat.icon}</span>
-            <div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{stat.label}</p><p className="text-xl font-black text-[#052552]">{stat.value}</p></div>
+            <div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{stat.label}</p><p className="text-xl font-black text-[#1f1b4d]">{stat.value}</p></div>
           </div>
         ))}
       </section>
@@ -158,10 +158,10 @@ export function RegistrationManagement() {
 
       <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
         <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50/70 p-4 lg:flex-row lg:items-center lg:justify-between">
-          <div><h2 className="text-sm font-extrabold text-[#052552]">Daftar ASN Terintegrasi</h2><p className="mt-0.5 text-[11px] text-slate-500">Data contoh digunakan untuk rancangan antarmuka integrasi SIMPEG.</p></div>
+          <div><h2 className="text-sm font-extrabold text-[#1f1b4d]">Daftar ASN Terintegrasi</h2><p className="mt-0.5 text-[11px] text-slate-500">Data contoh digunakan untuk rancangan antarmuka integrasi SIMPEG.</p></div>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Cari nama, NIP, atau satuan pendidikan..." className="h-9 min-w-0 rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-[#ffc400] sm:w-72" />
-            <select value={groupFilter} onChange={(event) => { setGroupFilter(event.target.value); setPage(1); }} className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 outline-none focus:border-[#ffc400]">
+            <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Cari nama, NIP, atau satuan pendidikan..." className="h-9 min-w-0 rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-[#7c5cff] sm:w-72" />
+            <select value={groupFilter} onChange={(event) => { setGroupFilter(event.target.value); setPage(1); }} className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 outline-none focus:border-[#7c5cff]">
               <option value="all">Semua Group</option><option value="unassigned">Belum Diatur</option>
               {groups.map((group) => <option key={group.id} value={group.id}>{group.title}</option>)}
             </select>
@@ -178,7 +178,7 @@ export function RegistrationManagement() {
                 const group = getGroup(record.groupId);
                 return (
                   <tr key={record.id} className="hover:bg-slate-50/70">
-                    <td className="px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#052552] text-xs font-black text-white">{initials(record.name)}</span><div><p className="text-sm font-bold text-[#052552]">{record.name}</p><p className="text-[10px] text-slate-500">{record.position}</p></div></div></td>
+                    <td className="px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#1f1b4d] text-xs font-black text-white">{initials(record.name)}</span><div><p className="text-sm font-bold text-[#1f1b4d]">{record.name}</p><p className="text-[10px] text-slate-500">{record.position}</p></div></div></td>
                     <td className="px-4 py-4"><code className="whitespace-nowrap rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">{record.nip}</code></td>
                     <td className="px-4 py-4"><p className="max-w-56 text-xs font-semibold text-slate-700">{record.unit}</p></td>
                     <td className="px-4 py-4">{group ? <div><Badge variant={group.level === 1 ? "info" : "success"}>{group.title}</Badge><p className="mt-1 text-[9px] font-semibold text-slate-400">Level {group.level}</p></div> : <Badge variant="warning">Belum diatur</Badge>}</td>
@@ -202,7 +202,7 @@ export function RegistrationManagement() {
               type="button"
               onClick={() => setPage((value) => Math.max(1, value - 1))}
               disabled={currentPage === 1}
-              className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-600 hover:border-slate-300 hover:text-[#052552] disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-600 hover:border-slate-300 hover:text-[#1f1b4d] disabled:cursor-not-allowed disabled:opacity-40"
             >
               ‹ Sebelumnya
             </button>
@@ -213,8 +213,8 @@ export function RegistrationManagement() {
                 onClick={() => setPage(pageNumber)}
                 className={`grid h-8 min-w-8 place-items-center rounded-lg border px-2 text-[11px] font-extrabold ${
                   currentPage === pageNumber
-                    ? "border-[#052552] bg-[#052552] text-white"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-[#ffc400]"
+                    ? "border-[#1f1b4d] bg-[#1f1b4d] text-white"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-[#7c5cff]"
                 }`}
                 aria-label={`Halaman ${pageNumber}`}
                 aria-current={currentPage === pageNumber ? "page" : undefined}
@@ -226,7 +226,7 @@ export function RegistrationManagement() {
               type="button"
               onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
               disabled={currentPage === totalPages}
-              className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-600 hover:border-slate-300 hover:text-[#052552] disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-600 hover:border-slate-300 hover:text-[#1f1b4d] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Berikutnya ›
             </button>
@@ -244,8 +244,8 @@ export function RegistrationManagement() {
       >
         {selectedRecord && (
           <form id="access-form" onSubmit={saveAccess} className="space-y-5">
-            <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"><span className="grid h-11 w-11 place-items-center rounded-xl bg-[#052552] text-xs font-black text-white">{initials(selectedRecord.name)}</span><div><p className="text-sm font-extrabold text-[#052552]">{selectedRecord.name}</p><p className="text-[11px] text-slate-500">{selectedRecord.unit}</p></div></div>
-            <div className="grid gap-4 sm:grid-cols-2"><div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">ID Registrasi</p><p className="mt-1 text-sm font-bold text-[#052552]">{selectedRecord.id}</p></div><div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">NIP</p><p className="mt-1 text-sm font-bold text-[#052552]">{selectedRecord.nip}</p></div></div>
+            <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"><span className="grid h-11 w-11 place-items-center rounded-xl bg-[#1f1b4d] text-xs font-black text-white">{initials(selectedRecord.name)}</span><div><p className="text-sm font-extrabold text-[#1f1b4d]">{selectedRecord.name}</p><p className="text-[11px] text-slate-500">{selectedRecord.unit}</p></div></div>
+            <div className="grid gap-4 sm:grid-cols-2"><div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">ID Registrasi</p><p className="mt-1 text-sm font-bold text-[#1f1b4d]">{selectedRecord.id}</p></div><div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">NIP</p><p className="mt-1 text-sm font-bold text-[#1f1b4d]">{selectedRecord.nip}</p></div></div>
             <Select label="Role Group" value={selectedGroupId} onChange={(event) => setSelectedGroupId(event.target.value)} required helperText="Level akses mengikuti konfigurasi group yang dipilih."><option value="">— Pilih role group —</option>{groups.map((group) => <option key={group.id} value={group.id}>{group.title} · Level {group.level}</option>)}</Select>
             {selectedGroupId && <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900"><strong>Cakupan:</strong> {getGroup(selectedGroupId)?.level === 1 ? "semua satuan pendidikan." : `hanya unit ${selectedRecord.unit}.`}</div>}
           </form>
@@ -253,7 +253,7 @@ export function RegistrationManagement() {
       </Modal>
 
       <Modal isOpen={modalMode === "detail"} onClose={() => setModalMode(null)} title="Detail ASN" description="Informasi referensi akun yang diterima dari sumber data kepegawaian." maxWidth="md" footer={<Button type="button" variant="primary" onClick={() => setModalMode(null)}>Tutup</Button>}>
-        {selectedRecord && <div className="space-y-5"><div className="flex items-center gap-4"><span className="grid h-14 w-14 place-items-center rounded-2xl bg-[#052552] text-sm font-black text-white">{initials(selectedRecord.name)}</span><div><h3 className="text-base font-extrabold text-[#052552]">{selectedRecord.name}</h3><p className="text-xs text-slate-500">{selectedRecord.position}</p></div></div><dl className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2"><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">NIP</dt><dd className="mt-1 text-xs font-bold text-[#052552]">{selectedRecord.nip}</dd></div><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">ID Registrasi</dt><dd className="mt-1 text-xs font-bold text-[#052552]">{selectedRecord.id}</dd></div><div className="sm:col-span-2"><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Satuan Pendidikan</dt><dd className="mt-1 text-xs font-bold text-[#052552]">{selectedRecord.unit}</dd></div><div className="sm:col-span-2"><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Role Group</dt><dd className="mt-1">{getGroup(selectedRecord.groupId) ? <Badge variant="info">{getGroup(selectedRecord.groupId)?.title}</Badge> : <Badge variant="warning">Belum diatur</Badge>}</dd></div><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Dibuat pada</dt><dd className="mt-1 text-xs font-bold text-[#052552]">{formatAuditDate(selectedRecord.created_at)}</dd></div><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Dibuat oleh</dt><dd className="mt-1 text-xs font-bold text-[#052552]">{selectedRecord.created_by}</dd></div></dl></div>}
+        {selectedRecord && <div className="space-y-5"><div className="flex items-center gap-4"><span className="grid h-14 w-14 place-items-center rounded-2xl bg-[#1f1b4d] text-sm font-black text-white">{initials(selectedRecord.name)}</span><div><h3 className="text-base font-extrabold text-[#1f1b4d]">{selectedRecord.name}</h3><p className="text-xs text-slate-500">{selectedRecord.position}</p></div></div><dl className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2"><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">NIP</dt><dd className="mt-1 text-xs font-bold text-[#1f1b4d]">{selectedRecord.nip}</dd></div><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">ID Registrasi</dt><dd className="mt-1 text-xs font-bold text-[#1f1b4d]">{selectedRecord.id}</dd></div><div className="sm:col-span-2"><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Satuan Pendidikan</dt><dd className="mt-1 text-xs font-bold text-[#1f1b4d]">{selectedRecord.unit}</dd></div><div className="sm:col-span-2"><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Role Group</dt><dd className="mt-1">{getGroup(selectedRecord.groupId) ? <Badge variant="info">{getGroup(selectedRecord.groupId)?.title}</Badge> : <Badge variant="warning">Belum diatur</Badge>}</dd></div><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Dibuat pada</dt><dd className="mt-1 text-xs font-bold text-[#1f1b4d]">{formatAuditDate(selectedRecord.created_at)}</dd></div><div><dt className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Dibuat oleh</dt><dd className="mt-1 text-xs font-bold text-[#1f1b4d]">{selectedRecord.created_by}</dd></div></dl></div>}
       </Modal>
     </div>
   );

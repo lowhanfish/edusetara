@@ -174,10 +174,10 @@ export default function PengumumanAdminPage() {
               <TableRow key={item.id}>
                 <TableCell className="max-w-md">
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs font-mono font-semibold text-[#0b3b73]">
+                    <span className="text-xs font-mono font-semibold text-[#5b3fe0]">
                       {item.number}
                     </span>
-                    <span className="font-bold text-[#052552] line-clamp-2">
+                    <span className="font-bold text-[#1f1b4d] line-clamp-2">
                       {item.title}
                     </span>
                     {item.important && (
@@ -351,7 +351,7 @@ export default function PengumumanAdminPage() {
             />
             <label
               htmlFor="ann-important"
-              className="text-xs font-semibold text-[#052552] cursor-pointer"
+              className="text-xs font-semibold text-[#1f1b4d] cursor-pointer"
             >
               Tandai sebagai Pengumuman Mendesak / Penting (Badge Merah)
             </label>
