@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
 import { Icon } from "../admin-icons";
 
 export interface RichTextEditorProps {
@@ -30,6 +31,8 @@ export function RichTextEditor({
   className = "",
   onChange,
 }: RichTextEditorProps) {
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -46,6 +49,14 @@ export function RichTextEditor({
           rel: "noopener noreferrer",
         },
       }),
+      Image.configure({
+        inline: false,
+        allowBase64: true,
+        HTMLAttributes: {
+          class:
+            "rounded-2xl max-w-full my-4 shadow-sm border border-amber-200/80 mx-auto block",
+        },
+      }),
     ],
     content: value,
     immediatelyRender: false,
@@ -56,6 +67,66 @@ export function RichTextEditor({
         style: `min-height: ${
           typeof minHeight === "number" ? `${minHeight}px` : minHeight
         };`,
+      },
+      // Mendukung seret & lepas (Drag & Drop) gambar langsung ke dalam editor
+      handleDrop: (view, event, _slice, moved) => {
+        if (!moved && event.dataTransfer?.files?.[0]) {
+          const file = event.dataTransfer.files[0];
+          if (file.type.startsWith("image/")) {
+            event.preventDefault();
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const src = e.target?.result as string;
+              if (src) {
+                const node = view.state.schema.nodes.image.create({
+                  src,
+                  alt: file.name,
+                });
+                const coordinates = view.posAtCoords({
+                  left: event.clientX,
+                  top: event.clientY,
+                });
+                const tr = view.state.tr.insert(
+                  coordinates?.pos ?? view.state.selection.from,
+                  node
+                );
+                view.dispatch(tr);
+              }
+            };
+            reader.readAsDataURL(file);
+            return true;
+          }
+        }
+        return false;
+      },
+      // Mendukung Paste gambar langsung dari clipboard (Ctrl+V screenshot / copy gambar)
+      handlePaste: (view, event) => {
+        const items = event.clipboardData?.items;
+        if (items) {
+          for (let i = 0; i < items.length; i++) {
+            if (items[i].type.startsWith("image/")) {
+              const file = items[i].getAsFile();
+              if (file) {
+                event.preventDefault();
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  const src = e.target?.result as string;
+                  if (src) {
+                    const node = view.state.schema.nodes.image.create({
+                      src,
+                      alt: file.name,
+                    });
+                    const tr = view.state.tr.replaceSelectionWith(node);
+                    view.dispatch(tr);
+                  }
+                };
+                reader.readAsDataURL(file);
+                return true;
+              }
+            }
+          }
+        }
+        return false;
       },
     },
     onUpdate: ({ editor }) => {
@@ -90,6 +161,42 @@ export function RichTextEditor({
       .setLink({ href: url })
       .run();
   }, [editor]);
+
+  // Upload gambar dari komputer
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editor) return;
+
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      const src = uploadEvent.target?.result as string;
+      if (src) {
+        editor.chain().focus().setImage({ src, alt: file.name }).run();
+      }
+    };
+    reader.readAsDataURL(file);
+    // Reset file input agar file yang sama bisa dipilih ulang jika diinginkan
+    if (imageInputRef.current) {
+      imageInputRef.current.value = "";
+    }
+  };
+
+  // Pilihan sisipkan gambar: pilih file atau masukkan URL
+  const promptImage = () => {
+    if (!editor) return;
+    const choice = window.confirm(
+      "Klik [OK] untuk mengunggah gambar dari komputer Anda,\natau [Batal] untuk memasukkan URL gambar web."
+    );
+
+    if (choice) {
+      imageInputRef.current?.click();
+    } else {
+      const url = window.prompt("Masukkan URL Gambar Web (https://...):");
+      if (url) {
+        editor.chain().focus().setImage({ src: url }).run();
+      }
+    }
+  };
 
   if (!editor) {
     return (
@@ -126,6 +233,15 @@ export function RichTextEditor({
           {required && <span className="text-red-500">*</span>}
         </label>
       )}
+
+      {/* Hidden file input untuk upload gambar langsung dari komputer */}
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageUpload}
+      />
 
       <div
         className={`w-full rounded-2xl overflow-hidden border bg-white/90 backdrop-blur transition-all duration-150 shadow-xs ${
@@ -256,7 +372,7 @@ export function RichTextEditor({
 
           <span className="w-px h-4 bg-amber-200/80 mx-1" aria-hidden="true" />
 
-          {/* Quote & Link */}
+          {/* Quote, Link, Image */}
           <button
             type="button"
             title="Kutipan (Blockquote)"
@@ -276,6 +392,16 @@ export function RichTextEditor({
             }`}
           >
             <Icon name="link" size={14} />
+          </button>
+          <button
+            type="button"
+            title="Sisipkan Gambar (Upload dari Komputer / URL)"
+            onClick={promptImage}
+            className={`${btnBase} ${
+              editor.isActive("image") ? btnActive : btnInactive
+            }`}
+          >
+            <Icon name="image" size={14} />
           </button>
           <button
             type="button"
