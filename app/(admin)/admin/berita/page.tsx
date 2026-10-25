@@ -202,7 +202,7 @@ export default function BeritaAdminPage() {
               onClick={() => setCategoryFilter(cat)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                 categoryFilter === cat
-                  ? "bg-[#7c5cff] text-white"
+                  ? "bg-[#f5b82e] text-[#3b2a05]"
                   : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
               }`}
             >
@@ -237,10 +237,10 @@ export default function BeritaAdminPage() {
                 <TableRow key={item.id}>
                   <TableCell className="max-w-md">
                     <div className="flex flex-col gap-1">
-                      <span className="font-bold text-[#1f1b4d] line-clamp-1">
+                      <span className="font-bold text-[#2d2410] line-clamp-1">
                         {item.title}
                       </span>
-                      <span className="text-xs text-[#6b6f8f] line-clamp-1">
+                      <span className="text-xs text-[#7d7152] line-clamp-1">
                         {item.excerpt}
                       </span>
                       {item.featured && (
@@ -428,7 +428,7 @@ export default function BeritaAdminPage() {
             />
             <label
               htmlFor="featured-check"
-              className="text-xs font-semibold text-[#1f1b4d] cursor-pointer"
+              className="text-xs font-semibold text-[#2d2410] cursor-pointer"
             >
               Jadikan sebagai Berita Utama (Tampil di carousel/highlight beranda)
             </label>

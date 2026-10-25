@@ -213,10 +213,10 @@ export default function SekolahAdminPage() {
           <TableBody>
             {filtered.map((item) => (
               <TableRow key={item.npsn}>
-                <TableCell className="font-mono text-xs font-bold text-[#5b3fe0] whitespace-nowrap">
+                <TableCell className="font-mono text-xs font-bold text-[#a86a00] whitespace-nowrap">
                   {item.npsn}
                 </TableCell>
-                <TableCell className="font-bold text-[#1f1b4d] max-w-sm">
+                <TableCell className="font-bold text-[#2d2410] max-w-sm">
                   <div>{item.name}</div>
                   {item.url && (
                     <a

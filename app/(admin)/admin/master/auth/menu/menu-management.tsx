@@ -207,19 +207,19 @@ function MenuTreeRow({
             onClick={() => hasChildren && onToggle(item.id)}
             className={`mr-2 grid h-6 w-6 shrink-0 place-items-center rounded-md text-[10px] transition-colors ${
               hasChildren
-                ? "text-slate-500 hover:bg-slate-200 hover:text-[#1f1b4d]"
+                ? "text-slate-500 hover:bg-slate-200 hover:text-[#2d2410]"
                 : "text-slate-300 cursor-default"
             }`}
             aria-label={hasChildren ? `${expanded ? "Tutup" : "Buka"} ${item.title}` : undefined}
           >
             {hasChildren ? (expanded ? "▼" : "▶") : "•"}
           </button>
-          <span className="mr-3 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#f1edff] text-lg ring-1 ring-[#7c5cff]/25">
+          <span className="mr-3 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#fff6dc] text-lg ring-1 ring-[#f5b82e]/25">
             {item.icon || "📁"}
           </span>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="truncate text-sm font-bold text-[#1f1b4d]">{item.title}</span>
+              <span className="truncate text-sm font-bold text-[#2d2410]">{item.title}</span>
               {level === 0 ? (
                 <Badge size="sm" variant="gold">Induk</Badge>
               ) : (
@@ -255,7 +255,7 @@ function MenuTreeRow({
           <button
             type="button"
             onClick={() => onAddChild(item)}
-            className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 bg-white text-sm text-slate-600 hover:border-[#7c5cff] hover:bg-[#f6f3ff] hover:text-[#1f1b4d]"
+            className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 bg-white text-sm text-slate-600 hover:border-[#f5b82e] hover:bg-[#fffaea] hover:text-[#2d2410]"
             aria-label={`Tambah submenu ke ${item.title}`}
             title="Tambah submenu"
           >
@@ -407,23 +407,23 @@ export function MenuManagement() {
   return (
     <div className="space-y-6">
       <nav className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-slate-500" aria-label="Breadcrumb">
-        <Link href="/admin" className="hover:text-[#1f1b4d]">Dashboard</Link>
+        <Link href="/admin" className="hover:text-[#2d2410]">Dashboard</Link>
         <span>/</span>
         <span>Data Master</span>
         <span>/</span>
         <span>Auth</span>
         <span>/</span>
-        <span className="font-bold text-[#1f1b4d]">Menu</span>
+        <span className="font-bold text-[#2d2410]">Menu</span>
       </nav>
 
       <div className="flex flex-col gap-4 border-b border-slate-200/80 pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="mb-2 flex items-center gap-2">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#7c5cff] text-xl text-white shadow-sm">📑</span>
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#f5b82e] text-xl text-[#3b2a05] shadow-sm">📑</span>
             <Badge variant="gold">Data Master · Auth</Badge>
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-[#1f1b4d]">Manajemen Menu</h1>
-          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-[#6b6f8f]">
+          <h1 className="text-2xl font-black tracking-tight text-[#2d2410]">Manajemen Menu</h1>
+          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-[#7d7152]">
             Susun menu dan submenu yang tampil pada sidebar admin. Setiap menu dapat memiliki turunan tanpa batas tingkat.
           </p>
         </div>
@@ -437,13 +437,13 @@ export function MenuManagement() {
           { label: "Total Menu", value: totalMenus, icon: "📚", tone: "bg-sky-50 text-sky-700" },
           { label: "Menu Utama", value: rootMenus, icon: "🗂️", tone: "bg-amber-50 text-amber-700" },
           { label: "Submenu", value: submenuCount, icon: "↳", tone: "bg-emerald-50 text-emerald-700" },
-          { label: "Kedalaman", value: `${depth} level`, icon: "🌳", tone: "bg-violet-50 text-violet-700" },
+          { label: "Kedalaman", value: `${depth} level`, icon: "🌳", tone: "bg-amber-50 text-amber-800" },
         ].map((stat) => (
           <div key={stat.label} className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
             <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl text-lg font-black ${stat.tone}`}>{stat.icon}</span>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{stat.label}</p>
-              <p className="mt-0.5 text-xl font-black text-[#1f1b4d]">{stat.value}</p>
+              <p className="mt-0.5 text-xl font-black text-[#2d2410]">{stat.value}</p>
             </div>
           </div>
         ))}
@@ -459,7 +459,7 @@ export function MenuManagement() {
       <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
         <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50/70 p-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-sm font-extrabold text-[#1f1b4d]">Struktur Menu Admin</h2>
+            <h2 className="text-sm font-extrabold text-[#2d2410]">Struktur Menu Admin</h2>
             <p className="mt-0.5 text-[11px] text-slate-500">Gunakan tombol panah untuk membuka hierarki submenu.</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -470,7 +470,7 @@ export function MenuManagement() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Cari nama, path, atau ID menu..."
-                className="h-9 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-xs text-[#1f1b4d] outline-none focus:border-[#7c5cff] focus:ring-3 focus:ring-[#7c5cff]/15"
+                className="h-9 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-xs text-[#2d2410] outline-none focus:border-[#f5b82e] focus:ring-3 focus:ring-[#f5b82e]/15"
               />
             </div>
             <div className="flex gap-2">
@@ -504,7 +504,7 @@ export function MenuManagement() {
           ) : (
             <div className="min-w-[780px] px-6 py-16 text-center">
               <div className="text-3xl">🔍</div>
-              <h3 className="mt-3 text-sm font-bold text-[#1f1b4d]">Menu tidak ditemukan</h3>
+              <h3 className="mt-3 text-sm font-bold text-[#2d2410]">Menu tidak ditemukan</h3>
               <p className="mt-1 text-xs text-slate-500">Coba gunakan kata kunci lain.</p>
             </div>
           )}
@@ -534,7 +534,7 @@ export function MenuManagement() {
         <form id="menu-form" onSubmit={handleSubmit} className="space-y-5">
           <div className="rounded-xl border border-sky-100 bg-sky-50/70 px-4 py-3">
             <p className="text-[10px] font-bold uppercase tracking-wider text-sky-700">ID Menu</p>
-            <p className="mt-1 text-sm font-extrabold text-[#1f1b4d]">
+            <p className="mt-1 text-sm font-extrabold text-[#2d2410]">
               {editingId ?? "Dibuat otomatis setelah data disimpan"}
             </p>
           </div>
@@ -595,7 +595,7 @@ export function MenuManagement() {
           </Select>
 
           <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-relaxed text-slate-500">
-            <strong className="text-[#1f1b4d]">Children:</strong> otomatis bernilai kosong saat menu dibuat. Submenu dapat ditambahkan kemudian melalui tombol <strong>＋</strong> pada baris menu.
+            <strong className="text-[#2d2410]">Children:</strong> otomatis bernilai kosong saat menu dibuat. Submenu dapat ditambahkan kemudian melalui tombol <strong>＋</strong> pada baris menu.
           </div>
         </form>
       </Modal>

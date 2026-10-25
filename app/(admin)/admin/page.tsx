@@ -28,7 +28,7 @@ const stats = [
     value: "4.231",
     change: "+45 sertifikasi",
     icon: "users",
-    color: "bg-violet-500/15 text-violet-600",
+    color: "bg-amber-400/25 text-amber-700",
   },
   {
     label: "Peserta Didik Aktif",
@@ -114,14 +114,14 @@ export default function AdminDashboard() {
       {/* ── Welcome Banner ── */}
       <div className="glass rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h2 className="text-xl sm:text-2xl font-semibold text-[#1f1b4d] tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-semibold text-[#2d2410] tracking-tight">
             Selamat datang di Portal Admin
           </h2>
-          <p className="text-xs sm:text-sm text-[#6b6f8f] max-w-xl">
+          <p className="text-xs sm:text-sm text-[#7d7152] max-w-xl">
             Pusat manajemen konten publikasi, warta kedinasan, layanan publik, dan data pendidikan Kabupaten Konawe Selatan.
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-white/70 px-3.5 py-2 rounded-2xl text-xs font-medium text-[#4a4770] border border-white/80 shrink-0">
+        <div className="flex items-center gap-2 bg-white/70 px-3.5 py-2 rounded-2xl text-xs font-medium text-[#5e5133] border border-white/80 shrink-0">
           <Icon name="calendar" size={15} />
           <span>Rabu, 17 September 2026</span>
         </div>
@@ -135,8 +135,8 @@ export default function AdminDashboard() {
             className="glass rounded-3xl p-5 flex items-center justify-between hover:-translate-y-0.5 transition-all duration-150"
           >
             <div className="space-y-1.5">
-              <span className="text-xs font-medium text-[#6b6f8f] block">{stat.label}</span>
-              <span className="text-2xl sm:text-3xl font-semibold text-[#1f1b4d] tracking-tight block">
+              <span className="text-xs font-medium text-[#7d7152] block">{stat.label}</span>
+              <span className="text-2xl sm:text-3xl font-semibold text-[#2d2410] tracking-tight block">
                 {stat.value}
               </span>
               <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-500/15 px-2 py-0.5 rounded-full inline-block">
@@ -156,11 +156,11 @@ export default function AdminDashboard() {
           <Link
             key={action.label}
             href={action.href}
-            className="glass flex items-center gap-3 p-3.5 rounded-2xl hover:bg-white/80 text-xs font-semibold text-[#1f1b4d] transition-all"
+            className="glass flex items-center gap-3 p-3.5 rounded-2xl hover:bg-white/80 text-xs font-semibold text-[#2d2410] transition-all"
           >
-            <span className="w-8 h-8 rounded-xl bg-violet-500/15 text-violet-600 flex items-center justify-center"><Icon name={action.icon} size={16} /></span>
+            <span className="w-8 h-8 rounded-xl bg-amber-400/25 text-amber-700 flex items-center justify-center"><Icon name={action.icon} size={16} /></span>
             <span>{action.label}</span>
-            <Icon name="arrow" size={14} className="ml-auto text-[#b9b6dc]" />
+            <Icon name="arrow" size={14} className="ml-auto text-[#d8c998]" />
           </Link>
         ))}
       </div>
@@ -172,12 +172,12 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Icon name="news" size={18} className="text-violet-600" />
+                <Icon name="news" size={18} className="text-amber-700" />
                 <CardTitle>Publikasi Berita Terkini</CardTitle>
               </div>
               <Link
                 href="/admin/berita"
-                className="text-xs font-bold text-[#5b3fe0] hover:text-[#7c5cff] transition-colors"
+                className="text-xs font-bold text-[#a86a00] hover:text-[#f5b82e] transition-colors"
               >
                 Lihat semua
               </Link>
@@ -194,7 +194,7 @@ export default function AdminDashboard() {
               <TableBody>
                 {recentNews.map((news) => (
                   <TableRow key={news.id}>
-                    <TableCell className="font-semibold text-[#1f1b4d] max-w-sm truncate">
+                    <TableCell className="font-semibold text-[#2d2410] max-w-sm truncate">
                       {news.title}
                     </TableCell>
                     <TableCell>
@@ -222,12 +222,12 @@ export default function AdminDashboard() {
           <Card className="h-full flex flex-col">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Icon name="megaphone" size={18} className="text-violet-600" />
+                <Icon name="megaphone" size={18} className="text-amber-700" />
                 <CardTitle>Pengumuman Aktif</CardTitle>
               </div>
               <Link
                 href="/admin/pengumuman"
-                className="text-xs font-bold text-[#5b3fe0] hover:text-[#7c5cff] transition-colors"
+                className="text-xs font-bold text-[#a86a00] hover:text-[#f5b82e] transition-colors"
               >
                 Semua
               </Link>
@@ -236,7 +236,7 @@ export default function AdminDashboard() {
               {recentAnnouncements.map((ann) => (
                 <div
                   key={ann.id}
-                  className="p-3.5 rounded-2xl border border-white/80 bg-white/50 hover:bg-white/80 transition-colors space-y-1.5"
+                  className="p-3.5 rounded-2xl border border-white bg-white/80 hover:bg-white transition-colors space-y-1.5"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <Badge variant="neutral">{ann.category}</Badge>
@@ -250,7 +250,7 @@ export default function AdminDashboard() {
                       </span>
                     )}
                   </div>
-                  <h4 className="text-xs font-semibold text-[#1f1b4d] leading-snug line-clamp-2">
+                  <h4 className="text-xs font-semibold text-[#2d2410] leading-snug line-clamp-2">
                     {ann.title}
                   </h4>
                 </div>
@@ -264,7 +264,7 @@ export default function AdminDashboard() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Icon name="clock" size={18} className="text-violet-600" />
+            <Icon name="clock" size={18} className="text-amber-700" />
             <CardTitle>Riwayat Aktivitas & Pembaruan Sistem</CardTitle>
           </div>
         </CardHeader>
@@ -280,10 +280,10 @@ export default function AdminDashboard() {
               className="px-6 py-3.5 flex items-center justify-between gap-4 text-xs hover:bg-white/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-xl bg-violet-500/15 text-violet-600 flex items-center justify-center">
+                <span className="w-8 h-8 rounded-xl bg-amber-400/25 text-amber-700 flex items-center justify-center">
                   <Icon name={act.icon} size={15} />
                 </span>
-                <span className="font-semibold text-[#1f1b4d]">{act.text}</span>
+                <span className="font-semibold text-[#2d2410]">{act.text}</span>
               </div>
               <span className="text-slate-400 whitespace-nowrap">{act.time}</span>
             </div>

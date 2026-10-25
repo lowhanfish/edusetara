@@ -134,7 +134,7 @@ export default function LayananAdminPage() {
           <TableBody>
             {services.map((item) => (
               <TableRow key={item.id}>
-                <TableCell className="font-bold text-[#1f1b4d] max-w-sm">
+                <TableCell className="font-bold text-[#2d2410] max-w-sm">
                   {item.name}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">

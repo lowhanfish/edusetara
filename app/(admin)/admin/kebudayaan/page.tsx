@@ -130,7 +130,7 @@ export default function KebudayaanAdminPage() {
             onClick={() => setFilterType(type)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
               filterType === type
-                ? "bg-[#1f1b4d] text-white"
+                ? "bg-[#2d2410] text-white"
                 : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
             }`}
           >
@@ -154,7 +154,7 @@ export default function KebudayaanAdminPage() {
           <TableBody>
             {filtered.map((item) => (
               <TableRow key={item.id}>
-                <TableCell className="font-bold text-[#1f1b4d]">
+                <TableCell className="font-bold text-[#2d2410]">
                   {item.name}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">

@@ -53,15 +53,15 @@ function MenuItemRenderer({
     level === 1
       ? `w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-[13px] transition-all duration-150 cursor-pointer select-none text-left ${
           isExactActive
-            ? "bg-white text-[#5b3fe0] font-semibold shadow-[0_4px_14px_rgba(88,76,200,.14)]"
+            ? "bg-white text-[#a86a00] font-semibold shadow-[0_4px_14px_rgba(170,120,10,.14)]"
             : isActive
-            ? "text-[#5b3fe0] font-semibold"
-            : "text-[#4a4770] font-medium hover:bg-white/60"
+            ? "text-[#a86a00] font-semibold"
+            : "text-[#5e5133] font-medium hover:bg-white/60"
         }`
       : `w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-150 cursor-pointer select-none text-left ${
           isExactActive
-            ? "bg-white text-[#5b3fe0] font-semibold shadow-[0_2px_10px_rgba(88,76,200,.12)]"
-            : "text-[#6b6f8f] font-medium hover:bg-white/60 hover:text-[#5b3fe0]"
+            ? "bg-white text-[#a86a00] font-semibold shadow-[0_2px_10px_rgba(170,120,10,.12)]"
+            : "text-[#7d7152] font-medium hover:bg-white/60 hover:text-[#a86a00]"
         }`;
 
   const innerContent = (
@@ -71,7 +71,7 @@ function MenuItemRenderer({
       ) : (
         <span
           className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-            isExactActive ? "bg-[#7c5cff]" : "bg-[#b9b6dc]"
+            isExactActive ? "bg-[#f5b82e]" : "bg-[#d8c998]"
           }`}
         />
       )}
@@ -80,7 +80,7 @@ function MenuItemRenderer({
         <Icon
           name="chevron"
           size={14}
-          className={`text-[#9a97c0] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+          className={`text-[#b3a77f] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
       )}
     </>
@@ -96,7 +96,7 @@ function MenuItemRenderer({
         {isOpen && (
           <div
             className={`space-y-1 pt-0.5 pb-1 ${
-              level === 1 ? "ml-5 pl-3 border-l border-[#d9d6f3]" : "ml-3 pl-2.5 border-l border-[#e3e0f6]"
+              level === 1 ? "ml-5 pl-3 border-l border-[#efe2b8]" : "ml-3 pl-2.5 border-l border-[#f3e9cb]"
             }`}
           >
             {item.children.map((child) => (
@@ -160,7 +160,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* ── Mobile Sidebar Overlay ── */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-[#1f1b4d]/30 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-[#2d2410]/30 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
           aria-hidden="true"
         />
@@ -174,19 +174,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       >
         {/* Brand Header */}
         <div className="h-[72px] flex items-center justify-between px-5 shrink-0">
-          <Link href="/admin" className="flex items-center gap-3 rounded-2xl bg-white/60 border border-white/80 px-3 py-2 flex-1 mr-2 shadow-[0_2px_10px_rgba(88,76,200,.08)]">
+          <Link href="/admin" className="flex items-center gap-3 rounded-2xl bg-white/60 border border-white/80 px-3 py-2 flex-1 mr-2 shadow-[0_2px_10px_rgba(170,120,10,.08)]">
             <div className="w-8 h-8 relative flex-shrink-0">
               <Image src="/img/logo_loght.png" width={32} height={32} alt="Logo Dikbud" className="object-contain" />
             </div>
             <div className="flex flex-col leading-tight min-w-0">
-              <span className="font-semibold text-sm text-[#1f1b4d] truncate">Dikbud Admin</span>
-              <span className="text-[10px] text-[#8a87ad] truncate">Kab. Konawe Selatan</span>
+              <span className="font-semibold text-sm text-[#2d2410] truncate">Dikbud Admin</span>
+              <span className="text-[10px] text-[#a39770] truncate">Kab. Konawe Selatan</span>
             </div>
           </Link>
 
           <button
             type="button"
-            className="lg:hidden w-8 h-8 rounded-xl flex items-center justify-center text-[#6b6f8f] hover:bg-white/70"
+            className="lg:hidden w-8 h-8 rounded-xl flex items-center justify-center text-[#7d7152] hover:bg-white/70"
             onClick={() => setSidebarOpen(false)}
             aria-label="Tutup menu"
           >
@@ -196,7 +196,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Navigation Items */}
         <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
-          <div className="px-3 py-1.5 text-[11px] font-medium text-[#9a97c0]">Menu utama</div>
+          <div className="px-3 py-1.5 text-[11px] font-medium text-[#b3a77f]">Menu utama</div>
 
           {adminMenu.map((item) => (
             <MenuItemRenderer
@@ -215,7 +215,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="p-3 border-t border-white/60 space-y-1 shrink-0">
           <Link
             href="/"
-            className="flex items-center gap-3 px-3 py-2 rounded-2xl text-xs font-medium text-[#4a4770] hover:bg-white/60 transition-colors"
+            className="flex items-center gap-3 px-3 py-2 rounded-2xl text-xs font-medium text-[#5e5133] hover:bg-white/60 transition-colors"
           >
             <Icon name="globe" size={16} />
             <span>Lihat Website Publik</span>
@@ -237,7 +237,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
-              className="lg:hidden w-10 h-10 rounded-2xl bg-white/70 flex items-center justify-center text-[#4a4770] hover:bg-white transition-colors"
+              className="lg:hidden w-10 h-10 rounded-2xl bg-white/70 flex items-center justify-center text-[#5e5133] hover:bg-white transition-colors"
               onClick={() => setSidebarOpen(true)}
               aria-label="Buka Menu"
             >
@@ -245,12 +245,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
 
             <div className="flex flex-col min-w-0">
-              <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-medium text-[#9a97c0]">
-                <Link href="/admin" className="hover:text-[#5b3fe0]">Admin</Link>
+              <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-medium text-[#b3a77f]">
+                <Link href="/admin" className="hover:text-[#a86a00]">Admin</Link>
                 <span>/</span>
-                <span className="text-[#6b6f8f]">{pageTitle}</span>
+                <span className="text-[#7d7152]">{pageTitle}</span>
               </div>
-              <h1 className="text-base sm:text-lg font-semibold text-[#1f1b4d] tracking-tight truncate">
+              <h1 className="text-base sm:text-lg font-semibold text-[#2d2410] tracking-tight truncate">
                 {pageTitle}
               </h1>
             </div>
@@ -259,7 +259,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="relative w-10 h-10 rounded-2xl bg-white/70 text-[#4a4770] hover:bg-white flex items-center justify-center transition-colors cursor-pointer"
+              className="relative w-10 h-10 rounded-2xl bg-white/70 text-[#5e5133] hover:bg-white flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Notifikasi"
             >
               <Icon name="bell" size={18} />
@@ -267,12 +267,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
 
             <div className="flex items-center gap-2.5 pl-3 border-l border-white/70">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-b from-[#8b6dff] to-[#6a49f0] text-white font-semibold text-sm flex items-center justify-center shadow-[0_4px_12px_rgba(124,92,255,.35)]">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-b from-[#ffd666] to-[#eda61a] text-[#3b2a05] font-semibold text-sm flex items-center justify-center shadow-[0_4px_12px_rgba(245,176,46,.35)]">
                 A
               </div>
               <div className="hidden sm:flex flex-col leading-none">
-                <span className="text-xs font-semibold text-[#1f1b4d]">Administrator</span>
-                <span className="text-[10px] text-[#8a87ad] mt-1">Dikbud Konsel</span>
+                <span className="text-xs font-semibold text-[#2d2410]">Administrator</span>
+                <span className="text-[10px] text-[#a39770] mt-1">Dikbud Konsel</span>
               </div>
             </div>
           </div>

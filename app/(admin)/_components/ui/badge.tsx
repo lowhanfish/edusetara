@@ -22,8 +22,8 @@ export function Badge({
     success: "bg-emerald-500/15 text-emerald-700",
     warning: "bg-amber-400/20 text-amber-700",
     danger: "bg-rose-500/15 text-rose-600",
-    info: "bg-violet-500/15 text-violet-700",
-    gold: "bg-violet-500/15 text-violet-700 font-bold",
+    info: "bg-amber-400/25 text-amber-800",
+    gold: "bg-amber-400/25 text-amber-800 font-bold",
     neutral: "bg-white/60 text-slate-600 border border-white/80",
   }[variant];
 

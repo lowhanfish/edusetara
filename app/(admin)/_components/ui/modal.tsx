@@ -68,11 +68,11 @@ export function Modal({
         {/* Header */}
         <div className="flex items-start justify-between px-6 py-5 border-b border-white/70 bg-white/40">
           <div className="flex flex-col gap-1 pr-6">
-            <h2 className="text-lg font-extrabold text-[#1f1b4d] tracking-tight">
+            <h2 className="text-lg font-extrabold text-[#2d2410] tracking-tight">
               {title}
             </h2>
             {description && (
-              <p className="text-xs text-[#6b6f8f] leading-relaxed">
+              <p className="text-xs text-[#7d7152] leading-relaxed">
                 {description}
               </p>
             )}
@@ -88,7 +88,7 @@ export function Modal({
         </div>
 
         {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-4 flex-1 text-sm text-[#1f1b4d]">
+        <div className="p-6 overflow-y-auto space-y-4 flex-1 text-sm text-[#2d2410]">
           {children}
         </div>
 

@@ -28,7 +28,7 @@ export function Input({
       {label && (
         <label
           htmlFor={inputId}
-          className="text-xs font-semibold text-[#6b6f8f] flex items-center gap-1"
+          className="text-xs font-semibold text-[#7d7152] flex items-center gap-1"
         >
           {label}
           {required && <span className="text-red-500">*</span>}
@@ -45,12 +45,12 @@ export function Input({
         <input
           id={inputId}
           required={required}
-          className={`w-full h-10 px-3 py-2 text-sm bg-white/70 backdrop-blur text-[#1f1b4d] placeholder:text-slate-400 border rounded-xl outline-none transition-all duration-150 ${
+          className={`w-full h-10 px-3 py-2 text-sm bg-white/90 backdrop-blur text-[#2d2410] placeholder:text-slate-400 border rounded-xl outline-none transition-all duration-150 ${
             leftIcon ? "pl-9" : ""
           } ${rightIcon ? "pr-9" : ""} ${
             error
               ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100"
-              : "border-[#dcdcf2] focus:border-[#7c5cff] focus:ring-3 focus:ring-[#7c5cff]/20"
+              : "border-[#efe3c2] focus:border-[#f5b82e] focus:ring-3 focus:ring-[#f5b82e]/20"
           } ${className}`}
           {...props}
         />
@@ -64,7 +64,7 @@ export function Input({
 
       {error && <span className="text-xs text-red-600 font-medium">{error}</span>}
       {helperText && !error && (
-        <span className="text-xs text-[#6b6f8f]">{helperText}</span>
+        <span className="text-xs text-[#7d7152]">{helperText}</span>
       )}
     </div>
   );

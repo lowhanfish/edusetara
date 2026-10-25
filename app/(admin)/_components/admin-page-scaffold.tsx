@@ -22,18 +22,18 @@ export function AdminPageScaffold({
       {/* Breadcrumbs */}
       {breadcrumbs.length > 0 && (
         <nav className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-          <Link href="/admin" className="hover:text-[#1f1b4d] transition-colors">
+          <Link href="/admin" className="hover:text-[#2d2410] transition-colors">
             Dashboard
           </Link>
           {breadcrumbs.map((crumb, idx) => (
             <React.Fragment key={idx}>
               <span>/</span>
               {crumb.href ? (
-                <Link href={crumb.href} className="hover:text-[#1f1b4d] transition-colors">
+                <Link href={crumb.href} className="hover:text-[#2d2410] transition-colors">
                   {crumb.label}
                 </Link>
               ) : (
-                <span className="text-[#1f1b4d] font-semibold">{crumb.label}</span>
+                <span className="text-[#2d2410] font-semibold">{crumb.label}</span>
               )}
             </React.Fragment>
           ))}
@@ -58,12 +58,12 @@ export function AdminPageScaffold({
       />
 
       {/* Status Notice */}
-      <div className="p-4 rounded-2xl bg-violet-500/10 border border-white/70 text-violet-900 flex items-start gap-3.5 shadow-xs">
+      <div className="p-4 rounded-2xl bg-amber-400/15 border border-white/70 text-amber-900 flex items-start gap-3.5 shadow-xs">
         <span className="text-2xl mt-0.5 shrink-0">ℹ️</span>
         <div className="text-xs space-y-1">
           <div className="font-bold text-amber-950 flex items-center gap-2">
             <span>Modul Halaman Disiapkan</span>
-            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-violet-200 text-violet-900">
+            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
               Siap Dikonfigurasi
             </span>
           </div>
@@ -77,7 +77,7 @@ export function AdminPageScaffold({
       <Card>
         <CardHeader className="bg-white/30 border-b border-white/60">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
-            <CardTitle className="text-sm font-bold text-[#1f1b4d] flex items-center gap-2">
+            <CardTitle className="text-sm font-bold text-[#2d2410] flex items-center gap-2">
               <span>📋</span>
               <span>Daftar {title}</span>
             </CardTitle>
@@ -85,7 +85,7 @@ export function AdminPageScaffold({
               <input
                 type="text"
                 placeholder={`Cari ${title.toLowerCase()}...`}
-                className="text-xs px-3 py-1.5 border border-slate-200 rounded-xl bg-white/70 focus:outline-hidden focus:ring-2 focus:ring-[#1f1b4d]/20"
+                className="text-xs px-3 py-1.5 border border-slate-200 rounded-xl bg-white/70 focus:outline-hidden focus:ring-2 focus:ring-[#2d2410]/20"
                 disabled
               />
               <select
@@ -103,7 +103,7 @@ export function AdminPageScaffold({
             {icon}
           </div>
           <div className="max-w-md mx-auto space-y-1">
-            <h3 className="text-sm font-bold text-[#1f1b4d]">
+            <h3 className="text-sm font-bold text-[#2d2410]">
               Belum Ada Data Tersimpan
             </h3>
             <p className="text-xs text-slate-500">

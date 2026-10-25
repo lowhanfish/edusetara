@@ -149,7 +149,7 @@ export default function KontakAdminPage() {
             onClick={() => setStatusFilter(status)}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
               statusFilter === status
-                ? "bg-[#1f1b4d] text-white"
+                ? "bg-[#2d2410] text-white"
                 : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
             }`}
           >
@@ -175,10 +175,10 @@ export default function KontakAdminPage() {
               <TableRow key={item.id}>
                 <TableCell>
                   <div className="flex flex-col">
-                    <span className="font-bold text-[#1f1b4d]">
+                    <span className="font-bold text-[#2d2410]">
                       {item.senderName}
                     </span>
-                    <span className="text-xs text-[#6b6f8f]">
+                    <span className="text-xs text-[#7d7152]">
                       {item.email} • {item.phone}
                     </span>
                   </div>
@@ -269,7 +269,7 @@ export default function KontakAdminPage() {
           <div className="space-y-4">
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-sm text-[#1f1b4d]">
+                <span className="font-bold text-sm text-[#2d2410]">
                   {selectedMessage.subject}
                 </span>
                 <Badge variant="neutral">{selectedMessage.category}</Badge>

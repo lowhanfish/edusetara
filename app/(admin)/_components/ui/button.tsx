@@ -28,15 +28,15 @@ export function Button({
 
   const variantClasses = {
     primary:
-      "bg-gradient-to-b from-[#8b6dff] to-[#6a49f0] text-white shadow-[0_6px_16px_rgba(124,92,255,.35)] hover:brightness-105 active:scale-[0.98]",
+      "bg-gradient-to-b from-[#ffd666] to-[#eda61a] text-[#3b2a05] shadow-[0_6px_16px_rgba(245,176,46,.35)] hover:brightness-105 active:scale-[0.98]",
     gold:
-      "bg-gradient-to-b from-[#8b6dff] to-[#6a49f0] text-white shadow-[0_6px_16px_rgba(124,92,255,.35)] hover:brightness-105 active:scale-[0.98]",
+      "bg-gradient-to-b from-[#ffd666] to-[#eda61a] text-[#3b2a05] shadow-[0_6px_16px_rgba(245,176,46,.35)] hover:brightness-105 active:scale-[0.98]",
     secondary:
-      "bg-white/60 text-[#1f1b4d] border border-white/80 hover:bg-white/90 active:scale-[0.98]",
+      "bg-white/80 text-[#2d2410] border border-white/80 hover:bg-white/90 active:scale-[0.98]",
     outline:
-      "border border-white/80 text-[#1f1b4d] bg-white/60 backdrop-blur hover:bg-white/90 shadow-[0_2px_8px_rgba(88,76,200,.08)] active:scale-[0.98]",
+      "border border-white/80 text-[#2d2410] bg-white/60 backdrop-blur hover:bg-white/90 shadow-[0_2px_8px_rgba(170,120,10,.08)] active:scale-[0.98]",
     ghost:
-      "text-[#6b6f8f] hover:text-[#5b3fe0] hover:bg-white/70 active:scale-[0.98]",
+      "text-[#7d7152] hover:text-[#a86a00] hover:bg-white/70 active:scale-[0.98]",
     danger:
       "bg-[#dc2626] text-white hover:bg-[#b91c1c] shadow-sm active:scale-[0.98]",
   }[variant];

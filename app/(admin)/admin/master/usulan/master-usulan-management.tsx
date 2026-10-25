@@ -184,27 +184,27 @@ export function MasterUsulanManagement({ kind }: { kind: MasterUsulanKind }) {
   return (
     <div className="space-y-6">
       <nav className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-slate-500" aria-label="Breadcrumb">
-        <Link href="/admin" className="hover:text-[#1f1b4d]">Dashboard</Link><span>/</span>
+        <Link href="/admin" className="hover:text-[#2d2410]">Dashboard</Link><span>/</span>
         <span>Data Master</span><span>/</span><span>Master Usulan</span><span>/</span>
-        <span className="font-bold text-[#1f1b4d]">{config.title}</span>
+        <span className="font-bold text-[#2d2410]">{config.title}</span>
       </nav>
 
       <div className="flex flex-col gap-4 border-b border-slate-200/80 pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="mb-2 flex items-center gap-2">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#7c5cff] text-xl shadow-sm">{config.icon}</span>
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#f5b82e] text-xl shadow-sm">{config.icon}</span>
             <Badge variant="gold">Data Master · Usulan</Badge>
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-[#1f1b4d]">{config.title}</h1>
-          <p className="mt-1 max-w-3xl text-xs leading-relaxed text-[#6b6f8f]">{config.description}</p>
+          <h1 className="text-2xl font-black tracking-tight text-[#2d2410]">{config.title}</h1>
+          <p className="mt-1 max-w-3xl text-xs leading-relaxed text-[#7d7152]">{config.description}</p>
         </div>
         <Button type="button" variant="gold" onClick={openAdd}>＋ Tambah {config.title}</Button>
       </div>
 
       <section className="grid gap-3 sm:grid-cols-3" aria-label={`Ringkasan ${config.title}`}>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Data</p><p className="mt-1 text-2xl font-black text-[#1f1b4d]">{records.length}</p></div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Jenis Master</p><p className="mt-1 text-sm font-extrabold text-[#1f1b4d]">Master Tetap</p></div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pengelolaan</p><p className="mt-1 text-sm font-extrabold text-[#1f1b4d]">Tambah · Edit · Hapus</p></div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Data</p><p className="mt-1 text-2xl font-black text-[#2d2410]">{records.length}</p></div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Jenis Master</p><p className="mt-1 text-sm font-extrabold text-[#2d2410]">Master Tetap</p></div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pengelolaan</p><p className="mt-1 text-sm font-extrabold text-[#2d2410]">Tambah · Edit · Hapus</p></div>
       </section>
 
       {notice && (
@@ -215,13 +215,13 @@ export function MasterUsulanManagement({ kind }: { kind: MasterUsulanKind }) {
 
       <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
         <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50/70 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div><h2 className="text-sm font-extrabold text-[#1f1b4d]">Daftar {config.title}</h2><p className="mt-0.5 text-[11px] text-slate-500">Data acuan yang digunakan pada proses usulan tunjangan guru.</p></div>
+          <div><h2 className="text-sm font-extrabold text-[#2d2410]">Daftar {config.title}</h2><p className="mt-0.5 text-[11px] text-slate-500">Data acuan yang digunakan pada proses usulan tunjangan guru.</p></div>
           <input
             type="search"
             value={query}
             onChange={(event) => { setQuery(event.target.value); setPage(1); }}
             placeholder={`Cari ${config.itemLabel}...`}
-            className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-[#7c5cff] sm:w-72"
+            className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-[#f5b82e] sm:w-72"
           />
         </div>
 
@@ -233,7 +233,7 @@ export function MasterUsulanManagement({ kind }: { kind: MasterUsulanKind }) {
             <tbody className="divide-y divide-slate-100">
               {visibleRecords.map((item) => (
                 <tr key={item.id} className="align-top hover:bg-slate-50/70">
-                  <td className="px-5 py-4"><div className="flex items-start gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#f1edff] text-base">{config.icon}</span><div><p className="text-sm font-bold text-[#1f1b4d]">{item.title}</p><p className="mt-0.5 text-[10px] font-semibold text-slate-400">{item.id}</p></div></div></td>
+                  <td className="px-5 py-4"><div className="flex items-start gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#fff6dc] text-base">{config.icon}</span><div><p className="text-sm font-bold text-[#2d2410]">{item.title}</p><p className="mt-0.5 text-[10px] font-semibold text-slate-400">{item.id}</p></div></div></td>
                   <td className="max-w-xl px-4 py-4"><p className="text-xs leading-relaxed text-slate-600">{item.desc}</p></td>
                   <td className="whitespace-nowrap px-4 py-4"><p className="text-[11px] font-semibold text-slate-600">{formatAuditDate(item.created_at)}</p><p className="mt-1 text-[9px] text-slate-400">{item.created_by}</p></td>
                   <td className="px-5 py-4"><div className="flex justify-end gap-2"><Button type="button" size="sm" variant="outline" onClick={() => openEdit(item)}>Edit</Button><Button type="button" size="sm" variant="ghost" className="text-rose-600 hover:bg-rose-50" onClick={() => handleDelete(item)}>Hapus</Button></div></td>
@@ -249,7 +249,7 @@ export function MasterUsulanManagement({ kind }: { kind: MasterUsulanKind }) {
           <div className="flex items-center gap-2">
             <span className="mr-1 text-[10px] font-semibold text-amber-700">Mode desain · belum terhubung API</span>
             <button type="button" onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={currentPage === 1} className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-600 disabled:cursor-not-allowed disabled:opacity-40">‹</button>
-            <span className="grid h-8 min-w-8 place-items-center rounded-lg bg-[#1f1b4d] px-2 text-[11px] font-extrabold text-white">{currentPage}/{totalPages}</span>
+            <span className="grid h-8 min-w-8 place-items-center rounded-lg bg-[#2d2410] px-2 text-[11px] font-extrabold text-white">{currentPage}/{totalPages}</span>
             <button type="button" onClick={() => setPage((value) => Math.min(totalPages, value + 1))} disabled={currentPage === totalPages} className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-600 disabled:cursor-not-allowed disabled:opacity-40">›</button>
           </div>
         </div>
@@ -264,7 +264,7 @@ export function MasterUsulanManagement({ kind }: { kind: MasterUsulanKind }) {
         footer={<><Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Batal</Button><Button type="submit" form="master-usulan-form" variant="gold">{editingId ? "Simpan Perubahan" : `Tambah ${config.title}`}</Button></>}
       >
         <form id="master-usulan-form" onSubmit={handleSubmit} className="space-y-5">
-          {editingId && <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">ID Data</p><p className="mt-1 text-sm font-extrabold text-[#1f1b4d]">{editingId}</p></div>}
+          {editingId && <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">ID Data</p><p className="mt-1 text-sm font-extrabold text-[#2d2410]">{editingId}</p></div>}
           <Input label={`Nama ${config.title}`} value={title} onChange={(event) => { setTitle(event.target.value); setError(""); }} placeholder={config.titlePlaceholder} error={error} required autoFocus />
           <Textarea label="Penjelasan Singkat" value={desc} onChange={(event) => setDesc(event.target.value)} placeholder={config.descPlaceholder} helperText="Gunakan penjelasan ringkas dan mudah dipahami oleh operator." rows={5} required />
         </form>
