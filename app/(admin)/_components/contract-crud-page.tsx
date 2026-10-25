@@ -9,6 +9,7 @@ import {
   Input,
   Modal,
   PageHeader,
+  RichTextEditor,
   Select,
   Table,
   TableBody,
@@ -24,7 +25,7 @@ export interface CrudField {
   /** Nama field sesuai Contract API */
   name: string;
   label: string;
-  type?: "text" | "number" | "textarea" | "select" | "file" | "date";
+  type?: "text" | "number" | "textarea" | "richtext" | "select" | "file" | "date";
   required?: boolean;
   placeholder?: string;
   helperText?: string;
@@ -180,6 +181,16 @@ export function ContractCrudPage({
                         </TableCell>
                       );
                     }
+                    if (f.type === "richtext") {
+                      const plainText = (val ?? "").replace(/<[^>]*>/g, "").trim();
+                      return (
+                        <TableCell key={f.name}>
+                          <span className="truncate max-w-xs block text-xs text-[#5e5133]">
+                            {plainText || "-"}
+                          </span>
+                        </TableCell>
+                      );
+                    }
                     return (
                       <TableCell key={f.name}>
                         {labelOf(f, r[f.name] ?? "") || "-"}
@@ -240,6 +251,19 @@ export function ContractCrudPage({
                   rows={4}
                   placeholder={f.placeholder}
                   onChange={(e) => setForm({ ...form, [f.name]: e.target.value })}
+                />
+              );
+            }
+            if (f.type === "richtext") {
+              return (
+                <RichTextEditor
+                  key={f.name}
+                  label={f.label}
+                  required={f.required ?? true}
+                  value={form[f.name] ?? ""}
+                  placeholder={f.placeholder ?? "Mulai menulis isi konten..."}
+                  helperText={f.helperText}
+                  onChange={(html) => setForm({ ...form, [f.name]: html })}
                 />
               );
             }

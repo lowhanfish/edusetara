@@ -13,7 +13,7 @@ export default function ModulDanMateriPelatihanPage() {
       description="Kelola dan konfigurasi data Modul dan Materi Pelatihan secara berkala untuk mendukung tata kelola pendidikan terpadu."
       fields={[
         {"name": "judul", "label": "Judul Modul / Materi", "type": "text"},
-        {"name": "deskripsi", "label": "Ringkasan Silabus / Kompetensi", "type": "textarea"},
+        {"name": "deskripsi", "label": "Ringkasan Silabus / Kompetensi", "type": "richtext"},
         {"name": "file", "label": "Lampiran Dokumen / Handout (PDF)", "type": "file", "accept": ".pdf", "placeholder": "Unggah handout materi PDF"},
       ]}
       columns={["judul", "deskripsi", "file"]}

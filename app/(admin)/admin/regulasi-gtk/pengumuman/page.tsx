@@ -13,7 +13,7 @@ export default function PengumumanGTKPage() {
       description="Kelola dan konfigurasi data Pengumuman GTK secara berkala untuk mendukung tata kelola pendidikan terpadu."
       fields={[
         {"name": "judul", "label": "Judul Pengumuman GTK", "type": "text"},
-        {"name": "deskripsi", "label": "Uraian Lengkap Surat Edaran", "type": "textarea"},
+        {"name": "deskripsi", "label": "Uraian Lengkap Surat Edaran", "type": "richtext"},
         {"name": "file", "label": "Lampiran Surat Edaran (PDF)", "type": "file", "accept": ".pdf", "placeholder": "Unggah surat edaran PDF"},
       ]}
       columns={["judul", "deskripsi", "file"]}

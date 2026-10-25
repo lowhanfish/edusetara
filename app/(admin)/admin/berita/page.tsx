@@ -9,6 +9,7 @@ import {
   Input,
   Modal,
   PageHeader,
+  RichTextEditor,
   Select,
   Table,
   TableBody,
@@ -407,14 +408,15 @@ export default function BeritaAdminPage() {
             helperText="Unggah berkas foto dokumentasi atau banner berita (JPG, PNG, WebP)"
           />
 
-          <Textarea
-            label="Isi Berita"
-            placeholder="Tuliskan isi berita lengkap di sini..."
-            rows={5}
+          <RichTextEditor
+            label="Isi Berita Lengkap"
+            placeholder="Tuliskan berita lengkap dengan format paragraf, subjudul (H2/H3), daftar poin, dan tautan..."
+            minHeight={260}
             value={formData.content}
-            onChange={(e) =>
-              setFormData({ ...formData, content: e.target.value })
+            onChange={(html) =>
+              setFormData({ ...formData, content: html })
             }
+            helperText="Gunakan toolbar di atas untuk memformat teks, menambahkan subjudul, kutipan, atau daftar poin"
           />
 
           <div className="flex items-center gap-2 pt-2">
