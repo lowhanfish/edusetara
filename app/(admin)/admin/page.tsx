@@ -111,19 +111,55 @@ const recentAnnouncements = [
 export default function AdminDashboard() {
   return (
     <div className="space-y-6">
-      {/* ── Welcome Banner ── */}
-      <div className="glass rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h2 className="text-xl sm:text-2xl font-semibold text-[#2d2410] tracking-tight">
-            Selamat datang di Portal Admin
+      {/* ── Welcome Banner with Friendly AI Edu Mascot ── */}
+      <div className="glass rounded-3xl p-6 sm:p-7 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 border border-amber-200/60 shadow-xs">
+        {/* Soft Ambient Glow */}
+        <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-gradient-to-br from-amber-300/25 to-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="space-y-2 z-10 max-w-2xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 border border-amber-300/60 text-amber-900 text-xs font-semibold">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            Sikola Pindara AI • Edukasi Pintar
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#2d2410] tracking-tight">
+            Selamat datang di Portal Admin Dikbud!
           </h2>
-          <p className="text-xs sm:text-sm text-[#7d7152] max-w-xl">
-            Pusat manajemen konten publikasi, warta kedinasan, layanan publik, dan data pendidikan Kabupaten Konawe Selatan.
+          <p className="text-xs sm:text-sm text-[#7d7152] leading-relaxed">
+            Pusat tata kelola terpadu publikasi berita, rombel, sarpras, usulan bantuan & jurnal pendidikan Kabupaten Konawe Selatan.
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-white/70 px-3.5 py-2 rounded-2xl text-xs font-medium text-[#5e5133] border border-white/80 shrink-0">
-          <Icon name="calendar" size={15} />
-          <span>Rabu, 17 September 2026</span>
+
+        {/* Robot AI Companion Badge */}
+        <div className="flex items-center gap-4 z-10 shrink-0">
+          <div className="flex items-center gap-3.5 bg-white/95 px-4 py-2.5 rounded-2xl border border-amber-200/80 shadow-sm">
+            {/* Robot Illustration Avatar */}
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 p-0.5 shadow-xs flex items-center justify-center shrink-0">
+              <div className="w-full h-full bg-[#241e12] rounded-[14px] flex flex-col items-center justify-center relative overflow-hidden">
+                {/* Antena */}
+                <div className="w-1 h-1.5 bg-amber-400 rounded-full mb-0.5" />
+                {/* Robot Visor Screen */}
+                <div className="w-7 h-4 rounded-md bg-amber-400/30 border border-amber-400/60 flex items-center justify-around px-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse" />
+                </div>
+                {/* Smile */}
+                <div className="w-3 h-1 border-b border-amber-300 rounded-full mt-0.5" />
+              </div>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wider">Pindara Bot AI</span>
+              <span className="text-xs font-medium text-[#7d7152]">Sistem Terpadu Aktif</span>
+              <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 mt-0.5">
+                ● Seluruh modul terhubung
+              </span>
+            </div>
+          </div>
+
+          <div className="hidden xl:flex items-center gap-2 bg-white/80 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-[#5e5133] border border-amber-100 shadow-xs">
+            <Icon name="calendar" size={16} className="text-amber-600" />
+            <span>Rabu, 17 Sep 2026</span>
+          </div>
         </div>
       </div>
 

@@ -282,6 +282,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
           {children}
         </main>
+        {/* ── AI Assistant Mascot Floating Pill (Modern SaaS Inspiration) ── */}
+        <aside aria-label="AI Assistant" className="fixed bottom-5 right-6 z-40 hidden sm:flex items-center gap-3 bg-white/95 backdrop-blur-xl border border-amber-200/90 shadow-[0_10px_30px_rgba(180,130,20,0.15)] pl-2 pr-4 py-2 rounded-full cursor-pointer hover:shadow-lg hover:border-amber-400 transition-all group">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 p-0.5 shadow-sm flex items-center justify-center shrink-0">
+            <div className="w-full h-full bg-[#241e12] rounded-full flex flex-col items-center justify-center relative overflow-hidden">
+              <div className="w-5 h-3 rounded-md bg-amber-400/40 border border-amber-300/80 flex items-center justify-around px-0.5">
+                <span className="w-1 h-1 rounded-full bg-amber-300 animate-pulse" />
+                <span className="w-1 h-1 rounded-full bg-amber-300 animate-pulse" />
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="text-[11px] font-bold text-[#2d2410] group-hover:text-amber-800 transition-colors flex items-center gap-1.5">
+              Pindara AI Assistant
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            </span>
+            <span className="text-[10px] text-[#7d7152]">Bantuan analisis & dokumen data</span>
+          </div>
+        </aside>
+
       </div>
     </div>
   );
