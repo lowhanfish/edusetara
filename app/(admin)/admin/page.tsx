@@ -272,7 +272,7 @@ export default function AdminDashboard() {
               {recentAnnouncements.map((ann) => (
                 <div
                   key={ann.id}
-                  className="p-3.5 rounded-2xl border border-white bg-white/80 hover:bg-white transition-colors space-y-1.5"
+                  className="p-3.5 rounded-2xl border border-white/85 bg-white/50 backdrop-blur-md hover:bg-white/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors space-y-1.5"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <Badge variant="neutral">{ann.category}</Badge>

@@ -231,9 +231,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* ── Main Area ── */}
-      <div className="flex-1 lg:pl-[284px] flex flex-col min-w-0 pr-3">
+      <div className="flex-1 lg:pl-[308px] flex flex-col min-w-0 px-3 lg:pr-7">
         {/* Topbar */}
-        <header className="glass sticky top-3 z-30 ml-1 mr-0 mt-3 h-16 rounded-[22px] px-5 flex items-center justify-between">
+        <header className="glass sticky top-3 z-30 mt-3 h-16 rounded-[22px] px-5 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
@@ -279,7 +279,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Content Shell */}
-        <main className="flex-1 ml-1 mr-0 py-4 space-y-5 w-full">
+        <main className="flex-1 py-6 space-y-6 w-full">
           {children}
         </main>
         {/* ── AI Assistant Mascot Floating Pill (Modern SaaS Inspiration) ── */}

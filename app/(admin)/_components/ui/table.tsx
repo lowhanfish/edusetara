@@ -24,7 +24,7 @@ export function TableHeader({
   className?: string;
 }) {
   return (
-    <thead className={`border-b border-white/60 bg-amber-50/70 text-xs font-semibold text-[#7d7152] ${className}`}>
+    <thead className={`border-b border-white/60 bg-white/35 text-xs font-semibold text-[#7d7152] ${className}`}>
       {children}
     </thead>
   );
