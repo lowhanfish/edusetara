@@ -7606,6 +7606,9 @@ footer:before { content:""; position:absolute; left:0; right:0; top:-17px; heigh
     #f1f2fd;
   background-attachment: fixed;
   color: #1f1b4d;
+  /* Skala tampilan default 90% (setara Cmd + minus sekali di browser) */
+  zoom: 0.9;
+  min-height: calc(100vh / 0.9);
 }
 .glass {
   background: var(--glass-bg);
