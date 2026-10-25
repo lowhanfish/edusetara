@@ -13,7 +13,7 @@ export default function TanahSekolahPage() {
       description="Data bidang tanah yang dimiliki atau dikuasai satuan pendidikan beserta luas dan dokumen bukti kepemilikan."
       fields={[
         {name:"title",label:"Luas Tanah (m²)",type:"number"},
-        {name:"file",label:"Berkas Bukti Kepemilikan",type:"text",placeholder:"nama berkas / URL, misal: sertifikat.pdf"},
+        {name:"file",label:"Berkas Bukti Kepemilikan (Sertifikat)",type:"file",accept:".pdf,image/*",placeholder:"Unggah berkas sertifikat/akta hibah"},
       ]}
     />
   );

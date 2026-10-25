@@ -14,7 +14,7 @@ export default function ModulDanMateriPelatihanPage() {
       fields={[
         {"name": "judul", "label": "Judul Modul / Materi", "type": "text"},
         {"name": "deskripsi", "label": "Ringkasan Silabus / Kompetensi", "type": "textarea"},
-        {"name": "file", "label": "Lampiran Dokumen / Handout (PDF)", "type": "text", "placeholder": "modul.pdf"},
+        {"name": "file", "label": "Lampiran Dokumen / Handout (PDF)", "type": "file", "accept": ".pdf", "placeholder": "Unggah handout materi PDF"},
       ]}
       columns={["judul", "deskripsi", "file"]}
     />

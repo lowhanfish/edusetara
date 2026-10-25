@@ -18,7 +18,7 @@ export default function UsulanDataAssessmentPage() {
         {"name": "jml_perempuan", "label": "Jumlah Perempuan", "type": "number"},
         {"name": "kurikulum_k13", "label": "Siswa Kurikulum 2013", "type": "number"},
         {"name": "kurikulum_kurmer", "label": "Siswa Kurikulum Merdeka", "type": "number"},
-        {"name": "file", "label": "Lampiran Excel Nominasi", "type": "text", "placeholder": "nama berkas .xlsx"},
+        {"name": "file", "label": "Lampiran Excel Nominasi", "type": "file", "accept": ".xlsx,.xls,.csv", "placeholder": "Unggah berkas Excel nominasi"},
       ]}
     />
   );

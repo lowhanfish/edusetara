@@ -15,7 +15,7 @@ export default function RegulasiPage() {
         {"name": "judul", "label": "Nama / Nomor Peraturan Resmi", "type": "text"},
         {"name": "deskripsi", "label": "Konsideran / Tentang Regulasi", "type": "textarea"},
         {"name": "tahun", "label": "Tahun Penetapan", "type": "number"},
-        {"name": "file", "label": "Salinan Lembaran Hukum (PDF)", "type": "text", "placeholder": "perbup_juknis.pdf"},
+        {"name": "file", "label": "Salinan Lembaran Hukum (PDF)", "type": "file", "accept": ".pdf", "placeholder": "Unggah salinan lembaran hukum PDF"},
       ]}
       columns={["judul", "tahun", "deskripsi", "file"]}
     />

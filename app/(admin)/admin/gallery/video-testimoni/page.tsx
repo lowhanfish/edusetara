@@ -13,7 +13,7 @@ export default function VideoTestimoniPage() {
       description="Kelola dan konfigurasi data Video Testimoni secara berkala untuk mendukung tata kelola pendidikan terpadu."
       fields={[
         {"name": "judul", "label": "Judul / Narasi Video Testimoni", "type": "text"},
-        {"name": "file", "label": "Berkas Video (MP4 / WebM)", "type": "text", "placeholder": "nama file video .mp4 / url"},
+        {"name": "file", "label": "Berkas Video (MP4 / WebM)", "type": "file", "accept": "video/*", "placeholder": "Unggah berkas video .mp4 / .webm"},
       ]}
       columns={["judul", "file"]}
     />

@@ -20,7 +20,7 @@ export default function JurnalPengawasPage() {
         {"name": "tindak_lanjut", "label": "Arahan Rekomendasi / Tindak Lanjut", "type": "textarea"},
         {"name": "tugas_id", "label": "Tugas Kepengawasan", "type": "select", "options": [{"value": "1", "label": "Supervisi Akademik"}, {"value": "2", "label": "Monitoring Asesmen Nasional"}, {"value": "3", "label": "Evaluasi Sarpras"}]},
         {"name": "tgl", "label": "Tanggal Pelaksanaan", "type": "date"},
-        {"name": "file", "label": "Lembar Instrumen / Foto", "type": "text"},
+        {"name": "file", "label": "Lembar Instrumen / Foto", "type": "file", "accept": ".pdf,image/*", "placeholder": "Unggah lembar instrumen atau foto"},
       ]}
       columns={["unit_kerja", "kepsek", "pendampingan_id", "tgl", "temuan_akademik"]}
     />

@@ -16,7 +16,7 @@ export default function KegiatanSekolahPage() {
         {"name": "deskripsi", "label": "Deskripsi", "type": "textarea"},
         {"name": "tanggal", "label": "Tanggal", "type": "date"},
         {"name": "tahun", "label": "Tahun", "type": "number"},
-        {"name": "file", "label": "Berkas Dokumen", "type": "text", "placeholder": "nama berkas / URL"},
+        {"name": "file", "label": "Berkas Dokumen / Foto", "type": "file", "accept": ".pdf,image/*", "placeholder": "Unggah berkas dokumen atau foto"},
         {"name": "link", "label": "Link YouTube", "type": "text", "placeholder": "https://youtube.com/...", "required": false},
       ]}
       columns={["judul", "tanggal", "tahun", "link"]}

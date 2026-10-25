@@ -5,6 +5,7 @@ import {
   Badge,
   Button,
   Card,
+  FileInput,
   Input,
   Modal,
   PageHeader,
@@ -396,14 +397,14 @@ export default function BeritaAdminPage() {
             }
           />
 
-          <Input
-            label="Foto"
-            placeholder="URL / nama berkas, misal: prestasi_olimpiade_sains_2026.jpg"
+          <FileInput
+            label="Foto Sampul Berita"
+            accept="image/*"
             value={formData.image}
-            onChange={(e) =>
-              setFormData({ ...formData, image: e.target.value })
+            onChange={(fileName) =>
+              setFormData({ ...formData, image: fileName })
             }
-            helperText="Berkas gambar banner/thumbnail berita atau URL foto"
+            helperText="Unggah berkas foto dokumentasi atau banner berita (JPG, PNG, WebP)"
           />
 
           <Textarea

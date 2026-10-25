@@ -5,6 +5,7 @@ import {
   Badge,
   Button,
   Card,
+  FileInput,
   Input,
   Modal,
   PageHeader,
@@ -318,11 +319,13 @@ export default function PengumumanAdminPage() {
           />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Nama Dokumen PDF Lampiran"
-              placeholder="Contoh: Surat_Edaran_ANBK_2026.pdf"
+            <FileInput
+              label="Dokumen PDF Lampiran"
+              accept=".pdf"
               value={formData.attachmentName}
-              onChange={(e) => setFormData({ ...formData, attachmentName: e.target.value })}
+              placeholder="Unggah berkas PDF surat edaran..."
+              onChange={(fileName) => setFormData({ ...formData, attachmentName: fileName })}
+              helperText="Format dokumen resmi PDF maksimal 10 MB"
             />
             <Select
               label="Status"

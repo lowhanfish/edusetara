@@ -5,6 +5,7 @@ import {
   Badge,
   Button,
   Card,
+  FileInput,
   Input,
   Modal,
   PageHeader,
@@ -27,6 +28,7 @@ export interface CrudField {
   required?: boolean;
   placeholder?: string;
   helperText?: string;
+  accept?: string;
   /** Untuk type "select" (relasi <option> pada Contract API) */
   options?: { value: string; label: string }[];
 }
@@ -152,9 +154,38 @@ export function ContractCrudPage({
               filtered.map((r, i) => (
                 <TableRow key={r.id}>
                   <TableCell>{i + 1}</TableCell>
-                  {shownFields.map((f) => (
-                    <TableCell key={f.name}>{labelOf(f, r[f.name] ?? "") || "-"}</TableCell>
-                  ))}
+                  {shownFields.map((f) => {
+                    const isFileField = f.type === "file" || f.name === "file";
+                    const val = r[f.name];
+                    if (isFileField) {
+                      if (!val) return <TableCell key={f.name}>-</TableCell>;
+                      const isPdf = /\.pdf$/i.test(val);
+                      const isImg = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(val);
+                      return (
+                        <TableCell key={f.name}>
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-medium bg-amber-50 text-amber-900 border border-amber-200/80">
+                            <Icon
+                              name={isPdf ? "file" : isImg ? "image" : "file"}
+                              size={13}
+                              className={
+                                isPdf
+                                  ? "text-rose-600"
+                                  : isImg
+                                  ? "text-amber-600"
+                                  : "text-blue-600"
+                              }
+                            />
+                            <span className="truncate max-w-[130px]">{val}</span>
+                          </span>
+                        </TableCell>
+                      );
+                    }
+                    return (
+                      <TableCell key={f.name}>
+                        {labelOf(f, r[f.name] ?? "") || "-"}
+                      </TableCell>
+                    );
+                  })}
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Button variant="ghost" size="sm" onClick={() => openEdit(r)}>
@@ -219,6 +250,33 @@ export function ContractCrudPage({
                   {...common}
                   options={[{ value: "", label: "-- Pilih --" }, ...(f.options ?? [])]}
                   onChange={(e) => setForm({ ...form, [f.name]: e.target.value })}
+                />
+              );
+            }
+            if (f.type === "file" || f.name === "file") {
+              const defaultAccept =
+                f.accept ??
+                (f.label.toLowerCase().includes("foto") ||
+                f.label.toLowerCase().includes("gambar") ||
+                f.label.toLowerCase().includes("pasfoto")
+                  ? "image/*"
+                  : f.label.toLowerCase().includes("video")
+                  ? "video/*"
+                  : f.label.toLowerCase().includes("excel") || f.label.toLowerCase().includes(".xlsx")
+                  ? ".xlsx,.xls,.csv"
+                  : ".pdf,image/*");
+              return (
+                <FileInput
+                  key={f.name}
+                  label={f.label}
+                  required={f.required ?? true}
+                  accept={defaultAccept}
+                  value={form[f.name] ?? ""}
+                  placeholder={f.placeholder ?? "Pilih berkas..."}
+                  helperText={f.helperText}
+                  onChange={(fileName) =>
+                    setForm({ ...form, [f.name]: fileName })
+                  }
                 />
               );
             }

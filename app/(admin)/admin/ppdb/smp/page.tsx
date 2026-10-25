@@ -27,7 +27,7 @@ export default function PPDBSMPPage() {
         {"name": "pekerjaan_ayah", "label": "Pekerjaan Ayah", "type": "text"},
         {"name": "nama_ibu", "label": "Nama Lengkap Ibu Kandung", "type": "text"},
         {"name": "pekerjaan_ibu", "label": "Pekerjaan Ibu", "type": "text"},
-        {"name": "file", "label": "Lampiran Pasfoto Calon Siswa", "type": "text", "placeholder": "pasfoto.jpg"},
+        {"name": "file", "label": "Lampiran Pasfoto Calon Siswa", "type": "file", "accept": "image/*", "placeholder": "Unggah pasfoto siswa"},
       ]}
       columns={["nama", "jns_kelamin", "nisn", "nik", "alamat"]}
     />

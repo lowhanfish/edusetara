@@ -26,7 +26,7 @@ export default function JurnalGuruKelasPage() {
         {"name": "siswa_alpa", "label": "Siswa Alpa", "type": "number"},
         {"name": "persentase", "label": "Persentase Kehadiran (%)", "type": "number"},
         {"name": "keterangan", "label": "Catatan / Refleksi KBM", "type": "textarea"},
-        {"name": "file", "label": "Foto Dokumentasi KBM", "type": "text", "placeholder": "nama file foto .jpg/.png"},
+        {"name": "file", "label": "Foto Dokumentasi KBM", "type": "file", "accept": "image/*", "placeholder": "Unggah foto pelaksanaan KBM"},
       ]}
       columns={["tema", "materi_pokok", "pertemuan_ke", "tgl", "persentase"]}
     />

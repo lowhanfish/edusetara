@@ -15,7 +15,7 @@ export default function KomunitasBelajarPage() {
         {"name": "uraian", "label": "Nama Komunitas Belajar", "type": "text"},
         {"name": "jns_kegiatan", "label": "Jenis Kegiatan", "type": "select", "options": [{"value": "0", "label": "Siklus Refleksi Awal"}, {"value": "1", "label": "Siklus Perencanaan"}, {"value": "2", "label": "Siklus Implementasi"}, {"value": "3", "label": "Siklus Evaluasi"}]},
         {"name": "deskripsi", "label": "Deskripsi Kegiatan", "type": "textarea"},
-        {"name": "file", "label": "Lampiran (Foto / PDF)", "type": "text", "placeholder": "nama berkas"},
+        {"name": "file", "label": "Lampiran (Foto / PDF)", "type": "file", "accept": ".pdf,image/*", "placeholder": "Unggah foto atau dokumen kegiatan"},
       ]}
       columns={["uraian", "jns_kegiatan", "deskripsi", "file"]}
     />

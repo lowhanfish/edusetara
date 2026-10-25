@@ -22,7 +22,7 @@ export default function JurnalBKPage() {
         {"name": "hasil", "label": "Hasil Konseling / Solusi", "type": "textarea"},
         {"name": "rnc_tindak_lanjut", "label": "Rencana Tindak Lanjut", "type": "textarea"},
         {"name": "keterangan", "label": "Catatan Perkembangan Siswa", "type": "text"},
-        {"name": "file", "label": "Foto Sesi / Berkas Penanganan", "type": "text"},
+        {"name": "file", "label": "Foto Sesi / Berkas Penanganan", "type": "file", "accept": ".pdf,image/*", "placeholder": "Unggah foto sesi atau berkas penanganan"},
       ]}
       columns={["nm_siswa", "kelas_id", "tgl", "jns_layanan_id", "mdl_kegiatan_id"]}
     />

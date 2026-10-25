@@ -18,7 +18,7 @@ export default function JurnalKepalaSekolahPage() {
         {"name": "keterlibatan", "label": "Pihak yang Dilibatkan", "type": "text", "placeholder": "Dewan Guru, Pengawas, Komite"},
         {"name": "tgl", "label": "Tanggal Pelaksanaan", "type": "date"},
         {"name": "keterangan", "label": "Catatan Detail & Arahan Manajerial", "type": "textarea"},
-        {"name": "file", "label": "Dokumen Pendukung / Notula (PDF/Foto)", "type": "text"},
+        {"name": "file", "label": "Dokumen Pendukung / Notula (PDF/Foto)", "type": "file", "accept": ".pdf,image/*", "placeholder": "Unggah notula atau dokumen pendukung"},
       ]}
       columns={["uraian", "target", "hasil", "tgl", "keterlibatan"]}
     />

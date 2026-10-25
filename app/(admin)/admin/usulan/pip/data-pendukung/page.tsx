@@ -16,7 +16,7 @@ export default function DataPendukungPage() {
         {name:"jenjang_id",label:"Jenjang",type:"select",options:[{value:"2",label:"SD"},{value:"3",label:"SMP"}]},
         {name:"nominal",label:"Nominal (Rp)",type:"number"},
         {name:"tahun",label:"Tahun Anggaran",type:"number"},
-        {name:"file",label:"Lampiran (PDF)",type:"text",placeholder:"nama berkas, misal: sk_pip.pdf"},
+        {name:"file",label:"Lampiran Dokumen SK (PDF)",type:"file",accept:".pdf",placeholder:"Unggah dokumen SK/Berita Acara PDF"},
       ]}
       columns={["uraian","jenjang_id","nominal","tahun","file"]}
     />

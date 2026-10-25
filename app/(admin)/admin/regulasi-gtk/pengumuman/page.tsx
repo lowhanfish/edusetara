@@ -14,7 +14,7 @@ export default function PengumumanGTKPage() {
       fields={[
         {"name": "judul", "label": "Judul Pengumuman GTK", "type": "text"},
         {"name": "deskripsi", "label": "Uraian Lengkap Surat Edaran", "type": "textarea"},
-        {"name": "file", "label": "Lampiran Surat Edaran (PDF)", "type": "text", "placeholder": "edaran.pdf"},
+        {"name": "file", "label": "Lampiran Surat Edaran (PDF)", "type": "file", "accept": ".pdf", "placeholder": "Unggah surat edaran PDF"},
       ]}
       columns={["judul", "deskripsi", "file"]}
     />

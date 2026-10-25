@@ -17,7 +17,7 @@ export default function SekolahPenggerakPage() {
         {"name": "proses", "label": "Tahapan / Proses Kegiatan", "type": "textarea"},
         {"name": "hasil", "label": "Capaian / Output Positif", "type": "textarea"},
         {"name": "link", "label": "Link YouTube (Opsional)", "type": "text", "placeholder": "https://youtube.com/watch?v=...", "required": false},
-        {"name": "file", "label": "Foto Dokumentasi Kegiatan", "type": "text", "placeholder": "nama file foto .jpg/.png"},
+        {"name": "file", "label": "Foto Dokumentasi Kegiatan", "type": "file", "accept": "image/*", "placeholder": "Unggah foto dokumentasi kegiatan"},
       ]}
       columns={["judul", "tujuan", "hasil", "link"]}
     />

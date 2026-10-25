@@ -5,6 +5,7 @@ import {
   Badge,
   Button,
   Card,
+  FileInput,
   Input,
   Modal,
   PageHeader,
@@ -209,6 +210,16 @@ export default function BannerAdminPage() {
             onChange={(e) =>
               setFormData({ ...formData, subtitle: e.target.value })
             }
+          />
+
+          <FileInput
+            label="Foto / Gambar Latar Belakang Banner"
+            accept="image/*"
+            value={formData.image}
+            onChange={(fileName) =>
+              setFormData({ ...formData, image: fileName })
+            }
+            helperText="Unggah gambar hero slider resolusi tinggi (rekomendasi 1920x800 px)"
           />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

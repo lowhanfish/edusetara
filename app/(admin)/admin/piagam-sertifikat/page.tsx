@@ -17,7 +17,7 @@ export default function PiagamSertifikatPage() {
         {"name": "tahun", "label": "Tahun Perolehan", "type": "number"},
         {"name": "tempat_pelaksana", "label": "Lokasi Pelaksanaan", "type": "text"},
         {"name": "sebagai", "label": "Peran (Peserta / Narasumber / Juara)", "type": "text"},
-        {"name": "file", "label": "Berkas Piagam/Sertifikat (PDF)", "type": "text", "placeholder": "sertifikat.pdf"},
+        {"name": "file", "label": "Berkas Piagam/Sertifikat (PDF)", "type": "file", "accept": ".pdf", "placeholder": "Unggah berkas digital PDF piagam/sertifikat"},
       ]}
       columns={["kegiatan", "penyelenggara", "tahun", "sebagai", "file"]}
     />
