@@ -156,6 +156,26 @@ const PATHS: Record<string, React.ReactNode> = {
   ),
   refresh: <path d="M20 11a8 8 0 0 0-14.5-3M4 5v4h4M4 13a8 8 0 0 0 14.5 3M20 19v-4h-4" />,
   arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
+  chart: (
+    <>
+      <path d="M3 3v18h18" />
+      <rect x="7" y="10" width="3" height="7" rx="0.5" />
+      <rect x="12" y="6" width="3" height="11" rx="0.5" />
+      <rect x="17" y="13" width="3" height="4" rx="0.5" />
+    </>
+  ),
+  pie: (
+    <>
+      <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+      <path d="M22 12A10 10 0 0 0 12 2v10z" />
+    </>
+  ),
+  trending: (
+    <>
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+      <polyline points="16 7 22 7 22 13" />
+    </>
+  ),
   dot: <circle cx="12" cy="12" r="3" />,
 };
 

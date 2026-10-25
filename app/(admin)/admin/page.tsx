@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Icon } from "../_components/admin-icons";
+import { DashboardAnalyticsSection } from "../_components/chart";
 import {
   Badge,
-  Button,
   Card,
   CardContent,
   CardHeader,
@@ -200,6 +200,9 @@ export default function AdminDashboard() {
           </Link>
         ))}
       </div>
+
+      {/* ── Interactive Highcharts Analytics Section ── */}
+      <DashboardAnalyticsSection />
 
       {/* ── 2-Column Content Area ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
