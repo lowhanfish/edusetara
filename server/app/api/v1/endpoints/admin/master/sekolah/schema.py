@@ -10,7 +10,9 @@ class SekolahBase(BaseModel):
     status_sekolah: str = Field("NEGERI", description="Status kelembagaan (NEGERI / SWASTA)")
     npsn: str | None = Field(None, description="Nomor Pokok Sekolah Nasional")
     akreditasi: str | None = Field(None, description="Peringkat Akreditasi (A, B, C, TT)")
+    kecamatan_id: int | None = Field(None, description="ID Kecamatan di egov.master_kecamatan")
     kecamatan: str | None = Field(None, description="Kecamatan di Kab. Konawe Selatan")
+    desa_kelurahan_id: int | None = Field(None, description="ID Desa/Kelurahan di egov.master_des_kel")
     desa_kelurahan: str | None = Field(None, description="Desa atau kelurahan")
     is_active: bool = Field(True, description="Status keaktifan data sekolah")
 
@@ -20,7 +22,9 @@ class SekolahUpdate(BaseModel):
     status_sekolah: str | None = None
     npsn: str | None = None
     akreditasi: str | None = None
+    kecamatan_id: int | None = None
     kecamatan: str | None = None
+    desa_kelurahan_id: int | None = None
     desa_kelurahan: str | None = None
     is_active: bool | None = None
 

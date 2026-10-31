@@ -13,6 +13,7 @@ from app.api.v1.endpoints.admin.master.sekolah import router as sekolah_router
 from app.api.v1.endpoints.admin.master.seed import router as seed_router
 from app.api.v1.endpoints.admin.master.siswa import siswa_router
 from app.api.v1.endpoints.admin.master.usulan import usulan_router
+from app.api.v1.endpoints.admin.master.wilayah import router as wilayah_router
 
 master_router = APIRouter(prefix="/master")
 
@@ -46,6 +47,9 @@ master_router.include_router(pelengkap_router)
 
 # 10. Master Sekolah (/sekolah)
 master_router.include_router(sekolah_router, prefix="/sekolah")
+
+# 11. Master Wilayah (/wilayah)
+master_router.include_router(wilayah_router, prefix="/wilayah")
 
 # Alias for backward compatibility
 router = master_router

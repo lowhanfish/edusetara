@@ -35,7 +35,55 @@ TestSessionLocal = async_sessionmaker(
 @pytest_asyncio.fixture(autouse=True)
 async def prepare_database() -> AsyncGenerator[None, None]:
     """Create all tables before each test and drop afterwards."""
+    from sqlalchemy import text
+
     async with test_engine.begin() as conn:
+        try:
+            await conn.execute(text("ATTACH DATABASE ':memory:' AS egov"))
+        except Exception:
+            pass
+        try:
+            await conn.execute(text("ATTACH DATABASE ':memory:' AS simpeg"))
+        except Exception:
+            pass
+
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS egov.master_kecamatan (
+                kecamatan_id INTEGER PRIMARY KEY,
+                provinsi_id INTEGER,
+                kabupaten_id INTEGER,
+                kode_kecamatan TEXT,
+                nama_kecamatan TEXT
+            )
+        """))
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS egov.master_des_kel (
+                des_kel_id INTEGER PRIMARY KEY,
+                kecamatan_id INTEGER,
+                nama_des_kel TEXT,
+                kode_des_kel TEXT
+            )
+        """))
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS simpeg.unit_kerja (
+                id TEXT PRIMARY KEY,
+                unit_kerja TEXT,
+                alamat TEXT,
+                instansi TEXT,
+                status INTEGER
+            )
+        """))
+
+        # Seed minimal sample regional rows for egov
+        await conn.execute(text("""
+            INSERT OR IGNORE INTO egov.master_kecamatan (kecamatan_id, kabupaten_id, nama_kecamatan)
+            VALUES (7405020, 7405, 'ANDOOLO'), (7405091, 7405, 'RANOMEETO')
+        """))
+        await conn.execute(text("""
+            INSERT OR IGNORE INTO egov.master_des_kel (des_kel_id, kecamatan_id, nama_des_kel)
+            VALUES (68746, 7405020, 'ANDOOLO'), (68747, 7405020, 'ALANGGA'), (68962, 7405091, 'SINDANGKASIH')
+        """))
+
         await conn.run_sync(Base.metadata.create_all)
     yield
     async with test_engine.begin() as conn:

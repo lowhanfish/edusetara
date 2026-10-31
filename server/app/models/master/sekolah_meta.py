@@ -1,6 +1,6 @@
 """Master Sekolah Meta model (Bridge/Extension entity for simpeg.unit_kerja)."""
 
-from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.sql import func
 
 from app.db.base import Base
@@ -22,7 +22,9 @@ class MasterSekolahMeta(Base):
     )  # NEGERI, SWASTA
     npsn = Column(String(20), nullable=True, index=True)
     akreditasi = Column(String(10), nullable=True)
+    kecamatan_id = Column(Integer, nullable=True, index=True)
     kecamatan = Column(String(100), nullable=True, index=True)
+    desa_kelurahan_id = Column(Integer, nullable=True, index=True)
     desa_kelurahan = Column(String(100), nullable=True)
     is_active = Column(Boolean, nullable=False, default=True)
 

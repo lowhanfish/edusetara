@@ -168,12 +168,12 @@ Seluruh modul admin (termasuk Data Master) wajib mengadopsi pola arsitektur yang
 | 67 | **Master Model Pembelajaran** | Data Master | `/admin/master/model-pembelajaran` | `/api/v1/admin/master/model-pembelajaran` | `master_model_pembelajaran` |
 | 68 | **Master Pendampingan** | Data Master | `/admin/master/pendampingan` | `/api/v1/admin/master/pendampingan` | `master_pendampingan` |
 | 69 | **Master Tugas** | Data Master | `/admin/master/tugas` | `/api/v1/admin/master/tugas` | `master_tugas` |
-| 70 | **Master Kategori** | Data Master | `/admin/master/kategori` | `/api/v1/admin/master/kategori` | `master_kategori` |
 | 71 | **Master Sekolah** | Data Master > Master Sekolah | `/admin/master/sekolah/{sd,smp,tk,pkbm}` | `/api/v1/admin/master/sekolah` | `simpeg.unit_kerja` + `master_sekolah_meta` |
+| 72 | **Master Wilayah** | Data Master > Referensi Wilayah | `/admin/master/sekolah` (Dropdown) | `/api/v1/admin/master/wilayah` | `egov.master_kecamatan` + `egov.master_des_kel` |
 
 ---
 
-## 3. Spesifikasi Lengkap Modul (1 s/d 71)
+## 3. Spesifikasi Lengkap Modul (1 s/d 72)
 
 ### 1. Berita
 **Kategori:** `Publish & Informasi`  
@@ -2967,10 +2967,12 @@ Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggara
       "status": "NEGERI",
       "npsn": "40402064",
       "akreditasi": "B",
+      "kecamatan_id": 7405091,
       "kecamatan": "Ranomeeto Barat",
       "district": "Ranomeeto Barat",
-      "desa_kelurahan": "Sindangkasih",
-      "village": "Sindangkasih",
+      "desa_kelurahan_id": 68962,
+      "desa_kelurahan": "SINDANGKASIH",
+      "village": "SINDANGKASIH",
       "is_active": true,
       "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402064",
       "created_at": "2026-11-01T00:20:41",
@@ -2987,8 +2989,10 @@ Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggara
   "status_sekolah": "NEGERI",
   "npsn": "40402064",
   "akreditasi": "A",
+  "kecamatan_id": 7405091,
   "kecamatan": "Ranomeeto Barat",
-  "desa_kelurahan": "Sindangkasih",
+  "desa_kelurahan_id": 68962,
+  "desa_kelurahan": "SINDANGKASIH",
   "is_active": true
 }
 ```
@@ -3008,3 +3012,52 @@ Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggara
 ```
 
 ---
+
+### 72. Master Wilayah (E-Gov Reference)
+**Kategori:** `Data Master > Referensi Wilayah`  
+**Route Frontend:** Digunakan pada Select Dropdown di Modal Edit & Filter Sekolah  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/wilayah`  
+**Tabel Database:** `egov.master_kecamatan` & `egov.master_des_kel` (Read-Only)  
+**Tipe Modul:** `Hierarchical Regional Lookup Options`
+
+**Operasi & Method:**
+- `GET /api/v1/admin/master/wilayah/kecamatan` : Daftar 25 kecamatan resmi di Kab. Konawe Selatan (`kabupaten_id = 7405`).
+- `GET /api/v1/admin/master/wilayah/desa-kelurahan?kecamatan_id={id}` : Daftar 359 desa/kelurahan resmi di Kab. Konawe Selatan (dapat difilter per kecamatan).
+
+**Contoh Response Kecamatan (`GET /api/v1/admin/master/wilayah/kecamatan`):**
+```json
+[
+  {
+    "id": 7405020,
+    "kode": null,
+    "nama": "ANDOOLO",
+    "label": "Andoolo"
+  },
+  {
+    "id": 7405022,
+    "kode": null,
+    "nama": "ANDOOLO BARAT",
+    "label": "Andoolo Barat"
+  }
+]
+```
+
+**Contoh Response Desa/Kelurahan (`GET /api/v1/admin/master/wilayah/desa-kelurahan?kecamatan_id=7405020`):**
+```json
+[
+  {
+    "id": 68747,
+    "kecamatan_id": 7405020,
+    "kode": null,
+    "nama": "ALANGGA",
+    "label": "Alangga"
+  },
+  {
+    "id": 68746,
+    "kecamatan_id": 7405020,
+    "kode": null,
+    "nama": "ANDOOLO",
+    "label": "Andoolo"
+  }
+]
+```

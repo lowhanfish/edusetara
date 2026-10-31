@@ -12,7 +12,12 @@ import {
   Select,
 } from "../../../../_components/ui";
 import { SekolahRecord, SekolahUpdatePayload } from "../types";
-import { useResponseListSekolah, useUpdateSekolah, useSyncSekolah } from "../hooks/crud";
+import {
+  useResponseListSekolah,
+  useUpdateSekolah,
+  useSyncSekolah,
+  useKecamatanList,
+} from "../hooks/crud";
 import DetailSekolahModal from "./DetailSekolahModal";
 import EditSekolahModal from "./EditSekolahModal";
 import { listindex } from "@/utilities/pagination";
@@ -76,6 +81,8 @@ export default function SekolahManager({
     statusSekolah: statusFilter,
     kecamatan: kecamatanFilter,
   });
+
+  const { kecamatanList } = useKecamatanList();
 
   const updateMutation = useUpdateSekolah();
   const syncMutation = useSyncSekolah();
@@ -266,11 +273,17 @@ export default function SekolahManager({
               className="text-xs"
             >
               <option value="Semua">Semua Kecamatan</option>
-              {KECAMATAN_OPTIONS.map((kec) => (
-                <option key={kec} value={kec}>
-                  Kec. {kec}
-                </option>
-              ))}
+              {kecamatanList.length > 0
+                ? kecamatanList.map((kec) => (
+                    <option key={kec.id} value={kec.label}>
+                      Kec. {kec.label}
+                    </option>
+                  ))
+                : KECAMATAN_OPTIONS.map((kec) => (
+                    <option key={kec} value={kec}>
+                      Kec. {kec}
+                    </option>
+                  ))}
             </Select>
 
             {(search || statusFilter !== "Semua" || kecamatanFilter !== "Semua") && (

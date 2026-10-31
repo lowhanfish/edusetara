@@ -3,7 +3,13 @@
 import { fetchData } from "@/lib/api_secure";
 import { useUrlStore } from "@/store/useUrlStore";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { SekolahListResponse, SekolahRecord, SekolahUpdatePayload } from "../types";
+import {
+  DesaKelurahanOption,
+  KecamatanOption,
+  SekolahListResponse,
+  SekolahRecord,
+  SekolahUpdatePayload,
+} from "../types";
 import { swallAlert, showLoadingAlert } from "@/lib/show_swall";
 
 export const useResponseListSekolah = ({
@@ -13,6 +19,7 @@ export const useResponseListSekolah = ({
   jenjang = "",
   statusSekolah = "",
   kecamatan = "",
+  kecamatanId = null,
 }: {
   page: number;
   pageSize: number;
@@ -20,6 +27,7 @@ export const useResponseListSekolah = ({
   jenjang?: string;
   statusSekolah?: string;
   kecamatan?: string;
+  kecamatanId?: number | null;
 }) => {
   const url = useUrlStore((state) => state.URL.APP);
 
@@ -29,14 +37,27 @@ export const useResponseListSekolah = ({
   if (search) queryParams.set("search", search);
   if (jenjang && jenjang !== "Semua") queryParams.set("jenjang", jenjang);
   if (statusSekolah && statusSekolah !== "Semua") queryParams.set("status_sekolah", statusSekolah);
-  if (kecamatan && kecamatan !== "Semua") queryParams.set("kecamatan", kecamatan);
+  if (kecamatanId) {
+    queryParams.set("kecamatan_id", String(kecamatanId));
+  } else if (kecamatan && kecamatan !== "Semua") {
+    queryParams.set("kecamatan", kecamatan);
+  }
 
   const { data: List, isLoading, isError, error, refetch } = useQuery({
     queryFn: () =>
       fetchData<SekolahListResponse>(
         `${url}/api/v1/admin/master/sekolah?${queryParams.toString()}`
       ),
-    queryKey: ["master-sekolah", page, pageSize, search, jenjang, statusSekolah, kecamatan],
+    queryKey: [
+      "master-sekolah",
+      page,
+      pageSize,
+      search,
+      jenjang,
+      statusSekolah,
+      kecamatan,
+      kecamatanId,
+    ],
   });
 
   return { List, isLoading, isError, error, refetch };
@@ -100,4 +121,34 @@ export const useSyncSekolah = () => {
   }
 
   return syncMutation;
+};
+
+export const useKecamatanList = () => {
+  const url = useUrlStore((state) => state.URL.APP);
+
+  const { data: kecamatanList = [], isLoading, isError } = useQuery<KecamatanOption[]>({
+    queryKey: ["master-wilayah-kecamatan"],
+    queryFn: () => fetchData<KecamatanOption[]>(`${url}/api/v1/admin/master/wilayah/kecamatan`),
+    staleTime: 1000 * 60 * 30,
+  });
+
+  return { kecamatanList, isLoading, isError };
+};
+
+export const useDesaKelurahanList = (kecamatanId?: number | null) => {
+  const url = useUrlStore((state) => state.URL.APP);
+
+  const { data: desaList = [], isLoading, isError } = useQuery<DesaKelurahanOption[]>({
+    queryKey: ["master-wilayah-desa", kecamatanId],
+    queryFn: () => {
+      const endpoint = kecamatanId
+        ? `${url}/api/v1/admin/master/wilayah/desa-kelurahan?kecamatan_id=${kecamatanId}`
+        : `${url}/api/v1/admin/master/wilayah/desa-kelurahan`;
+      return fetchData<DesaKelurahanOption[]>(endpoint);
+    },
+    enabled: Boolean(kecamatanId),
+    staleTime: 1000 * 60 * 30,
+  });
+
+  return { desaList, isLoading, isError };
 };

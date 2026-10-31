@@ -29,11 +29,13 @@ def map_row_to_response(r: Any) -> dict[str, Any]:
     status_sekolah = r[4]
     npsn = r[5]
     akreditasi = r[6]
-    kecamatan = r[7]
-    desa_kelurahan = r[8]
-    is_active = bool(r[9])
-    created_at = r[10]
-    updated_at = r[11]
+    kecamatan_id = r[7]
+    kecamatan = r[8]
+    desa_kelurahan_id = r[9]
+    desa_kelurahan = r[10]
+    is_active = bool(r[11])
+    created_at = r[12]
+    updated_at = r[13]
 
     url = f"https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/{npsn}" if npsn else None
 
@@ -50,8 +52,10 @@ def map_row_to_response(r: Any) -> dict[str, Any]:
         "status": status_sekolah,
         "npsn": npsn,
         "akreditasi": akreditasi,
+        "kecamatan_id": kecamatan_id,
         "kecamatan": kecamatan,
         "district": kecamatan or "-",
+        "desa_kelurahan_id": desa_kelurahan_id,
         "desa_kelurahan": desa_kelurahan,
         "village": desa_kelurahan or "-",
         "is_active": is_active,
@@ -124,6 +128,7 @@ async def read_sekolah(
     jenjang: str | None = Query(None, description="Jenjang (SD, SMP, TK, PAUD, SATAP, PKBM)"),
     status_sekolah: str | None = Query(None, description="Status (NEGERI, SWASTA)"),
     kecamatan: str | None = Query(None, description="Kecamatan"),
+    kecamatan_id: int | None = Query(None, description="ID Kecamatan"),
     include_satap: bool = Query(True, description="Sertakan SATAP jika filter SD atau SMP"),
     db: AsyncSession = Depends(get_db),
 ):
@@ -145,7 +150,10 @@ async def read_sekolah(
         where_clauses.append("m.status_sekolah = :status_sekolah")
         params["status_sekolah"] = status_sekolah.upper()
 
-    if kecamatan and kecamatan.upper() != "SEMUA":
+    if kecamatan_id:
+        where_clauses.append("m.kecamatan_id = :kecamatan_id")
+        params["kecamatan_id"] = kecamatan_id
+    elif kecamatan and kecamatan.upper() != "SEMUA":
         where_clauses.append("m.kecamatan = :kecamatan")
         params["kecamatan"] = kecamatan
 
@@ -180,7 +188,9 @@ async def read_sekolah(
             m.status_sekolah,
             m.npsn,
             m.akreditasi,
+            m.kecamatan_id,
             m.kecamatan,
+            m.desa_kelurahan_id,
             m.desa_kelurahan,
             m.is_active,
             m.created_at,
@@ -217,7 +227,9 @@ async def get_sekolah_detail(
             m.status_sekolah,
             m.npsn,
             m.akreditasi,
+            m.kecamatan_id,
             m.kecamatan,
+            m.desa_kelurahan_id,
             m.desa_kelurahan,
             m.is_active,
             m.created_at,
