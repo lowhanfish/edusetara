@@ -7,12 +7,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
 } from "../_components/ui";
 
 const stats = [
@@ -221,38 +215,40 @@ export default function AdminDashboard() {
                 Lihat semua
               </Link>
             </CardHeader>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Judul Artikel</TableHead>
-                  <TableHead>Kategori</TableHead>
-                  <TableHead>Tanggal</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentNews.map((news) => (
-                  <TableRow key={news.id}>
-                    <TableCell className="font-semibold text-[#2d2410] max-w-sm truncate">
-                      {news.title}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="neutral">{news.category}</Badge>
-                    </TableCell>
-                    <TableCell className="text-xs text-slate-500 whitespace-nowrap">
-                      {news.date}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={news.status === "Terbit" ? "success" : "warning"}
-                      >
-                        {news.status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-[#2d2410]/10 bg-white/35">
+                    <th className="py-3 px-4 font-bold text-[#2d2410]/80">Judul Artikel</th>
+                    <th className="py-3 px-4 font-bold text-[#2d2410]/80">Kategori</th>
+                    <th className="py-3 px-4 font-bold text-[#2d2410]/80">Tanggal</th>
+                    <th className="py-3 px-4 font-bold text-[#2d2410]/80">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/60">
+                  {recentNews.map((news) => (
+                    <tr key={news.id} className="hover:bg-white/50 transition-colors">
+                      <td className="py-3 px-4 font-semibold text-[#2d2410] max-w-sm truncate">
+                        {news.title}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge variant="neutral">{news.category}</Badge>
+                      </td>
+                      <td className="py-3 px-4 text-xs text-slate-500 whitespace-nowrap">
+                        {news.date}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge
+                          variant={news.status === "Terbit" ? "success" : "warning"}
+                        >
+                          {news.status}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </Card>
         </div>
 

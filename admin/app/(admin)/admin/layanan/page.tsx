@@ -8,13 +8,8 @@ import {
   Input,
   Modal,
   PageHeader,
+  Pagination,
   Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   Textarea,
 } from "../../_components/ui";
 
@@ -106,8 +101,23 @@ export default function LayananAdminPage() {
     });
   };
 
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  const filtered = services.filter(
+    (s) =>
+      s.name.toLowerCase().includes(search.toLowerCase()) ||
+      s.category.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const paginated = filtered.slice(
+    (page - 1) * pageSize,
+    (page - 1) * pageSize + pageSize
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       <PageHeader
         title="Manajemen Layanan Publik & SOP"
         description="Atur jenis layanan terpadu, standar operasional prosedur (SOP), estimasi waktu pelayanan, serta syarat administrasi."
@@ -119,63 +129,100 @@ export default function LayananAdminPage() {
         }
       />
 
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nama Layanan</TableHead>
-              <TableHead>Sasaran Pengguna</TableHead>
-              <TableHead>Estimasi Waktu</TableHead>
-              <TableHead>Biaya</TableHead>
-              <TableHead>Moda Layanan</TableHead>
-              <TableHead className="text-right">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {services.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-bold text-[#2d2410] max-w-sm">
-                  {item.name}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  <Badge variant="neutral">{item.category}</Badge>
-                </TableCell>
-                <TableCell className="text-xs text-slate-600 whitespace-nowrap">
-                  ⏱️ {item.processingTime}
-                </TableCell>
-                <TableCell className="text-xs font-semibold text-emerald-700 whitespace-nowrap">
-                  {item.fee}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  <Badge variant={item.status === "Online" ? "success" : "info"}>
-                    {item.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-right">
-                  <div className="flex items-center justify-end gap-1.5">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => alert(`Edit SOP: ${item.name}`)}
-                    >
-                      ✏️
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="hover:text-red-600 hover:bg-red-50"
-                      onClick={() =>
-                        setServices(services.filter((s) => s.id !== item.id))
-                      }
-                    >
-                      🗑️
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <Card className="border border-white/80 shadow-xs">
+        {/* Toolbar Pencarian Data di dalam Card */}
+        <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex items-center justify-between">
+          <div className="w-full sm:w-80">
+            <Input
+              placeholder="Cari nama layanan atau kategori..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Tabel Semantik Native HTML */}
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
+              <tr>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Nama Layanan</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Sasaran Pengguna</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Estimasi Waktu</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Biaya</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Moda Layanan</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/60 bg-transparent">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
+                    Tidak ada layanan ditemukan.
+                  </td>
+                </tr>
+              ) : (
+                paginated.map((item) => (
+                  <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
+                    <td className="px-4 py-3.5 text-xs align-middle font-bold text-[#2d2410] max-w-sm">
+                      {item.name}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
+                      <Badge variant="neutral">{item.category}</Badge>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-[#7d7152] whitespace-nowrap">
+                      ⏱️ {item.processingTime}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle font-semibold text-emerald-700 whitespace-nowrap">
+                      {item.fee}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
+                      <Badge variant={item.status === "Online" ? "success" : "info"}>
+                        {item.status}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => alert(`Edit SOP: ${item.name}`)}
+                        >
+                          ✏️
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="hover:text-red-600 hover:bg-red-50"
+                          onClick={() =>
+                            setServices(services.filter((s) => s.id !== item.id))
+                          }
+                        >
+                          🗑️
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer Paginasi Terstandar */}
+        <div className="px-6 py-4 bg-white/20 border-t border-white/60">
+          <Pagination
+            page={page}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            total={filtered.length}
+            pageSizeOptions={[5, 10, 20]}
+          />
+        </div>
       </Card>
 
       <Modal

@@ -9,13 +9,8 @@ import {
   Input,
   Modal,
   PageHeader,
+  Pagination,
   Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   Textarea,
 } from "../../_components/ui";
 
@@ -126,14 +121,23 @@ export default function PengumumanAdminPage() {
     }
   };
 
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
   const filtered = announcements.filter(
     (a) =>
       a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       a.number.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const paginated = filtered.slice(
+    (page - 1) * pageSize,
+    (page - 1) * pageSize + pageSize
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       <PageHeader
         title="Manajemen Pengumuman & Surat Edaran"
         description="Publikasi edaran kedinasan resmi, jadwal ujian, juknis asesmen, dan pemberitahuan penting."
@@ -149,90 +153,119 @@ export default function PengumumanAdminPage() {
         }
       />
 
-      <div className="w-full sm:w-80">
-        <Input
-          placeholder="Cari nomor edaran atau judul..."
-          leftIcon="🔍"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
+      <Card className="border border-white/80 shadow-xs">
+        {/* Toolbar Filter Pencarian di dalam Card */}
+        <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex items-center justify-between">
+          <div className="w-full sm:w-80">
+            <Input
+              placeholder="Cari nomor edaran atau judul..."
+              leftIcon="🔍"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
+        </div>
 
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>No. Surat & Judul</TableHead>
-              <TableHead>Kategori</TableHead>
-              <TableHead>Sasaran Penerima</TableHead>
-              <TableHead>Batas Waktu</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="max-w-md">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs font-mono font-semibold text-[#a86a00]">
-                      {item.number}
-                    </span>
-                    <span className="font-bold text-[#2d2410] line-clamp-2">
-                      {item.title}
-                    </span>
-                    {item.important && (
-                      <span className="inline-block text-[10px] text-red-600 font-bold">
-                        ⚡ PENTING / SEGERA
-                      </span>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  <Badge variant="neutral">{item.category}</Badge>
-                </TableCell>
-                <TableCell className="text-xs text-slate-600">
-                  {item.targetAudience}
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-xs text-slate-500">
-                  {item.deadline}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  <Badge
-                    variant={
-                      item.status === "Aktif"
-                        ? "success"
-                        : item.status === "Draft"
-                        ? "warning"
-                        : "neutral"
-                    }
-                  >
-                    {item.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-right">
-                  <div className="flex items-center justify-end gap-1.5">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => alert(`Edit edaran: ${item.number}`)}
-                    >
-                      ✏️
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="hover:text-red-600 hover:bg-red-50"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      🗑️
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        {/* Tabel Semantik Native HTML */}
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
+              <tr>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">No. Surat & Judul</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Kategori</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Sasaran Penerima</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Batas Waktu</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Status</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/60 bg-transparent">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
+                    Tidak ada pengumuman ditemukan.
+                  </td>
+                </tr>
+              ) : (
+                paginated.map((item) => (
+                  <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
+                    <td className="px-4 py-3.5 text-xs align-middle max-w-md">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs font-mono font-semibold text-[#a86a00]">
+                          {item.number}
+                        </span>
+                        <span className="font-bold text-[#2d2410] line-clamp-2">
+                          {item.title}
+                        </span>
+                        {item.important && (
+                          <span className="inline-block text-[10px] text-red-600 font-bold">
+                            ⚡ PENTING / SEGERA
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
+                      <Badge variant="neutral">{item.category}</Badge>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-[#5e5133]">
+                      {item.targetAudience}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-[#7d7152]">
+                      {item.deadline}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
+                      <Badge
+                        variant={
+                          item.status === "Aktif"
+                            ? "success"
+                            : item.status === "Draft"
+                            ? "warning"
+                            : "neutral"
+                        }
+                      >
+                        {item.status}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => alert(`Edit edaran: ${item.number}`)}
+                        >
+                          ✏️
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="hover:text-red-600 hover:bg-red-50"
+                          onClick={() => handleDelete(item.id)}
+                        >
+                          🗑️
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer Paginasi Terstandar */}
+        <div className="px-6 py-4 bg-white/20 border-t border-white/60">
+          <Pagination
+            page={page}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            total={filtered.length}
+            pageSizeOptions={[5, 10, 20]}
+          />
+        </div>
       </Card>
 
       <Modal

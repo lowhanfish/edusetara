@@ -8,13 +8,8 @@ import {
   Input,
   Modal,
   PageHeader,
+  Pagination,
   Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   Textarea,
 } from "../../_components/ui";
 
@@ -123,12 +118,27 @@ export default function KontakAdminPage() {
     setReplyText("");
   };
 
-  const filtered = messages.filter(
-    (m) => statusFilter === "Semua" || m.status === statusFilter
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  const filtered = messages.filter((m) => {
+    const matchSearch =
+      m.senderName.toLowerCase().includes(search.toLowerCase()) ||
+      m.subject.toLowerCase().includes(search.toLowerCase()) ||
+      m.email.toLowerCase().includes(search.toLowerCase()) ||
+      m.message.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter === "Semua" || m.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
+
+  const paginated = filtered.slice(
+    (page - 1) * pageSize,
+    (page - 1) * pageSize + pageSize
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       <PageHeader
         title="Kotak Pesan & Pengaduan Masuk"
         description="Kelola pesan masuk masyarakat, pertanyaan layanan, serta aspirasi publik yang masuk melalui portal Dikbud Konawe Selatan."
@@ -140,103 +150,142 @@ export default function KontakAdminPage() {
         }
       />
 
-      {/* Filter Status */}
-      <div className="flex gap-2">
-        {["Semua", "Belum Dibalas", "Diproses", "Selesai"].map((status) => (
-          <button
-            key={status}
-            type="button"
-            onClick={() => setStatusFilter(status)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-              statusFilter === status
-                ? "bg-[#2d2410] text-white"
-                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-            }`}
-          >
-            {status}
-          </button>
-        ))}
-      </div>
+      <Card className="border border-white/80 shadow-xs">
+        {/* Toolbar Pencarian & Filter Status di dalam Card */}
+        <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="w-full sm:w-80">
+            <Input
+              placeholder="Cari pengirim, email, subjek..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
 
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Pengirim & Kontak</TableHead>
-              <TableHead>Kategori</TableHead>
-              <TableHead>Perihal / Subjek</TableHead>
-              <TableHead>Waktu Masuk</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="font-bold text-[#2d2410]">
-                      {item.senderName}
-                    </span>
-                    <span className="text-xs text-[#7d7152]">
-                      {item.email} • {item.phone}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  <Badge variant="neutral">{item.category}</Badge>
-                </TableCell>
-                <TableCell className="max-w-xs">
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-slate-800 line-clamp-1">
-                      {item.subject}
-                    </span>
-                    <span className="text-xs text-slate-500 line-clamp-1">
-                      {item.message}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-xs text-slate-500">
-                  {item.date}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  <Badge
-                    variant={
-                      item.status === "Selesai"
-                        ? "success"
-                        : item.status === "Diproses"
-                        ? "info"
-                        : "warning"
-                    }
-                  >
-                    {item.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-right">
-                  <div className="flex items-center justify-end gap-1.5">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => setSelectedMessage(item)}
-                    >
-                      Buka & Balas
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="hover:text-red-600 hover:bg-red-50"
-                      onClick={() =>
-                        setMessages(messages.filter((m) => m.id !== item.id))
-                      }
-                    >
-                      🗑️
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+          <div className="flex gap-2 overflow-x-auto w-full sm:w-auto pb-1">
+            {["Semua", "Belum Dibalas", "Diproses", "Selesai"].map((status) => (
+              <button
+                key={status}
+                type="button"
+                onClick={() => {
+                  setStatusFilter(status);
+                  setPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                  statusFilter === status
+                    ? "bg-[#2d2410] text-white shadow-2xs"
+                    : "bg-white/60 text-slate-600 border border-white/80 hover:bg-white"
+                }`}
+              >
+                {status}
+              </button>
             ))}
-          </TableBody>
-        </Table>
+          </div>
+        </div>
+
+        {/* Tabel Semantik Native HTML */}
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
+              <tr>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Pengirim & Kontak</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Kategori</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Perihal / Subjek</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Waktu Masuk</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Status</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/60 bg-transparent">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
+                    Tidak ada pesan ditemukan.
+                  </td>
+                </tr>
+              ) : (
+                paginated.map((item) => (
+                  <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
+                    <td className="px-4 py-3.5 text-xs align-middle">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-[#2d2410]">
+                          {item.senderName}
+                        </span>
+                        <span className="text-xs text-[#7d7152]">
+                          {item.email} • {item.phone}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
+                      <Badge variant="neutral">{item.category}</Badge>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle max-w-xs">
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-slate-800 line-clamp-1">
+                          {item.subject}
+                        </span>
+                        <span className="text-xs text-[#7d7152] line-clamp-1">
+                          {item.message}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-[#7d7152]">
+                      {item.date}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
+                      <Badge
+                        variant={
+                          item.status === "Selesai"
+                            ? "success"
+                            : item.status === "Diproses"
+                            ? "info"
+                            : "warning"
+                        }
+                      >
+                        {item.status}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedMessage(item)}
+                        >
+                          Buka & Balas
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="hover:text-red-600 hover:bg-red-50"
+                          onClick={() =>
+                            setMessages(messages.filter((m) => m.id !== item.id))
+                          }
+                        >
+                          🗑️
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer Paginasi Terstandar */}
+        <div className="px-6 py-4 bg-white/20 border-t border-white/60">
+          <Pagination
+            page={page}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            total={filtered.length}
+            pageSizeOptions={[5, 10, 20]}
+          />
+        </div>
       </Card>
 
       {/* Modal Balas Pesan */}

@@ -10,14 +10,9 @@ import {
   Input,
   Modal,
   PageHeader,
+  Pagination,
   RichTextEditor,
   Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   Textarea,
 } from "../../_components/ui";
 import { Icon } from "../../_components/admin-icons";
@@ -261,6 +256,10 @@ export default function BeritaAdminPage() {
     }
   };
 
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
   const filteredNews = newsList.filter((item) => {
     const matchSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -270,8 +269,13 @@ export default function BeritaAdminPage() {
     return matchSearch && matchCategory;
   });
 
+  const paginatedNews = filteredNews.slice(
+    (page - 1) * pageSize,
+    (page - 1) * pageSize + pageSize
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       <PageHeader
         title="Manajemen Berita"
         description="Kelola publikasi warta, liputan kegiatan, dan dokumentasi pendidikan & kebudayaan Kabupaten Konawe Selatan."
@@ -287,135 +291,150 @@ export default function BeritaAdminPage() {
         }
       />
 
-      {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="w-full sm:w-80">
-          <Input
-            placeholder="Cari judul berita atau penulis..."
-            leftIcon={<Icon name="search" size={16} />}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+      <Card className="border border-white/80 shadow-xs">
+        {/* Filter & Search Bar di dalam Card */}
+        <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="w-full sm:w-80">
+            <Input
+              placeholder="Cari judul berita atau penulis..."
+              leftIcon={<Icon name="search" size={16} />}
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1">
+            {[
+              "Semua",
+              "Pendidikan",
+              "Kebudayaan",
+              "GTK & Guru",
+              "Sarana Prasarana",
+            ].map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => {
+                  setCategoryFilter(cat);
+                  setPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                  categoryFilter === cat
+                    ? "bg-[#2d2410] text-white shadow-2xs"
+                    : "bg-white/60 text-slate-600 border border-white/80 hover:bg-white"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Tabel Semantik Native HTML */}
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
+              <tr>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Judul & Ringkasan</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Kategori</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Penulis</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Tanggal</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Status</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/60 bg-transparent">
+              {filteredNews.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
+                    Tidak ada artikel yang sesuai dengan pencarian.
+                  </td>
+                </tr>
+              ) : (
+                paginatedNews.map((item) => (
+                  <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
+                    <td className="px-4 py-3.5 text-xs align-middle max-w-md">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-bold text-[#2d2410] line-clamp-1">
+                          {item.title}
+                        </span>
+                        <span className="text-xs text-[#7d7152] line-clamp-1">
+                          {item.excerpt}
+                        </span>
+                        {item.featured && (
+                          <span className="inline-block text-[10px] text-amber-700 font-bold">
+                            ★ Berita Utama (Featured)
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
+                      <Badge variant="neutral">{item.category}</Badge>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-[#5e5133]">
+                      {item.author}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-[#7d7152]">
+                      {item.date}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
+                      <Badge
+                        variant={item.status === "Terbit" ? "success" : "warning"}
+                      >
+                        {item.status}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          title="Pratinjau / Preview Berita"
+                          className="text-amber-700 hover:text-amber-900 hover:bg-amber-100/60"
+                          onClick={() => handleOpenPreview(item)}
+                        >
+                          <Icon name="eye" size={15} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          title="Edit Berita"
+                          className="text-slate-600 hover:text-[#2d2410] hover:bg-slate-100"
+                          onClick={() => handleOpenEdit(item)}
+                        >
+                          <Icon name="edit" size={15} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          title="Hapus Berita"
+                          className="text-slate-400 hover:text-red-600 hover:bg-red-50"
+                          onClick={() => handleDelete(item.id)}
+                        >
+                          <Icon name="trash" size={15} />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer Paginasi Terstandar */}
+        <div className="px-6 py-4 bg-white/20 border-t border-white/60">
+          <Pagination
+            page={page}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            total={filteredNews.length}
+            pageSizeOptions={[5, 10, 20]}
           />
         </div>
-        <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1">
-          {[
-            "Semua",
-            "Pendidikan",
-            "Kebudayaan",
-            "GTK & Guru",
-            "Sarana Prasarana",
-          ].map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setCategoryFilter(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-                categoryFilter === cat
-                  ? "bg-[#f5b82e] text-[#3b2a05]"
-                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* News Table */}
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Judul & Ringkasan</TableHead>
-              <TableHead>Kategori</TableHead>
-              <TableHead>Penulis</TableHead>
-              <TableHead>Tanggal</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredNews.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-12 text-slate-400">
-                  Tidak ada artikel yang sesuai dengan pencarian.
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredNews.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="max-w-md">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-bold text-[#2d2410] line-clamp-1">
-                        {item.title}
-                      </span>
-                      <span className="text-xs text-[#7d7152] line-clamp-1">
-                        {item.excerpt}
-                      </span>
-                      {item.featured && (
-                        <span className="inline-block text-[10px] text-amber-700 font-bold">
-                          ★ Berita Utama (Featured)
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    <Badge variant="neutral">{item.category}</Badge>
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap text-xs text-slate-600">
-                    {item.author}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap text-xs text-slate-500">
-                    {item.date}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    <Badge
-                      variant={item.status === "Terbit" ? "success" : "warning"}
-                    >
-                      {item.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      {/* Tombol Preview Berita */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        title="Pratinjau / Preview Berita"
-                        className="text-amber-700 hover:text-amber-900 hover:bg-amber-100/60"
-                        onClick={() => handleOpenPreview(item)}
-                      >
-                        <Icon name="eye" size={15} />
-                      </Button>
-
-                      {/* Tombol Edit Berita */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        title="Edit Berita"
-                        className="text-slate-600 hover:text-[#2d2410] hover:bg-slate-100"
-                        onClick={() => handleOpenEdit(item)}
-                      >
-                        <Icon name="edit" size={15} />
-                      </Button>
-
-                      {/* Tombol Hapus Berita */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        title="Hapus Berita"
-                        className="text-slate-400 hover:text-red-600 hover:bg-red-50"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        <Icon name="trash" size={15} />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
       </Card>
 
       {/* ── Modal Tambah / Ubah Berita ── */}

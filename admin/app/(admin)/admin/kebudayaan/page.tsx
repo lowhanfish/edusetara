@@ -8,13 +8,8 @@ import {
   Input,
   Modal,
   PageHeader,
+  Pagination,
   Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   Textarea,
 } from "../../_components/ui";
 
@@ -99,12 +94,26 @@ export default function KebudayaanAdminPage() {
     });
   };
 
-  const filtered = items.filter(
-    (item) => filterType === "Semua" || item.type === filterType
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  const filtered = items.filter((item) => {
+    const matchSearch =
+      item.name.toLowerCase().includes(search.toLowerCase()) ||
+      item.location.toLowerCase().includes(search.toLowerCase()) ||
+      item.description.toLowerCase().includes(search.toLowerCase());
+    const matchType = filterType === "Semua" || item.type === filterType;
+    return matchSearch && matchType;
+  });
+
+  const paginated = filtered.slice(
+    (page - 1) * pageSize,
+    (page - 1) * pageSize + pageSize
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       <PageHeader
         title="Manajemen Kebudayaan Daerah"
         description="Inventarisasi warisan budaya takbenda, cagar budaya bersejarah, sanggar seni, serta kalender festival kebudayaan."
@@ -116,92 +125,132 @@ export default function KebudayaanAdminPage() {
         }
       />
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {[
-          "Semua",
-          "Warisan Takbenda (WBTb)",
-          "Cagar Budaya",
-          "Sanggar Seni",
-          "Festival / Agenda",
-        ].map((type) => (
-          <button
-            key={type}
-            type="button"
-            onClick={() => setFilterType(type)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-              filterType === type
-                ? "bg-[#2d2410] text-white"
-                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-            }`}
-          >
-            {type}
-          </button>
-        ))}
-      </div>
+      <Card className="border border-white/80 shadow-xs">
+        {/* Toolbar Pencarian & Filter Tabs di dalam Card */}
+        <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+          <div className="w-full md:w-80">
+            <Input
+              placeholder="Cari objek budaya, sanggar, lokasi..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
 
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nama Objek / Sanggar</TableHead>
-              <TableHead>Jenis Kebudayaan</TableHead>
-              <TableHead>Lokasi / Kecamatan</TableHead>
-              <TableHead>Deskripsi</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-bold text-[#2d2410]">
-                  {item.name}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  <Badge variant="neutral">{item.type}</Badge>
-                </TableCell>
-                <TableCell className="text-xs text-slate-600">
-                  {item.location}
-                </TableCell>
-                <TableCell className="text-xs text-slate-600 max-w-xs truncate">
-                  {item.description}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  <Badge
-                    variant={
-                      item.status === "Terverifikasi" || item.status === "Aktif"
-                        ? "success"
-                        : "warning"
-                    }
-                  >
-                    {item.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-right">
-                  <div className="flex items-center justify-end gap-1.5">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => alert(`Edit: ${item.name}`)}
-                    >
-                      ✏️
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="hover:text-red-600 hover:bg-red-50"
-                      onClick={() =>
-                        setItems(items.filter((x) => x.id !== item.id))
-                      }
-                    >
-                      🗑️
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+          <div className="flex gap-1.5 overflow-x-auto w-full md:w-auto pb-1">
+            {[
+              "Semua",
+              "Warisan Takbenda (WBTb)",
+              "Cagar Budaya",
+              "Sanggar Seni",
+              "Festival / Agenda",
+            ].map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => {
+                  setFilterType(type);
+                  setPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                  filterType === type
+                    ? "bg-[#2d2410] text-white shadow-2xs"
+                    : "bg-white/60 text-slate-600 border border-white/80 hover:bg-white"
+                }`}
+              >
+                {type}
+              </button>
             ))}
-          </TableBody>
-        </Table>
+          </div>
+        </div>
+
+        {/* Tabel Semantik Native HTML */}
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
+              <tr>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Nama Objek / Sanggar</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Jenis Kebudayaan</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Lokasi / Kecamatan</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Deskripsi</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Status</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/60 bg-transparent">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
+                    Tidak ada data kebudayaan ditemukan.
+                  </td>
+                </tr>
+              ) : (
+                paginated.map((item) => (
+                  <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
+                    <td className="px-4 py-3.5 text-xs align-middle font-bold text-[#2d2410]">
+                      {item.name}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
+                      <Badge variant="neutral">{item.type}</Badge>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-[#5e5133]">
+                      {item.location}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-[#7d7152] max-w-xs truncate">
+                      {item.description}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
+                      <Badge
+                        variant={
+                          item.status === "Terverifikasi" || item.status === "Aktif"
+                            ? "success"
+                            : "warning"
+                        }
+                      >
+                        {item.status}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => alert(`Edit: ${item.name}`)}
+                        >
+                          ✏️
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="hover:text-red-600 hover:bg-red-50"
+                          onClick={() =>
+                            setItems(items.filter((x) => x.id !== item.id))
+                          }
+                        >
+                          🗑️
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer Paginasi Terstandar */}
+        <div className="px-6 py-4 bg-white/20 border-t border-white/60">
+          <Pagination
+            page={page}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            total={filtered.length}
+            pageSizeOptions={[5, 10, 20]}
+          />
+        </div>
       </Card>
 
       <Modal

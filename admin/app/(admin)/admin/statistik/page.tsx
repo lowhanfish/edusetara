@@ -8,13 +8,8 @@ import {
   Input,
   Modal,
   PageHeader,
+  Pagination,
   Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
 } from "../../_components/ui";
 
 interface StatRecord {
@@ -105,8 +100,23 @@ export default function StatistikAdminPage() {
     });
   };
 
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  const filtered = stats.filter(
+    (item) =>
+      item.indicator.toLowerCase().includes(search.toLowerCase()) ||
+      item.category.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const paginated = filtered.slice(
+    (page - 1) * pageSize,
+    (page - 1) * pageSize + pageSize
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       <PageHeader
         title="Manajemen Data & Statistik"
         description="Kelola indikator capaian mutu pendidikan, indeks kepuasan masyarakat (IKM), dan statistik agregat wilayah."
@@ -120,7 +130,7 @@ export default function StatistikAdminPage() {
 
       {/* Grid of Key Figures */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((item) => (
+        {stats.slice(0, 4).map((item) => (
           <div
             key={item.id}
             className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between gap-3"
@@ -148,52 +158,89 @@ export default function StatistikAdminPage() {
         ))}
       </div>
 
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nama Indikator</TableHead>
-              <TableHead>Kategori</TableHead>
-              <TableHead>Nilai Data</TableHead>
-              <TableHead>Periode</TableHead>
-              <TableHead>Tren / Capaian</TableHead>
-              <TableHead className="text-right">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {stats.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-bold text-[#2d2410]">
-                  {item.indicator}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  <Badge variant="neutral">{item.category}</Badge>
-                </TableCell>
-                <TableCell className="font-bold text-[#a86a00] whitespace-nowrap">
-                  {item.value} <span className="text-xs font-normal text-slate-500">{item.unit}</span>
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-xs text-slate-600">
-                  {item.period}
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-xs text-emerald-700 font-semibold">
-                  {item.trend}
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hover:text-red-600 hover:bg-red-50"
-                    onClick={() =>
-                      setStats(stats.filter((s) => s.id !== item.id))
-                    }
-                  >
-                    🗑️
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <Card className="border border-white/80 shadow-xs">
+        {/* Toolbar Pencarian Data di dalam Card */}
+        <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex items-center justify-between">
+          <div className="w-full sm:w-80">
+            <Input
+              placeholder="Cari indikator atau kategori..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Tabel Semantik Native HTML */}
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
+              <tr>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Nama Indikator</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Kategori</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Nilai Data</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Periode</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Tren / Capaian</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/60 bg-transparent">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
+                    Tidak ada indikator statistik ditemukan.
+                  </td>
+                </tr>
+              ) : (
+                paginated.map((item) => (
+                  <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
+                    <td className="px-4 py-3.5 text-xs align-middle font-bold text-[#2d2410]">
+                      {item.indicator}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
+                      <Badge variant="neutral">{item.category}</Badge>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle font-bold text-[#a86a00] whitespace-nowrap">
+                      {item.value} <span className="text-xs font-normal text-slate-500">{item.unit}</span>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-[#7d7152]">
+                      {item.period}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-emerald-700 font-semibold">
+                      {item.trend}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="hover:text-red-600 hover:bg-red-50"
+                        onClick={() =>
+                          setStats(stats.filter((s) => s.id !== item.id))
+                        }
+                      >
+                        🗑️
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer Paginasi Terstandar */}
+        <div className="px-6 py-4 bg-white/20 border-t border-white/60">
+          <Pagination
+            page={page}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            total={filtered.length}
+            pageSizeOptions={[5, 10, 20]}
+          />
+        </div>
       </Card>
 
       <Modal
