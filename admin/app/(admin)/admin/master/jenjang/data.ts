@@ -1,0 +1,48 @@
+import { JenjangRecord } from "./types";
+
+export const DUMMY_JENJANG: JenjangRecord[] = [
+  {
+    id: "JJG-01",
+    uraian: "PAUD / TK",
+    nip: "198208102008011009",
+    unit_kerja: "Bidang Pembinaan PAUD & PNF",
+    keterangan: "Pendidikan Anak Usia Dini formal & non-formal (TK, KB, TPA, SPS) usia 4-6 tahun.",
+    kategori: "Formal",
+    status: "Aktif",
+    created_at: "2026-10-31T07:30:00Z",
+    created_by: "Subbag Perencanaan & Data",
+  },
+  {
+    id: "JJG-02",
+    uraian: "SD (Sekolah Dasar)",
+    nip: "198501012010011001",
+    unit_kerja: "Bidang Pembinaan Sekolah Dasar",
+    keterangan: "Pendidikan dasar wajib belajar 6 tahun (Kelas 1 s/d Kelas 6) negeri dan swasta.",
+    kategori: "Formal",
+    status: "Aktif",
+    created_at: "2026-10-31T07:30:00Z",
+    created_by: "Subbag Perencanaan & Data",
+  },
+  {
+    id: "JJG-03",
+    uraian: "SMP (Sekolah Menengah Pertama)",
+    nip: "198412052010011019",
+    unit_kerja: "Bidang Pembinaan SMP",
+    keterangan: "Pendidikan menengah pertama wajib belajar 3 tahun (Kelas 7 s/d Kelas 9) serta SMP Satap.",
+    kategori: "Formal",
+    status: "Aktif",
+    created_at: "2026-10-31T07:30:00Z",
+    created_by: "Subbag Perencanaan & Data",
+  },
+  {
+    id: "JJG-04",
+    uraian: "PKBM / Kesetaraan",
+    nip: "198803152014022003",
+    unit_kerja: "Bidang Pembinaan PAUD & PNF",
+    keterangan: "Pusat Kegiatan Belajar Masyarakat program Paket A setara SD, Paket B setara SMP, dan Paket C setara SMA.",
+    kategori: "Non-Formal",
+    status: "Aktif",
+    created_at: "2026-10-31T07:30:00Z",
+    created_by: "Subbag Perencanaan & Data",
+  },
+];

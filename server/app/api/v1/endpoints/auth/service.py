@@ -98,7 +98,7 @@ async def register_user(session: AsyncSession, payload: RegisterRequest) -> User
 
 
 async def authenticate_user(session: AsyncSession, payload: LoginRequest) -> User:
-    """Authenticate username/email and password."""
+    """Authenticate username/email/nip and password."""
     stmt = (
         select(User)
         .options(selectinload(User.role))
@@ -106,6 +106,7 @@ async def authenticate_user(session: AsyncSession, payload: LoginRequest) -> Use
             or_(
                 User.username == payload.username_or_email,
                 User.email == payload.username_or_email,
+                User.nip == payload.username_or_email,
             )
         )
     )

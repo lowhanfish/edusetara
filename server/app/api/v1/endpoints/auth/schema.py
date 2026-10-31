@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, EmailStr, Field
 
 
 class RegisterRequest(BaseModel):
@@ -19,8 +19,14 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     """Payload for user login."""
 
-    username_or_email: str = Field(..., min_length=3, max_length=100)
+    username_or_email: str = Field(
+        ...,
+        min_length=3,
+        max_length=100,
+        validation_alias=AliasChoices("username_or_email", "identifier", "username", "email"),
+    )
     password: str = Field(..., min_length=1, max_length=128)
+    remember_me: bool = Field(default=False)
 
 
 class RoleSummary(BaseModel):

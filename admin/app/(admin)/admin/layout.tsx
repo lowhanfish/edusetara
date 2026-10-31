@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { adminMenu, MenuItem } from "../_data/admin-menu";
 import { EMOJI_ICON, Icon } from "../_components/admin-icons";
+import { useAuthStore } from "@/store/useAuthStore";
 
 function isItemActive(item: MenuItem, pathname: string): boolean {
   if (item.path && item.path === pathname) return true;
@@ -128,6 +129,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
 
+  const user = useAuthStore((state) => state.user);
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+  const logout = useAuthStore((state) => state.logout);
+
+  useEffect(() => {
+    checkAuth().then((currentUser) => {
+      if (!currentUser && typeof window !== "undefined") {
+        window.location.replace("/");
+      }
+    });
+  }, [checkAuth]);
+
   // Auto-expand any active menu section when pathname changes
   useEffect(() => {
     setOpenMenus((prev) => {
@@ -220,13 +233,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Icon name="globe" size={16} />
             <span>Lihat Website Publik</span>
           </Link>
-          <Link
-            href="/login"
-            className="flex items-center gap-3 px-3 py-2 rounded-2xl text-xs font-medium text-rose-500 hover:bg-rose-500/10 transition-colors"
+          <button
+            type="button"
+            onClick={() => logout()}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-2xl text-xs font-medium text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer text-left"
           >
             <Icon name="logout" size={16} />
             <span>Keluar Akun</span>
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -267,12 +281,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
 
             <div className="flex items-center gap-2.5 pl-3 border-l border-white/70">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-b from-[#ffd666] to-[#eda61a] text-[#3b2a05] font-semibold text-sm flex items-center justify-center shadow-[0_4px_12px_rgba(245,176,46,.35)]">
-                A
+              <div className="w-10 h-10 rounded-full bg-gradient-to-b from-[#ffd666] to-[#eda61a] text-[#3b2a05] font-semibold text-sm flex items-center justify-center shadow-[0_4px_12px_rgba(245,176,46,.35)] uppercase">
+                {(user?.full_name || user?.username || "A")[0]}
               </div>
               <div className="hidden sm:flex flex-col leading-none">
-                <span className="text-xs font-semibold text-[#2d2410]">Administrator</span>
-                <span className="text-[10px] text-[#a39770] mt-1">Dikbud Konsel</span>
+                <span className="text-xs font-semibold text-[#2d2410] truncate max-w-[150px]">
+                  {user?.full_name || user?.username || "Administrator"}
+                </span>
+                <span className="text-[10px] text-[#a39770] mt-1 capitalize">
+                  {user?.role ? `${user.role} Dikbud` : "Dikbud Konsel"}
+                </span>
               </div>
             </div>
           </div>
