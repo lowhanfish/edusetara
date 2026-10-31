@@ -30,7 +30,7 @@ export default function MasterJenjangPage() {
 
   // Pagination State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
 
   // Debounce Search input (e-office pattern)
   useEffect(() => {
@@ -60,10 +60,10 @@ export default function MasterJenjangPage() {
   const [selectedRecord, setSelectedRecord] = useState<JenjangRecord | null>(null);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
 
-  // Form Field State - strictly follows database schema: uraian, keterangan
+  // Form Field State - strictly follows Arsitektur Sistem contract: title, desc
   const initialForm: Partial<ResponseInterface> = {
-    uraian: "",
-    keterangan: "",
+    title: "",
+    desc: "",
   };
 
   const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
@@ -81,8 +81,15 @@ export default function MasterJenjangPage() {
   // Statistik Ringkasan Metrik
   const stats = useMemo(() => {
     const total = List?.total ?? rawList.length;
-    const withKeterangan = rawList.filter((d) => Boolean(d.keterangan && d.keterangan !== "-")).length;
-    return { total, withKeterangan };
+    const sdCount = rawList.filter((d) => {
+      const val = String(d.title || d.uraian || "");
+      return ["1", "2", "3", "4", "5", "6"].includes(val) || (d.desc || "").toLowerCase().includes("sd");
+    }).length;
+    const smpCount = rawList.filter((d) => {
+      const val = String(d.title || d.uraian || "");
+      return ["7", "8", "9"].includes(val) || (d.desc || "").toLowerCase().includes("smp");
+    }).length;
+    return { total, sdCount, smpCount };
   }, [List, rawList]);
 
   // Modal Handlers
@@ -96,8 +103,8 @@ export default function MasterJenjangPage() {
     setFormMode("edit");
     setSelectedRecord(item);
     setFormData({
-      uraian: item.uraian || "",
-      keterangan: item.keterangan || "",
+      title: item.title || item.uraian || "",
+      desc: item.desc || item.keterangan || "",
     });
     setIsFormOpen(true);
   };
@@ -107,10 +114,10 @@ export default function MasterJenjangPage() {
     setIsDetailOpen(true);
   };
 
-  const handleDelete = (id: string, uraian: string) => {
+  const handleDelete = (id: string, title: string) => {
     Swal.fire({
       title: "Konfirmasi Hapus",
-      text: `Apakah Anda yakin ingin menghapus Master Jenjang "${uraian}"?`,
+      text: `Apakah Anda yakin ingin menghapus Master Jenjang "${title}"?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Ya, Hapus!",
@@ -126,21 +133,22 @@ export default function MasterJenjangPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.uraian?.trim()) {
+    const titleVal = (formData.title || formData.uraian || "").trim();
+    if (!titleVal) {
       Swal.fire({
         title: "Pemberitahuan!",
-        text: "Silakan isi Uraian Jenjang Pendidikan!",
+        text: "Silakan isi Nama Jenjang (title)!",
         icon: "warning",
       });
       return;
     }
 
-    if (formMode === "add") {
-      const payload: Partial<ResponseInterface> = {
-        uraian: formData.uraian.trim(),
-        keterangan: formData.keterangan?.trim() || null,
-      };
+    const payload: Partial<ResponseInterface> = {
+      title: titleVal,
+      desc: (formData.desc || formData.keterangan || "").trim() || null,
+    };
 
+    if (formMode === "add") {
       createMutation.mutate(payload, {
         onSuccess: () => {
           setIsFormOpen(false);
@@ -148,11 +156,6 @@ export default function MasterJenjangPage() {
         },
       });
     } else if (formMode === "edit" && selectedRecord) {
-      const payload: Partial<ResponseInterface> = {
-        uraian: formData.uraian.trim(),
-        keterangan: formData.keterangan?.trim() || null,
-      };
-
       updateMutation.mutate(
         {
           id: selectedRecord.id,
@@ -186,7 +189,7 @@ export default function MasterJenjangPage() {
       {/* 2. PageHeader Standar EduSetara */}
       <PageHeader
         title="Master Jenjang Pendidikan"
-        description="Kelola data klasifikasi jenjang pendidikan resmi (uraian & keterangan) sesuai basis data master_jenjang."
+        description="Daftar data tingkat jenjang pendidikan mulai dari kelas 1 Sekolah Dasar (SD) hingga kelas 9 Sekolah Menengah Pertama (SMP) sesuai dokumen spesifikasi Arsitektur Sistem."
         badge={<Badge variant="gold">Data Master</Badge>}
         action={
           <Button variant="gold" onClick={openAddModal}>
@@ -199,9 +202,9 @@ export default function MasterJenjangPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
           <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Total Jenjang</p>
+            <p className="text-xs font-semibold text-[#7d7152]">Total Tingkat Jenjang</p>
             <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.total} Jenjang</h4>
-            <span className="text-[11px] text-emerald-700 font-medium">Tabel master_jenjang</span>
+            <span className="text-[11px] text-emerald-700 font-medium">Kelas 1 s/d Kelas 9</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
             🎓
@@ -210,31 +213,31 @@ export default function MasterJenjangPage() {
 
         <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
           <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Catatan Keterangan</p>
-            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.withKeterangan} Terisi</h4>
-            <span className="text-[11px] text-[#a86a00] font-semibold">Field Keterangan</span>
+            <p className="text-xs font-semibold text-[#7d7152]">Jenjang SD</p>
+            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.sdCount} Tingkat</h4>
+            <span className="text-[11px] text-[#a86a00] font-semibold">Tingkat Kelas 1 s/d 6</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
-            📝
+            🏫
           </div>
         </Card>
 
         <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
           <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Basis Data</p>
-            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">MySQL</h4>
-            <span className="text-[11px] text-emerald-700 font-medium">Terhubung Langsung</span>
+            <p className="text-xs font-semibold text-[#7d7152]">Jenjang SMP</p>
+            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.smpCount} Tingkat</h4>
+            <span className="text-[11px] text-emerald-700 font-medium">Tingkat Kelas 7 s/d 9</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
-            🗄️
+            🎒
           </div>
         </Card>
 
         <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
           <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Sinkronisasi Sistem</p>
+            <p className="text-xs font-semibold text-[#7d7152]">Integrasi Jurnal & Rombel</p>
             <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Aktif</h4>
-            <span className="text-[11px] text-emerald-700 font-semibold">TanStack Query Cache</span>
+            <span className="text-[11px] text-emerald-700 font-semibold">Rujukan Tingkatan</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
             ⚡
@@ -250,7 +253,7 @@ export default function MasterJenjangPage() {
             <Input
               value={search}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
-              placeholder="Cari uraian atau keterangan jenjang..."
+              placeholder="Cari tingkat jenjang (1 s/d 9) atau penjelasan..."
             />
           </div>
 
@@ -282,16 +285,16 @@ export default function MasterJenjangPage() {
           <table className="w-full text-left text-sm border-collapse">
             <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
               <tr>
-                <th className="w-[6%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">
+                <th className="w-[8%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">
                   No
                 </th>
-                <th className="w-[44%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
-                  Uraian Jenjang Pendidikan
+                <th className="w-[22%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
+                  Tingkat Jenjang (title)
                 </th>
-                <th className="w-[36%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
-                  Keterangan
+                <th className="w-[55%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
+                  Penjelasan Singkat Jenjang (desc)
                 </th>
-                <th className="w-[14%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">
+                <th className="w-[15%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">
                   Aksi
                 </th>
               </tr>
@@ -305,10 +308,10 @@ export default function MasterJenjangPage() {
                       <div className="h-4 w-4 bg-amber-200/50 rounded-md mx-auto" />
                     </td>
                     <td className="px-4 py-3.5">
-                      <div className="h-4 w-56 bg-amber-200/50 rounded-md" />
+                      <div className="h-5 w-20 bg-amber-200/50 rounded-md" />
                     </td>
                     <td className="px-4 py-3.5">
-                      <div className="h-4 w-48 bg-amber-200/40 rounded-md" />
+                      <div className="h-4 w-72 bg-amber-200/40 rounded-md" />
                     </td>
                     <td className="px-4 py-3.5 text-right">
                       <div className="h-7 w-20 bg-amber-200/40 rounded-lg ml-auto" />
@@ -329,6 +332,8 @@ export default function MasterJenjangPage() {
                 </tr>
               ) : (
                 rawList.map((row, idx) => {
+                  const displayTitle = row.title || row.uraian || "";
+                  const displayDesc = row.desc || row.keterangan || "-";
                   return (
                     <tr key={row.id} className="hover:bg-white/50 transition-colors duration-150">
                       {/* 1. Nomor Baris dengan listindex */}
@@ -336,18 +341,18 @@ export default function MasterJenjangPage() {
                         {listindex(pageSize, page, idx)}
                       </td>
 
-                      {/* 2. Uraian Jenjang */}
+                      {/* 2. Tingkat Jenjang (title) */}
                       <td className="px-4 py-3.5 text-xs text-[#2d2410] align-middle">
-                        <span className="font-bold text-[#2d2410] hover:text-[#a86a00] transition-colors">
-                          {row.uraian}
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#ffd666]/30 text-[#855700] border border-[#ffd666]/60 font-mono shadow-2xs">
+                          Tingkat {displayTitle}
                         </span>
                       </td>
 
-                      {/* 3. Keterangan */}
+                      {/* 3. Penjelasan Singkat (desc) */}
                       <td className="px-4 py-3.5 text-xs text-[#2d2410] align-middle">
-                        <span className="text-xs text-[#5e5133]">
-                          {row.keterangan || "-"}
-                        </span>
+                        <p className="text-xs text-[#4a3f29] font-medium leading-relaxed">
+                          {displayDesc}
+                        </p>
                       </td>
 
                       {/* 4. Tombol Aksi (Detail, Edit, Hapus) */}
@@ -380,7 +385,7 @@ export default function MasterJenjangPage() {
                             variant="ghost"
                             size="sm"
                             className="hover:text-red-600 hover:bg-red-50/80"
-                            onClick={() => handleDelete(row.id, row.uraian)}
+                            onClick={() => handleDelete(row.id, displayTitle)}
                             title="Hapus Jenjang"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -408,7 +413,7 @@ export default function MasterJenjangPage() {
               setPage(1);
             }}
             total={List?.total ?? rawList.length}
-            pageSizeOptions={[3, 5, 10, 20]}
+            pageSizeOptions={[5, 10, 20]}
           />
         </div>
       </Card>

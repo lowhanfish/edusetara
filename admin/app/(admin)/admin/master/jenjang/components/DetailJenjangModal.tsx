@@ -18,7 +18,7 @@ export default function DetailJenjangModal({
       isOpen={isOpen && Boolean(record)}
       onClose={onClose}
       title="Lembar Data Master Jenjang Pendidikan"
-      description="Dinas Pendidikan & Kebudayaan Kabupaten Konawe Selatan"
+      description="Sesuai dokumen spesifikasi Arsitektur Sistem EduSetara"
       maxWidth="md"
       footer={
         <div className="flex items-center justify-between w-full">
@@ -42,19 +42,19 @@ export default function DetailJenjangModal({
           <div className="p-4 rounded-2xl bg-white/60 border border-white/80 space-y-3">
             <div>
               <span className="text-[#9c8e6b] block text-[10px] uppercase font-semibold">
-                Uraian Jenjang Pendidikan
+                Nama / Tingkat Jenjang (title)
               </span>
-              <h3 className="font-extrabold text-[#2d2410] text-base mt-0.5">
-                {record.uraian}
+              <h3 className="font-extrabold text-[#2d2410] text-xl mt-0.5">
+                {record.title || record.uraian}
               </h3>
             </div>
 
             <div className="pt-2 border-t border-white/60">
               <span className="text-[#9c8e6b] block text-[10px] uppercase font-semibold">
-                Keterangan
+                Penjelasan Singkat Jenjang (desc)
               </span>
-              <p className="text-[#5e5133] mt-0.5 leading-relaxed">
-                {record.keterangan || "-"}
+              <p className="text-[#5e5133] mt-1 leading-relaxed">
+                {record.desc || record.keterangan || "-"}
               </p>
             </div>
           </div>

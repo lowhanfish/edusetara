@@ -1,10 +1,16 @@
 export interface CreateInterface {
-  uraian: string;
+  title: string;
+  desc?: string | null;
+  uraian?: string;
   keterangan?: string | null;
 }
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  title: string;
+  desc?: string | null;
+  uraian?: string;
+  keterangan?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;

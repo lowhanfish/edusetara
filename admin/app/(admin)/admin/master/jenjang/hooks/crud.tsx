@@ -21,7 +21,7 @@ export const useResponseOption = (search: string = "") => {
   if (data) {
     result = (data as ResponseInterface[])?.map((item: ResponseInterface) => ({
       id: item.id,
-      value: item.uraian,
+      value: item.title || item.uraian,
     }));
   }
 

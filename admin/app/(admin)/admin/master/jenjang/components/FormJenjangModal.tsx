@@ -30,7 +30,7 @@ export default function FormJenjangModal({
           ? "+ Tambah Master Jenjang Pendidikan"
           : "✎ Edit Master Jenjang Pendidikan"
       }
-      description="Kelola nama jenjang pendidikan (uraian) dan keterangan sesuai basis data master_jenjang."
+      description="Sesuai dokumen Arsitektur Sistem: nama jenjang (title) dan penjelasan singkat jenjang (desc)."
       maxWidth="md"
       footer={
         <>
@@ -48,32 +48,44 @@ export default function FormJenjangModal({
       }
     >
       <form id="form-master-jenjang" onSubmit={onSubmit} className="space-y-4">
-        {/* Nama Jenjang Pendidikan (uraian) */}
+        {/* Nama Jenjang (title) */}
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Uraian Jenjang Pendidikan <span className="text-rose-500">*</span>
+            Nama Jenjang (title) <span className="text-rose-500">*</span>
           </label>
           <Input
             required
-            value={formData.uraian || ""}
-            onChange={(e) => setFormData({ ...formData, uraian: e.target.value })}
-            placeholder="Contoh: PAUD / TK, SD, SMP, PKBM"
+            value={formData.title || formData.uraian || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                title: e.target.value,
+                uraian: e.target.value,
+              })
+            }
+            placeholder="Contoh: 1, 6, 7, 9 (Tingkat Jenjang Pendidikan)"
           />
           <p className="text-[10px] text-[#9c8e6b] mt-1">
-            Label deskriptor jenjang pendidikan (field uraian).
+            Tingkatan jenjang pendidikan dasar hingga menengah pertama (misal: 1 s/d 9).
           </p>
         </div>
 
-        {/* Keterangan (keterangan) */}
+        {/* Penjelasan Singkat Jenjang (desc) */}
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Keterangan
+            Penjelasan Singkat Jenjang (desc)
           </label>
           <Textarea
             rows={3}
-            value={formData.keterangan || ""}
-            onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
-            placeholder="Tambahkan catatan atau keterangan jenjang bila diperlukan..."
+            value={formData.desc || formData.keterangan || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                desc: e.target.value,
+                keterangan: e.target.value,
+              })
+            }
+            placeholder="Contoh: Tingkatan jenjang awal kelas 1 pada jenjang Sekolah Dasar (SD)."
           />
         </div>
       </form>

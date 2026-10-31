@@ -1293,9 +1293,31 @@ Direferensikan oleh [`app/(admin)/admin/master/usulan/master-usulan-management.t
 ---
 
 ### 16.6 Master Jenjang (`/admin/master/jenjang`)
+- **Penjelasan (Sesuai `Arsitektur Sistem.docx`)**: Modul ini menyajikan daftar data tingkat jenjang pendidikan mulai dari kelas 1 Sekolah Dasar (SD) hingga kelas 9 Sekolah Menengah Pertama (SMP).
 - **File Frontend**: [`app/(admin)/admin/master/jenjang/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/jenjang/page.tsx)
 - **Endpoint CRUD**: `/api/v1/admin/master/jenjang` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Tabel `master_jenjang`**: `id` (`VARCHAR(36)` PK), `uraian` (`VARCHAR(100)` NOT NULL: `"PAUD / TK"`, `"SD (Sekolah Dasar)"`, `"SMP (Sekolah Menengah Pertama)"`, `"PKBM / Kesetaraan"`), `nip`, `unit_kerja`, `created_by`, `created_at`.
+- **Form (Contract API Sesuai Dokumen Arsitektur)**:
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "title": "string <input>, (nama jenjang, contoh: '1', '6', '7', '9')",
+  "desc": "string <input>, (penjelasan singkat jenjang)",
+  "created_at": "date, <generate otomatis | backend>",
+  "created_by": "string, <generate otomatis | backend>"
+}
+```
+- **Tabel Basis Data `master_jenjang`**:
+  - `id` (`VARCHAR(50)` PK)
+  - `uraian` / `title` (`VARCHAR(100)` NOT NULL: `"1"` s/d `"9"`)
+  - `keterangan` / `desc` (`TEXT` NULL)
+  - `created_by` (`VARCHAR(100)` NULL)
+  - `created_at` (`DATETIME` NOT NULL)
+  - `updated_at` (`DATETIME` NOT NULL)
+- **Contoh Seed Data Resmi (`Arsitektur Sistem.docx`)**:
+  - `1`: Tingkatan jenjang awal kelas 1 pada jenjang Sekolah Dasar (SD).
+  - `6`: Tingkatan jenjang akhir kelas 6 pada jenjang Sekolah Dasar (SD).
+  - `7`: Tingkatan jenjang awal kelas 7 pada jenjang Sekolah Menengah Pertama (SMP).
+  - `9`: Tingkatan jenjang akhir kelas 9 pada jenjang Sekolah Menengah Pertama (SMP).
 
 ---
 

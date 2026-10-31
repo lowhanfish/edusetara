@@ -82,10 +82,16 @@ async def create_jenjang(
     current_user: User = Depends(get_current_user),
 ):
     create_data = payload.model_dump(exclude_unset=True)
-    if not create_data.get("id"):
-        create_data["id"] = str(uuid.uuid4())
-    create_data["created_by"] = getattr(current_user, "username", "admin")
-    return await crud_jenjang.create(db, obj_in=create_data)
+    uraian_val = create_data.get("title") or create_data.get("uraian")
+    keterangan_val = create_data.get("desc") or create_data.get("keterangan")
+    
+    db_obj = {
+        "id": create_data.get("id") or str(uuid.uuid4()),
+        "uraian": uraian_val,
+        "keterangan": keterangan_val,
+        "created_by": getattr(current_user, "username", "admin"),
+    }
+    return await crud_jenjang.create(db, obj_in=db_obj)
 
 
 @router.put("/{id}", response_model=JenjangResponse)
@@ -95,7 +101,14 @@ async def update_jenjang(
     payload: JenjangUpdate,
     db: AsyncSession = Depends(get_db),
 ):
-    updated = await crud_jenjang.update(db, id=id, obj_in=payload.model_dump(exclude_unset=True))
+    update_data = payload.model_dump(exclude_unset=True)
+    db_obj = {}
+    if "title" in update_data or "uraian" in update_data:
+        db_obj["uraian"] = update_data.get("title") or update_data.get("uraian")
+    if "desc" in update_data or "keterangan" in update_data:
+        db_obj["keterangan"] = update_data.get("desc") or update_data.get("keterangan")
+
+    updated = await crud_jenjang.update(db, id=id, obj_in=db_obj)
     if not updated:
         raise HTTPException(status_code=404, detail="Data tidak ditemukan")
     return updated
