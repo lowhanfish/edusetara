@@ -3,6 +3,7 @@
 import uuid
 
 from sqlalchemy import Column, DateTime, String
+from sqlalchemy.orm import declared_attr, synonym
 from sqlalchemy.sql import func
 
 
@@ -16,3 +17,8 @@ class MasterBaseMixin:
     created_by = Column(String(100), nullable=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    @declared_attr
+    def title(cls):
+        """Synonym so models transparently support title <-> uraian."""
+        return synonym("uraian")
