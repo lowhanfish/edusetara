@@ -1,7 +1,7 @@
 import { MasterUsulanManagement } from "../master-usulan-management";
 
 export const metadata = {
-  title: "Triwulan | Admin Dikbud Konawe Selatan",
+  title: "Triwulan",
   description: "Manajemen Triwulan Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

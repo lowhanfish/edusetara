@@ -5,7 +5,7 @@ import { SchoolDirectory } from "./_components/school-directory";
 import schoolsData from "./schools.json";
 
 export const metadata: Metadata = {
-  title: "Cari Sekolah | Dikbud Konawe Selatan",
+  title: "Cari Sekolah",
   description:
     "Direktori dan pencarian data satuan pendidikan SD dan SMP di 25 kecamatan Kabupaten Konawe Selatan.",
 };

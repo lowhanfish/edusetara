@@ -1,7 +1,7 @@
 import { ContractCrudPage } from "../../../../_components/contract-crud-page";
 
 export const metadata = {
-  title: "Mode Transportasi | Admin Dikbud Konawe Selatan",
+  title: "Mode Transportasi",
   description: "Manajemen Mode Transportasi Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

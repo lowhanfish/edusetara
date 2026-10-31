@@ -4,7 +4,7 @@ import Link from "next/link";
 import { CultureHero, CultureNavigation, CultureHelp } from "../_components/culture-shell";
 
 export const metadata: Metadata = {
-  title: "Sanggar & Komunitas Seni | Dikbud Konawe Selatan",
+  title: "Sanggar & Komunitas Seni",
   description:
     "Direktori sanggar tari, kelompok musik tradisional, komunitas kriya tenun, alur pendaftaran Nomor Induk Kesenian (NIK), dan pembinaan seni budaya di Konawe Selatan.",
 };

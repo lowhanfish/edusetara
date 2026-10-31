@@ -59,34 +59,41 @@ async def test_exact_contract_two_level_crud(client: AsyncClient, db_session: As
     }
     await client.post("/api/v1/auth/register", json=reg_payload)
 
-    # 2. CREATE item directly on /sarpras/bangunan
+    # 2. CREATE item directly on /sarpras/bangunan (e-office returns BangunanResponse)
     create_payload = {"id": "KBG-TEST", "uraian": "Gedung Uji Coba"}
-    create_res = await client.post("/api/v1/admin/master/sarpras/bangunan", json=create_payload)
+    create_res = await client.post(
+        "/api/v1/admin/master/sarpras/bangunan/create", json=create_payload
+    )
     assert create_res.status_code == 201
-    assert create_res.json()["data"]["id"] == "KBG-TEST"
+    assert create_res.json()["id"] == "KBG-TEST"
 
     # 3. GET item directly on /sarpras/bangunan/KBG-TEST
     get_res = await client.get("/api/v1/admin/master/sarpras/bangunan/KBG-TEST")
     assert get_res.status_code == 200
-    assert get_res.json()["data"]["uraian"] == "Gedung Uji Coba"
+    assert get_res.json()["uraian"] == "Gedung Uji Coba"
 
-    # 4. LIST items on /sarpras/bangunan
+    # 4. LIST items on /sarpras/bangunan (e-office returns { total, skip, limit, data })
     list_res = await client.get("/api/v1/admin/master/sarpras/bangunan")
     assert list_res.status_code == 200
     assert any(i["id"] == "KBG-TEST" for i in list_res.json()["data"])
 
-    # 5. UPDATE item
+    # 5. OPTION items on /sarpras/bangunan/option (e-office returns list[BangunanResponse])
+    opt_res = await client.get("/api/v1/admin/master/sarpras/bangunan/option")
+    assert opt_res.status_code == 200
+    assert any(i["id"] == "KBG-TEST" for i in opt_res.json())
+
+    # 6. UPDATE item via /update/{id}
     update_res = await client.put(
-        "/api/v1/admin/master/sarpras/bangunan/KBG-TEST",
+        "/api/v1/admin/master/sarpras/bangunan/update/KBG-TEST",
         json={"uraian": "Gedung Uji Coba Direvisi"},
     )
     assert update_res.status_code == 200
-    assert update_res.json()["data"]["uraian"] == "Gedung Uji Coba Direvisi"
+    assert update_res.json()["uraian"] == "Gedung Uji Coba Direvisi"
 
-    # 6. DELETE item
-    del_res = await client.delete("/api/v1/admin/master/sarpras/bangunan/KBG-TEST")
+    # 7. DELETE item via /delete/{id}
+    del_res = await client.delete("/api/v1/admin/master/sarpras/bangunan/delete/KBG-TEST")
     assert del_res.status_code == 200
-    assert del_res.json()["data"]["id"] == "KBG-TEST"
+    assert "Berhasil" in del_res.json()["message"]
 
 
 @pytest.mark.asyncio
@@ -110,7 +117,7 @@ async def test_exact_contract_one_level_crud(client: AsyncClient, db_session: As
     # GET
     get_res = await client.get("/api/v1/admin/master/jenjang/JJG-TEST")
     assert get_res.status_code == 200
-    assert get_res.json()["data"]["uraian"] == "Jenjang Khusus"
+    assert get_res.json()["uraian"] == "Jenjang Khusus"
 
     # DELETE
     del_res = await client.delete("/api/v1/admin/master/jenjang/JJG-TEST")
@@ -141,12 +148,12 @@ async def test_master_siswa_crud(client: AsyncClient, db_session: AsyncSession) 
     }
     create_res = await client.post("/api/v1/admin/master/siswa", json=siswa_payload)
     assert create_res.status_code == 201
-    assert create_res.json()["data"]["id"] == "SIS-001"
+    assert create_res.json()["id"] == "SIS-001"
 
     # 2. GET Siswa
     get_res = await client.get("/api/v1/admin/master/siswa/SIS-001")
     assert get_res.status_code == 200
-    assert get_res.json()["data"]["nama"] == "Ahmad Dani"
+    assert get_res.json()["nama"] == "Ahmad Dani"
 
     # 3. LIST Siswa with search
     list_res = await client.get("/api/v1/admin/master/siswa?search=Ahmad")
@@ -159,8 +166,84 @@ async def test_master_siswa_crud(client: AsyncClient, db_session: AsyncSession) 
         json={"nama": "Ahmad Dani Pratama"},
     )
     assert update_res.status_code == 200
-    assert update_res.json()["data"]["nama"] == "Ahmad Dani Pratama"
+    assert update_res.json()["nama"] == "Ahmad Dani Pratama"
 
     # 5. DELETE Siswa
     del_res = await client.delete("/api/v1/admin/master/siswa/SIS-001")
     assert del_res.status_code == 200
+    assert "telah dihapus" in del_res.json()["message"]
+
+
+@pytest.mark.asyncio
+async def test_ppdb_and_usulan_crud(client: AsyncClient, db_session: AsyncSession) -> None:
+    """Test CRUD on PPDB and Usulan e-office modules."""
+    reg_payload = {
+        "username": "user_ppdb_usulan",
+        "email": "user.pu@konawe.go.id",
+        "password": "Password123!",
+        "full_name": "User PPDB Usulan",
+    }
+    await client.post("/api/v1/auth/register", json=reg_payload)
+
+    # 1. PPDB Agama
+    res_agama = await client.post(
+        "/api/v1/admin/master/ppdb/agama/create",
+        json={"id": "AGM-TEST", "uraian": "Agama Test"},
+    )
+    assert res_agama.status_code == 201
+    assert res_agama.json()["id"] == "AGM-TEST"
+
+    opt_agama = await client.get("/api/v1/admin/master/ppdb/agama/option")
+    assert opt_agama.status_code == 200
+    assert any(a["id"] == "AGM-TEST" for a in opt_agama.json())
+
+    # 2. Usulan Triwulan
+    res_tw = await client.post(
+        "/api/v1/admin/master/usulan/triwulan/create",
+        json={"id": "TW-TEST", "uraian": "Triwulan Uji"},
+    )
+    assert res_tw.status_code == 201
+    assert res_tw.json()["id"] == "TW-TEST"
+
+    read_tw = await client.get("/api/v1/admin/master/usulan/triwulan/read")
+    assert read_tw.status_code == 200
+    assert any(t["id"] == "TW-TEST" for t in read_tw.json()["data"])
+
+
+@pytest.mark.asyncio
+async def test_jurnal_and_pelengkap_crud(client: AsyncClient, db_session: AsyncSession) -> None:
+    """Test CRUD on Jurnal and Pelengkap e-office modules."""
+    reg_payload = {
+        "username": "user_jurnal_pelengkap",
+        "email": "user.jp@konawe.go.id",
+        "password": "Password123!",
+        "full_name": "User Jurnal Pelengkap",
+    }
+    await client.post("/api/v1/auth/register", json=reg_payload)
+
+    # 1. Jurnal Kelas
+    res_kls = await client.post(
+        "/api/v1/admin/master/jurnal/kelas/create",
+        json={"id": "KLS-TEST", "uraian": "Kelas Test"},
+    )
+    assert res_kls.status_code == 201
+
+    # 2. Jurnal Mata Pelajaran with kelas_id
+    res_mapel = await client.post(
+        "/api/v1/admin/master/jurnal/mata-pelajaran/create",
+        json={"id": "MP-TEST", "kelas_id": "KLS-TEST", "uraian": "Matematika Uji"},
+    )
+    assert res_mapel.status_code == 201
+    assert res_mapel.json()["kelas_id"] == "KLS-TEST"
+
+    # 3. Pelengkap BK Jenis Layanan
+    res_bk = await client.post(
+        "/api/v1/admin/master/bk-jenis-layanan/create",
+        json={"id": "BK-TEST", "uraian": "Konseling Khusus"},
+    )
+    assert res_bk.status_code == 201
+    assert res_bk.json()["id"] == "BK-TEST"
+
+    # 4. Pelengkap Kategori Berkas
+    res_kat = await client.get("/api/v1/admin/master/kategori/option")
+    assert res_kat.status_code == 200

@@ -1,7 +1,7 @@
 import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
-  title: "Visi dan Misi | Admin Dikbud Konawe Selatan",
+  title: "Visi dan Misi",
   description: "Manajemen Visi dan Misi Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

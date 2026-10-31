@@ -1,7 +1,7 @@
 import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
-  title: "Gallery Kegiatan TK & PAUD | Admin Dikbud Konawe Selatan",
+  title: "Gallery Kegiatan TK & PAUD",
   description: "Manajemen Gallery Kegiatan TK & PAUD Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

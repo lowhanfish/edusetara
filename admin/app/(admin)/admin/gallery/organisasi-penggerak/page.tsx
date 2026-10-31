@@ -1,7 +1,7 @@
 import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
-  title: "Gallery Program Organisasi Penggerak | Admin Dikbud Konawe Selatan",
+  title: "Gallery Program Organisasi Penggerak",
   description: "Manajemen Gallery Program Organisasi Penggerak Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

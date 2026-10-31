@@ -6,6 +6,12 @@
     "children": null
   },
   {
+    "title": "Dokumentasi UI",
+    "path": "/admin/dokumentasi-komponen",
+    "icon": "🧩",
+    "children": null
+  },
+  {
     "title": "Sarana dan Prasarana",
     "path": null,
     "icon": "🏢",

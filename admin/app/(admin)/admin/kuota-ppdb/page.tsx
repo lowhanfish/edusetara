@@ -1,7 +1,7 @@
 import { ContractCrudPage } from "../../_components/contract-crud-page";
 
 export const metadata = {
-  title: "Kuota PPDB | Admin Dikbud Konawe Selatan",
+  title: "Kuota PPDB",
   description: "Manajemen Kuota PPDB Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

@@ -1,7 +1,7 @@
 import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
-  title: "Pengumuman GTK | Admin Dikbud Konawe Selatan",
+  title: "Pengumuman GTK",
   description: "Manajemen Pengumuman GTK Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { EducationHero, EducationNavigation, EducationHelp } from "../_components/education-shell";
 
 export const metadata: Metadata = {
-  title: "Kurikulum & Pembelajaran | Dikbud Konawe Selatan",
+  title: "Kurikulum & Pembelajaran",
   description:
     "Pedoman Kurikulum Merdeka, Projek P5 berbasis kearifan lokal, Kalender Pendidikan 2026/2027, dan pelaksanaan Asesmen Nasional (ANBK) di Konawe Selatan.",
 };

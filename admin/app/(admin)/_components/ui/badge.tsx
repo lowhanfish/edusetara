@@ -3,7 +3,7 @@ import React from "react";
 export interface BadgeProps {
   children: React.ReactNode;
   variant?: "success" | "warning" | "danger" | "info" | "neutral" | "gold";
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
   className?: string;
 }
 
@@ -16,6 +16,7 @@ export function Badge({
   const sizeClasses = {
     sm: "px-2 py-0.5 text-[10px]",
     md: "px-2.5 py-1 text-xs",
+    lg: "px-3 py-1 text-sm",
   }[size];
 
   const variantClasses = {

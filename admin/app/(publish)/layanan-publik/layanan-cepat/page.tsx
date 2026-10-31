@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ServiceHero, ServiceNavigation, ServiceHelp } from "../_components/service-shell";
 
 export const metadata: Metadata = {
-  title: "Layanan Cepat | Dikbud Konawe Selatan",
+  title: "Layanan Cepat",
   description:
     "Akses Dapodik, regulasi pendidikan, panduan unduhan, informasi pengaduan, dan tanya jawab layanan Dikbud Konawe Selatan.",
 };

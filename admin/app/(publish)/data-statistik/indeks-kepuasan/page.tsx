@@ -3,7 +3,7 @@ import Link from "next/link";
 import { DataHero, DataNavigation, DataHelp } from "../_components/data-shell";
 
 export const metadata: Metadata = {
-  title: "Indeks Kepuasan Masyarakat (IKM) | Dikbud Konawe Selatan",
+  title: "Indeks Kepuasan Masyarakat (IKM)",
   description:
     "Hasil pengukuran mutu pelayanan publik Dikbud Konawe Selatan: skor IKM 90.14% (Sangat Baik), tren historis tahunan, dan evaluasi 9 unsur layanan.",
 };

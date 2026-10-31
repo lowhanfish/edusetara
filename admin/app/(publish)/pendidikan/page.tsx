@@ -4,7 +4,7 @@ import Link from "next/link";
 import { EducationHero, EducationNavigation, EducationHelp } from "./_components/education-shell";
 
 export const metadata: Metadata = {
-  title: "Jenjang & Satuan Pendidikan | Dikbud Konawe Selatan",
+  title: "Jenjang & Satuan Pendidikan",
   description:
     "Layanan informasi jenjang PAUD, SD, SMP, dan Pendidikan Kesetaraan (PKBM) di Kabupaten Konawe Selatan. Memastikan akses belajar berkualitas, merata, dan inklusif.",
 };

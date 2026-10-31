@@ -23,12 +23,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!article) {
     return {
-      title: "Berita Tidak Ditemukan | Dikbud Konawe Selatan",
+      title: "Berita Tidak Ditemukan",
     };
   }
 
   return {
-    title: `${article.title} | Dikbud Konawe Selatan`,
+    title: `${article.title}`,
     description: article.excerpt,
     openGraph: {
       title: article.title,

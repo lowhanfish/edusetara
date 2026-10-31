@@ -1,7 +1,7 @@
 import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
-  title: "Jenjang SD | Admin Dikbud Konawe Selatan",
+  title: "Jenjang SD",
   description: "Manajemen Jenjang SD Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

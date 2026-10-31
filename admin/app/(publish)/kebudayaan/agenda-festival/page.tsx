@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CultureHero, CultureNavigation, CultureHelp } from "../_components/culture-shell";
 
 export const metadata: Metadata = {
-  title: "Agenda & Festival Budaya | Dikbud Konawe Selatan",
+  title: "Agenda & Festival Budaya",
   description:
     "Jadwal Pekan Kebudayaan Daerah (PKD), Festival Seni Pelajar, pameran kriya tenun, pawai budaya, dan kalender festival tahunan Kabupaten Konawe Selatan.",
 };

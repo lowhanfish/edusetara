@@ -45,7 +45,7 @@ function traverse(items, breadcrumbs = []) {
 }
 
 // Traverse menu items (excluding Publish)
-const publishItem = menuData.find((m) => m.title === "Publish");
+const _publishItem = menuData.find((m) => m.title === "Publish");
 const nonPublishItems = menuData.filter((m) => m.title !== "Publish");
 traverse(nonPublishItems);
 
@@ -77,7 +77,7 @@ for (const page of pagesToCreate) {
   const content = `import { AdminPageScaffold } from "${scaffoldImport}";
 
 export const metadata = {
-  title: "${page.title} | Admin Dikbud Konawe Selatan",
+  title: "${page.title}",
   description: "Manajemen ${page.title} Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

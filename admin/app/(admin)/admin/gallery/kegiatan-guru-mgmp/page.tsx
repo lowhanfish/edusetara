@@ -1,7 +1,7 @@
 import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
-  title: "Gallery Kegiatan Guru MGMP | Admin Dikbud Konawe Selatan",
+  title: "Gallery Kegiatan Guru MGMP",
   description: "Manajemen Gallery Kegiatan Guru MGMP Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

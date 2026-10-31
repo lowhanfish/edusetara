@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Masuk - Panel Admin Dikbud Konawe Selatan",
+  title: "Masuk - Panel Admin",
   description:
     "Halaman login untuk mengakses panel administrasi Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan.",
 };

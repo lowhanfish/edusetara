@@ -4,7 +4,7 @@ import Link from "next/link";
 import { EducationHero, EducationNavigation, EducationHelp } from "../_components/education-shell";
 
 export const metadata: Metadata = {
-  title: "Pendidik & Tenaga Kependidikan | Dikbud Konawe Selatan",
+  title: "Pendidik & Tenaga Kependidikan",
   description:
     "Layanan pembinaan profesi guru, sertifikasi pendidik (PPG), formasi PPPK, Komunitas Belajar (Kombel), dan pengelolaan kinerja GTK Dikbud Konawe Selatan.",
 };

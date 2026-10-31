@@ -1,7 +1,7 @@
 import { ContractCrudPage } from "../../../../_components/contract-crud-page";
 
 export const metadata = {
-  title: "Data Pendukung | Admin Dikbud Konawe Selatan",
+  title: "Data Pendukung",
   description: "Manajemen Data Pendukung Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

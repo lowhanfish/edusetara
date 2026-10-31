@@ -1,7 +1,7 @@
 import { ContractCrudPage } from "../../../../_components/contract-crud-page";
 
 export const metadata = {
-  title: "Tempat Tinggal | Admin Dikbud Konawe Selatan",
+  title: "Tempat Tinggal",
   description: "Manajemen Tempat Tinggal Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

@@ -1,7 +1,7 @@
 import { RegistrationManagement } from "./registration-management";
 
 export const metadata = {
-  title: "Registrasi | Admin Dikbud Konawe Selatan",
+  title: "Registrasi",
   description: "Pengaturan role dan level akses ASN Dikbud Konawe Selatan",
 };
 

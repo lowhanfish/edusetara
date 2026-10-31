@@ -833,26 +833,27 @@ Direferensikan oleh 3 rute jenjang yang menggunakan tabel yang sama (`rombel`) d
 ### 9.1 Jurnal Guru Kelas (`/admin/jurnal/guru-kelas`)
 - **File Frontend**: [`app/(admin)/admin/jurnal/guru-kelas/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/jurnal/guru-kelas/page.tsx)
 - **Endpoint CRUD**: `/api/v1/admin/jurnal/guru-kelas` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
+- **Karakteristik Pembelajaran**: Pembelajaran tematik terpadu oleh Guru Kelas, mencakup integrasi tema/subtema materi pokok, nomor urut pertemuan, model dan metode pembelajaran, sintaks kegiatan belajar, instrumen penilaian, rekapitulasi presensi siswa terperinci (hadir, izin, sakit, alpa beserta persentase), catatan refleksi, dan foto dokumentasi kegiatan.
 - **Skema Tabel `jurnal_guru_kelas`**:
 | Kolom | Tipe PostgreSQL | Constraints | Keterangan |
 | :--- | :--- | :--- | :--- |
 | `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"JGK-001"` |
-| `hari` | `VARCHAR(20)` | `NOT NULL` | Hari pelaksanaan (`Senin` s/d `Sabtu`) |
-| `tgl_pelaksanaan` | `DATE` | `NOT NULL` | Tanggal pelaksanaan mengajar |
-| `jam_ke` | `VARCHAR(30)` | `NOT NULL` | Jam pelajaran ke- (contoh: `"1 - 3"`) |
-| `kelas_id` | `VARCHAR(50)` | `FK -> master_jurnal_kelas.id` | Kelas yang diajar |
-| `mapel_id` | `VARCHAR(50)` | `FK -> master_jurnal_mata_pelajaran.id` | Mata pelajaran |
-| `materi_id` | `VARCHAR(50)` | `FK -> master_jurnal_materi_ajar.id` | Materi ajar |
-| `bahan_id` | `VARCHAR(50)` | `FK -> master_jurnal_bahan_ajar.id` | Bahan ajar / media |
-| `model_pembelajaran_id` | `VARCHAR(50)` | `FK -> master_model_pembelajaran.id` | Model pembelajaran (`PBL`, `PjBL`, `Discovery Learning`, dll.) |
-| `tujuan_pembelajaran` | `TEXT` | `NOT NULL` | Tujuan pembelajaran (TP) |
-| `materi_pokok` | `TEXT` | `NOT NULL` | Materi pokok bahasan |
-| `kegiatan_pembelajaran` | `TEXT` | `NOT NULL` | Langkah-langkah kegiatan pembelajaran |
-| `penilaian_pembelajaran` | `VARCHAR(255)` | `NOT NULL` | Jenis asesmen / penilaian |
-| `hadir` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah siswa hadir |
-| `tidak_hadir` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah siswa tidak hadir |
-| `file` | `TEXT` | `NULLABLE` | Foto kegiatan KBM di kelas |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
+| `tema` | `VARCHAR(255)` | `NOT NULL` | Tema Pembelajaran (contoh: `"Tema 1: Indahnya Kebersamaan"`) |
+| `materi_pokok` | `TEXT` | `NOT NULL` | Materi Pokok / Subtema Pembelajaran |
+| `pertemuan_ke` | `INTEGER` | `NOT NULL DEFAULT 1` | Nomor urut pertemuan pembelajaran |
+| `tgl` | `DATE` | `NOT NULL` | Tanggal pelaksanaan pembelajaran |
+| `model_pembelajaran` | `VARCHAR(100)` | `NOT NULL` | Model Pembelajaran (`PBL`, `PjBL`, `Discovery Learning`, dll., sinkron dengan `master_model_pembelajaran`) |
+| `metode_pembelajaran` | `VARCHAR(100)` | `NOT NULL` | Metode Pembelajaran (`Ceramah`, `Diskusi`, `Tanya Jawab`, `Demonstrasi`, `Penugasan`) |
+| `kegiatan` | `TEXT` | `NOT NULL` | Uraian tahapan/sintaks kegiatan belajar mengajar |
+| `penilaian` | `VARCHAR(100)` | `NOT NULL` | Bentuk penilaian (`Penilaian Sikap`, `Penilaian Pengetahuan`, `Penilaian Keterampilan`) |
+| `siswa_hadir` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah peserta didik yang hadir |
+| `siswa_izin` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah peserta didik izin |
+| `siswa_sakit` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah peserta didik sakit |
+| `siswa_alpa` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah peserta didik tanpa keterangan (alpa) |
+| `persentase` | `NUMERIC(5,2)` | `NOT NULL DEFAULT 0.0` | Persentase kehadiran siswa (contoh: `95.00`%) |
+| `keterangan` | `TEXT` | `NULLABLE` | Catatan refleksi atau kendala saat pembelajaran berlangsung |
+| `file` | `TEXT` | `NULLABLE` | Path / URL foto dokumentasi kegiatan belajar di kelas |
+| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari sesi login guru |
 
 ### 9.2 Jurnal Kepala Sekolah (`/admin/jurnal/kepala-sekolah`)
 - **File Frontend**: [`app/(admin)/admin/jurnal/kepala-sekolah/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/jurnal/kepala-sekolah/page.tsx)
@@ -1818,11 +1819,7 @@ erDiagram
     master_jurnal_kelas ||--o{ master_siswa : "kelas_id"
 
     master_jurnal_kelas ||--o{ master_jurnal_mata_pelajaran : "kelas_id"
-    master_jurnal_kelas ||--o{ jurnal_guru_kelas : "kelas_id"
-    master_jurnal_mata_pelajaran ||--o{ jurnal_guru_kelas : "mapel_id"
-    master_jurnal_materi_ajar ||--o{ jurnal_guru_kelas : "materi_id"
-    master_jurnal_bahan_ajar ||--o{ jurnal_guru_kelas : "bahan_id"
-    master_model_pembelajaran ||--o{ jurnal_guru_kelas : "model_pembelajaran_id"
+    master_model_pembelajaran ||--o{ jurnal_guru_kelas : "model_pembelajaran"
 
     master_tugas ||--o{ jurnal_kepala_sekolah : "tugas_id"
     master_pendampingan ||--o{ jurnal_pengawas : "pendampingan_id"

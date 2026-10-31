@@ -1,0 +1,117 @@
+"""Master Usulan Jenis Penerima endpoints (e-office pattern)."""
+
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.deps import get_current_user, get_db
+from app.models.auth.user import User
+from app.models.master.usulan import MasterUsulanJenisPenerima
+from app.services.crud_service import CRUDBase
+
+from .schema import (
+    JenisPenerimaCreate,
+    JenisPenerimaResponse,
+    JenisPenerimaResponseList,
+    JenisPenerimaUpdate,
+)
+
+router = APIRouter()
+crud_jenis_penerima = CRUDBase(MasterUsulanJenisPenerima)
+
+
+@router.get("/option", response_model=list[JenisPenerimaResponse])
+async def option(
+    db: AsyncSession = Depends(get_db),
+    search: str | None = None,
+):
+    query = select(MasterUsulanJenisPenerima)
+    if search:
+        query = query.where(MasterUsulanJenisPenerima.uraian.ilike(f"%{search}%"))
+
+    query = query.limit(50)
+    result = await db.execute(query)
+    return list(result.scalars().all())
+
+
+@router.get("", response_model=JenisPenerimaResponseList)
+@router.get("/", response_model=JenisPenerimaResponseList)
+@router.get("/read", response_model=JenisPenerimaResponseList)
+async def read_jenis_penerima(
+    db: AsyncSession = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+    search: str | None = None,
+):
+    query = select(MasterUsulanJenisPenerima)
+    if search:
+        query = query.where(MasterUsulanJenisPenerima.uraian.ilike(f"%{search}%"))
+
+    total_query = select(func.count()).select_from(query.subquery())
+    total_result = await db.execute(total_query)
+    total = total_result.scalar_one_or_none() or 0
+
+    query = query.order_by(MasterUsulanJenisPenerima.created_at.asc()).offset(skip).limit(limit)
+    result = await db.execute(query)
+    data = list(result.scalars().all())
+
+    return {
+        "total": total,
+        "skip": skip,
+        "limit": limit,
+        "data": data,
+    }
+
+
+@router.get("/{id}", response_model=JenisPenerimaResponse)
+async def get_jenis_penerima(
+    id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    item = await crud_jenis_penerima.get(db, id=id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Data tidak ditemukan")
+    return item
+
+
+@router.post("", response_model=JenisPenerimaResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=JenisPenerimaResponse, status_code=status.HTTP_201_CREATED)
+async def create_jenis_penerima(
+    payload: JenisPenerimaCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    create_data = payload.model_dump(exclude_unset=True)
+    if not create_data.get("id"):
+        create_data["id"] = str(uuid.uuid4())
+    create_data["created_by"] = getattr(current_user, "username", "admin")
+    return await crud_jenis_penerima.create(db, obj_in=create_data)
+
+
+@router.put("/{id}", response_model=JenisPenerimaResponse)
+@router.put("/update/{id}", response_model=JenisPenerimaResponse)
+async def update_jenis_penerima(
+    id: str,
+    payload: JenisPenerimaUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    updated = await crud_jenis_penerima.update(
+        db, id=id, obj_in=payload.model_dump(exclude_unset=True)
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="Data tidak ditemukan")
+    return updated
+
+
+@router.delete("/{id}")
+@router.delete("/delete/{id}")
+async def delete_jenis_penerima(
+    id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    success = await crud_jenis_penerima.remove(db, id=id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Gagal menghapus data")
+    return {"message": "Berhasil menghapus data", "id": id, "data": {"id": id}}

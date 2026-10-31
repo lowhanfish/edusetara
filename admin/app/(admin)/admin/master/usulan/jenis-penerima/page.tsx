@@ -1,7 +1,7 @@
 import { MasterUsulanManagement } from "../master-usulan-management";
 
 export const metadata = {
-  title: "Jenis Penerima | Admin Dikbud Konawe Selatan",
+  title: "Jenis Penerima",
   description: "Manajemen Jenis Penerima Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

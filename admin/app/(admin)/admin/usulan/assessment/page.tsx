@@ -1,7 +1,7 @@
 import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
-  title: "Usulan Data Assessment | Admin Dikbud Konawe Selatan",
+  title: "Usulan Data Assessment",
   description: "Manajemen Usulan Data Assessment Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

@@ -4,7 +4,7 @@ import { DataHero, DataNavigation, DataHelp } from "../_components/data-shell";
 import { AnnouncementsFeed, type AnnouncementItem } from "./_components/announcements-feed";
 
 export const metadata: Metadata = {
-  title: "Pengumuman Resmi | Dikbud Konawe Selatan",
+  title: "Pengumuman Resmi",
   description:
     "Pemberitahuan resmi dan surat edaran kedinasan Dikbud Konawe Selatan: jadwal ANBK 2026, seleksi PPPK, Dapodik, dan agenda daerah.",
 };

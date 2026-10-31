@@ -1,7 +1,7 @@
 import { AdminPageScaffold } from "../../../../_components/admin-page-scaffold";
 
 export const metadata = {
-  title: "Master SMP | Admin Dikbud Konawe Selatan",
+  title: "Master SMP",
   description: "Manajemen Master SMP Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

@@ -5,7 +5,7 @@ import { AnnouncementsFeed } from "./_components/announcements-feed";
 import { announcementsData } from "./_data/announcements-data";
 
 export const metadata: Metadata = {
-  title: "Pusat Pengumuman & Surat Edaran Kedinasan | Dikbud Konawe Selatan",
+  title: "Pusat Pengumuman & Surat Edaran Kedinasan",
   description:
     "Portal siaran resmi dan dokumen surat edaran Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan: jadwal ANBK 2026, hasil seleksi PPPK Guru, cut-off Dapodik, dan bantuan PIP.",
 };

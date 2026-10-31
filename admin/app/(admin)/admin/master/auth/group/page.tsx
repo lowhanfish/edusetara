@@ -1,7 +1,7 @@
 import { GroupManagement } from "./group-management";
 
 export const metadata = {
-  title: "Group | Admin Dikbud Konawe Selatan",
+  title: "Group",
   description: "Pengaturan role group dan hak akses menu admin Dikbud Konawe Selatan",
 };
 

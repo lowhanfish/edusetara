@@ -1,7 +1,7 @@
 import { MenuManagement } from "./menu-management";
 
 export const metadata = {
-  title: "Menu | Admin Dikbud Konawe Selatan",
+  title: "Menu",
   description: "Pengelolaan struktur menu dan submenu admin Dikbud Konawe Selatan",
 };
 

@@ -1,7 +1,7 @@
 import { AdminPageScaffold } from "../../../../_components/admin-page-scaffold";
 
 export const metadata = {
-  title: "Master PKBM | Admin Dikbud Konawe Selatan",
+  title: "Master PKBM",
   description: "Manajemen Master PKBM Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

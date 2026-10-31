@@ -3,7 +3,7 @@ import Link from "next/link";
 import { DataHero, DataNavigation, DataHelp } from "./_components/data-shell";
 
 export const metadata: Metadata = {
-  title: "Statistik Pendidikan | Dikbud Konawe Selatan",
+  title: "Statistik Pendidikan",
   description:
     "Data agregat pendidikan Kabupaten Konawe Selatan: jumlah sekolah, peserta didik, guru & GTK, sebaran jenjang, akreditasi, dan sebaran per kecamatan.",
 };

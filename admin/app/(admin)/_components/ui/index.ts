@@ -9,3 +9,7 @@ export * from "./badge";
 export * from "./card";
 export * from "./page-header";
 export * from "./table";
+export * from "./pagination";
+export * from "./autocomplete";
+export * from "./skeleton";
+export * from "./date-input";

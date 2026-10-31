@@ -1,7 +1,7 @@
 import { ContractCrudPage } from "../../../_components/contract-crud-page";
 
 export const metadata = {
-  title: "Usulan Rekonsiliasi Dana BOSP | Admin Dikbud Konawe Selatan",
+  title: "Usulan Rekonsiliasi Dana BOSP",
   description: "Manajemen Usulan Rekonsiliasi Dana BOSP Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

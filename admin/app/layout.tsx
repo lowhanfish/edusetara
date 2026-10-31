@@ -13,8 +13,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dinas Pendidikan dan Kebudayaan Konawe Selatan",
+  title: {
+    default: "EDUSETARA-DIKBUD KONSEL",
+    template: "%s | EDUSETARA-DIKBUD KONSEL",
+  },
   description: "Portal resmi layanan pendidikan dan kebudayaan Kabupaten Konawe Selatan.",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

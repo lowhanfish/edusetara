@@ -4,7 +4,7 @@ import Link from "next/link";
 import { CultureHero, CultureNavigation, CultureHelp } from "./_components/culture-shell";
 
 export const metadata: Metadata = {
-  title: "Warisan & Cagar Budaya | Dikbud Konawe Selatan",
+  title: "Warisan & Cagar Budaya",
   description:
     "Inventarisasi situs cagar budaya, tradisi lisan Tolaki, upacara adat Mosehe Wonua, filosofi Kalosara, dan Warisan Budaya Takbenda (WBTb) Kabupaten Konawe Selatan.",
 };

@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints.admin.master.router import router as master_router
+from app.api.v1.endpoints.admin.master import master_router
 
 admin_router = APIRouter(prefix="/admin")
 

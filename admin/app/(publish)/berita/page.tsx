@@ -4,7 +4,7 @@ import { NewsFeed } from "./_components/news-feed";
 import { getAllNews } from "./_data/news-data";
 
 export const metadata: Metadata = {
-  title: "Warta & Berita Resmi | Dikbud Konawe Selatan",
+  title: "Warta & Berita Resmi",
   description:
     "Portal berita dan publikasi resmi Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan. Memuat update inovasi pembelajaran, agenda kebudayaan, sarpras sekolah, dan prestasi siswa.",
 };

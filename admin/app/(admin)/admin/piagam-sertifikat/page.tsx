@@ -1,7 +1,7 @@
 import { ContractCrudPage } from "../../_components/contract-crud-page";
 
 export const metadata = {
-  title: "Piagam Sertifikat | Admin Dikbud Konawe Selatan",
+  title: "Piagam Sertifikat",
   description: "Manajemen Piagam Sertifikat Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AboutServiceHero, AboutServiceNavigation } from "./_components/about-shell";
 
 export const metadata: Metadata = {
-  title: "Profil Dinas | Dikbud Konawe Selatan",
+  title: "Profil Dinas",
   description:
     "Profil, arah kerja, tugas, dan nilai pelayanan Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan.",
 };
