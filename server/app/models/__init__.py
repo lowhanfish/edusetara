@@ -27,7 +27,7 @@ from app.models.master import (
     MasterSarprasKepemilikan,
     MasterSarprasKondisiAlat,
     MasterSarprasSumberDana,
-    MasterSekolahMeta,
+    MasterSekolah,
     MasterSiswa,
     MasterTugas,
     MasterUsulanJenisPenerima,
@@ -70,6 +70,6 @@ __all__ = [
     "MasterPendampingan",
     "MasterTugas",
     "MasterKategori",
-    "MasterSekolahMeta",
+    "MasterSekolah",
     "MasterSiswa",
 ]

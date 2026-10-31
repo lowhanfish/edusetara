@@ -33,7 +33,6 @@ from app.models.master.sarpras import (
     MasterSarprasSumberDana,
 )
 from app.models.master.sekolah import MasterSekolah
-from app.models.master.sekolah_meta import MasterSekolahMeta
 from app.models.master.siswa import MasterSiswa
 from app.models.master.usulan import (
     MasterUsulanJenisPenerima,
@@ -44,7 +43,6 @@ from app.models.master.usulan import (
 __all__ = [
     "MasterBaseMixin",
     "MasterSekolah",
-    "MasterSekolahMeta",
     # Usulan
     "MasterUsulanTriwulan",
     "MasterUsulanJenisPenerima",

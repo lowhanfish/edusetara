@@ -126,17 +126,16 @@ async def fetch_sekolah_lookup(session: AsyncSession) -> list[dict[str, Any]]:
     """Fetch all active schools for dropdown lookup."""
     from sqlalchemy import text
     sql = text("""
-        SELECT u.id, u.unit_kerja, m.jenjang, m.status_sekolah, m.kecamatan
-        FROM simpeg.unit_kerja u
-        INNER JOIN edusetara.master_sekolah_meta m ON u.id = m.unit_kerja_id
-        WHERE u.instansi = 'nCxELyiYZBPCeF85N' AND u.status = 1 AND m.is_active = 1
-        ORDER BY u.unit_kerja ASC
+        SELECT id, nama_sekolah, jenjang, status_sekolah, kecamatan
+        FROM master_sekolah
+        WHERE is_active = 1
+        ORDER BY nama_sekolah ASC
     """)
     result = await session.execute(sql)
     return [
         {
             "id": r[0],
-            "uraian": (r[1] or "").replace("\u200c", "").strip(),
+            "uraian": (r[1] or "").strip(),
             "jenjang": r[2],
             "status": r[3],
             "kecamatan": r[4],

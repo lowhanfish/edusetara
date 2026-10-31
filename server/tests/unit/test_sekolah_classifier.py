@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.db.seed_sekolah_meta import classify_school, extract_kecamatan
+from app.utils.school_classifier import classify_school, extract_kecamatan
 
 
 @pytest.mark.parametrize(

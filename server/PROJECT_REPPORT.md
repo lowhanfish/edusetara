@@ -236,7 +236,7 @@ server/app/api/v1/endpoints/admin/master/
 | 24 | Tugas Pokok | `/api/v1/admin/master/tugas` | `MasterTugas` | `master_tugas` |
 | 25 | Kategori Berkas | `/api/v1/admin/master/kategori` | `MasterKategori` | `master_kategori` |
 | **Kelompok Satuan Pendidikan (Sekolah)** | | | | |
-| 26 | Master Sekolah (SD, SMP, TK, PKBM) | `/api/v1/admin/master/sekolah` | `MasterSekolahMeta` | `simpeg.unit_kerja` + `master_sekolah_meta` |
+| 26 | Master Sekolah (SD, SMP, TK, PKBM, dll.) | `/api/v1/admin/master/sekolah` | `MasterSekolah` | `edusetara.master_sekolah` |
 
 ---
 
