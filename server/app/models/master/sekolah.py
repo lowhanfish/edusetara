@@ -36,6 +36,7 @@ class MasterSekolah(Base):
 
     # Relasi Masa Depan dengan SIMPEG
     simpeg_unit_kerja_id = Column(String(50), nullable=True, default=None, index=True)
+    simpeg_unit_kerja_nama = Column(String(255), nullable=True, default=None)
 
     is_active = Column(Boolean, nullable=False, default=True)
     created_by = Column(String(100), nullable=True, default="system_import")

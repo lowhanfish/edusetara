@@ -79,8 +79,11 @@ export default function DetailSekolahModal({
                 NPSN: {record.npsn}
               </span>
               {record.simpeg_unit_kerja_id ? (
-                <span className="text-[11px] font-mono font-bold text-sky-800 bg-sky-200/60 px-2 py-0.5 rounded">
-                  SIMPEG: {record.simpeg_unit_kerja_id}
+                <span
+                  className="text-[11px] font-medium text-sky-800 bg-sky-100 px-2 py-0.5 rounded border border-sky-300/40 flex items-center gap-1"
+                  title={`Kode Unit Kerja: ${record.simpeg_unit_kerja_id}`}
+                >
+                  🏛️ {record.simpeg_unit_kerja_nama || record.simpeg_unit_kerja_id}
                 </span>
               ) : (
                 <span className="text-[10px] text-[#7d7152] bg-white/60 px-2 py-0.5 rounded border border-white">
@@ -101,6 +104,44 @@ export default function DetailSekolahModal({
               {record.bentuk_pendidikan || record.jenjang}
             </Badge>
           </div>
+        </div>
+
+        {/* Integrasi Kepegawaian SIMPEG BKPSDM */}
+        <div className="p-3.5 rounded-xl bg-sky-500/10 border border-sky-300/40 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-sky-950 flex items-center gap-1.5">
+              🏛️ Integrasi Kepegawaian SIMPEG BKPSDM
+            </span>
+            {record.simpeg_unit_kerja_id ? (
+              <Badge variant="success" size="sm">
+                ✓ Terhubung SIMPEG
+              </Badge>
+            ) : (
+              <Badge variant="neutral" size="sm">
+                Belum Terhubung
+              </Badge>
+            )}
+          </div>
+          {record.simpeg_unit_kerja_id ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs">
+              <div className="space-y-0.5">
+                <span className="text-[11px] font-medium text-[#7d7152] block">Nama Unit Kerja (SIMPEG):</span>
+                <span className="font-bold text-sm text-[#2d2410] block">
+                  {record.simpeg_unit_kerja_nama || record.nama_sekolah}
+                </span>
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[11px] font-medium text-[#7d7152] block">Kode / ID Unit Kerja:</span>
+                <span className="font-mono font-bold text-sky-900 bg-sky-100 border border-sky-200 px-2 py-0.5 rounded text-xs inline-block">
+                  {record.simpeg_unit_kerja_id}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-[11px] text-[#7d7152]">
+              Satuan pendidikan ini belum terpetakan dengan unit kerja kepegawaian ASN/PNS di SIMPEG BKPSDM (sekolah mandiri / swasta / Kemenag).
+            </p>
+          )}
         </div>
 
         {/* Grid Parameter Pendidikan */}

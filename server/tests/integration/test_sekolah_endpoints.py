@@ -26,6 +26,7 @@ async def test_read_sekolah_endpoints(client: AsyncClient, db_session: AsyncSess
         latitude=-4.114,
         longitude=122.208,
         simpeg_unit_kerja_id=None,
+        simpeg_unit_kerja_nama=None,
         is_active=True,
     )
     db_session.add(sch)
@@ -45,6 +46,7 @@ async def test_read_sekolah_endpoints(client: AsyncClient, db_session: AsyncSess
     assert detail["npsn"] == "40401228"
     assert detail["bentuk_pendidikan"] == "SD"
     assert detail["simpeg_unit_kerja_id"] is None
+    assert detail["simpeg_unit_kerja_nama"] is None
     assert detail["latitude"] == -4.114
 
     # 3. Test Lookup

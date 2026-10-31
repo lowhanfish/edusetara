@@ -2974,9 +2974,10 @@ Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggara
       "longitude": "122.3812",
       "akreditasi": "B",
       "is_active": true,
-      "simpeg_unit_kerja_id": null,
+      "simpeg_unit_kerja_id": "2bm7ule1ag5clatt2xxl",
+      "simpeg_unit_kerja_nama": "SD-SMPN SATAP 2 KONSEL",
       "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402064",
-      "unit_kerja_id": "1",
+      "unit_kerja_id": "2bm7ule1ag5clatt2xxl",
       "name": "SD-SMPN SATAP 2 KONSEL",
       "address": "Jl. Poros Desa Sindangkasih",
       "level": "SATAP",
@@ -3004,7 +3005,8 @@ Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggara
   "desa_kelurahan": "SINDANGKASIH",
   "latitude": "-4.0536",
   "longitude": "122.3812",
-  "simpeg_unit_kerja_id": null,
+  "simpeg_unit_kerja_id": "2bm7ule1ag5clatt2xxl",
+  "simpeg_unit_kerja_nama": "SD-SMPN SATAP 2 KONSEL",
   "is_active": true
 }
 ```

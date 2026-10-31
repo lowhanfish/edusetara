@@ -41,6 +41,7 @@ def map_row_to_response(r: Any) -> dict[str, Any]:
     is_active = bool(r[16])
     created_at = r[17]
     updated_at = r[18]
+    simpeg_unit_kerja_nama = r[19] if len(r) > 19 else None
 
     url = f"https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/{npsn}" if npsn else None
 
@@ -69,6 +70,7 @@ def map_row_to_response(r: Any) -> dict[str, Any]:
         "latitude": latitude,
         "longitude": longitude,
         "simpeg_unit_kerja_id": simpeg_unit_kerja_id,
+        "simpeg_unit_kerja_nama": simpeg_unit_kerja_nama,
         "unit_kerja_id": simpeg_unit_kerja_id or sid,
         "is_active": is_active,
         "url": url,
@@ -113,7 +115,8 @@ async def option_sekolah(
             bentuk_pendidikan,
             status_sekolah,
             kecamatan,
-            simpeg_unit_kerja_id
+            simpeg_unit_kerja_id,
+            simpeg_unit_kerja_nama
         FROM master_sekolah
         WHERE {where_sql}
         ORDER BY nama_sekolah ASC
@@ -132,6 +135,7 @@ async def option_sekolah(
             "status": r[4],
             "kecamatan": r[5],
             "simpeg_unit_kerja_id": r[6],
+            "simpeg_unit_kerja_nama": r[7] if len(r) > 7 else None,
         }
         for r in rows
     ]
@@ -223,7 +227,8 @@ async def read_sekolah(
             simpeg_unit_kerja_id,
             is_active,
             created_at,
-            updated_at
+            updated_at,
+            simpeg_unit_kerja_nama
         FROM master_sekolah
         WHERE {where_sql}
         ORDER BY nama_sekolah ASC
@@ -266,7 +271,8 @@ async def get_sekolah_detail(
             simpeg_unit_kerja_id,
             is_active,
             created_at,
-            updated_at
+            updated_at,
+            simpeg_unit_kerja_nama
         FROM master_sekolah
         WHERE id = :id OR npsn = :id
     """)
@@ -287,13 +293,31 @@ async def update_sekolah(
 ):
     """
     Update attributes of a school in master_sekolah.
-    Supports updating simpeg_unit_kerja_id, wilayah, or spatial coordinates.
+    Supports updating simpeg_unit_kerja_id, simpeg_unit_kerja_nama, wilayah, or spatial coordinates.
     """
     update_data = payload.model_dump(exclude_unset=True)
     if "jenjang" in update_data and not update_data.get("bentuk_pendidikan"):
         update_data["bentuk_pendidikan"] = update_data.pop("jenjang")
     elif "jenjang" in update_data:
         update_data.pop("jenjang")
+
+    # If simpeg_unit_kerja_id is updated without explicit simpeg_unit_kerja_nama, auto-resolve name from SIMPEG
+    if "simpeg_unit_kerja_id" in update_data and not update_data.get("simpeg_unit_kerja_nama"):
+        simpeg_id = update_data["simpeg_unit_kerja_id"]
+        if simpeg_id:
+            try:
+                res_u = await db.execute(
+                    text("SELECT unit_kerja FROM simpeg.unit_kerja WHERE id = :uid"),
+                    {"uid": simpeg_id},
+                )
+                u_row = res_u.fetchone()
+                if u_row and u_row[0]:
+                    clean_u = (u_row[0] or "").replace("\u200c", "").replace("\u200b", "").strip()
+                    update_data["simpeg_unit_kerja_nama"] = clean_u
+            except Exception:
+                pass
+        else:
+            update_data["simpeg_unit_kerja_nama"] = None
 
     if not update_data:
         return await get_sekolah_detail(sekolah_id, db)

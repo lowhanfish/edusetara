@@ -23,6 +23,7 @@ export interface SekolahRecord {
   latitude?: number | null;
   longitude?: number | null;
   simpeg_unit_kerja_id?: string | null;
+  simpeg_unit_kerja_nama?: string | null;
   unit_kerja_id?: string | null;
   is_active: boolean;
   url?: string | null;
@@ -54,6 +55,7 @@ export interface SekolahUpdatePayload {
   latitude?: number | null;
   longitude?: number | null;
   simpeg_unit_kerja_id?: string | null;
+  simpeg_unit_kerja_nama?: string | null;
   is_active?: boolean;
 }
 

@@ -422,6 +422,14 @@ export default function SekolahManager({
                               🗺️ GPS
                             </span>
                           )}
+                          {item.simpeg_unit_kerja_id && (
+                            <span
+                              className="text-[10px] text-sky-800 bg-sky-50 px-1.5 py-0.2 rounded border border-sky-200"
+                              title={`SIMPEG: ${item.simpeg_unit_kerja_nama || item.simpeg_unit_kerja_id}`}
+                            >
+                              🏛️ SIMPEG
+                            </span>
+                          )}
                         </div>
                       </td>
 

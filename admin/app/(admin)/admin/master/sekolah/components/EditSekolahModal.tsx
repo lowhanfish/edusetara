@@ -304,12 +304,19 @@ export default function EditSekolahModal({
             value={formData.longitude !== null && formData.longitude !== undefined ? String(formData.longitude) : ""}
             onChange={(e: any) => setFormData({ ...formData, longitude: e.target.value ? Number(e.target.value) : null })}
           />
-          <Input
-            label="ID Unit Kerja SIMPEG"
-            placeholder="Kosongkan jika belum dipetakan"
-            value={formData.simpeg_unit_kerja_id || ""}
-            onChange={(e: any) => setFormData({ ...formData, simpeg_unit_kerja_id: e.target.value })}
-          />
+          <div>
+            <Input
+              label="ID Unit Kerja SIMPEG"
+              placeholder="Kosongkan jika belum dipetakan"
+              value={formData.simpeg_unit_kerja_id || ""}
+              onChange={(e: any) => setFormData({ ...formData, simpeg_unit_kerja_id: e.target.value })}
+            />
+            {formData.simpeg_unit_kerja_nama && (
+              <p className="mt-1 text-[11px] text-sky-800 font-medium truncate" title={formData.simpeg_unit_kerja_nama}>
+                🏛️ {formData.simpeg_unit_kerja_nama}
+              </p>
+            )}
+          </div>
         </div>
       </form>
     </Modal>

@@ -198,13 +198,20 @@ async def run_matching(session: AsyncSession) -> dict[str, Any]:
     # 3. Perform bulk update into edusetara.master_sekolah
     print(f"Applying {len(matched_pairs)} matched school links to edusetara.master_sekolah...")
     for pair in matched_pairs:
+        clean_simpeg_name = re.sub(r"[\u200c\u200b\s]+", " ", pair["simpeg_name"]).strip()
         await session.execute(
             text("""
                 UPDATE master_sekolah
-                SET simpeg_unit_kerja_id = :simpeg_id, updated_at = NOW()
+                SET simpeg_unit_kerja_id = :simpeg_id,
+                    simpeg_unit_kerja_nama = :simpeg_name,
+                    updated_at = NOW()
                 WHERE id = :edu_id
             """),
-            {"simpeg_id": pair["simpeg_id"], "edu_id": pair["edu_id"]},
+            {
+                "simpeg_id": pair["simpeg_id"],
+                "simpeg_name": clean_simpeg_name,
+                "edu_id": pair["edu_id"],
+            },
         )
 
     await session.commit()

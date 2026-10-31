@@ -22,6 +22,7 @@ class SekolahBase(BaseModel):
     latitude: float | None = Field(None, description="Koordinat lintang (Latitude)")
     longitude: float | None = Field(None, description="Koordinat bujur (Longitude)")
     simpeg_unit_kerja_id: str | None = Field(None, description="ID relasi ke simpeg.unit_kerja (opsional)")
+    simpeg_unit_kerja_nama: str | None = Field(None, description="Nama resmi unit kerja di SIMPEG (opsional)")
     is_active: bool = Field(True, description="Status keaktifan data sekolah")
 
 
@@ -42,6 +43,7 @@ class SekolahUpdate(BaseModel):
     latitude: float | None = None
     longitude: float | None = None
     simpeg_unit_kerja_id: str | None = None
+    simpeg_unit_kerja_nama: str | None = None
     is_active: bool | None = None
 
 
@@ -78,3 +80,5 @@ class SekolahLookupItem(BaseModel):
     status: str
     kecamatan: str | None = None
     simpeg_unit_kerja_id: str | None = None
+    simpeg_unit_kerja_nama: str | None = None
+
