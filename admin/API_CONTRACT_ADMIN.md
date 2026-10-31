@@ -168,7 +168,7 @@ Seluruh modul admin (termasuk Data Master) wajib mengadopsi pola arsitektur yang
 | 67 | **Master Model Pembelajaran** | Data Master | `/admin/master/model-pembelajaran` | `/api/v1/admin/master/model-pembelajaran` | `master_model_pembelajaran` |
 | 68 | **Master Pendampingan** | Data Master | `/admin/master/pendampingan` | `/api/v1/admin/master/pendampingan` | `master_pendampingan` |
 | 69 | **Master Tugas** | Data Master | `/admin/master/tugas` | `/api/v1/admin/master/tugas` | `master_tugas` |
-| 71 | **Master Sekolah** | Data Master > Master Sekolah | `/admin/master/sekolah/{sd,smp,tk,pkbm}` | `/api/v1/admin/master/sekolah` | `simpeg.unit_kerja` + `master_sekolah_meta` |
+| 71 | **Master Sekolah** | Data Master > Master Sekolah | `/admin/master/sekolah/{sd,smp,tk,pkbm}` | `/api/v1/admin/master/sekolah` | `edusetara.master_sekolah` |
 | 72 | **Master Wilayah** | Data Master > Referensi Wilayah | `/admin/master/sekolah` (Dropdown) | `/api/v1/admin/master/wilayah` | `egov.master_kecamatan` + `egov.master_des_kel` |
 
 ---
@@ -2923,7 +2923,7 @@ Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggara
 ```
 
 ---
-### 71. Master Sekolah (SD, SMP, TK, PKBM)
+### 71. Master Sekolah (SD, SMP, TK, PKBM, dll.)
 **Kategori:** `Data Master > Master Sekolah`  
 **Route Frontend:** 
 - [`/admin/master/sekolah/sd`](http://localhost:3000/admin/master/sekolah/sd) (Master SD)
@@ -2933,13 +2933,14 @@ Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggara
 - [`/admin/sekolah`](http://localhost:3000/admin/sekolah) (Direktori Seluruh Satuan Pendidikan)
 
 **Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/sekolah`  
-**Tabel Database:** `simpeg.unit_kerja` (Identity Source) + `edusetara.master_sekolah_meta` (Bridge Extension)
+**Tabel Database:** `edusetara.master_sekolah` (Master Mandiri Berbasis Dapodik Konawe Selatan)
 
 #### Deskripsi & Bisnis Logika
-> Modul ini menyajikan direktori data induk satuan pendidikan yang terintegrasi langsung dengan database kepegawaian SIMPEG (`instansi = "nCxELyiYZBPCeF85N"`). Identitas utama sekolah (`id`, `nama_sekolah`, dan `alamat`) dipelihara oleh SIMPEG tanpa penambahan kolom dan tanpa duplikasi data (*zero duplication*). Sementara pengelompokan jenjang (`PAUD`, `TK`, `SD`, `SMP`, `SATAP`, `PKBM`), status kelembagaan (`NEGERI`, `SWASTA`), identitas Dapodik (`NPSN`, `akreditasi`), serta kewilayahan disimpan di tabel ekstensi `edusetara.master_sekolah_meta`.
+> Modul ini mengelola data induk master sekolah mandiri Kabupaten Konawe Selatan sebanyak **870 satuan pendidikan** yang bersumber resmi dari Dapodik Kemendikdasmen (SD, SMP, TK, KB, PKBM, SMA, SMK, dll). Data telah diselaraskan dengan referensi kewilayahan `egov.master_kecamatan` dan `egov.master_des_kel`, serta dilengkapi dengan koordinat spasial (`latitude`, `longitude`) dan alamat riil.  
+> Sesuai arsitektur kemandirian data, tabel ini juga dilengkapi dengan kolom **`simpeg_unit_kerja_id`** (`VARCHAR(50) DEFAULT NULL`) yang disiapkan untuk rekonsiliasi dan *matching* masa depan dengan unit kerja SIMPEG BKPSDM.
 
 #### Parameter Query (Filter & Pencarian)
-- `jenjang` (opsional): `SD` | `SMP` | `TK` | `PAUD` | `SATAP` | `PKBM`
+- `jenjang` (opsional): `SD` | `SMP` | `TK` | `PAUD` | `SATAP` | `PKBM` | `SMA` | `SMK`
 - `status_sekolah` (opsional): `NEGERI` | `SWASTA`
 - `kecamatan` (opsional): Filter per nama kecamatan (Andoolo, Ranomeeto, Konda, dll.)
 - `search` (opsional): Pencarian nama sekolah, NPSN, kecamatan, atau alamat
@@ -2950,42 +2951,50 @@ Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggara
 **Response List (`GET /api/v1/admin/master/sekolah`)**
 ```json
 {
-  "total": 438,
+  "total": 870,
   "skip": 0,
   "limit": 50,
   "data": [
     {
-      "id": "2bm7ule1ag5clatt2xxl",
-      "unit_kerja_id": "2bm7ule1ag5clatt2xxl",
-      "nama_sekolah": "SD-SMPN SATAP 2 KONSEL",
-      "name": "SD-SMPN SATAP 2 KONSEL",
-      "alamat": "Jl. Poros Desa Sindangkasih, Kec. Ranomeeto Barat",
-      "address": "Jl. Poros Desa Sindangkasih, Kec. Ranomeeto Barat",
-      "jenjang": "SATAP",
-      "level": "SATAP",
-      "status_sekolah": "NEGERI",
-      "status": "NEGERI",
+      "id": "1",
       "npsn": "40402064",
-      "akreditasi": "B",
+      "nama_sekolah": "SD-SMPN SATAP 2 KONSEL",
+      "bentuk_pendidikan": "SMP",
+      "status_sekolah": "NEGERI",
+      "jenjang": "SATAP",
+      "alamat": "Jl. Poros Desa Sindangkasih",
+      "rt": "00",
+      "rw": "00",
+      "kode_pos": "93385",
       "kecamatan_id": 7405091,
       "kecamatan": "Ranomeeto Barat",
-      "district": "Ranomeeto Barat",
       "desa_kelurahan_id": 68962,
       "desa_kelurahan": "SINDANGKASIH",
-      "village": "SINDANGKASIH",
+      "latitude": "-4.0536",
+      "longitude": "122.3812",
+      "akreditasi": "B",
       "is_active": true,
+      "simpeg_unit_kerja_id": null,
       "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402064",
-      "created_at": "2026-11-01T00:20:41",
-      "updated_at": "2026-11-01T00:20:41"
+      "unit_kerja_id": "1",
+      "name": "SD-SMPN SATAP 2 KONSEL",
+      "address": "Jl. Poros Desa Sindangkasih",
+      "level": "SATAP",
+      "status": "NEGERI",
+      "district": "Ranomeeto Barat",
+      "village": "SINDANGKASIH",
+      "created_at": "2026-11-01T06:23:45",
+      "updated_at": "2026-11-01T06:23:45"
     }
   ]
 }
 ```
 
-**Form Update Metadata (`PUT /api/v1/admin/master/sekolah/{unit_kerja_id}`)**
+**Form Update Metadata (`PUT /api/v1/admin/master/sekolah/{id}`)**
 ```json
 {
-  "jenjang": "SD",
+  "jenjang": "SMP",
+  "bentuk_pendidikan": "SMP",
   "status_sekolah": "NEGERI",
   "npsn": "40402064",
   "akreditasi": "A",
@@ -2993,6 +3002,9 @@ Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggara
   "kecamatan": "Ranomeeto Barat",
   "desa_kelurahan_id": 68962,
   "desa_kelurahan": "SINDANGKASIH",
+  "latitude": "-4.0536",
+  "longitude": "122.3812",
+  "simpeg_unit_kerja_id": null,
   "is_active": true
 }
 ```
@@ -3001,8 +3013,8 @@ Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggara
 ```json
 [
   {
-    "id": "2bm7ule1ag5clatsnttg",
-    "unit_kerja_id": "2bm7ule1ag5clatsnttg",
+    "id": "1",
+    "unit_kerja_id": "1",
     "nama": "SMPN 36 KONAWE SELATAN",
     "jenjang": "SMP",
     "status": "NEGERI",

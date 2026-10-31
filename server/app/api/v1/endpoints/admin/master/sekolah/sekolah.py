@@ -1,4 +1,4 @@
-"""Master Sekolah endpoints combining simpeg.unit_kerja and edusetara.master_sekolah_meta."""
+"""Master Sekolah endpoints powered by sovereign edusetara.master_sekolah dataset."""
 
 from typing import Any
 
@@ -7,7 +7,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
-from app.db.seed_sekolah_meta import sync_master_sekolah
+from app.db.seed_master_sekolah import import_schools_from_excel
 from app.models.auth.user import User
 
 from .schema import (
@@ -21,36 +21,39 @@ router = APIRouter(tags=["Admin Master Sekolah"])
 
 
 def map_row_to_response(r: Any) -> dict[str, Any]:
-    """Map raw tuple from cross-database query to SekolahResponse structure."""
-    unit_id = r[0]
-    raw_name = (r[1] or "").replace("\u200c", "").replace("\u200b", "").strip()
-    alamat = r[2]
-    jenjang = r[3]
+    """Map row from master_sekolah table to SekolahResponse structure."""
+    sid = r[0]
+    npsn = r[1]
+    nama_sekolah = (r[2] or "").replace("\u200c", "").replace("\u200b", "").strip()
+    bentuk_pendidikan = r[3]
     status_sekolah = r[4]
-    npsn = r[5]
-    akreditasi = r[6]
-    kecamatan_id = r[7]
-    kecamatan = r[8]
-    desa_kelurahan_id = r[9]
-    desa_kelurahan = r[10]
-    is_active = bool(r[11])
-    created_at = r[12]
-    updated_at = r[13]
+    akreditasi = r[5]
+    kecamatan_id = r[6]
+    kecamatan = r[7]
+    desa_kelurahan_id = r[8]
+    desa_kelurahan = r[9]
+    alamat_jalan = r[10]
+    dusun = r[11]
+    kode_pos = r[12]
+    latitude = r[13]
+    longitude = r[14]
+    simpeg_unit_kerja_id = r[15]
+    is_active = bool(r[16])
+    created_at = r[17]
+    updated_at = r[18]
 
     url = f"https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/{npsn}" if npsn else None
 
     return {
-        "id": unit_id,
-        "unit_kerja_id": unit_id,
-        "nama_sekolah": raw_name,
-        "name": raw_name,
-        "alamat": alamat,
-        "address": alamat,
-        "jenjang": jenjang,
-        "level": jenjang,
+        "id": sid,
+        "npsn": npsn,
+        "nama_sekolah": nama_sekolah,
+        "name": nama_sekolah,
+        "bentuk_pendidikan": bentuk_pendidikan,
+        "jenjang": bentuk_pendidikan,
+        "level": bentuk_pendidikan,
         "status_sekolah": status_sekolah,
         "status": status_sekolah,
-        "npsn": npsn,
         "akreditasi": akreditasi,
         "kecamatan_id": kecamatan_id,
         "kecamatan": kecamatan,
@@ -58,6 +61,15 @@ def map_row_to_response(r: Any) -> dict[str, Any]:
         "desa_kelurahan_id": desa_kelurahan_id,
         "desa_kelurahan": desa_kelurahan,
         "village": desa_kelurahan or "-",
+        "alamat_jalan": alamat_jalan,
+        "alamat": alamat_jalan,
+        "address": alamat_jalan,
+        "dusun": dusun,
+        "kode_pos": kode_pos,
+        "latitude": latitude,
+        "longitude": longitude,
+        "simpeg_unit_kerja_id": simpeg_unit_kerja_id,
+        "unit_kerja_id": simpeg_unit_kerja_id or sid,
         "is_active": is_active,
         "url": url,
         "created_at": created_at,
@@ -68,38 +80,43 @@ def map_row_to_response(r: Any) -> dict[str, Any]:
 @router.get("/lookup", response_model=list[SekolahLookupItem])
 @router.get("/option", response_model=list[SekolahLookupItem])
 async def option_sekolah(
-    jenjang: str | None = Query(None, description="Filter jenjang (SD, SMP, TK, PAUD, PKBM)"),
-    search: str | None = Query(None, description="Cari nama sekolah"),
+    jenjang: str | None = Query(None, description="Filter jenjang (SD, SMP, TK, PAUD, PKBM, dll)"),
+    search: str | None = Query(None, description="Cari nama sekolah atau NPSN"),
     db: AsyncSession = Depends(get_db),
 ):
     """Dropdown lookup endpoint for school selection across modules."""
-    where_clauses = ["u.instansi = 'nCxELyiYZBPCeF85N'", "u.status = 1", "m.is_active = 1"]
+    where_clauses = ["is_active = 1"]
     params: dict[str, Any] = {}
 
     if jenjang:
         j_upper = jenjang.upper()
         if j_upper in ["SD", "SMP"]:
-            where_clauses.append("m.jenjang IN (:jenjang, 'SATAP')")
+            where_clauses.append("bentuk_pendidikan IN (:jenjang, 'SATAP')")
+        elif j_upper in ["TK", "PAUD"]:
+            where_clauses.append("bentuk_pendidikan IN ('TK', 'KB', 'PAUD', 'RA', 'SPS')")
+        elif j_upper in ["PKBM", "SKB"]:
+            where_clauses.append("bentuk_pendidikan IN ('PKBM', 'SKB', 'KURSUS')")
         else:
-            where_clauses.append("m.jenjang = :jenjang")
+            where_clauses.append("bentuk_pendidikan = :jenjang")
         params["jenjang"] = j_upper
 
     if search:
-        where_clauses.append("u.unit_kerja LIKE :search")
+        where_clauses.append("(nama_sekolah LIKE :search OR npsn LIKE :search)")
         params["search"] = f"%{search}%"
 
     where_sql = " AND ".join(where_clauses)
     sql = text(f"""
         SELECT
-            u.id,
-            u.unit_kerja,
-            m.jenjang,
-            m.status_sekolah,
-            m.kecamatan
-        FROM simpeg.unit_kerja u
-        INNER JOIN edusetara.master_sekolah_meta m ON u.id = m.unit_kerja_id
+            id,
+            npsn,
+            nama_sekolah,
+            bentuk_pendidikan,
+            status_sekolah,
+            kecamatan,
+            simpeg_unit_kerja_id
+        FROM master_sekolah
         WHERE {where_sql}
-        ORDER BY u.unit_kerja ASC
+        ORDER BY nama_sekolah ASC
         LIMIT 100
     """)
 
@@ -108,11 +125,13 @@ async def option_sekolah(
     return [
         {
             "id": r[0],
-            "unit_kerja_id": r[0],
-            "nama": (r[1] or "").replace("\u200c", "").strip(),
-            "jenjang": r[2],
-            "status": r[3],
-            "kecamatan": r[4],
+            "npsn": r[1],
+            "nama": (r[2] or "").replace("\u200c", "").strip(),
+            "bentuk_pendidikan": r[3],
+            "jenjang": r[3],
+            "status": r[4],
+            "kecamatan": r[5],
+            "simpeg_unit_kerja_id": r[6],
         }
         for r in rows
     ]
@@ -125,45 +144,51 @@ async def read_sekolah(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=500),
     search: str | None = Query(None),
-    jenjang: str | None = Query(None, description="Jenjang (SD, SMP, TK, PAUD, SATAP, PKBM)"),
+    jenjang: str | None = Query(None, description="Jenjang (SD, SMP, TK, PAUD, SATAP, PKBM, dll)"),
     status_sekolah: str | None = Query(None, description="Status (NEGERI, SWASTA)"),
-    kecamatan: str | None = Query(None, description="Kecamatan"),
+    kecamatan: str | None = Query(None, description="Nama Kecamatan"),
     kecamatan_id: int | None = Query(None, description="ID Kecamatan"),
-    include_satap: bool = Query(True, description="Sertakan SATAP jika filter SD atau SMP"),
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Paginated list of schools from simpeg.unit_kerja joined with edusetara.master_sekolah_meta.
+    Paginated list of schools from sovereign master_sekolah database.
     """
-    where_clauses = ["u.instansi = 'nCxELyiYZBPCeF85N'", "u.status = 1"]
+    where_clauses = ["is_active = 1"]
     params: dict[str, Any] = {"skip": skip, "limit": limit}
 
-    if jenjang:
+    if jenjang and jenjang.upper() != "SEMUA":
         j_upper = jenjang.upper()
-        if include_satap and j_upper in ["SD", "SMP"]:
-            where_clauses.append("m.jenjang IN (:jenjang, 'SATAP')")
+        if j_upper in ["SD"]:
+            where_clauses.append("bentuk_pendidikan IN ('SD', 'MI', 'SATAP')")
+        elif j_upper in ["SMP"]:
+            where_clauses.append("bentuk_pendidikan IN ('SMP', 'MTS', 'SATAP')")
+        elif j_upper in ["TK", "PAUD"]:
+            where_clauses.append("bentuk_pendidikan IN ('TK', 'KB', 'RA', 'SPS')")
+        elif j_upper in ["PKBM"]:
+            where_clauses.append("bentuk_pendidikan IN ('PKBM', 'SKB', 'KURSUS')")
         else:
-            where_clauses.append("m.jenjang = :jenjang")
+            where_clauses.append("bentuk_pendidikan = :jenjang")
         params["jenjang"] = j_upper
 
     if status_sekolah and status_sekolah.upper() != "SEMUA":
-        where_clauses.append("m.status_sekolah = :status_sekolah")
+        where_clauses.append("status_sekolah = :status_sekolah")
         params["status_sekolah"] = status_sekolah.upper()
 
     if kecamatan_id:
-        where_clauses.append("m.kecamatan_id = :kecamatan_id")
+        where_clauses.append("kecamatan_id = :kecamatan_id")
         params["kecamatan_id"] = kecamatan_id
     elif kecamatan and kecamatan.upper() != "SEMUA":
-        where_clauses.append("m.kecamatan = :kecamatan")
+        where_clauses.append("kecamatan = :kecamatan")
         params["kecamatan"] = kecamatan
 
     if search:
         where_clauses.append(
             "("
-            "u.unit_kerja LIKE :search OR "
-            "m.npsn LIKE :search OR "
-            "m.kecamatan LIKE :search OR "
-            "u.alamat LIKE :search"
+            "nama_sekolah LIKE :search OR "
+            "npsn LIKE :search OR "
+            "kecamatan LIKE :search OR "
+            "desa_kelurahan LIKE :search OR "
+            "alamat_jalan LIKE :search"
             ")"
         )
         params["search"] = f"%{search}%"
@@ -172,8 +197,7 @@ async def read_sekolah(
 
     count_sql = text(f"""
         SELECT COUNT(*)
-        FROM simpeg.unit_kerja u
-        INNER JOIN edusetara.master_sekolah_meta m ON u.id = m.unit_kerja_id
+        FROM master_sekolah
         WHERE {where_sql}
     """)
     total_result = await db.execute(count_sql, params)
@@ -181,24 +205,28 @@ async def read_sekolah(
 
     data_sql = text(f"""
         SELECT
-            u.id,
-            u.unit_kerja,
-            u.alamat,
-            m.jenjang,
-            m.status_sekolah,
-            m.npsn,
-            m.akreditasi,
-            m.kecamatan_id,
-            m.kecamatan,
-            m.desa_kelurahan_id,
-            m.desa_kelurahan,
-            m.is_active,
-            m.created_at,
-            m.updated_at
-        FROM simpeg.unit_kerja u
-        INNER JOIN edusetara.master_sekolah_meta m ON u.id = m.unit_kerja_id
+            id,
+            npsn,
+            nama_sekolah,
+            bentuk_pendidikan,
+            status_sekolah,
+            akreditasi,
+            kecamatan_id,
+            kecamatan,
+            desa_kelurahan_id,
+            desa_kelurahan,
+            alamat_jalan,
+            dusun,
+            kode_pos,
+            latitude,
+            longitude,
+            simpeg_unit_kerja_id,
+            is_active,
+            created_at,
+            updated_at
+        FROM master_sekolah
         WHERE {where_sql}
-        ORDER BY u.unit_kerja ASC
+        ORDER BY nama_sekolah ASC
         LIMIT :limit OFFSET :skip
     """)
     result = await db.execute(data_sql, params)
@@ -212,57 +240,66 @@ async def read_sekolah(
     }
 
 
-@router.get("/{unit_kerja_id}", response_model=SekolahResponse)
+@router.get("/{sekolah_id}", response_model=SekolahResponse)
 async def get_sekolah_detail(
-    unit_kerja_id: str,
+    sekolah_id: str,
     db: AsyncSession = Depends(get_db),
 ):
-    """Retrieve single school detail with merged SIMPEG identity and EduSetara metadata."""
+    """Retrieve single school detail by ID or NPSN."""
     sql = text("""
         SELECT
-            u.id,
-            u.unit_kerja,
-            u.alamat,
-            m.jenjang,
-            m.status_sekolah,
-            m.npsn,
-            m.akreditasi,
-            m.kecamatan_id,
-            m.kecamatan,
-            m.desa_kelurahan_id,
-            m.desa_kelurahan,
-            m.is_active,
-            m.created_at,
-            m.updated_at
-        FROM simpeg.unit_kerja u
-        INNER JOIN edusetara.master_sekolah_meta m ON u.id = m.unit_kerja_id
-        WHERE u.id = :id
+            id,
+            npsn,
+            nama_sekolah,
+            bentuk_pendidikan,
+            status_sekolah,
+            akreditasi,
+            kecamatan_id,
+            kecamatan,
+            desa_kelurahan_id,
+            desa_kelurahan,
+            alamat_jalan,
+            dusun,
+            kode_pos,
+            latitude,
+            longitude,
+            simpeg_unit_kerja_id,
+            is_active,
+            created_at,
+            updated_at
+        FROM master_sekolah
+        WHERE id = :id OR npsn = :id
     """)
-    result = await db.execute(sql, {"id": unit_kerja_id})
+    result = await db.execute(sql, {"id": sekolah_id})
     row = result.fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Data sekolah tidak ditemukan")
     return map_row_to_response(row)
 
 
-@router.put("/{unit_kerja_id}", response_model=SekolahResponse)
-@router.put("/update/{unit_kerja_id}", response_model=SekolahResponse)
-async def update_sekolah_meta(
-    unit_kerja_id: str,
+@router.put("/{sekolah_id}", response_model=SekolahResponse)
+@router.put("/update/{sekolah_id}", response_model=SekolahResponse)
+async def update_sekolah(
+    sekolah_id: str,
     payload: SekolahUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """
-    Update metadata attributes of a school in master_sekolah_meta.
-    Does NOT modify simpeg.unit_kerja.
+    Update attributes of a school in master_sekolah.
+    Supports updating simpeg_unit_kerja_id, wilayah, or spatial coordinates.
     """
     update_data = payload.model_dump(exclude_unset=True)
+    if "jenjang" in update_data and not update_data.get("bentuk_pendidikan"):
+        update_data["bentuk_pendidikan"] = update_data.pop("jenjang")
+    elif "jenjang" in update_data:
+        update_data.pop("jenjang")
+
     if not update_data:
-        return await get_sekolah_detail(unit_kerja_id, db)
+        return await get_sekolah_detail(sekolah_id, db)
 
     set_clauses = ["updated_at = NOW()"]
-    params: dict[str, Any] = {"id": unit_kerja_id}
+    params: dict[str, Any] = {"id": sekolah_id}
 
     for key, val in update_data.items():
         set_clauses.append(f"{key} = :{key}")
@@ -270,25 +307,25 @@ async def update_sekolah_meta(
 
     set_sql = ", ".join(set_clauses)
     sql = text(f"""
-        UPDATE edusetara.master_sekolah_meta
+        UPDATE master_sekolah
         SET {set_sql}
-        WHERE unit_kerja_id = :id
+        WHERE id = :id OR npsn = :id
     """)
     await db.execute(sql, params)
     await db.commit()
 
-    return await get_sekolah_detail(unit_kerja_id, db)
+    return await get_sekolah_detail(sekolah_id, db)
 
 
 @router.post("/sync", status_code=status.HTTP_200_OK)
-async def sync_sekolah_from_simpeg(
+async def sync_sekolah_from_excel(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Manually trigger synchronization of schools from simpeg.unit_kerja."""
-    stats = await sync_master_sekolah(db)
+    """Trigger re-synchronization of schools from official Dapodik Excel dataset."""
+    stats = await import_schools_from_excel(db)
     return {
         "success": True,
-        "message": f"Berhasil mensinkronkan {stats['processed_schools']} sekolah dari SIMPEG",
+        "message": f"Berhasil mengimpor {stats['imported_schools']} sekolah resmi Dapodik",
         "data": stats,
     }

@@ -23,6 +23,8 @@ export default function EditSekolahModal({
   const { kecamatanList, isLoading: isKecLoading } = useKecamatanList();
 
   const [formData, setFormData] = useState<SekolahUpdatePayload>({
+    nama_sekolah: "",
+    bentuk_pendidikan: "SD",
     jenjang: "SD",
     status_sekolah: "NEGERI",
     npsn: "",
@@ -31,6 +33,10 @@ export default function EditSekolahModal({
     kecamatan: "",
     desa_kelurahan_id: null,
     desa_kelurahan: "",
+    alamat_jalan: "",
+    latitude: null,
+    longitude: null,
+    simpeg_unit_kerja_id: "",
     is_active: true,
   });
 
@@ -48,7 +54,9 @@ export default function EditSekolahModal({
       }
 
       setFormData({
-        jenjang: record.jenjang || "SD",
+        nama_sekolah: record.nama_sekolah || "",
+        bentuk_pendidikan: record.bentuk_pendidikan || record.jenjang || "SD",
+        jenjang: record.bentuk_pendidikan || record.jenjang || "SD",
         status_sekolah: record.status_sekolah || "NEGERI",
         npsn: record.npsn || "",
         akreditasi: record.akreditasi || "",
@@ -56,6 +64,10 @@ export default function EditSekolahModal({
         kecamatan: record.kecamatan || "",
         desa_kelurahan_id: record.desa_kelurahan_id || null,
         desa_kelurahan: record.desa_kelurahan || "",
+        alamat_jalan: record.alamat_jalan || record.alamat || "",
+        latitude: record.latitude ?? null,
+        longitude: record.longitude ?? null,
+        simpeg_unit_kerja_id: record.simpeg_unit_kerja_id || "",
         is_active: record.is_active ?? true,
       });
     }
@@ -103,8 +115,10 @@ export default function EditSekolahModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(record.unit_kerja_id, {
-      jenjang: formData.jenjang,
+    onSave(record.id || record.npsn, {
+      nama_sekolah: formData.nama_sekolah?.trim(),
+      bentuk_pendidikan: formData.bentuk_pendidikan || formData.jenjang,
+      jenjang: formData.bentuk_pendidikan || formData.jenjang,
       status_sekolah: formData.status_sekolah,
       npsn: formData.npsn ? formData.npsn.trim() : null,
       akreditasi: formData.akreditasi ? formData.akreditasi.trim() : null,
@@ -112,6 +126,10 @@ export default function EditSekolahModal({
       kecamatan: formData.kecamatan ? formData.kecamatan.trim() : null,
       desa_kelurahan_id: formData.desa_kelurahan_id,
       desa_kelurahan: formData.desa_kelurahan ? formData.desa_kelurahan.trim() : null,
+      alamat_jalan: formData.alamat_jalan ? formData.alamat_jalan.trim() : null,
+      latitude: formData.latitude !== null && !isNaN(Number(formData.latitude)) ? Number(formData.latitude) : null,
+      longitude: formData.longitude !== null && !isNaN(Number(formData.longitude)) ? Number(formData.longitude) : null,
+      simpeg_unit_kerja_id: formData.simpeg_unit_kerja_id ? formData.simpeg_unit_kerja_id.trim() : null,
       is_active: formData.is_active,
     });
   };
@@ -120,8 +138,8 @@ export default function EditSekolahModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Perbarui Metadata Satuan Pendidikan"
-      description={`Ubah klasifikasi jenjang, NPSN, akreditasi, atau wilayah untuk ${record.nama_sekolah}. Identitas nama dan alamat tetap sinkron dengan SIMPEG.`}
+      title="Perbarui Data Satuan Pendidikan"
+      description={`Ubah klasifikasi jenjang, NPSN, akreditasi, wilayah resmi, koordinat GPS, atau tautan SIMPEG untuk ${record.nama_sekolah}.`}
       maxWidth="lg"
       footer={
         <>
@@ -136,17 +154,26 @@ export default function EditSekolahModal({
     >
       <form id="form-edit-sekolah" onSubmit={handleSubmit} className="space-y-4">
         {/* Banner Lembaga */}
-        <div className="p-3 bg-amber-500/10 border border-amber-300/30 rounded-lg">
-          <p className="text-xs font-bold text-[#2d2410]">{record.nama_sekolah}</p>
-          <p className="text-[11px] text-[#7d7152]">ID SIMPEG: {record.unit_kerja_id}</p>
+        <div className="p-3 bg-amber-500/10 border border-amber-300/30 rounded-lg flex items-center justify-between">
+          <div>
+            <p className="text-xs font-bold text-[#2d2410]">{record.nama_sekolah}</p>
+            <p className="text-[11px] text-[#7d7152]">
+              NPSN: <span className="font-mono font-bold text-[#2d2410]">{record.npsn}</span>
+              {record.simpeg_unit_kerja_id ? ` • ID SIMPEG: ${record.simpeg_unit_kerja_id}` : " • Data Mandiri Dapodik"}
+            </p>
+          </div>
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-200/60 text-amber-900">
+            {record.bentuk_pendidikan || record.jenjang}
+          </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
             label="Nomor Pokok Sekolah Nasional (NPSN)"
-            placeholder="8 Digit NPSN (misal: 40402064)"
+            placeholder="8 Karakter NPSN (misal: 40402064)"
             value={formData.npsn || ""}
             onChange={(e: any) => setFormData({ ...formData, npsn: e.target.value })}
+            required
           />
 
           <div>
@@ -161,6 +188,7 @@ export default function EditSekolahModal({
               <option value="A">A (Unggul)</option>
               <option value="B">B (Baik)</option>
               <option value="C">C (Cukup)</option>
+              <option value="Tidak Terakreditasi">Tidak Terakreditasi</option>
             </Select>
           </div>
         </div>
@@ -168,18 +196,26 @@ export default function EditSekolahModal({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-[#2d2410] mb-1.5">
-              Klasifikasi Jenjang Pendidikan
+              Bentuk Pendidikan / Jenjang
             </label>
             <Select
-              value={formData.jenjang}
-              onChange={(e: any) => setFormData({ ...formData, jenjang: e.target.value })}
+              value={formData.bentuk_pendidikan || formData.jenjang}
+              onChange={(e: any) => setFormData({ ...formData, bentuk_pendidikan: e.target.value, jenjang: e.target.value })}
             >
-              <option value="PAUD">PAUD (Pendidikan Anak Usia Dini)</option>
-              <option value="TK">TK (Taman Kanak-Kanak)</option>
               <option value="SD">SD (Sekolah Dasar)</option>
               <option value="SMP">SMP (Sekolah Menengah Pertama)</option>
-              <option value="SATAP">SATAP (Satu Atap SD & SMP)</option>
-              <option value="PKBM">PKBM / SKB (Nonformal Kesetaraan)</option>
+              <option value="TK">TK (Taman Kanak-Kanak)</option>
+              <option value="KB">KB (Kelompok Bermain)</option>
+              <option value="PAUD">PAUD</option>
+              <option value="PKBM">PKBM (Pusat Kegiatan Belajar Masyarakat)</option>
+              <option value="SKB">SKB (Sanggar Kegiatan Belajar)</option>
+              <option value="MI">MI (Madrasah Ibtidaiyah)</option>
+              <option value="MTS">MTs (Madrasah Tsanawiyah)</option>
+              <option value="MA">MA (Madrasah Aliyah)</option>
+              <option value="SMA">SMA</option>
+              <option value="SMK">SMK</option>
+              <option value="SLB">SLB</option>
+              <option value="SATAP">SATAP (Satu Atap)</option>
             </Select>
           </div>
 
@@ -191,7 +227,7 @@ export default function EditSekolahModal({
               value={formData.status_sekolah}
               onChange={(e: any) => setFormData({ ...formData, status_sekolah: e.target.value })}
             >
-              <option value="NEGERI">Negeri (Pemerintah Daerah)</option>
+              <option value="NEGERI">Negeri (Pemerintah)</option>
               <option value="SWASTA">Swasta (Yayasan / Swasta)</option>
             </Select>
           </div>
@@ -242,10 +278,38 @@ export default function EditSekolahModal({
             </Select>
             {formData.desa_kelurahan && !formData.desa_kelurahan_id && (
               <p className="mt-1 text-[11px] text-amber-700">
-                Data lama: <span className="font-semibold">{formData.desa_kelurahan}</span> (silakan pilih opsi resmi E-Gov)
+                Nama asal: <span className="font-semibold">{formData.desa_kelurahan}</span>
               </p>
             )}
           </div>
+        </div>
+
+        <Input
+          label="Alamat Jalan / Lokasi"
+          placeholder="Nama jalan, nomor, atau patokan lokasi"
+          value={formData.alamat_jalan || ""}
+          onChange={(e: any) => setFormData({ ...formData, alamat_jalan: e.target.value })}
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Input
+            label="Latitude (Lintang)"
+            placeholder="Contoh: -4.1140"
+            value={formData.latitude !== null && formData.latitude !== undefined ? String(formData.latitude) : ""}
+            onChange={(e: any) => setFormData({ ...formData, latitude: e.target.value ? Number(e.target.value) : null })}
+          />
+          <Input
+            label="Longitude (Bujur)"
+            placeholder="Contoh: 122.2080"
+            value={formData.longitude !== null && formData.longitude !== undefined ? String(formData.longitude) : ""}
+            onChange={(e: any) => setFormData({ ...formData, longitude: e.target.value ? Number(e.target.value) : null })}
+          />
+          <Input
+            label="ID Unit Kerja SIMPEG"
+            placeholder="Kosongkan jika belum dipetakan"
+            value={formData.simpeg_unit_kerja_id || ""}
+            onChange={(e: any) => setFormData({ ...formData, simpeg_unit_kerja_id: e.target.value })}
+          />
         </div>
       </form>
     </Modal>

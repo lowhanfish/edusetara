@@ -124,8 +124,8 @@ export default function SekolahManager({
 
   const handleSyncConfirm = () => {
     Swal.fire({
-      title: "Sinkronisasi SIMPEG",
-      text: "Sistem akan membaca data terbaru dari tabel unit_kerja SIMPEG dan memetakan sekolah baru secara otomatis tanpa mengubah struktur SIMPEG. Lanjutkan?",
+      title: "Sinkronisasi Data Dapodik",
+      text: "Sistem akan menyelaraskan data satuan pendidikan terbaru dari basis data Dapodik Kemendikdasmen Kabupaten Konawe Selatan. Lanjutkan?",
       icon: "info",
       showCancelButton: true,
       confirmButtonText: "Ya, Sinkronkan!",
@@ -177,9 +177,9 @@ export default function SekolahManager({
               size="sm"
               onClick={handleSyncConfirm}
               disabled={syncMutation.isPending}
-              title="Sinkronisasi Perubahan Unit Kerja dari SIMPEG"
+              title="Sinkronisasi Data Dapodik Kabupaten Konawe Selatan"
             >
-              🔄 Sync SIMPEG
+              🔄 Sync Dapodik
             </Button>
           </div>
         }
@@ -191,7 +191,7 @@ export default function SekolahManager({
           <div>
             <p className="text-xs font-semibold text-[#7d7152]">Total Satuan {title}</p>
             <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.total} Lembaga</h4>
-            <span className="text-[11px] text-[#7d7152]">Data Riil SIMPEG</span>
+            <span className="text-[11px] text-[#7d7152]">Master Mandiri Dapodik</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
             {icon}
@@ -384,7 +384,7 @@ export default function SekolahManager({
                 rawList.map((item, idx) => {
                   const isSatap = item.jenjang === "SATAP";
                   return (
-                    <tr key={item.unit_kerja_id} className="hover:bg-white/50 transition-colors duration-150">
+                    <tr key={item.id || item.npsn || item.unit_kerja_id} className="hover:bg-white/50 transition-colors duration-150">
                       {/* 1. No */}
                       <td className="px-4 py-3.5 text-xs align-middle text-center font-semibold text-[#a89b7b]">
                         {listindex(pageSize, page, idx)}
@@ -408,19 +408,33 @@ export default function SekolahManager({
                         <p className="font-bold text-[#2d2410] leading-snug">
                           {item.nama_sekolah}
                         </p>
-                        {item.alamat && (
-                          <p className="text-[11px] text-[#7d7152] truncate max-w-sm mt-0.5">
-                            📍 {item.alamat}
-                          </p>
-                        )}
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {item.alamat && (
+                            <p className="text-[11px] text-[#7d7152] truncate max-w-sm">
+                              📍 {item.alamat}
+                            </p>
+                          )}
+                          {item.latitude && item.longitude && (
+                            <span
+                              className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200"
+                              title={`Koordinat: ${item.latitude}, ${item.longitude}`}
+                            >
+                              🗺️ GPS
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* 4. Jenjang & Status */}
                       <td className="px-4 py-3.5 text-xs align-middle text-center">
                         <div className="flex flex-col items-center gap-1">
-                          {isSatap ? (
+                          {item.bentuk_pendidikan ? (
+                            <Badge variant="gold" size="sm">
+                              {item.bentuk_pendidikan}
+                            </Badge>
+                          ) : isSatap ? (
                             <Badge variant="info" size="sm">
-                              SATAP (SD & SMP)
+                              SATAP
                             </Badge>
                           ) : (
                             <Badge variant="gold" size="sm">

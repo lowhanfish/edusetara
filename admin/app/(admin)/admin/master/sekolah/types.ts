@@ -1,15 +1,13 @@
 export interface SekolahRecord {
   id: string;
-  unit_kerja_id: string;
+  npsn: string;
   nama_sekolah: string;
   name: string;
-  alamat?: string | null;
-  address?: string | null;
+  bentuk_pendidikan: string;
   jenjang: "SD" | "SMP" | "TK" | "PAUD" | "SATAP" | "PKBM" | string;
   level: string;
   status_sekolah: "NEGERI" | "SWASTA" | string;
   status: string;
-  npsn?: string | null;
   akreditasi?: string | null;
   kecamatan_id?: number | null;
   kecamatan?: string | null;
@@ -17,6 +15,15 @@ export interface SekolahRecord {
   desa_kelurahan_id?: number | null;
   desa_kelurahan?: string | null;
   village?: string | null;
+  alamat_jalan?: string | null;
+  alamat?: string | null;
+  address?: string | null;
+  dusun?: string | null;
+  kode_pos?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  simpeg_unit_kerja_id?: string | null;
+  unit_kerja_id?: string | null;
   is_active: boolean;
   url?: string | null;
   created_at?: string | null;
@@ -31,6 +38,8 @@ export interface SekolahListResponse {
 }
 
 export interface SekolahUpdatePayload {
+  nama_sekolah?: string;
+  bentuk_pendidikan?: string;
   jenjang?: string;
   status_sekolah?: string;
   npsn?: string | null;
@@ -39,6 +48,12 @@ export interface SekolahUpdatePayload {
   kecamatan?: string | null;
   desa_kelurahan_id?: number | null;
   desa_kelurahan?: string | null;
+  alamat_jalan?: string | null;
+  dusun?: string | null;
+  kode_pos?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  simpeg_unit_kerja_id?: string | null;
   is_active?: boolean;
 }
 

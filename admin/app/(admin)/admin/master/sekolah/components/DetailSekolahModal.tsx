@@ -24,11 +24,11 @@ export default function DetailSekolahModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Lembar Data Profil Satuan Pendidikan"
-      description="Rincian identitas resmi satuan pendidikan hasil integrasi data kepegawaian SIMPEG dan metadata EduSetara."
+      description="Rincian identitas resmi satuan pendidikan dalam Data Master Mandiri EduSetara (Dapodik Kemendikdasmen)."
       maxWidth="lg"
       footer={
         <div className="flex items-center justify-between w-full">
-          <div>
+          <div className="flex items-center gap-3">
             {record.url && (
               <a
                 href={record.url}
@@ -37,6 +37,16 @@ export default function DetailSekolahModal({
                 className="text-xs text-sky-600 hover:underline inline-flex items-center gap-1 font-medium"
               >
                 Cek Profil Kemendikdasmen ↗
+              </a>
+            )}
+            {record.latitude && record.longitude && (
+              <a
+                href={`https://www.google.com/maps?q=${record.latitude},${record.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-emerald-600 hover:underline inline-flex items-center gap-1 font-medium"
+              >
+                Buka Peta Google Maps 📍
               </a>
             )}
           </div>
@@ -64,18 +74,31 @@ export default function DetailSekolahModal({
         {/* Banner Ringkasan Lembaga */}
         <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-300/30 flex items-start justify-between gap-3">
           <div>
-            <span className="text-[11px] font-mono font-bold text-amber-800 bg-amber-200/60 px-2 py-0.5 rounded">
-              ID SIMPEG: {record.unit_kerja_id}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-mono font-bold text-amber-800 bg-amber-200/60 px-2 py-0.5 rounded">
+                NPSN: {record.npsn}
+              </span>
+              {record.simpeg_unit_kerja_id ? (
+                <span className="text-[11px] font-mono font-bold text-sky-800 bg-sky-200/60 px-2 py-0.5 rounded">
+                  SIMPEG: {record.simpeg_unit_kerja_id}
+                </span>
+              ) : (
+                <span className="text-[10px] text-[#7d7152] bg-white/60 px-2 py-0.5 rounded border border-white">
+                  Belum Ditautkan SIMPEG
+                </span>
+              )}
+            </div>
             <h3 className="text-base font-bold text-[#2d2410] mt-1.5">{record.nama_sekolah}</h3>
-            <p className="text-xs text-[#7d7152] mt-0.5">{record.alamat || "Alamat belum tercatat di SIMPEG"}</p>
+            <p className="text-xs text-[#7d7152] mt-0.5">
+              {record.alamat_jalan || record.alamat || "Alamat belum tercatat"}
+            </p>
           </div>
           <div className="flex flex-col items-end gap-1.5 shrink-0">
             <Badge variant={record.status_sekolah === "NEGERI" ? "success" : "neutral"} size="sm">
               {record.status_sekolah}
             </Badge>
             <Badge variant="gold" size="sm">
-              Jenjang {record.jenjang}
+              {record.bentuk_pendidikan || record.jenjang}
             </Badge>
           </div>
         </div>
@@ -85,7 +108,7 @@ export default function DetailSekolahModal({
           <div className="p-3.5 rounded-lg bg-white/40 border border-white/80 space-y-1">
             <span className="text-[#7d7152] font-medium block">Nomor Pokok Sekolah Nasional (NPSN)</span>
             <span className="font-mono font-bold text-sm text-[#2d2410] block">
-              {record.npsn ? record.npsn : "Belum diisi"}
+              {record.npsn}
             </span>
           </div>
 
@@ -109,6 +132,22 @@ export default function DetailSekolahModal({
               {record.desa_kelurahan || "-"}
             </span>
           </div>
+
+          <div className="p-3.5 rounded-lg bg-white/40 border border-white/80 space-y-1">
+            <span className="text-[#7d7152] font-medium block">Koordinat Geografis (GPS)</span>
+            <span className="font-mono text-xs text-[#2d2410] block">
+              {record.latitude && record.longitude
+                ? `${record.latitude}, ${record.longitude}`
+                : "Belum tercatat"}
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-white/40 border border-white/80 space-y-1">
+            <span className="text-[#7d7152] font-medium block">Kode Pos / Dusun</span>
+            <span className="font-semibold text-sm text-[#2d2410] block">
+              {record.kode_pos || record.dusun || "-"}
+            </span>
+          </div>
         </div>
 
         {/* Informasi Sistem & Audit */}
@@ -120,7 +159,7 @@ export default function DetailSekolahModal({
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Sinkronisasi Terakhir:</span>
+            <span>Pembaruan Terakhir:</span>
             <span>{record.updated_at ? new Date(record.updated_at).toLocaleString("id-ID") : "-"}</span>
           </div>
         </div>
