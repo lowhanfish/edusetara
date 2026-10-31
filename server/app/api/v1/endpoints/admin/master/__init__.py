@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter
 
+from app.api.v1.endpoints.admin.master.auth import auth_router
 from app.api.v1.endpoints.admin.master.jenjang import router as jenjang_router
 from app.api.v1.endpoints.admin.master.jurnal import jurnal_router
 from app.api.v1.endpoints.admin.master.lookup import router as lookup_router
@@ -18,25 +19,28 @@ master_router = APIRouter(prefix="/master")
 master_router.include_router(lookup_router)
 master_router.include_router(seed_router)
 
-# 2. Master Siswa
+# 2. Master Auth (/auth/menu, /auth/group, /auth/registrasi)
+master_router.include_router(auth_router)
+
+# 3. Master Siswa
 master_router.include_router(siswa_router, prefix="/siswa")
 
-# 3. Master Jenjang
+# 4. Master Jenjang
 master_router.include_router(jenjang_router, prefix="/jenjang")
 
-# 4. Master Sarpras (/sarpras/*)
+# 5. Master Sarpras (/sarpras/*)
 master_router.include_router(sarpras_router)
 
-# 5. Master PPDB (/ppdb/*)
+# 6. Master PPDB (/ppdb/*)
 master_router.include_router(ppdb_router)
 
-# 6. Master Usulan (/usulan/*)
+# 7. Master Usulan (/usulan/*)
 master_router.include_router(usulan_router)
 
-# 7. Master Jurnal (/jurnal/*)
+# 8. Master Jurnal (/jurnal/*)
 master_router.include_router(jurnal_router)
 
-# 8. Master Pelengkap (/bk-jenis-layanan, /model-pembelajaran, etc.)
+# 9. Master Pelengkap (/bk-jenis-layanan, /model-pembelajaran, etc.)
 master_router.include_router(pelengkap_router)
 
 # Alias for backward compatibility

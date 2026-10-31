@@ -56,6 +56,16 @@ class User(Base):
         nullable=True,
         index=True,
     )
+    group_id = Column(
+        String(50),
+        ForeignKey("auth_groups.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    jabatan = Column(
+        String(100),
+        nullable=True,
+    )
     instansi_id = Column(
         String(50),
         nullable=True,
@@ -75,6 +85,7 @@ class User(Base):
 
     # Relationships
     role = relationship("Role", back_populates="users", lazy="selectin")
+    group = relationship("AuthGroup", foreign_keys=[group_id], lazy="selectin")
     refresh_sessions = relationship(
         "RefreshSession",
         back_populates="user",
