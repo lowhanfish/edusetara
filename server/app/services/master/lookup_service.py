@@ -126,7 +126,7 @@ async def fetch_sekolah_lookup(session: AsyncSession) -> list[dict[str, Any]]:
     """Fetch all active schools for dropdown lookup."""
     from sqlalchemy import text
     sql = text("""
-        SELECT id, nama_sekolah, jenjang, status_sekolah, kecamatan
+        SELECT id, nama_sekolah, bentuk_pendidikan, status_sekolah, kecamatan
         FROM master_sekolah
         WHERE is_active = 1
         ORDER BY nama_sekolah ASC
@@ -137,6 +137,7 @@ async def fetch_sekolah_lookup(session: AsyncSession) -> list[dict[str, Any]]:
             "id": r[0],
             "uraian": (r[1] or "").strip(),
             "jenjang": r[2],
+            "bentuk_pendidikan": r[2],
             "status": r[3],
             "kecamatan": r[4],
         }
