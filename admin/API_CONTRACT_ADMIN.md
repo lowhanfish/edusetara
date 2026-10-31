@@ -1,1997 +1,2924 @@
-# Dokumentasi Kontrak API & Skema Database Lengkap (FastAPI + SQLAlchemy + PostgreSQL)
-**Sistem Informasi Dinas Pendidikan & Kebudayaan Kabupaten Konawe Selatan (EduSetara)**
+# Single Source of Truth (SSOT) Kontrak API & Arsitektur Admin EduSetara
+**Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan**
 
-Dokumen ini merupakan **Single Source of Truth (SSOT)** kontrak RESTful API dan arsitektur database **PostgreSQL + SQLAlchemy 2.0 + Pydantic v2** untuk seluruh modul aplikasi **EduSetara** (Auth, Dashboard & Analytics, Operasional Sekolah, Verifikasi Kedinasan, Data Master, serta Portal Publik / Publish).
-
-Seluruh spesifikasi di dalam dokumen ini disusun dari hasil audit menyeluruh terhadap:
-1. Seluruh kode sumber *frontend* Next.js (`app/(auth)/**`, `app/(admin)/**`, `app/(publish)/**`, dan `app/(admin)/_data/admin-menu.json`).
-2. Dokumen spesifikasi asli [`reff/Arsitektur Sistem.docx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/reff/Arsitektur%20Sistem.docx) dan [`reff/Peta Module Front-end.docx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/reff/Peta%20Module%20Front-end.docx).
-
----
-
-## Daftar Isi
-
-1. [Arsitektur Backend, Konvensi FastAPI + SQLAlchemy, & Standar Response](#1-arsitektur-backend-konvensi-fastapi--sqlalchemy--standar-response)
-2. [Autentikasi, Sesi, RBAC, & Integrasi SIMPEG (`/login`, `/api/v1/auth/*`, `/api/v1/simpeg/*`)](#2-autentikasi-sesi-rbac--integrasi-simpeg)
-3. [Dashboard Utama & Visual Analytics (`/admin`, `/api/v1/admin/dashboard/*`)](#3-dashboard-utama--visual-analytics)
-4. [Modul Sarana & Prasarana (`/admin/sarpras/*`)](#4-modul-sarana--prasarana-adminsarpas)
-   - 4.1 Tanah Sekolah (`/admin/sarpras/tanah`)
-   - 4.2 Bangunan (`/admin/sarpras/bangunan`)
-   - 4.3 Ruang (`/admin/sarpras/ruang`)
-   - 4.4 Peralatan / Aset Sekolah (`/admin/sarpras/peralatan`)
-5. [Modul Usulan Sekolah (`/admin/usulan/*`)](#5-modul-usulan-sekolah-adminusulan)
-   - 5.1 Usulan Tunjangan Guru & Sub-Lampiran (`/admin/usulan/tunjangan-guru`)
-   - 5.2 Usulan Bantuan PIP: Data Pendukung (`/admin/usulan/pip/data-pendukung`)
-   - 5.3 Usulan Bantuan PIP: Data Penerima (`/admin/usulan/pip/data-penerima`)
-   - 5.4 Usulan Data Assessment (`/admin/usulan/assessment`)
-   - 5.5 Usulan Rekonsiliasi Dana BOSP, Sub-Lampiran, & Surat Rekomendasi (`/admin/usulan/rekonsiliasi-bosp`)
-6. [Modul Kegiatan Sekolah (`/admin/kegiatan-sekolah`)](#6-modul-kegiatan-sekolah-adminkegiatan-sekolah)
-7. [Modul Rombongan Belajar / Rombel (`/admin/rombel/{paud|sd|smp}`)](#7-modul-rombongan-belajar--rombel-adminrombel)
-8. [Modul Komunitas Belajar & Struktur Pengurus (`/admin/komunitas-belajar`)](#8-modul-komunitas-belajar--struktur-pengurus-adminkomunitas-belajar)
-9. [Modul Jurnal V2 (`/admin/jurnal/*`)](#9-modul-jurnal-v2-adminjurnal)
-   - 9.1 Jurnal Guru Kelas (`/admin/jurnal/guru-kelas`)
-   - 9.2 Jurnal Kepala Sekolah (`/admin/jurnal/kepala-sekolah`)
-   - 9.3 Jurnal Pengawas (`/admin/jurnal/pengawas`)
-   - 9.4 Jurnal Bimbingan & Konseling / BK (`/admin/jurnal/bk`)
-10. [Modul Gallery & Video Testimoni (`/admin/gallery/*`)](#10-modul-gallery--video-testimoni-admingallery)
-    - 10.1–10.8 8 Submodul Gallery Foto Kegiatan
-    - 10.9 Video Testimoni (`/admin/gallery/video-testimoni`)
-11. [Modul Piagam & Sertifikat PTK (`/admin/piagam-sertifikat`)](#11-modul-piagam--sertifikat-ptk-adminpiagam-sertifikat)
-12. [Modul Verifikasi Kedinasan (`/admin/verifikasi/*`)](#12-modul-verifikasi-kedinasan-adminverifikasi)
-    - 12.1 Verifikasi Usulan Tunjangan Guru (`/admin/verifikasi/tunjangan-guru`)
-    - 12.2 Verifikasi Dual-Tahap Rekonsiliasi Dana BOSP (`/admin/verifikasi/rekonsiliasi-bosp`)
-13. [Modul Regulasi & Info GTK (`/admin/regulasi-gtk/*`)](#13-modul-regulasi--info-gtk-adminregulasi-gtk)
-    - 13.1 Pengumuman GTK (`/admin/regulasi-gtk/pengumuman`)
-    - 13.2 Modul & Materi Pelatihan (`/admin/regulasi-gtk/modul-materi`)
-    - 13.3 Regulasi Resmi (`/admin/regulasi-gtk/regulasi`)
-14. [Modul PPDB & Kuota PPDB (`/admin/ppdb/*`, `/admin/kuota-ppdb`)](#14-modul-ppdb--kuota-ppdb)
-    - 14.1–14.3 PPDB PAUD, SD, SMP (`/admin/ppdb/{paud|sd|smp}`)
-    - 14.4 Kalkulasi & Manajemen Kuota PPDB (`/admin/kuota-ppdb`)
-15. [Modul Profile Kelembagaan (`/admin/profile/{renstra|tugas-fungsi|visi-misi}`)](#15-modul-profile-kelembagaan-adminprofile)
-16. [Modul Data Master (`/admin/master/*`)](#16-modul-data-master-adminmaster)
-    - 16.1 Master Auth: Menu, Group & Matriks Akses, Registrasi ASN (`/admin/master/auth/*`)
-    - 16.2 Master Siswa (`/admin/master/siswa`)
-    - 16.3 Master Sekolah SD, SMP, TK, PKBM (`/admin/master/sekolah/*`)
-    - 16.4 Master Usulan: Triwulan, Jenis Penerima, Kelas Penerima (`/admin/master/usulan/*`)
-    - 16.5 Master Jurnal: Bahan Ajar, Materi Ajar, Kelas, Mata Pelajaran (`/admin/master/jurnal/*`)
-    - 16.6 Master Jenjang (`/admin/master/jenjang`)
-    - 16.7 Master PPDB: Agama, Tempat Tinggal, Transportasi, Pendidikan, Pekerjaan, Penghasilan (`/admin/master/ppdb/*`)
-    - 16.8 Master Sarpras: Bangunan, Kepemilikan, Sumber Dana, Kondisi Alat, Jenis Bantuan (`/admin/master/sarpras/*`)
-    - 16.9–16.14 Master Lainnya: BK Jenis Layanan, BK Kegiatan Layanan, Model Pembelajaran, Pendampingan, Tugas, Kategori
-17. [Modul Publish / Portal Publik (`/admin/*` & `/api/v1/public/*`)](#17-modul-publish--portal-publik)
-    - 17.1 Berita (`/admin/berita` & `/berita`)
-    - 17.2 Pengumuman (`/admin/pengumuman` & `/pengumuman`)
-    - 17.3 Pendidikan per Jenjang (`/admin/pendidikan` & `/pendidikan`)
-    - 17.4 Direktori Sekolah (`/admin/sekolah` & `/sekolah`)
-    - 17.5 Kebudayaan (`/admin/kebudayaan` & `/kebudayaan`)
-    - 17.6 Layanan Publik (`/admin/layanan` & `/layanan`)
-    - 17.7 Statistik Pendidikan (`/admin/statistik` & `/statistik`)
-    - 17.8 Profil Dinas (`/admin/profil` & `/profil`)
-    - 17.9 Banner Beranda (`/admin/banner` & `/`)
-    - 17.10 Pesan Kontak & Pengaduan (`/admin/kontak` & `/kontak`)
-18. [Spesifikasi Upload Berkas, Keamanan, & Rekomendasi Struktur Proyek FastAPI](#18-spesifikasi-upload-berkas-keamanan--rekomendasi-struktur-proyek-fastapi)
-19. [Peta Relasi Data Lengkap (ERD, Relasi Data Master ke Tabel Operasional, & Implementasi SQLAlchemy)](#19-peta-relasi-data-lengkap-erd-relasi-data-master-ke-tabel-operasional--implementasi-sqlalchemy)
+> [!IMPORTANT]
+> Dokumen ini diselaraskan 100% secara langsung dengan dokumen spesifikasi resmi **`ref/Arsitektur Sistem (1).docx`** dan struktur rute menu aktif **`admin/app/(admin)/_data/admin-menu.json`**.
+> Dokumen ini mengatur seluruh kontrak API antara Frontend Next.js Admin (`http://localhost:3000/admin/*`) dan Backend FastAPI (`http://localhost:8000/api/v1/*`).
+> **Dilarang keras mengarang atau menambahkan field, relasi, maupun enum di luar ketentuan dokumen resmi ini.**
 
 ---
 
-## 1. Arsitektur Backend, Konvensi FastAPI + SQLAlchemy, & Standar Response
+## 1. Prinsip Utama & Standar Arsitektur
 
-### 1.1 Tech Stack & Base URL
-- **Framework**: FastAPI (Python 3.11+)
-- **ORM & Migrations**: SQLAlchemy 2.0 (`DeclarativeBase`, `Mapped`, `mapped_column`, `AsyncSession`) + Alembic
-- **Database**: PostgreSQL 15+
-- **Validation & Serialization**: Pydantic v2 (`ConfigDict(from_attributes=True, populate_by_name=True)`)
-- **Base API Prefix**:
-  - Endpoint Admin & Operasional: `/api/v1/admin/...`
-  - Endpoint Autentikasi: `/api/v1/auth/...`
-  - Endpoint Integrasi SIMPEG: `/api/v1/simpeg/...`
-  - Endpoint Portal Publik (Tanpa Auth): `/api/v1/public/...`
-
-### 1.2 Standar Envelope Response JSON
-Seluruh endpoint FastAPI mengembalikan struktur *envelope* JSON yang seragam agar langsung kompatibel dengan komponen frontend (`ContractCrudPage`, `AdminPageScaffold`, dan modul kustom):
-
-#### A. Response Sukses (Single Object / Mutation)
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "Data berhasil disimpan",
-  "data": {
-    "id": "uuid-atau-kode",
-    "...": "..."
-  }
-}
-```
-
-#### B. Response Sukses Koleksi dengan Paginasi (List Data)
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "Data berhasil diambil",
-  "data": [
-    { "id": "1", "...": "..." }
-  ],
-  "meta": {
-    "page": 1,
-    "limit": 10,
-    "totalItems": 142,
-    "totalPages": 15,
-    "hasNextPage": true,
-    "hasPrevPage": false
-  }
-}
-```
-
-#### C. Response Error / Validasi Gagal (`400`, `401`, `403`, `404`, `422`, `500`)
-```json
-{
-  "success": false,
-  "statusCode": 422,
-  "message": "Validasi data gagal",
-  "errors": [
-    {
-      "field": "nisn",
-      "message": "NISN wajib terdiri dari 10 digit angka"
-    }
-  ]
-}
-```
-
-### 1.3 Standar Query Parameters (List & Filter)
-Setiap endpoint `GET` koleksi wajib mendukung query parameter berikut di FastAPI (`Query(...)`):
-| Parameter | Tipe | Default | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `page` | `int` | `1` | Nomor halaman aktif (`>= 1`) |
-| `limit` | `int` | `10` | Jumlah item per halaman (`1..100`, atau `all=true` untuk dropdown master) |
-| `search` | `str \| None` | `None` | Kata kunci pencarian (`ILIKE %search%` pada kolom teks utama) |
-| `sortBy` | `str` | `"created_at"` | Kolom pengurutan |
-| `sortOrder` | `"asc" \| "desc"` | `"desc"` | Arah pengurutan |
-| `unit_kerja` | `str \| None` | `None` | Filter nama/ID satuan pendidikan (khusus pengguna Level 1 / Dinas) |
-| `tahun` | `int \| str \| None` | `None` | Filter tahun anggaran / tahun ajaran |
-| `triwulan_id` | `str \| None` | `None` | Filter triwulan (pada modul Usulan & Verifikasi) |
-| `status` | `str \| int \| None` | `None` | Filter status verifikasi atau status publikasi |
-
-### 1.4 Mixin Kolom Audit & Scoping Otomatis di SQLAlchemy
-Di seluruh modul operasional sekolah (`Sarpras`, `Usulan`, `Kegiatan Sekolah`, `Rombel`, `Komunitas Belajar`, `Jurnal V2`, `Gallery`, `Piagam`, `PPDB`), sistem wajib menyertakan kolom jejak audit dan identitas sekolah yang **diisi otomatis oleh Backend dari JWT Session user yang sedang login**:
-
-```python
-from datetime import datetime
-from sqlalchemy import String, DateTime, func
-from sqlalchemy.orm import Mapped, mapped_column
-
-class AuditScopeMixin:
-    """Mixin standar untuk tabel operasional EduSetara."""
-    nip: Mapped[str | None] = mapped_column(String(30), index=True, nullable=True, comment="NIP ASN pembuat data (dari sesi login)")
-    unit_kerja: Mapped[str | None] = mapped_column(String(150), index=True, nullable=True, comment="Nama Satuan Pendidikan / Unit Kerja")
-    unit_kerja_id: Mapped[str | None] = mapped_column(String(50), index=True, nullable=True, comment="ID Unit Kerja SIMPEG / NPSN Sekolah")
-    created_by: Mapped[str | None] = mapped_column(String(100), nullable=True, comment="Nama / Username pembuat data")
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
-```
-
-> **Catatan Kompatibilitas Penamaan Field (`snake_case` vs `camelCase`)**:
-> Pada dokumen arsitektur lama terdapat sebagian penulisan `createAt` / `createBy` dan sebagian `created_at` / `created_by`. Di komponen frontend [`contract-crud-page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/_components/contract-crud-page.tsx), nama field yang digunakan secara konsisten adalah **`created_at`** dan **`created_by`**. Gunakan nama kolom database `created_at` dan `created_by`, serta aktifkan `validation_alias` di Pydantic bila menerima payload legacy `createAt`/`createBy`.
-
-### 1.5 Aturan Multi-Scope Data Access (Level 1 vs Level 2)
-Berdasarkan modul **Data Master > Auth > Group** ([`group-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/auth/group/group-management.tsx)):
-1. **Level 1 (`level = 1` — Cakupan Semua Satuan Pendidikan / Dinas)**:
-   - Contoh Group: *Super Admin Dinas*, *Verifikator BOSP & Tunjangan*, *Pengawas Sekolah Kabupaten*, *Redaktur Berita & Publikasi*.
-   - **Perilaku Query**: Dapat melihat, memfilter, dan memverifikasi data dari **seluruh sekolah / unit kerja**.
-2. **Level 2 (`level = 2` — Cakupan Unit Pendidikan Pengguna)**:
-   - Contoh Group: *Operator Satuan Pendidikan*, *Kepala Satuan Pendidikan*, *Guru & Wali Kelas*.
-   - **Perilaku Query**: Setiap query `SELECT`, `INSERT`, `UPDATE`, `DELETE` pada tabel operasional **wajib di-filter otomatis** oleh dependency FastAPI berdasarkan `unit_kerja_id` (atau `unit_kerja`) milik user yang login. Untuk *Guru*, pada modul Jurnal Guru Kelas atau Usulan Tunjangan pribadi, filter juga dapat dipersempit ke `nip == current_user.nip`.
-
----
-
-## 2. Autentikasi, Sesi, RBAC, & Integrasi SIMPEG
-
-Direferensikan oleh:
-- [`app/(auth)/login/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(auth)/login/page.tsx)
-- [`app/(admin)/admin/master/auth/menu/menu-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/auth/menu/menu-management.tsx)
-- [`app/(admin)/admin/master/auth/group/group-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/auth/group/group-management.tsx)
-- [`app/(admin)/admin/master/auth/registrasi/registration-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/auth/registrasi/registration-management.tsx)
-
-### 2.1 Skema Tabel Database Auth & RBAC
-#### Tabel `auth_menus`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(30)` | `PRIMARY KEY` | Contoh: `"MNU-001"`, `"MNU-010-A"` |
-| `parent_id` | `VARCHAR(30)` | `FK -> auth_menus.id ON DELETE CASCADE`, `NULLABLE` | `NULL` jika menu utama (Root) |
-| `title` | `VARCHAR(100)` | `NOT NULL` | Judul menu di sidebar |
-| `icon` | `VARCHAR(60)` | `NOT NULL` | Nama ikon Lucide (contoh: `"LayoutDashboard"`, `"Building2"`) |
-| `path` | `VARCHAR(200)` | `NOT NULL` | Route Next.js (contoh: `"/admin/sarpras/tanah"`) |
-| `index` | `INTEGER` | `NOT NULL DEFAULT 1` | Urutan tampil menu |
-| `is_active` | `BOOLEAN` | `NOT NULL DEFAULT TRUE` | Status aktif menu |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Waktu pembuatan |
-| `created_by` | `VARCHAR(100)` | `NULLABLE` | Pembuat |
-
-#### Tabel `auth_groups`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(30)` | `PRIMARY KEY` | Contoh: `"GRP-001"` |
-| `title` | `VARCHAR(100)` | `NOT NULL UNIQUE` | Nama Group (contoh: `"Super Admin Dinas"`) |
-| `level` | `SMALLINT` | `NOT NULL CHECK (level IN (1, 2))` | `1` = Semua Satuan Pendidikan (Dinas), `2` = Unit Pendidikan Pengguna (Sekolah) |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Waktu pembuatan |
-| `created_by` | `VARCHAR(100)` | `NULLABLE` | Pembuat |
-
-#### Tabel `auth_group_permissions`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `UUID / SERIAL` | `PRIMARY KEY` | ID baris matriks akses |
-| `group_id` | `VARCHAR(30)` | `FK -> auth_groups.id ON DELETE CASCADE` | Relasi ke group |
-| `menu_id` | `VARCHAR(30)` | `FK -> auth_menus.id ON DELETE CASCADE` | Relasi ke menu (`UNIQUE(group_id, menu_id)`) |
-| `create` | `BOOLEAN` | `NOT NULL DEFAULT FALSE` | Hak tambah data (`C`) |
-| `read` | `BOOLEAN` | `NOT NULL DEFAULT FALSE` | Hak lihat menu & baca data (`R`) |
-| `update` | `BOOLEAN` | `NOT NULL DEFAULT FALSE` | Hak ubah data (`U`) |
-| `delete` | `BOOLEAN` | `NOT NULL DEFAULT FALSE` | Hak hapus data (`D`) |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Waktu update hak akses |
-| `created_by` | `VARCHAR(100)` | `NULLABLE` | Pembuat |
-
-#### Tabel `users` & `auth_asn_registrations`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(30)` | `PRIMARY KEY` | Contoh: `"REG-001"` atau UUID |
-| `nip` | `VARCHAR(30)` | `UNIQUE NOT NULL` | NIP ASN / Identitas Pegawai |
-| `email` | `VARCHAR(150)` | `UNIQUE NULLABLE` | Email login (opsional, bisa login via NIP atau Email) |
-| `password_hash` | `VARCHAR(255)` | `NOT NULL` | Bcrypt / Argon2 password hash |
-| `name` | `VARCHAR(150)` | `NOT NULL` | Nama lengkap beserta gelar (sinkron SIMPEG) |
-| `unit_kerja_id` | `VARCHAR(50)` | `INDEX NULLABLE` | ID Unit Kerja SIMPEG / NPSN Sekolah |
-| `unit_kerja` | `VARCHAR(150)` | `INDEX NOT NULL` | Nama Unit Kerja / Sekolah |
-| `position` | `VARCHAR(150)` | `NULLABLE` | Jabatan ASN di SIMPEG |
-| `group_id` | `VARCHAR(30)` | `FK -> auth_groups.id ON DELETE RESTRICT` | Group RBAC pengguna |
-| `avatar_url` | `TEXT` | `NULLABLE` | Foto profil |
-| `is_active` | `BOOLEAN` | `NOT NULL DEFAULT TRUE` | Status akun aktif |
-| `last_login_at` | `TIMESTAMPTZ` | `NULLABLE` | Waktu login terakhir |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Waktu registrasi |
-| `created_by` | `VARCHAR(100)` | `NULLABLE` | Admin peregistrasi |
-
-### 2.2 Kontrak Endpoint Autentikasi (`/api/v1/auth/*`)
-
-#### 1. `POST /api/v1/auth/login`
-Login menggunakan **Email kedinasan atau NIP** beserta password (sesuai form [`app/(auth)/login/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(auth)/login/page.tsx)).
-- **Request Body**:
-```json
-{
-  "identifier": "198208102008011009",
-  "password": "PasswordRahasia123!",
-  "remember_me": true
-}
-```
-*(Catatan: Backend juga wajib menerima key `"email"` atau `"nip"` sebagai alias dari `"identifier"`).*
-- **Response `200 OK`**:
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "Login berhasil",
-  "data": {
-    "access_token": "eyJhbGciOiJIUzI1NiIs...",
-    "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
-    "token_type": "bearer",
-    "expires_in": 86400,
-    "user": {
-      "id": "REG-003",
-      "nip": "198208102008011009",
-      "email": "operator@smpn1andoolo.sch.id",
-      "name": "Budi Santoso, S.Kom",
-      "unit_kerja_id": "40401821",
-      "unit_kerja": "SMPN 1 Andoolo",
-      "position": "Operator Dapodik & Bos",
-      "group": {
-        "id": "GRP-003",
-        "title": "Operator Satuan Pendidikan",
-        "level": 2
-      }
-    }
-  }
-}
-```
-
-#### 2. `GET /api/v1/auth/me`
-Mengambil profil user aktif beserta pohon menu sidebar (`admin-menu.json`) yang sudah difilter sesuai `auth_group_permissions` (`read = true`).
-- **Response `200 OK`**: Mengembalikan objek `user`, `permissions` (map `path -> {create, read, update, delete}`), dan `menus` (struktur hierarki `children`).
-
-#### 3. `POST /api/v1/auth/refresh` & `POST /api/v1/auth/logout`
-Memperbarui access token dari refresh token atau mencabut sesi aktif.
-
-### 2.3 Kontrak Endpoint Integrasi SIMPEG (`/api/v1/simpeg/*`)
-Banyak form di EduSetara memilih data pegawai/sekolah dari SIMPEG (Sistem Informasi Manajemen Kepegawaian):
-1. `GET /api/v1/simpeg/asn?search=&unit_kerja_id=`
-   - Mengembalikan daftar ASN (`nip`, `name`, `unit`, `unit_kerja_id`, `position`, `golongan`, `pangkat`) untuk modul **Registrasi ASN** dan **Komunitas Belajar**.
-2. `GET /api/v1/simpeg/guru?unit_kerja_id=&search=`
-   - Mengembalikan daftar Guru/PTK (`id`/`nip`, `nama`, `nip`, `nuptk`, `golongan`, `jabatan`, `unit_kerja`) untuk dropdown `guru_id`, `wali_kelas`, dan `nama_id` pada modul **Rombel**, **Usulan Tunjangan Guru**, **Piagam & Sertifikat**, dan **Jurnal Guru Kelas**.
-3. `GET /api/v1/simpeg/kepsek?unit_kerja_id=`
-   - Mengembalikan daftar Kepala Sekolah (`id`/`nip`, `nama`, `nip`, `unit_kerja`) untuk dropdown `kepsek_id` pada modul **Rombel**.
-4. `GET /api/v1/simpeg/unit-kerja?jenjang=&search=`
-   - Mengembalikan daftar Unit Kerja / Satuan Pendidikan (`id`/`npsn`, `nama_sekolah`, `jenjang`, `kecamatan`, `status`) untuk filter `unit_kerja` dan form **Kuota PPDB** / **Jurnal Pengawas**.
-
----
-
-## 3. Dashboard Utama & Visual Analytics
-
-Direferensikan oleh:
-- [`app/(admin)/admin/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/page.tsx)
-- [`app/(admin)/_components/chart/dashboard-analytics.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/_components/chart/dashboard-analytics.tsx)
-
-### 3.1 `GET /api/v1/admin/dashboard/summary`
-Mengambil ringkasan 4 kartu statistik utama, berita terbaru, pengumuman aktif, dan log aktivitas terkini.
-- **Response `200 OK`**:
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "data": {
-    "stats": {
-      "totalSchools": { "value": 608, "change": "+4 unit", "note": "PAUD, SD, SMP & PKBM aktif" },
-      "totalTeachers": { "value": 6540, "change": "+2.4%", "note": "ASN, PPPK, dan Non-ASN" },
-      "totalStudents": { "value": 64320, "change": "+1.8%", "note": "Tahun ajaran 2025/2026" },
-      "activeAnnouncements": { "value": 4, "change": "3 prioritas", "note": "Memerlukan tindak lanjut sekolah" }
-    },
-    "recentNews": [
-      {
-        "slug": "transformasi-pembelajaran-digital-konsel-2026",
-        "title": "Transformasi Pembelajaran Digital...",
-        "category": "Program Prioritas",
-        "author": "Tim Humas Disdikbud",
-        "readTime": "4 menit baca",
-        "featured": true
-      }
-    ],
-    "activeAnnouncements": [
-      {
-        "id": "PGM-2026-014",
-        "title": "Jadwal Verifikasi Berkas Tunjangan Profesi Guru Triwulan II",
-        "category": "Kepegawaian / PPPK",
-        "number": "800/142/DISDIKBUD/2026",
-        "deadline": "30 April 2026",
-        "important": true
-      }
-    ],
-    "activityLogs": [
-      {
-        "id": "LOG-01",
-        "title": "Pengumuman jadwal verifikasi berkas PPPK tahap II dipublikasikan",
-        "actor": "Subbag Kepegawaian",
-        "time": "25 menit lalu",
-        "type": "Pengumuman"
-      }
-    ]
-  }
-}
-```
-
-### 3.2 `GET /api/v1/admin/dashboard/analytics`
-Mengambil seluruh dataset untuk 4 panel grafik interaktif Highcharts di [`dashboard-analytics.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/_components/chart/dashboard-analytics.tsx).
-- **Query Params**: `?tahun=2026&unit_kerja_id=`
-- **Response `200 OK`**:
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "data": {
-    "sarpras": {
-      "categories": ["PAUD / TK", "SD Negeri/Swasta", "SMP Negeri/Swasta", "PKBM"],
-      "ruang": {
-        "baik": [285, 1640, 620, 48],
-        "rusak_ringan": [68, 410, 145, 16],
-        "rusak_sedang": [24, 165, 58, 9],
-        "rusak_berat": [12, 78, 29, 4]
-      },
-      "bangunan": {
-        "baik": [190, 980, 390, 32],
-        "rusak_ringan": [42, 240, 88, 11],
-        "rusak_sedang": [18, 95, 36, 5],
-        "rusak_berat": [8, 44, 16, 2]
-      },
-      "peralatan": {
-        "baik": [520, 3450, 1890, 140],
-        "rusak_ringan": [95, 620, 310, 28],
-        "rusak_sedang": [40, 230, 120, 12],
-        "rusak_berat": [15, 110, 54, 6]
-      }
-    },
-    "demografi": {
-      "siswa": [
-        { "name": "SD (Sekolah Dasar)", "y": 36840, "color": "#2563eb" },
-        { "name": "SMP (Menengah Pertama)", "y": 17920, "color": "#0891b2" },
-        { "name": "PAUD / TK", "y": 7650, "color": "#8b5cf6" },
-        { "name": "PKBM / Kesetaraan", "y": 1910, "color": "#f59e0b" }
-      ],
-      "rombel": [
-        { "name": "Rombel SD", "y": 1842, "color": "#2563eb" },
-        { "name": "Rombel SMP", "y": 685, "color": "#0891b2" },
-        { "name": "Rombel PAUD / TK", "y": 412, "color": "#8b5cf6" },
-        { "name": "Rombel PKBM", "y": 96, "color": "#f59e0b" }
-      ],
-      "sekolah": [
-        { "name": "Unit SD", "y": 342, "color": "#2563eb" },
-        { "name": "Unit PAUD / TK", "y": 156, "color": "#8b5cf6" },
-        { "name": "Unit SMP", "y": 88, "color": "#0891b2" },
-        { "name": "Unit PKBM", "y": 22, "color": "#f59e0b" }
-      ]
-    },
-    "usulan_verifikasi": {
-      "categories": ["Triwulan I", "Triwulan II", "Triwulan III", "Triwulan IV"],
-      "semua": {
-        "diterima": [412, 468, 395, 310],
-        "menunggu": [38, 64, 112, 185],
-        "dikembalikan": [29, 22, 34, 19]
-      },
-      "tunjangan": {
-        "diterima": [265, 290, 248, 195],
-        "menunggu": [22, 39, 68, 110],
-        "dikembalikan": [18, 14, 21, 11]
-      },
-      "bosp_pip": {
-        "diterima": [147, 178, 147, 115],
-        "menunggu": [16, 25, 44, 75],
-        "dikembalikan": [11, 8, 13, 8]
-      }
-    },
-    "activity": {
-      "jurnal": {
-        "categories": ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun"],
-        "guru_kelas": [1420, 1580, 1690, 1610, 1785, 1890],
-        "kepala_sekolah": [310, 345, 360, 352, 388, 412],
-        "pengawas": [92, 108, 115, 112, 128, 136],
-        "bk": [240, 275, 310, 295, 340, 365]
-      },
-      "ppdb": {
-        "categories": ["PAUD / TK", "SD Negeri", "SMP Negeri"],
-        "daya_tampung": [4200, 11500, 6800],
-        "terdaftar": [3680, 10940, 6590]
-      }
-    }
-  }
-}
-```
-
----
-
-## 4. Modul Sarana & Prasarana (`/admin/sarpras/*`)
-
-Modul Sarana & Prasarana memiliki hierarki relasi berjenjang:
-`Master Kepemilikan / Kondisi / Bantuan / Sumber Dana` $\rightarrow$ **`sarpras_tanah`** & **`sarpras_bangunan`** $\rightarrow$ **`sarpras_ruang`** $\rightarrow$ **`sarpras_peralatan`**.
-
-### 4.1 Tanah Sekolah (`/admin/sarpras/tanah`)
-- **File Frontend**: [`app/(admin)/admin/sarpras/tanah/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/sarpras/tanah/page.tsx)
-- **Endpoint CRUD**:
-  - `GET /api/v1/admin/sarpras/tanah`
-  - `GET /api/v1/admin/sarpras/tanah/{id}`
-  - `POST /api/v1/admin/sarpras/tanah` (`multipart/form-data` atau JSON)
-  - `PUT /api/v1/admin/sarpras/tanah/{id}`
-  - `DELETE /api/v1/admin/sarpras/tanah/{id}`
-- **Skema Tabel `sarpras_tanah`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | UUID / Kode (contoh: `"TNH-001"`) |
-| `nama_tanah` | `VARCHAR(200)` | `NOT NULL` | Nama aset tanah (contoh: `"Tanah Kampus Utama SDN 1 Andoolo"`) |
-| `no_sertifikat` | `VARCHAR(100)` | `NOT NULL` | Nomor sertifikat hak pakai / SHM |
-| `panjang` | `NUMERIC(10,2)` | `NOT NULL` | Panjang lahan ($m$) |
-| `lebar` | `NUMERIC(10,2)` | `NOT NULL` | Lebar lahan ($m$) |
-| `luas` | `NUMERIC(12,2)` | `NOT NULL` | Total luas tanah ($m^2$) |
-| `luas_tersedia` | `NUMERIC(12,2)` | `NOT NULL` | Luas lahan siap bangun / tersedia ($m^2$) |
-| `kepemilikan_id` | `VARCHAR(50)` | `FK -> master_sarpras_kepemilikan.id` | Status kepemilikan (`Milik` / `Sewa` / `Pinjam` / `Bukan Milik`) |
-| `ket_tanah` | `TEXT` | `NULLABLE` | Keterangan kondisi dan batas tanah |
-| `file` | `TEXT` | `NULLABLE` | Path/URL scan PDF sertifikat tanah |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
-### 4.2 Bangunan (`/admin/sarpras/bangunan`)
-- **File Frontend**: [`app/(admin)/admin/sarpras/bangunan/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/sarpras/bangunan/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/sarpras/bangunan` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `sarpras_bangunan`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"BGN-001"` |
-| `nama_bangunan` | `VARCHAR(200)` | `NOT NULL` | Nama gedung (contoh: `"Gedung Kelas Blok A"`) |
-| `kd_bangunan` | `VARCHAR(50)` | `NOT NULL` | Kode bangunan |
-| `panjang` | `NUMERIC(10,2)` | `NOT NULL` | Panjang bangunan ($m$) |
-| `lebar` | `NUMERIC(10,2)` | `NOT NULL` | Lebar bangunan ($m$) |
-| `luas_tapak_bangunan` | `NUMERIC(12,2)` | `NOT NULL` | Luas tapak bangunan ($m^2$) |
-| `kepemilikan_id` | `VARCHAR(50)` | `FK -> master_sarpras_kepemilikan.id` | Kepemilikan bangunan |
-| `peminjam_meminjamkan` | `VARCHAR(150)` | `NULLABLE` | Pihak peminjam / yang meminjamkan (`"-"`, `"Pemda"`, dll.) |
-| `nilai_perolehan_aset` | `NUMERIC(18,2)` | `NOT NULL DEFAULT 0` | Nilai perolehan aset (Rp) |
-| `jml_lantai` | `SMALLINT` | `NOT NULL DEFAULT 1` | Jumlah lantai |
-| `thn_dibangun` | `SMALLINT` | `NOT NULL` | Tahun dibangun (contoh: `2018`) |
-| `ket_bangunan` | `TEXT` | `NULLABLE` | Keterangan tambahan bangunan |
-| `tgl_sk_pemakai` | `DATE` | `NULLABLE` | Tanggal SK pemakai |
-| `kondisi_bangunan_id` | `VARCHAR(50)` | `FK -> master_sarpras_bangunan.id` | Kondisi (`Baik`, `Rusak Ringan`, `Rusak Sedang`, `Rusak Berat`) |
-| `konstruksi_bertingkat` | `VARCHAR(20)` | `NOT NULL` | `"Ya"` atau `"Tidak"` |
-| `konstruksi_beton` | `VARCHAR(20)` | `NOT NULL` | `"Ya"` atau `"Tidak"` |
-| `luas_lantai` | `NUMERIC(12,2)` | `NOT NULL` | Total luas lantai ($m^2$) |
-| `lokasi` | `VARCHAR(255)` | `NOT NULL` | Lokasi / alamat gedung |
-| `tahun` | `SMALLINT` | `NOT NULL` | Tahun data anggaran |
-| `no_sk_pemakai` | `VARCHAR(100)` | `NULLABLE` | Nomor SK pemakai |
-| `bantuan_id` | `VARCHAR(50)` | `FK -> master_sarpras_jenis_bantuan.id` | Jenis bantuan |
-| `sumber_dana_id` | `VARCHAR(50)` | `FK -> master_sarpras_sumber_dana.id` | Sumber dana (`DAK`, `APBD`, `BOS`, dll.) |
-| `nilai_bantuan` | `NUMERIC(18,2)` | `NOT NULL DEFAULT 0` | Nilai dana bantuan (Rp) |
-| `perolehan_aset` | `VARCHAR(150)` | `NULLABLE` | Cara perolehan aset |
-| `file` | `TEXT` | `NULLABLE` | Foto kondisi fisik bangunan (JPG/PNG) |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
-### 4.3 Ruang (`/admin/sarpras/ruang`)
-- **File Frontend**: [`app/(admin)/admin/sarpras/ruang/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/sarpras/ruang/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/sarpras/ruang` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Relasi Penting**: Data pada `sarpras_ruang` (khususnya `jns_ruang = 'Ruang Kelas'`) juga dikalkulasi secara agregat pada modul **Kuota PPDB (`/admin/kuota-ppdb`)**.
-- **Skema Tabel `sarpras_ruang`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"RNG-001"` |
-| `jns_ruang` | `VARCHAR(100)` | `NOT NULL` | Jenis ruang (`Ruang Kelas`, `Laboratorium IPA`, `Perpustakaan`, `Ruang Guru`, `UKS`) |
-| `bangunan_id` | `VARCHAR(36)` | `FK -> sarpras_bangunan.id ON DELETE RESTRICT` | Relasi ke Bangunan induk |
-| `kd_ruang` | `VARCHAR(50)` | `NOT NULL` | Kode ruang |
-| `nm_ruang` | `VARCHAR(150)` | `NOT NULL` | Nama ruang |
-| `lantai_ke` | `SMALLINT` | `NOT NULL DEFAULT 1` | Posisi lantai ke- |
-| `panjang` | `NUMERIC(10,2)` | `NOT NULL` | Panjang ruang ($m$) |
-| `lebar` | `NUMERIC(10,2)` | `NOT NULL` | Lebar ruang ($m$) |
-| `luas` | `NUMERIC(12,2)` | `NOT NULL` | Luas ruang ($m^2$) |
-| `kapasitas` | `INTEGER` | `NOT NULL DEFAULT 0` | Kapasitas siswa/orang |
-| `luas_plester` | `NUMERIC(10,2)` | `DEFAULT 0` | Luas plesteran ($m^2$) |
-| `luas_plafon` | `NUMERIC(10,2)` | `DEFAULT 0` | Luas plafon ($m^2$) |
-| `luas_dinding` | `NUMERIC(10,2)` | `DEFAULT 0` | Luas dinding ($m^2$) |
-| `luas_daun_jendela` | `NUMERIC(10,2)` | `DEFAULT 0` | Luas daun jendela ($m^2$) |
-| `luas_daun_pintu` | `NUMERIC(10,2)` | `DEFAULT 0` | Luas daun pintu ($m^2$) |
-| `panjang_kuseng` | `NUMERIC(10,2)` | `DEFAULT 0` | Panjang kusen ($m$) |
-| `luas_tutup_lantai` | `NUMERIC(10,2)` | `DEFAULT 0` | Luas tutup lantai ($m^2$) |
-| `luas_instalasi_listrik` | `NUMERIC(10,2)` | `DEFAULT 0` | Titik/luas instalasi listrik |
-| `jml_instalasi_listrik` | `INTEGER` | `DEFAULT 0` | Jumlah instalasi listrik |
-| `panjang_instalasi_air` | `NUMERIC(10,2)` | `DEFAULT 0` | Panjang instalasi air ($m$) |
-| `jml_instalasi_air` | `INTEGER` | `DEFAULT 0` | Jumlah titik air |
-| `panjang_drainase` | `NUMERIC(10,2)` | `DEFAULT 0` | Panjang saluran drainase ($m$) |
-| `luas_finish_struktur` | `NUMERIC(10,2)` | `DEFAULT 0` | Luas finishing struktur ($m^2$) |
-| `luas_finish_plafon` | `NUMERIC(10,2)` | `DEFAULT 0` | Luas finishing plafon ($m^2$) |
-| `luas_finish_dinding` | `NUMERIC(10,2)` | `DEFAULT 0` | Luas finishing dinding ($m^2$) |
-| `luas_finish_kjp` | `NUMERIC(10,2)` | `DEFAULT 0` | Luas finishing KJP (Kusen, Jendela, Pintu) ($m^2$) |
-| `file` | `TEXT` | `NULLABLE` | Foto bagian dalam ruang |
-| `kondisi_id` | `VARCHAR(50)` | `FK -> master_sarpras_bangunan.id` | Kondisi ruang (`Baik`, `Rusak Ringan`, `Rusak Sedang`, `Rusak Berat`) |
-| `kelas_id` | `VARCHAR(50)` | `FK -> master_jurnal_kelas.id NULLABLE` | Relasi ke Master Kelas |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
-### 4.4 Peralatan / Aset Sekolah (`/admin/sarpras/peralatan`)
-- **File Frontend**: [`app/(admin)/admin/sarpras/peralatan/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/sarpras/peralatan/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/sarpras/peralatan` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `sarpras_peralatan`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"ALT-001"` |
-| `ruang_id` | `VARCHAR(36)` | `FK -> sarpras_ruang.id ON DELETE RESTRICT` | Ruang penempatan alat |
-| `nm_alat` | `VARCHAR(200)` | `NOT NULL` | Nama peralatan / mobiler / TIK |
-| `jumlah` | `INTEGER` | `NOT NULL DEFAULT 1` | Jumlah unit |
-| `kondisi_id` | `VARCHAR(50)` | `FK -> master_sarpras_kondisi_alat.id` | Kondisi alat (`Baik`, `Rusak Ringan`, `Rusak Berat`) |
-| `sumber_dana_id` | `VARCHAR(50)` | `FK -> master_sarpras_sumber_dana.id` | Sumber anggaran pengadaan |
-| `tahun` | `SMALLINT` | `NOT NULL` | Tahun pengadaan |
-| `file` | `TEXT` | `NULLABLE` | Foto peralatan / aset |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-## 5. Modul Usulan Sekolah (`/admin/usulan/*`)
-
-### 5.1 Usulan Tunjangan Guru & Sub-Lampiran (`/admin/usulan/tunjangan-guru`)
-- **File Frontend**: [`app/(admin)/admin/usulan/tunjangan-guru/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/usulan/tunjangan-guru/page.tsx)
-- **Alur Bisnis Penting (Sesuai `Arsitektur Sistem.docx` & Modul Verifikasi)**:
-  1. Guru/Operator membuat header usulan pada tabel `usulan_tunjangan_guru`.
-  2. Setiap usulan memiliki **Sub-Form / Tabel Anak `usulan_tunjangan_lampiran`** untuk mengunggah berkas-berkas syarat (SKTP, SPTJM, SK Pembagian Tugas 24 Jam, Buku Rekening Bank Sultra).
-  3. Verifikator Dinas memverifikasi usulan ini di `/admin/verifikasi/tunjangan-guru` dengan mengubah `status` (`0` = Menunggu, `1` = Diterima, `2` = Dikembalikan) dan mengisi `pesan`.
-
-#### Skema Tabel Utama `usulan_tunjangan_guru`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"UTG-001"` |
-| `tahun` | `SMALLINT` | `NOT NULL` | Tahun anggaran (contoh: `2026`) |
-| `triwulan_id` | `VARCHAR(50)` | `FK -> master_usulan_triwulan.id` | Triwulan (`Triwulan I` s/d `Triwulan IV`) |
-| `jenis_id` | `VARCHAR(50)` | `FK -> master_usulan_jenis_penerima.id` | Jenis tunjangan (`TPG`, `Tamsil`, `TKG`, `Insentif Non-ASN`) |
-| `guru_id` | `VARCHAR(100)` | `NOT NULL` | ID / Nama Guru dari SIMPEG |
-| `uraian` | `TEXT` | `NOT NULL` | Uraian pengajuan |
-| `status` | `SMALLINT` | `NOT NULL DEFAULT 0` | `0` = Menunggu Verifikasi, `1` = Disetujui/Diterima, `2` = Dikembalikan/Perbaikan |
-| `pesan` | `TEXT` | `NULLABLE` | Catatan hasil verifikasi dari Dinas |
-| `verified_by` | `VARCHAR(100)` | `NULLABLE` | NIP/Nama Verifikator Dinas |
-| `verified_at` | `TIMESTAMPTZ` | `NULLABLE` | Waktu diverifikasi |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
-#### Skema Tabel Anak `usulan_tunjangan_lampiran`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"UTL-001"` |
-| `usulan_id` | `VARCHAR(36)` | `FK -> usulan_tunjangan_guru.id ON DELETE CASCADE` | Relasi ke header usulan |
-| `uraian` | `VARCHAR(255)` | `NOT NULL` | Nama dokumen (contoh: `"SKTP Semester Genap"`, `"SPTJM Kepala Sekolah"`) |
-| `file` | `TEXT` | `NOT NULL` | URL/Path file PDF lampiran |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Waktu unggah |
-| `created_by` | `VARCHAR(100)` | `NULLABLE` | Pengunggah |
-
-#### Endpoint Usulan Tunjangan Guru
-- `GET /api/v1/admin/usulan/tunjangan-guru` (Mengembalikan list usulan beserta array `lampiran: [...]` dan `jumlah_lampiran`)
-- `POST /api/v1/admin/usulan/tunjangan-guru`
-- `PUT /api/v1/admin/usulan/tunjangan-guru/{id}`
-- `DELETE /api/v1/admin/usulan/tunjangan-guru/{id}`
-- **Endpoint Sub-Lampiran**:
-  - `GET /api/v1/admin/usulan/tunjangan-guru/{usulan_id}/lampiran`
-  - `POST /api/v1/admin/usulan/tunjangan-guru/{usulan_id}/lampiran` (`multipart/form-data`: `uraian`, `file`)
-  - `PUT /api/v1/admin/usulan/tunjangan-guru/{usulan_id}/lampiran/{lampiran_id}`
-  - `DELETE /api/v1/admin/usulan/tunjangan-guru/{usulan_id}/lampiran/{lampiran_id}`
-
----
-
-### 5.2 Usulan Bantuan PIP: Data Pendukung (`/admin/usulan/pip/data-pendukung`)
-- **File Frontend**: [`app/(admin)/admin/usulan/pip/data-pendukung/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/usulan/pip/data-pendukung/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/usulan/pip/data-pendukung` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `pip_data_pendukung`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"PIP-DOC-001"` |
-| `uraian` | `VARCHAR(255)` | `NOT NULL` | Uraian berkas kolektif (contoh: `"Berkas Kolektif Usulan PIP Fase 1 Tahun 2026"`) |
-| `sptjm` | `TEXT` | `NOT NULL` | File PDF SPTJM Kepala Sekolah |
-| `sktm` | `TEXT` | `NOT NULL` | File PDF Kolektif SKTM / KIP / PKH |
-| `rekomendasi` | `TEXT` | `NOT NULL` | File PDF Surat Rekomendasi Pengajuan PIP |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-### 5.3 Usulan Bantuan PIP: Data Penerima (`/admin/usulan/pip/data-penerima`)
-- **File Frontend**: [`app/(admin)/admin/usulan/pip/data-penerima/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/usulan/pip/data-penerima/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/usulan/pip/data-penerima` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Dukungan Payload Ganda (Single & Batch sesuai `Arsitektur Sistem.docx`)**:
-  - **Mode Single (UI `ContractCrudPage`)**:
-    ```json
-    {
-      "pendukung_id": "PIP-DOC-001",
-      "siswa_id": "SIS-001",
-      "nisn": "0128491021",
-      "kelas": "Kelas V"
-    }
-    ```
-  - **Mode Batch (`POST /api/v1/admin/usulan/pip/data-penerima/batch`)**:
-    ```json
-    {
-      "form": { "pendukung_id": "PIP-DOC-001" },
-      "lokasi": [
-        { "id": "SIS-001", "nama": "La Ode Muhammad Farhan", "nisn": "0128491021", "kelas": "Kelas V" },
-        { "id": "SIS-002", "nama": "Wa Ode Siti Aisyah", "nisn": "0119482714", "kelas": "Kelas VIII" }
-      ]
-    }
-    ```
-- **Skema Tabel `pip_data_penerima`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"PIP-SIS-001"` |
-| `pendukung_id` | `VARCHAR(36)` | `FK -> pip_data_pendukung.id ON DELETE CASCADE` | Relasi ke paket berkas pendukung PIP |
-| `siswa_id` | `VARCHAR(50)` | `FK -> master_siswa.id ON DELETE RESTRICT` | Relasi ke Master Siswa (atau teks nama siswa) |
-| `nama_siswa` | `VARCHAR(150)` | `NOT NULL` | Nama siswa penerima |
-| `nisn` | `VARCHAR(20)` | `NOT NULL` | NISN siswa |
-| `kelas` | `VARCHAR(50)` | `NOT NULL` | Kelas aktif siswa |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-### 5.4 Usulan Data Assessment (`/admin/usulan/assessment`)
-- **File Frontend**: [`app/(admin)/admin/usulan/assessment/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/usulan/assessment/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/usulan/assessment` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `usulan_assessment`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"ASM-001"` |
-| `uraian` | `VARCHAR(255)` | `NOT NULL` | Judul dokumen assessment (contoh: `"Laporan Kesiapan ANBK & Asesmen Diagnostik"`) |
-| `tahun` | `SMALLINT` | `NOT NULL` | Tahun pelaksanaan |
-| `file` | `TEXT` | `NOT NULL` | File PDF dokumen assessment |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-### 5.5 Usulan Rekonsiliasi Dana BOSP, Sub-Lampiran, & Surat Rekomendasi (`/admin/usulan/rekonsiliasi-bosp`)
-- **File Frontend**: [`app/(admin)/admin/usulan/rekonsiliasi-bosp/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/usulan/rekonsiliasi-bosp/page.tsx)
-- **Alur Bisnis Penting (Sesuai `Arsitektur Sistem.docx` & Modul Verifikasi BOSP)**:
-  1. Sekolah membuat pengajuan per Triwulan pada tabel induk `usulan_rekon_bosp`.
-  2. Sekolah mengunggah dokumen per kategori (BKU, Rekening Koran, SPTJM, Faktur Pajak, Berita Acara Pemeriksaan Kas) pada tabel anak **`usulan_rekon_bosp_lampiran`** yang berelasi ke `master_kategori`.
-  3. Di modul `/admin/verifikasi/rekonsiliasi-bosp`, Verifikator melakukan **Verifikasi 2 Tahap**:
-     - **Tahap 1 (Cek Kebenaran)**: mengisi `status_1` (`0` = Proses, `1` = Diterima, `2` = Dikembalikan) & `pesan_1`.
-     - **Tahap 2 (Cek Kelengkapan)**: mengisi `status_2` (`0` = Proses, `1` = Diterima, `2` = Dikembalikan) & `pesan_2`.
-  4. Apabila Tahap 1 dan Tahap 2 telah disetujui (`status_1 = 1` dan `status_2 = 1`), Dinas menerbitkan **Surat Rekomendasi Pencairan / Bebas Rekon** pada tabel **`rekomendasi_bosp`** (`rekon_id`, `uraian`, `file`) yang dapat diunduh oleh sekolah.
-
-#### Skema Tabel Induk `usulan_rekon_bosp`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"BOSP-001"` |
-| `tahun` | `SMALLINT` | `NOT NULL` | Tahun anggaran |
-| `triwulan_id` | `VARCHAR(50)` | `FK -> master_usulan_triwulan.id` | Triwulan rekonsiliasi |
-| `uraian` | `TEXT` | `NOT NULL` | Uraian pengajuan rekonsiliasi BOSP |
-| `status_1` | `SMALLINT` | `NOT NULL DEFAULT 0` | Status Tahap 1 (Cek Benar): `0`=Proses, `1`=Diterima, `2`=Dikembalikan |
-| `pesan_1` | `TEXT` | `NULLABLE` | Catatan Verifikator Tahap 1 |
-| `status_2` | `SMALLINT` | `NOT NULL DEFAULT 0` | Status Tahap 2 (Cek Lengkap): `0`=Proses, `1`=Diterima, `2`=Dikembalikan |
-| `pesan_2` | `TEXT` | `NULLABLE` | Catatan Verifikator Tahap 2 |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
-#### Skema Tabel Anak `usulan_rekon_bosp_lampiran`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"BOSPL-001"` |
-| `usulan_id` | `VARCHAR(36)` | `FK -> usulan_rekon_bosp.id ON DELETE CASCADE` | Relasi ke pengajuan BOSP |
-| `kategori_id` | `VARCHAR(50)` | `FK -> master_kategori.id` | Kategori berkas (`Laporan BOSP`, `SP2D`, `BKU`, dll.) |
-| `uraian` | `VARCHAR(255)` | `NOT NULL` | Uraian lampiran |
-| `file` | `TEXT` | `NOT NULL` | File PDF dokumen lampiran |
-| `status_1` | `SMALLINT` | `NOT NULL DEFAULT 0` | Status Cek Benar per berkas (`0`/`1`/`2`) |
-| `pesan_1` | `TEXT` | `NULLABLE` | Catatan Cek Benar per berkas |
-| `status_2` | `SMALLINT` | `NOT NULL DEFAULT 0` | Status Cek Lengkap per berkas (`0`/`1`/`2`) |
-| `pesan_2` | `TEXT` | `NULLABLE` | Catatan Cek Lengkap per berkas |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Waktu unggah |
-| `created_by` | `VARCHAR(100)` | `NULLABLE` | Pengunggah |
-
-#### Skema Tabel Output `rekomendasi_bosp`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"REK-BOSP-001"` |
-| `rekon_id` | `VARCHAR(36)` | `FK -> usulan_rekon_bosp.id ON DELETE CASCADE` | Relasi ke usulan rekon BOSP |
-| `uraian` | `VARCHAR(255)` | `NOT NULL` | Nomor / Judul Surat Rekomendasi BOSP |
-| `file` | `TEXT` | `NOT NULL` | File PDF Surat Rekomendasi resmi bertanda tangan |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Waktu terbit |
-| `created_by` | `VARCHAR(100)` | `NULLABLE` | Pejabat/Admin penerbit |
-
-#### Endpoint Rekonsiliasi BOSP
-- `GET /api/v1/admin/usulan/rekonsiliasi-bosp`
-- `POST /api/v1/admin/usulan/rekonsiliasi-bosp`
-- `PUT /api/v1/admin/usulan/rekonsiliasi-bosp/{id}`
-- `DELETE /api/v1/admin/usulan/rekonsiliasi-bosp/{id}`
-- **Sub-Lampiran BOSP**:
-  - `GET /api/v1/admin/usulan/rekonsiliasi-bosp/{usulan_id}/lampiran`
-  - `POST /api/v1/admin/usulan/rekonsiliasi-bosp/{usulan_id}/lampiran`
-  - `PUT /api/v1/admin/usulan/rekonsiliasi-bosp/{usulan_id}/lampiran/{lampiran_id}`
-  - `DELETE /api/v1/admin/usulan/rekonsiliasi-bosp/{usulan_id}/lampiran/{lampiran_id}`
-- **Surat Rekomendasi BOSP**:
-  - `GET /api/v1/admin/usulan/rekonsiliasi-bosp/{usulan_id}/rekomendasi`
-  - `POST /api/v1/admin/usulan/rekonsiliasi-bosp/{usulan_id}/rekomendasi`
-
----
-
-## 6. Modul Kegiatan Sekolah (`/admin/kegiatan-sekolah`)
-
-- **File Frontend**: [`app/(admin)/admin/kegiatan-sekolah/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/kegiatan-sekolah/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/kegiatan-sekolah` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `kegiatan_sekolah`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"KEG-001"` |
-| `uraian` | `VARCHAR(255)` | `NOT NULL` | Judul kegiatan sekolah |
-| `deskripsi` | `TEXT` | `NOT NULL` | Deskripsi lengkap pelaksanaan kegiatan |
-| `file` | `TEXT` | `NULLABLE` | File dokumentasi foto / PDF laporan |
-| `type` | `VARCHAR(30)` | `NOT NULL DEFAULT 'image'` | Tipe media (`image` atau `pdf`) — terdeteksi otomatis dari MIME/ekstensi saat upload |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-## 7. Modul Rombongan Belajar / Rombel (`/admin/rombel/*`)
-
-Direferensikan oleh 3 rute jenjang yang menggunakan tabel yang sama (`rombel`) dengan discriminator `jenjang`:
-- [`app/(admin)/admin/rombel/paud/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/rombel/paud/page.tsx) (`jenjang = "PAUD"`)
-- [`app/(admin)/admin/rombel/sd/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/rombel/sd/page.tsx) (`jenjang = "SD"`)
-- [`app/(admin)/admin/rombel/smp/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/rombel/smp/page.tsx) (`jenjang = "SMP"`)
-
-### Endpoint CRUD Rombel
-- `GET /api/v1/admin/rombel/{jenjang}` (`jenjang` $\in$ `paud`, `sd`, `smp`)
-- `POST /api/v1/admin/rombel/{jenjang}`
-- `PUT /api/v1/admin/rombel/{jenjang}/{id}`
-- `DELETE /api/v1/admin/rombel/{jenjang}/{id}`
-
-### Skema Tabel `rombel`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"RMB-PAUD-01"`, `"RMB-SD-01"`, `"RMB-SMP-01"` |
-| `jenjang` | `VARCHAR(20)` | `NOT NULL INDEX` | `"PAUD"`, `"SD"`, atau `"SMP"` |
-| `kepsek_id` | `VARCHAR(100)` | `NOT NULL` | ID/Nama Kepala Sekolah dari SIMPEG |
-| `Kemampuan` | `VARCHAR(150)` | `NOT NULL` | Kompetensi / Kurikulum Rombel (contoh: `"Kurikulum Merdeka - Fase A"`) — *Gunakan alias Pydantic `kemampuan` & `Kemampuan`* |
-| `kelas_id` | `VARCHAR(50)` | `FK -> master_jurnal_kelas.id` | Tingkat Kelas (`Kelompok A`, `Kelas I`, `Kelas VII`, dll.) |
-| `laki_laki` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah siswa laki-laki (`L`) |
-| `perempuan` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah siswa perempuan (`P`) |
-| `jumlah_siswa` | `INTEGER` | `GENERATED ALWAYS AS (laki_laki + perempuan) STORED` | Total siswa dalam rombel |
-| `wali_kelas` | `VARCHAR(100)` | `NOT NULL` | ID/Nama Guru Wali Kelas dari SIMPEG |
-| `ruang_id` | `VARCHAR(36)` | `FK -> sarpras_ruang.id NULLABLE` | Ruang kelas yang ditempati |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-## 8. Modul Komunitas Belajar & Struktur Pengurus (`/admin/komunitas-belajar`)
-
-- **File Frontend**: [`app/(admin)/admin/komunitas-belajar/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/komunitas-belajar/page.tsx)
-- **Spesifikasi Dua Tabel (`Arsitektur Sistem.docx`)**:
-  1. **Tabel Utama `komunitas_belajar`**: Menyimpan aktivitas/dokumen kegiatan Komunitas Belajar.
-  2. **Tabel Pengurus `komunitas_belajar_pengurus`**: Menyimpan struktur pengurus Komunitas Belajar (`Ketua`, `Wakil`, `Sekretaris`, `Koordinator`) yang diambil dari data ASN SIMPEG.
-
-### 8.1 Skema Tabel `komunitas_belajar`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"KBL-001"` |
-| `uraian` | `VARCHAR(255)` | `NOT NULL` | Nama Komunitas Belajar & Judul Kegiatan |
-| `jns_kegiatan` | `SMALLINT` | `NOT NULL DEFAULT 0` | `0`=Kombel Internal Sekolah, `1`=KKG Gugus/Kecamatan, `2`=MGMP Kabupaten, `3`=Komunitas Praktisi/Webinar |
-| `deskripsi` | `TEXT` | `NOT NULL` | Ringkasan materi dan hasil refleksi |
-| `file` | `TEXT` | `NULLABLE` | File dokumentasi kegiatan |
-| `type` | `VARCHAR(30)` | `DEFAULT 'image'` | Tipe file (`image` / `pdf`) |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
-### 8.2 Skema Tabel `komunitas_belajar_pengurus`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"KBP-001"` |
-| `kombel_id` | `VARCHAR(36)` | `FK -> komunitas_belajar.id ON DELETE CASCADE NULLABLE` | Relasi ke Kombel (atau per `unit_kerja_id`) |
-| `nama_id` | `VARCHAR(100)` | `NOT NULL` | NIP / Nama Guru dari SIMPEG |
-| `jabatan` | `VARCHAR(50)` | `NOT NULL` | `"Ketua"`, `"Wakil"`, `"Sekretaris"`, atau `"Koordinator"` |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
-### 8.3 Endpoint Komunitas Belajar
-- `GET /api/v1/admin/komunitas-belajar`
-- `POST /api/v1/admin/komunitas-belajar`
-- `PUT /api/v1/admin/komunitas-belajar/{id}`
-- `DELETE /api/v1/admin/komunitas-belajar/{id}`
-- **Endpoint Struktur Pengurus Kombel**:
-  - `GET /api/v1/admin/komunitas-belajar/pengurus`
-  - `POST /api/v1/admin/komunitas-belajar/pengurus`
-  - `PUT /api/v1/admin/komunitas-belajar/pengurus/{id}`
-  - `DELETE /api/v1/admin/komunitas-belajar/pengurus/{id}`
-
----
-
-## 9. Modul Jurnal V2 (`/admin/jurnal/*`)
-
-### 9.1 Jurnal Guru Kelas (`/admin/jurnal/guru-kelas`)
-- **File Frontend**: [`app/(admin)/admin/jurnal/guru-kelas/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/jurnal/guru-kelas/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/jurnal/guru-kelas` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Karakteristik Pembelajaran**: Pembelajaran tematik terpadu oleh Guru Kelas, mencakup integrasi tema/subtema materi pokok, nomor urut pertemuan, model dan metode pembelajaran, sintaks kegiatan belajar, instrumen penilaian, rekapitulasi presensi siswa terperinci (hadir, izin, sakit, alpa beserta persentase), catatan refleksi, dan foto dokumentasi kegiatan.
-- **Skema Tabel `jurnal_guru_kelas`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"JGK-001"` |
-| `tema` | `VARCHAR(255)` | `NOT NULL` | Tema Pembelajaran (contoh: `"Tema 1: Indahnya Kebersamaan"`) |
-| `materi_pokok` | `TEXT` | `NOT NULL` | Materi Pokok / Subtema Pembelajaran |
-| `pertemuan_ke` | `INTEGER` | `NOT NULL DEFAULT 1` | Nomor urut pertemuan pembelajaran |
-| `tgl` | `DATE` | `NOT NULL` | Tanggal pelaksanaan pembelajaran |
-| `model_pembelajaran` | `VARCHAR(100)` | `NOT NULL` | Model Pembelajaran (`PBL`, `PjBL`, `Discovery Learning`, dll., sinkron dengan `master_model_pembelajaran`) |
-| `metode_pembelajaran` | `VARCHAR(100)` | `NOT NULL` | Metode Pembelajaran (`Ceramah`, `Diskusi`, `Tanya Jawab`, `Demonstrasi`, `Penugasan`) |
-| `kegiatan` | `TEXT` | `NOT NULL` | Uraian tahapan/sintaks kegiatan belajar mengajar |
-| `penilaian` | `VARCHAR(100)` | `NOT NULL` | Bentuk penilaian (`Penilaian Sikap`, `Penilaian Pengetahuan`, `Penilaian Keterampilan`) |
-| `siswa_hadir` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah peserta didik yang hadir |
-| `siswa_izin` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah peserta didik izin |
-| `siswa_sakit` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah peserta didik sakit |
-| `siswa_alpa` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah peserta didik tanpa keterangan (alpa) |
-| `persentase` | `NUMERIC(5,2)` | `NOT NULL DEFAULT 0.0` | Persentase kehadiran siswa (contoh: `95.00`%) |
-| `keterangan` | `TEXT` | `NULLABLE` | Catatan refleksi atau kendala saat pembelajaran berlangsung |
-| `file` | `TEXT` | `NULLABLE` | Path / URL foto dokumentasi kegiatan belajar di kelas |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari sesi login guru |
-
-### 9.2 Jurnal Kepala Sekolah (`/admin/jurnal/kepala-sekolah`)
-- **File Frontend**: [`app/(admin)/admin/jurnal/kepala-sekolah/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/jurnal/kepala-sekolah/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/jurnal/kepala-sekolah` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `jurnal_kepala_sekolah`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"JKS-001"` |
-| `hari` | `VARCHAR(20)` | `NOT NULL` | Hari kegiatan |
-| `tgl_pelaksanaan` | `DATE` | `NOT NULL` | Tanggal kegiatan |
-| `tugas_id` | `VARCHAR(50)` | `FK -> master_tugas.id` | Dimensi Tugas Pokok Kepsek (`Manajerial`, `Supervisi Guru & Tendik`, `Pengembangan Kewirausahaan`) |
-| `uraian_kegiatan` | `TEXT` | `NOT NULL` | Uraian kegiatan kepemimpinan sekolah |
-| `tindak_lanjut` | `TEXT` | `NOT NULL` | Rencana tindak lanjut |
-| `file` | `TEXT` | `NULLABLE` | Foto bukti kegiatan |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
-### 9.3 Jurnal Pengawas (`/admin/jurnal/pengawas`)
-- **File Frontend**: [`app/(admin)/admin/jurnal/pengawas/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/jurnal/pengawas/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/jurnal/pengawas` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `jurnal_pengawas`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"JPG-001"` |
-| `hari` | `VARCHAR(20)` | `NOT NULL` | Hari kunjungan kepengawasan |
-| `tgl_pelaksanaan` | `DATE` | `NOT NULL` | Tanggal pelaksanaan |
-| `pendampingan_id` | `VARCHAR(50)` | `FK -> master_pendampingan.id` | Jenis pendampingan (`Pendampingan Perencanaan Program`, `Supervisi Akademik`, `Supervisi Manajerial`, `Evaluasi Kinerja`) |
-| `unit_kerja_id` | `VARCHAR(100)` | `NOT NULL` | Sekolah sasaran binaan yang dikunjungi |
-| `materi_pendampingan` | `TEXT` | `NOT NULL` | Materi pembinaan/pendampingan |
-| `permasalahan` | `TEXT` | `NOT NULL` | Temuan permasalahan di sekolah binaan |
-| `solusi` | `TEXT` | `NOT NULL` | Rekomendasi solusi & tindak lanjut |
-| `file` | `TEXT` | `NULLABLE` | Foto dokumentasi supervisi |
-| `nip`, `unit_kerja`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
-### 9.4 Jurnal Bimbingan & Konseling / BK (`/admin/jurnal/bk`)
-- **File Frontend**: [`app/(admin)/admin/jurnal/bk/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/jurnal/bk/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/jurnal/bk` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `jurnal_bk`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"JBK-001"` |
-| `hari` | `VARCHAR(20)` | `NOT NULL` | Hari layanan konseling |
-| `tgl_pelaksanaan` | `DATE` | `NOT NULL` | Tanggal layanan |
-| `sasaran_kegiatan` | `VARCHAR(255)` | `NOT NULL` | Siswa / kelompok sasaran konseling |
-| `jns_layanan_id` | `VARCHAR(50)` | `FK -> master_bk_jenis_layanan.id` | Jenis layanan BK (`Layanan Orientasi`, `Konseling Perorangan`, `Bimbingan Kelompok`, `Mediasi`) |
-| `kegiatan_layanan_id` | `VARCHAR(50)` | `FK -> master_bk_kegiatan_layanan.id` | Kegiatan layanan BK |
-| `uraian_kegiatan` | `TEXT` | `NOT NULL` | Uraian permasalahan dan proses konseling |
-| `hasil_dicapai` | `TEXT` | `NOT NULL` | Hasil yang dicapai pasca layanan |
-| `file` | `TEXT` | `NULLABLE` | Foto / bukti kegiatan layanan |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-## 10. Modul Gallery & Video Testimoni (`/admin/gallery/*`)
-
-### 10.1–10.8 8 Submodul Gallery Foto Kegiatan
-Kedelapan rute berikut memiliki skema kolom yang identik dan dapat disimpan dalam satu tabel **`galleries`** dengan kolom discriminator `kategori_slug`:
-1. `/admin/gallery/sekolah-penggerak` (`kategori_slug = "sekolah-penggerak"`)
-2. `/admin/gallery/guru-penggerak` (`kategori_slug = "guru-penggerak"`)
-3. `/admin/gallery/organisasi-penggerak` (`kategori_slug = "organisasi-penggerak"`)
-4. `/admin/gallery/kegiatan-kepala-sekolah` (`kategori_slug = "kegiatan-kepala-sekolah"`)
-5. `/admin/gallery/kegiatan-kkg-sd` (`kategori_slug = "kegiatan-kkg-sd"`)
-6. `/admin/gallery/kegiatan-guru-mgmp` (`kategori_slug = "kegiatan-guru-mgmp"`)
-7. `/admin/gallery/kegiatan-tk-paud` (`kategori_slug = "kegiatan-tk-paud"`)
-8. `/admin/gallery/kegiatan-pengawas` (`kategori_slug = "kegiatan-pengawas"`)
-
-#### Endpoint CRUD Gallery Foto
-- `GET /api/v1/admin/gallery/{kategori_slug}`
-- `POST /api/v1/admin/gallery/{kategori_slug}`
-- `PUT /api/v1/admin/gallery/{kategori_slug}/{id}`
-- `DELETE /api/v1/admin/gallery/{kategori_slug}/{id}`
-
-#### Skema Tabel `galleries`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"GAL-SP-001"` |
-| `kategori_slug` | `VARCHAR(60)` | `NOT NULL INDEX` | Slug kategori (1 dari 8 submodul di atas) |
-| `uraian` | `VARCHAR(255)` | `NOT NULL` | Judul dokumentasi kegiatan |
-| `deskripsi` | `TEXT` | `NOT NULL` | Deskripsi lengkap kegiatan |
-| `file` | `TEXT` | `NOT NULL` | URL/Path foto kegiatan (`image/*`) |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
-### 10.9 Video Testimoni (`/admin/gallery/video-testimoni`)
-- **File Frontend**: [`app/(admin)/admin/gallery/video-testimoni/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/gallery/video-testimoni/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/gallery/video-testimoni` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `gallery_video_testimoni`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"VID-001"` |
-| `uraian` | `VARCHAR(255)` | `NOT NULL` | Judul video testimoni |
-| `deskripsi` | `TEXT` | `NOT NULL` | Ringkasan isi testimoni |
-| `url` | `TEXT` | `NOT NULL` | Tautan video YouTube (`https://www.youtube.com/watch?v=...`) |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
-
----
-
-## 11. Modul Piagam & Sertifikat PTK (`/admin/piagam-sertifikat`)
-
-- **File Frontend**: [`app/(admin)/admin/piagam-sertifikat/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/piagam-sertifikat/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/piagam-sertifikat` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `piagam_sertifikat`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"SRT-001"` |
-| `guru_id` | `VARCHAR(100)` | `NOT NULL` | ID/Nama Guru atau Tenaga Kependidikan dari SIMPEG |
-| `uraian` | `VARCHAR(255)` | `NOT NULL` | Nama Piagam / Sertifikat & Penyelenggara |
-| `tahun` | `SMALLINT` | `NOT NULL` | Tahun penerbitan |
-| `file` | `TEXT` | `NOT NULL` | File PDF scan piagam / sertifikat |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-## 12. Modul Verifikasi Kedinasan (`/admin/verifikasi/*`)
-
-Modul ini khusus diakses oleh Verifikator Dinas / Super Admin (`level = 1`) untuk memvalidasi berkas usulan dari seluruh satuan pendidikan.
-
-### 12.1 Verifikasi Usulan Tunjangan Guru (`/admin/verifikasi/tunjangan-guru`)
-- **File Frontend**: [`app/(admin)/admin/verifikasi/tunjangan-guru/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/verifikasi/tunjangan-guru/page.tsx)
-- **Tabel Target**: Memperbarui kolom `status`, `pesan`, `verified_by`, dan `verified_at` pada tabel **`usulan_tunjangan_guru`** (Bagian 5.1).
-- **Endpoint**:
-  - `GET /api/v1/admin/verifikasi/tunjangan-guru?tahun=&triwulan_id=&jenis_id=&status=&unit_kerja=`
-  - `PATCH /api/v1/admin/verifikasi/tunjangan-guru/{id}` (atau `PUT`)
-- **Request Payload Verifikasi**:
-```json
-{
-  "status": 1,
-  "pesan": "Berkas SKTP, SPTJM, dan Info GTK telah sesuai. Disetujui untuk pencairan Triwulan II."
-}
-```
-*(Keterangan `status`: `0` = Menunggu Verifikasi, `1` = Diterima / Disetujui, `2` = Dikembalikan / Perbaikan).*
-
-### 12.2 Verifikasi Dual-Tahap Rekonsiliasi Dana BOSP (`/admin/verifikasi/rekonsiliasi-bosp`)
-- **File Frontend**: [`app/(admin)/admin/verifikasi/rekonsiliasi-bosp/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/verifikasi/rekonsiliasi-bosp/page.tsx)
-- **Tabel Target**: Memperbarui tabel **`usulan_rekon_bosp`**, **`usulan_rekon_bosp_lampiran`**, dan menerbitkan surat di **`rekomendasi_bosp`** (Bagian 5.5).
-- **Endpoint**:
-  - `GET /api/v1/admin/verifikasi/rekonsiliasi-bosp?tahun=&triwulan_id=&status_1=&status_2=&unit_kerja=`
-  - `PATCH /api/v1/admin/verifikasi/rekonsiliasi-bosp/{id}/tahap-1` (Verifikasi Tahap 1: Cek Kebenaran Nominal & Pajak)
-  - `PATCH /api/v1/admin/verifikasi/rekonsiliasi-bosp/{id}/tahap-2` (Verifikasi Tahap 2: Cek Kelengkapan Dokumen Fisik/Digital)
-  - `PATCH /api/v1/admin/verifikasi/rekonsiliasi-bosp/{id}` (Update sekaligus `status_1`, `pesan_1`, `status_2`, `pesan_2` dari modal UI)
-  - `POST /api/v1/admin/verifikasi/rekonsiliasi-bosp/{id}/rekomendasi` (Unggah PDF Surat Rekomendasi BOSP setelah `status_1 = 1` dan `status_2 = 1`)
-- **Request Payload Verifikasi Dual-Tahap**:
-```json
-{
-  "status_1": 1,
-  "pesan_1": "Saldo BKU, rekening koran, dan setoran pajak telah sesuai.",
-  "status_2": 1,
-  "pesan_2": "Seluruh lampiran BKU, SPTJM, dan BAP Kas lengkap. Surat rekomendasi diterbitkan.",
-  "file": "/uploads/bosp/rekomendasi-smpn1-tw1-2026.pdf"
-}
-```
-
----
-
-## 13. Modul Regulasi & Info GTK (`/admin/regulasi-gtk/*`)
-
-### 13.1 Pengumuman GTK (`/admin/regulasi-gtk/pengumuman`)
-- **File Frontend**: [`app/(admin)/admin/regulasi-gtk/pengumuman/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/regulasi-gtk/pengumuman/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/regulasi-gtk/pengumuman` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `gtk_pengumuman`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"GTK-PGM-001"` |
-| `judul` | `VARCHAR(255)` | `NOT NULL` | Judul pengumuman GTK |
-| `isi` | `TEXT` | `NOT NULL` | Isi pengumuman lengkap |
-| `file` | `TEXT` | `NULLABLE` | Lampiran surat edaran (PDF/Gambar) |
-| `type` | `VARCHAR(30)` | `DEFAULT 'pdf'` | Tipe lampiran (`pdf` / `image`) |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
-### 13.2 Modul & Materi Pelatihan (`/admin/regulasi-gtk/modul-materi`)
-- **File Frontend**: [`app/(admin)/admin/regulasi-gtk/modul-materi/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/regulasi-gtk/modul-materi/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/regulasi-gtk/modul-materi` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `gtk_modul_materi`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"GTK-MOD-001"` |
-| `judul` | `VARCHAR(255)` | `NOT NULL` | Judul modul / materi pelatihan |
-| `isi` | `TEXT` | `NOT NULL` | Ringkasan materi dan panduan penggunaan |
-| `file` | `TEXT` | `NOT NULL` | File PDF / PPT modul |
-| `type` | `VARCHAR(30)` | `DEFAULT 'pdf'` | Tipe berkas |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
-### 13.3 Regulasi Resmi (`/admin/regulasi-gtk/regulasi`)
-- **File Frontend**: [`app/(admin)/admin/regulasi-gtk/regulasi/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/regulasi-gtk/regulasi/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/regulasi-gtk/regulasi` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `gtk_regulasi`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"GTK-REG-001"` |
-| `no_regulasi` | `VARCHAR(100)` | `NOT NULL` | Nomor produk hukum / regulasi |
-| `uraian` | `TEXT` | `NOT NULL` | Tentang / pokok bahasan regulasi |
-| `tahun` | `SMALLINT` | `NOT NULL` | Tahun penetapan |
-| `file` | `TEXT` | `NOT NULL` | File PDF salinan regulasi resmi |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-## 14. Modul PPDB & Kuota PPDB
-
-### 14.1–14.3 PPDB PAUD, SD, & SMP (`/admin/ppdb/{paud|sd|smp}`)
-Direferensikan oleh:
-- [`app/(admin)/admin/ppdb/paud/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/ppdb/paud/page.tsx)
-- [`app/(admin)/admin/ppdb/sd/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/ppdb/sd/page.tsx)
-- [`app/(admin)/admin/ppdb/smp/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/ppdb/smp/page.tsx)
-
-> **Catatan Penting Desain Skema `ppdb_pendaftar`**:
-> Di dokumen spesifikasi [`reff/Arsitektur Sistem.docx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/reff/Arsitektur%20Sistem.docx), formulir lengkap PPDB mencakup 38 kolom (biodata peserta didik, alamat detail wilayah, data Ayah, data Ibu, dan data Wali), sedangkan UI [`ContractCrudPage`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/_components/contract-crud-page.tsx) saat ini menampilkan 16 kolom inti agar ringkas.
-> **Solusi di SQLAlchemy & Pydantic**: Sediakan ke-38 kolom pada tabel `ppdb_pendaftar`, namun set kolom detail tambahan (seperti `nm_panggilan`, `anak_keberapa`, `jml_saudara`, `nik_ayah`, `nik_ibu`, data `wali`, dll.) menjadi **`NULLABLE / Optional`** dengan sinkronisasi alias `nama_ayah` $\leftrightarrow$ `nm_ayah` dan `nama_ibu` $\leftrightarrow$ `nm_ibu`. Dengan demikian baik form ringkas di Admin maupun form lengkap PPDB publik/import Dapodik berjalan 100% tanpa error!
-
-#### Endpoint CRUD PPDB
-- `GET /api/v1/admin/ppdb/{jenjang}` (`jenjang` $\in$ `paud`, `sd`, `smp`)
-- `POST /api/v1/admin/ppdb/{jenjang}`
-- `PUT /api/v1/admin/ppdb/{jenjang}/{id}`
-- `DELETE /api/v1/admin/ppdb/{jenjang}/{id}`
-
-#### Skema Tabel Lengkap `ppdb_pendaftar`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"PPDB-SD-001"` |
-| `jenjang` | `VARCHAR(20)` | `NOT NULL INDEX` | `"PAUD"`, `"SD"`, atau `"SMP"` |
-| `nama` | `VARCHAR(150)` | `NOT NULL` | Nama lengkap calon peserta didik |
-| `nm_panggilan` | `VARCHAR(80)` | `NULLABLE` | Nama panggilan |
-| `jns_kelamin` | `VARCHAR(20)` | `NOT NULL` | `"Laki-laki"` (`"L"`) atau `"Perempuan"` (`"P"`) |
-| `nisn` | `VARCHAR(20)` | `NULLABLE INDEX` | NISN (`"-" ` untuk PAUD/SD jika belum ada) |
-| `nik` | `VARCHAR(20)` | `NOT NULL INDEX` | NIK calon siswa (16 digit) |
-| `tmp_lahir` | `VARCHAR(100)` | `NOT NULL` | Tempat lahir |
-| `tgl_lahir` | `DATE` | `NOT NULL` | Tanggal lahir |
-| `agama` | `VARCHAR(50)` | `FK -> master_ppdb_agama.id` | Agama |
-| `anak_keberapa` | `SMALLINT` | `NULLABLE` | Anak ke- |
-| `jml_saudara` | `SMALLINT` | `NULLABLE` | Jumlah saudara kandung |
-| `kecamatan_id` | `VARCHAR(50)` | `NULLABLE` | ID/Nama Kecamatan domisili |
-| `des_kel_id` | `VARCHAR(50)` | `NULLABLE` | ID/Nama Desa/Kelurahan domisili |
-| `alamat` | `TEXT` | `NOT NULL` | Alamat lengkap tempat tinggal |
-| `rt_rw` | `VARCHAR(20)` | `NULLABLE` | RT / RW |
-| `dusun` | `VARCHAR(100)` | `NULLABLE` | Nama Dusun / Lingkungan |
-| `kode_pos` | `VARCHAR(10)` | `NULLABLE` | Kode Pos |
-| `tmp_tinggal` | `VARCHAR(100)` | `FK -> master_ppdb_tempat_tinggal.id` | Jenis tempat tinggal (`Bersama Orang Tua`, `Wali`, `Kos`, `Asrama`) |
-| `lainnya` | `VARCHAR(150)` | `NULLABLE` | Keterangan tempat tinggal lainnya |
-| `moda_transportasi` | `VARCHAR(100)` | `FK -> master_ppdb_transportasi.id` | Moda transportasi ke sekolah |
-| `nama_ayah` | `VARCHAR(150)` | `NULLABLE` | Nama lengkap Ayah kandung (alias: `nm_ayah`) |
-| `nik_ayah` | `VARCHAR(20)` | `NULLABLE` | NIK Ayah |
-| `thn_lahir_ayah` | `SMALLINT` | `NULLABLE` | Tahun lahir Ayah |
-| `pendidikan_ayah` | `VARCHAR(100)` | `FK -> master_ppdb_pendidikan.id NULLABLE` | Pendidikan terakhir Ayah |
-| `pekerjaan_ayah` | `VARCHAR(100)` | `FK -> master_ppdb_pekerjaan.id NULLABLE` | Pekerjaan Ayah |
-| `penghasilan_ayah` | `VARCHAR(100)` | `FK -> master_ppdb_penghasilan.id NULLABLE` | Rentang penghasilan Ayah |
-| `nama_ibu` | `VARCHAR(150)` | `NULLABLE` | Nama lengkap Ibu kandung (alias: `nm_ibu`) |
-| `nik_ibu` | `VARCHAR(20)` | `NULLABLE` | NIK Ibu |
-| `thn_lahir_ibu` | `SMALLINT` | `NULLABLE` | Tahun lahir Ibu |
-| `pendidikan_ibu` | `VARCHAR(100)` | `FK -> master_ppdb_pendidikan.id NULLABLE` | Pendidikan terakhir Ibu |
-| `pekerjaan_ibu` | `VARCHAR(100)` | `FK -> master_ppdb_pekerjaan.id NULLABLE` | Pekerjaan Ibu |
-| `penghasilan_ibu` | `VARCHAR(100)` | `FK -> master_ppdb_penghasilan.id NULLABLE` | Rentang penghasilan Ibu |
-| `nama_wali` | `VARCHAR(150)` | `NULLABLE` | Nama Wali (opsional) |
-| `nik_wali` | `VARCHAR(20)` | `NULLABLE` | NIK Wali |
-| `thn_lahir_wali` | `SMALLINT` | `NULLABLE` | Tahun lahir Wali |
-| `pendidikan_wali` | `VARCHAR(100)` | `NULLABLE` | Pendidikan Wali |
-| `pekerjaan_wali` | `VARCHAR(100)` | `NULLABLE` | Pekerjaan Wali |
-| `penghasilan_wali` | `VARCHAR(100)` | `NULLABLE` | Penghasilan Wali |
-| `kategori` | `VARCHAR(50)` | `NOT NULL DEFAULT 'Zonasi'` | Jalur pendaftaran (`Zonasi`, `Afirmasi`, `Perpindahan Tugas Orang Tua`, `Prestasi`, `Reguler`) |
-| `file` | `TEXT` | `NULLABLE` | File PDF berkas pendaftaran (KK, Akta Lahir, SKL/Ijazah) |
-| `status_penerimaan` | `VARCHAR(30)` | `DEFAULT 'Terdaftar'` | `"Terdaftar"`, `"Diterima"`, `"Cadangan"`, `"Ditolak"` |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-### 14.4 Kalkulasi & Manajemen Kuota PPDB (`/admin/kuota-ppdb`)
-- **File Frontend**: [`app/(admin)/admin/kuota-ppdb/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/kuota-ppdb/page.tsx)
-- **Rumus Bisnis Kuota PPDB (`Arsitektur Sistem.docx` & Frontend)**:
-  - Standar maksimal siswa per ruang kelas (`standar_maks_rombel`):
-    - **PAUD / TK**: `22` siswa/ruang
-    - **SD**: `28` siswa/ruang
-    - **SMP**: `32` siswa/ruang
-  - $\text{Total Daya Tampung} = \text{jml\_ruang\_tersedia} \times \text{standar\_maks\_rombel}$
-  - $\text{Sisa Kuota} = \text{total\_daya\_tampung} - \text{siswa\_terdaftar}$
-  - `status_kuota`:
-    - `"tersedia"` jika $\text{sisa\_kuota} > 0$
-    - `"penuh"` jika $\text{sisa\_kuota} = 0$
-    - `"over"` jika $\text{sisa\_kuota} < 0$ (Melebihi Kapasitas)
-- **Endpoint**:
-  - `GET /api/v1/admin/kuota-ppdb?jenjang=&unit_kerja_id=&status_kuota=`
-  - `POST /api/v1/admin/kuota-ppdb`
-  - `PUT /api/v1/admin/kuota-ppdb/{id}`
-  - `DELETE /api/v1/admin/kuota-ppdb/{id}`
-  - `POST /api/v1/admin/kuota-ppdb/sync` (Rekalkulasi otomatis dari tabel `sarpras_ruang` dan `ppdb_pendaftar`)
-- **Skema Tabel `kuota_ppdb`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"KTA-001"` |
-| `unit_kerja_id` | `VARCHAR(50)` | `NOT NULL UNIQUE` | ID / NPSN Sekolah |
-| `nama_sekolah` | `VARCHAR(150)` | `NOT NULL` | Nama satuan pendidikan |
-| `jenjang` | `VARCHAR(20)` | `NOT NULL` | `"PAUD"`, `"SD"`, atau `"SMP"` |
-| `jml_ruang_tersedia` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah ruang kelas layak pakai (dari `sarpras_ruang`) |
-| `standar_maks_rombel` | `INTEGER` | `NOT NULL DEFAULT 28` | `22` (PAUD), `28` (SD), `32` (SMP) |
-| `total_daya_tampung` | `INTEGER` | `NOT NULL DEFAULT 0` | `jml_ruang_tersedia * standar_maks_rombel` |
-| `siswa_terdaftar` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah pendaftar PPDB aktif |
-| `sisa_kuota` | `INTEGER` | `NOT NULL DEFAULT 0` | `total_daya_tampung - siswa_terdaftar` |
-| `status_kuota` | `VARCHAR(20)` | `NOT NULL DEFAULT 'tersedia'` | `"tersedia"`, `"penuh"`, atau `"over"` |
-| `nip`, `unit_kerja`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-## 15. Modul Profile Kelembagaan (`/admin/profile/*`)
-
-Direferensikan oleh 3 rute:
-- [`app/(admin)/admin/profile/renstra/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/profile/renstra/page.tsx) (`kategori_slug = "renstra"`)
-- [`app/(admin)/admin/profile/tugas-fungsi/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/profile/tugas-fungsi/page.tsx) (`kategori_slug = "tugas-fungsi"`)
-- [`app/(admin)/admin/profile/visi-misi/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/profile/visi-misi/page.tsx) (`kategori_slug = "visi-misi"`)
-
-### Endpoint CRUD Profile Kelembagaan
-- `GET /api/v1/admin/profile/{kategori_slug}` (`kategori_slug` $\in$ `renstra`, `tugas-fungsi`, `visi-misi`)
-- `POST /api/v1/admin/profile/{kategori_slug}`
-- `PUT /api/v1/admin/profile/{kategori_slug}/{id}`
-- `DELETE /api/v1/admin/profile/{kategori_slug}/{id}`
-
-### Skema Tabel `profile_kelembagaan`
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"PRF-REN-001"`, `"PRF-TF-001"`, `"PRF-VM-001"` |
-| `kategori_slug` | `VARCHAR(40)` | `NOT NULL INDEX` | `"renstra"`, `"tugas-fungsi"`, atau `"visi-misi"` |
-| `uraian` | `VARCHAR(255)` | `NOT NULL` | Judul dokumen / uraian |
-| `tahun` | `SMALLINT` | `NULLABLE` | Tahun penetapan (wajib untuk `renstra`, opsional untuk `tugas-fungsi` & `visi-misi`) |
-| `file` | `TEXT` | `NOT NULL` | File PDF / Gambar dokumen resmi |
-| `type` | `VARCHAR(30)` | `DEFAULT 'pdf'` | Tipe berkas (`pdf` / `image`) |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-## 16. Modul Data Master (`/admin/master/*`)
-
-Seluruh modul Data Master digunakan sebagai tabel referensi (*foreign key*) bagi modul-modul operasional.
-
-### 16.1 Master Auth: Menu, Group & Matriks Akses, Registrasi ASN (`/admin/master/auth/*`)
-Skema tabel database telah dijabarkan di **Bagian 2.1** (`auth_menus`, `auth_groups`, `auth_group_permissions`, `users`/`auth_asn_registrations`). Berikut kontrak endpoint CRUD-nya:
-
-#### A. Manajemen Menu (`/admin/master/auth/menu` — [`menu-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/auth/menu/menu-management.tsx))
-- `GET /api/v1/admin/master/auth/menu` — Mengembalikan pohon menu berjenjang (`children: MenuNode[]`) terurut berdasarkan `index ASC`.
-- `POST /api/v1/admin/master/auth/menu`
-  - Payload: `{ "parent_id": null, "title": "Sarana & Prasarana", "icon": "Building2", "path": "/admin/sarpras", "index": 3 }`
-- `PUT /api/v1/admin/master/auth/menu/{id}`
-- `DELETE /api/v1/admin/master/auth/menu/{id}` (Menghapus menu beserta sub-menu & relasi permission-nya).
-
-#### B. Manajemen Group & Matriks Hak Akses (`/admin/master/auth/group` — [`group-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/auth/group/group-management.tsx))
-- `GET /api/v1/admin/master/auth/group` — Mengembalikan daftar `groups` beserta jumlah menu yang diizinkan dan ringkasan matriksnya.
-- `POST /api/v1/admin/master/auth/group`
-  - Payload: `{ "title": "Operator Satuan Pendidikan", "level": 2 }` (`level`: `1` = Semua Satuan Pendidikan, `2` = Unit Pendidikan Pengguna).
-- `PUT /api/v1/admin/master/auth/group/{id}`
-- `DELETE /api/v1/admin/master/auth/group/{id}`
-- `GET /api/v1/admin/master/auth/group/{group_id}/permissions` — Mengembalikan daftar seluruh `menu_id` dengan boolean `{ create, read, update, delete }`.
-- `PUT /api/v1/admin/master/auth/group/{group_id}/permissions` — Menyimpan perubahan matriks hak akses secara *bulk upsert*:
-```json
-{
-  "permissions": [
-    { "menu_id": "MNU-001", "create": true, "read": true, "update": true, "delete": false },
-    { "menu_id": "MNU-002", "create": false, "read": true, "update": false, "delete": false }
-  ]
-}
-```
-
-#### C. Registrasi Pengguna ASN (`/admin/master/auth/registrasi` — [`registration-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/auth/registrasi/registration-management.tsx))
-- `GET /api/v1/admin/master/auth/registrasi?search=&group_id=&unit=` — Mengembalikan daftar registrasi ASN beserta objek SIMPEG (`name`, `unit`, `position`) dan `group` (`title`, `level`).
-- `POST /api/v1/admin/master/auth/registrasi`
-  - Payload: `{ "nip": "198208102008011009", "group_id": "GRP-003", "password": " OptionalDefaultNIP" }`
-- `PUT /api/v1/admin/master/auth/registrasi/{id}`
-  - Payload: `{ "nip": "198208102008011009", "group_id": "GRP-002" }`
-- `DELETE /api/v1/admin/master/auth/registrasi/{id}`
-
----
-
-### 16.2 Master Siswa (`/admin/master/siswa`)
-- **File Frontend**: [`app/(admin)/admin/master/siswa/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/siswa/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/master/siswa` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Skema Tabel `master_siswa`**:
-  - Mencakup 7 kolom ringkas yang tampil di UI (`id`, `nama`, `nisn`, `nik`, `jns_kelamin`, `kelas_id`, `tgl_lahir`, `alamat`) **plus** kolom opsional biodata lengkap orang tua/wali seperti pada tabel `ppdb_pendaftar` agar proses **Promosi Calon Siswa PPDB Diterima $\rightarrow$ Master Siswa Aktif** dapat dilakukan secara otomatis (`POST /api/v1/admin/master/siswa/import-from-ppdb`).
-
-| Kolom Inti UI | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"SIS-001"` |
-| `nama` | `VARCHAR(150)` | `NOT NULL` | Nama lengkap peserta didik |
-| `nisn` | `VARCHAR(20)` | `UNIQUE NOT NULL` | NISN (10 digit) |
-| `nik` | `VARCHAR(20)` | `UNIQUE NOT NULL` | NIK Kependudukan (16 digit) |
-| `jns_kelamin` | `VARCHAR(20)` | `NOT NULL` | `"Laki-laki"` atau `"Perempuan"` |
-| `kelas_id` | `VARCHAR(50)` | `FK -> master_jurnal_kelas.id` | Tingkat kelas aktif (`Kelas I` s/d `Kelas IX`, `Kelompok A/B`) |
-| `tmp_lahir` | `VARCHAR(100)` | `NULLABLE` | Tempat lahir |
-| `tgl_lahir` | `DATE` | `NOT NULL` | Tanggal lahir |
-| `agama` | `VARCHAR(50)` | `NULLABLE` | Agama |
-| `alamat` | `TEXT` | `NOT NULL` | Alamat domisili siswa |
-| `nama_ayah`, `nama_ibu`, `nama_wali`, `file` | `VARCHAR / TEXT` | `NULLABLE` | Kolom pelengkap dari kontrak arsitektur |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-### 16.3 Master Sekolah per Jenjang (`/admin/master/sekolah/{sd|smp|tk|pkbm}`)
-Direferensikan oleh:
-- [`app/(admin)/admin/master/sekolah/sd/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/sekolah/sd/page.tsx)
-- [`app/(admin)/admin/master/sekolah/smp/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/sekolah/smp/page.tsx)
-- [`app/(admin)/admin/master/sekolah/tk/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/sekolah/tk/page.tsx)
-- [`app/(admin)/admin/master/sekolah/pkbm/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/sekolah/pkbm/page.tsx)
-
-Keempat halaman ini menggunakan komponen manajemen direktori sekolah yang terintegrasi langsung dengan tabel **`schools`** (lihat detail lengkap skema tabel `schools` pada **Bagian 17.4 Direktori Sekolah**), dengan filter otomatis `level`:
-- `/admin/master/sekolah/sd` $\rightarrow$ `GET /api/v1/admin/sekolah?level=SD`
-- `/admin/master/sekolah/smp` $\rightarrow$ `GET /api/v1/admin/sekolah?level=SMP`
-- `/admin/master/sekolah/tk` $\rightarrow$ `GET /api/v1/admin/sekolah?level=PAUD/TK`
-- `/admin/master/sekolah/pkbm` $\rightarrow$ `GET /api/v1/admin/sekolah?level=PKBM`
-
----
-
-### 16.4 Master Usulan (`/admin/master/usulan/*`)
-Direferensikan oleh [`app/(admin)/admin/master/usulan/master-usulan-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/usulan/master-usulan-management.tsx):
-1. **Master Triwulan (`/admin/master/usulan/triwulan`)**
-   - **Endpoint**: `/api/v1/admin/master/usulan/triwulan` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-   - **Tabel `master_usulan_triwulan`**: `id` (`VARCHAR(36)` PK, contoh `"TW-01"`), `uraian` (`VARCHAR(150)` NOT NULL, contoh `"Triwulan I (Januari - Maret)"`), `created_at`, `created_by`.
-2. **Master Jenis Penerima (`/admin/master/usulan/jenis-penerima`)**
-   - **Endpoint**: `/api/v1/admin/master/usulan/jenis-penerima` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-   - **Tabel `master_usulan_jenis_penerima`**: `id` (`VARCHAR(36)` PK, contoh `"JP-01"`), `uraian` (`VARCHAR(150)` NOT NULL, contoh `"Tunjangan Profesi Guru (TPG) Sertifikasi"`), `created_at`, `created_by`.
-3. **Master Kelas Penerima (`/admin/master/usulan/kelas-penerima`)**
-   - **Endpoint**: `/api/v1/admin/master/usulan/kelas-penerima` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-   - **Tabel `master_usulan_kelas_penerima`**: `id` (`VARCHAR(36)` PK, contoh `"KP-01"`), `uraian` (`VARCHAR(150)` NOT NULL, contoh `"Golongan IV / Pembina (ASN Senior)"`), `created_at`, `created_by`.
-
----
-
-### 16.5 Master Jurnal (`/admin/master/jurnal/*`)
-1. **Master Bahan Ajar (`/admin/master/jurnal/bahan-ajar`)**
-   - **Endpoint**: `/api/v1/admin/master/jurnal/bahan-ajar`
-   - **Tabel `master_jurnal_bahan_ajar`**: `id` (`VARCHAR(36)` PK), `uraian` (`VARCHAR(200)` NOT NULL), `nip`, `unit_kerja`, `created_by`, `created_at`.
-2. **Master Materi Ajar (`/admin/master/jurnal/materi-ajar`)**
-   - **Endpoint**: `/api/v1/admin/master/jurnal/materi-ajar`
-   - **Tabel `master_jurnal_materi_ajar`**: `id` (`VARCHAR(36)` PK), `uraian` (`VARCHAR(200)` NOT NULL), `nip`, `unit_kerja`, `created_by`, `created_at`.
-3. **Master Kelas (`/admin/master/jurnal/kelas`)**
-   - **Endpoint**: `/api/v1/admin/master/jurnal/kelas`
-   - **Tabel `master_jurnal_kelas`**: `id` (`VARCHAR(36)` PK), `uraian` (`VARCHAR(150)` NOT NULL, contoh `"Kelas I (Satu) - Fase A"`), `nip`, `unit_kerja`, `created_by`, `created_at`.
-4. **Master Mata Pelajaran (`/admin/master/jurnal/mata-pelajaran`)**
-   - **Endpoint**: `/api/v1/admin/master/jurnal/mata-pelajaran`
-   - **Tabel `master_jurnal_mata_pelajaran`**:
-     - `id` (`VARCHAR(36)` PK)
-     - `kelas_id` (`VARCHAR(50)` FK -> `master_jurnal_kelas.id`, NOT NULL)
-     - `uraian` (`VARCHAR(150)` NOT NULL, contoh `"Matematika"`)
-     - `nip`, `unit_kerja`, `created_by`, `created_at`.
-
----
-
-### 16.6 Master Jenjang (`/admin/master/jenjang`)
-- **Penjelasan (Sesuai `Arsitektur Sistem.docx`)**: Modul ini menyajikan daftar data tingkat jenjang pendidikan mulai dari kelas 1 Sekolah Dasar (SD) hingga kelas 9 Sekolah Menengah Pertama (SMP).
-- **File Frontend**: [`app/(admin)/admin/master/jenjang/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/master/jenjang/page.tsx)
-- **Endpoint CRUD**: `/api/v1/admin/master/jenjang` (`GET`, `POST`, `PUT /{id}`, `DELETE /{id}`)
-- **Form (Contract API Sesuai Dokumen Arsitektur)**:
+### 1.1 Standar Data Master (Master Lookup Tables)
+Berdasarkan spesifikasi resmi `Arsitektur Sistem (1).docx`, seluruh tabel Data Master (seperti *Master Jenjang, Triwulan, Jenis Penerima, Kelas Penerima, Bahan Ajar, Materi Ajar, Kelas, Agama, Tempat Tinggal, Transportasi, Pendidikan, Pekerjaan, Penghasilan, Bangunan, Kepemilikan, Sumber Dana, Kondisi Alat, Jenis Bantuan, BK Jenis Layanan, BK Kegiatan Layanan, Model Pembelajaran, Pendampingan, Tugas, Kategori*) menggunakan skema standar:
 ```json
 {
   "id": "string, <generate otomatis | backend>",
-  "title": "string <input>, (nama jenjang, contoh: '1', '6', '7', '9')",
-  "desc": "string <input>, (penjelasan singkat jenjang)",
+  "title": "string <input>",
+  "desc": "string <input>",
   "created_at": "date, <generate otomatis | backend>",
   "created_by": "string, <generate otomatis | backend>"
 }
 ```
-- **Tabel Basis Data `master_jenjang`**:
-  - `id` (`VARCHAR(50)` PK)
-  - `uraian` / `title` (`VARCHAR(100)` NOT NULL: `"1"` s/d `"9"`)
-  - `keterangan` / `desc` (`TEXT` NULL)
-  - `created_by` (`VARCHAR(100)` NULL)
-  - `created_at` (`DATETIME` NOT NULL)
-  - `updated_at` (`DATETIME` NOT NULL)
-- **Contoh Seed Data Resmi (`Arsitektur Sistem.docx`)**:
-  - `1`: Tingkatan jenjang awal kelas 1 pada jenjang Sekolah Dasar (SD).
-  - `6`: Tingkatan jenjang akhir kelas 6 pada jenjang Sekolah Dasar (SD).
-  - `7`: Tingkatan jenjang awal kelas 7 pada jenjang Sekolah Menengah Pertama (SMP).
-  - `9`: Tingkatan jenjang akhir kelas 9 pada jenjang Sekolah Menengah Pertama (SMP).
+* **Kesesuaian Database MySQL**: Pada basis data MySQL `edusetara`, field `title` berkorespondensi dengan kolom `uraian`, dan `desc` berkorespondensi dengan kolom `keterangan`. Backend FastAPI menggunakan SQLAlchemy `synonym` sehingga endpoint secara transparan menerima dan menghasilkan format JSON resmi `title` & `desc`.
+* **Field Terlarang / Halusinasi**: Tidak ada kolom `kode`, `nip_pembina`, `bidang_pembina`, maupun kategori buatan di tabel Master Lookup ini.
 
----
+### 1.2 Penanganan Field Otomatis Backend vs Input Pengguna
+Field yang diberi penanda `<generate otomatis | backend>` seperti:
+* `id`: Dihasilkan otomatis oleh database / backend (UUID / autoincrement).
+* `nip` & `unit_kerja`: Untuk modul operasional (Sarpras, Jurnal, Usulan, Rombel, dll.), field ini **TIDAK DIINPUT OLEH PENGGUNA**. Backend menginjeksi nilainya secara otomatis dari token sesi ASN yang sedang login (`get_current_active_user`).
+* `created_at` & `created_by`: Diisi otomatis oleh sistem backend.
 
-### 16.7 Master PPDB (`/admin/master/ppdb/*`)
-Seluruh 6 submodul Master PPDB memiliki struktur tabel standar (`id`, `uraian`, `nip`, `unit_kerja`, `created_by`, `created_at`):
-| Submodul | Route Frontend | Endpoint API | Nama Tabel PostgreSQL | Contoh Seed Data (`uraian`) |
-| :--- | :--- | :--- | :--- | :--- |
-| **Agama** | `/admin/master/ppdb/agama` | `/api/v1/admin/master/ppdb/agama` | `master_ppdb_agama` | `Islam`, `Kristen Protestan`, `Katolik`, `Hindu`, `Buddha`, `Konghucu` |
-| **Tempat Tinggal** | `/admin/master/ppdb/tempat-tinggal` | `/api/v1/admin/master/ppdb/tempat-tinggal` | `master_ppdb_tempat_tinggal` | `Bersama Orang Tua`, `Wali / Kerabat`, `Kos / Kontrakan`, `Asrama / Panti Asuhan` |
-| **Moda Transportasi** | `/admin/master/ppdb/transportasi` | `/api/v1/admin/master/ppdb/transportasi` | `master_ppdb_transportasi` | `Jalan Kaki`, `Sepeda`, `Kendaraan Pribadi / Antar Jemput`, `Angkutan Umum` |
-| **Pendidikan** | `/admin/master/ppdb/pendidikan` | `/api/v1/admin/master/ppdb/pendidikan` | `master_ppdb_pendidikan` | `SD / Sederajat`, `SMP / Sederajat`, `SMA / SMK / Sederajat`, `D3 / D4 / S1`, `S2 / S3` |
-| **Pekerjaan** | `/admin/master/ppdb/pekerjaan` | `/api/v1/admin/master/ppdb/pekerjaan` | `master_ppdb_pekerjaan` | `PNS / TNI / Polri`, `Karyawan Swasta`, `Wiraswasta / Pedagang`, `Petani / Pekebun`, `Nelayan` |
-| **Penghasilan** | `/admin/master/ppdb/penghasilan` | `/api/v1/admin/master/ppdb/penghasilan` | `master_ppdb_penghasilan` | `< Rp 1.000.000`, `Rp 1.000.000 - Rp 2.500.000`, `Rp 2.500.000 - Rp 5.000.000`, `> Rp 5.000.000` |
+### 1.3 Format Standar Respons API
+Semua endpoint REST API FastAPI menggunakan format envelope standar:
 
----
-
-### 16.8 Master Sarpras (`/admin/master/sarpras/*`)
-Seluruh 5 submodul Master Sarpras memiliki struktur tabel standar (`id`, `uraian`, `nip`, `unit_kerja`, `created_by`, `created_at`):
-| Submodul | Route Frontend | Endpoint API | Nama Tabel PostgreSQL | Seed Data Wajib (`Arsitektur Sistem.docx`) |
-| :--- | :--- | :--- | :--- | :--- |
-| **Kondisi Bangunan** | `/admin/master/sarpras/bangunan` | `/api/v1/admin/master/sarpras/bangunan` | `master_sarpras_bangunan` | `Baik`, `Rusak Ringan`, `Rusak Sedang`, `Rusak Berat` |
-| **Kepemilikan** | `/admin/master/sarpras/kepemilikan` | `/api/v1/admin/master/sarpras/kepemilikan` | `master_sarpras_kepemilikan` | `Milik`, `Sewa`, `Pinjam`, `Bukan Milik` |
-| **Sumber Dana** | `/admin/master/sarpras/sumber-dana` | `/api/v1/admin/master/sarpras/sumber-dana` | `master_sarpras_sumber_dana` | `DAU`, `DAK`, `APBD`, `APBN`, `BOS`, `Lainnya` |
-| **Kondisi Alat** | `/admin/master/sarpras/kondisi-alat` | `/api/v1/admin/master/sarpras/kondisi-alat` | `master_sarpras_kondisi_alat` | `Baik`, `Rusak Ringan`, `Rusak Sedang`, `Rusak Berat` |
-| **Jenis Bantuan** | `/admin/master/sarpras/jenis-bantuan` | `/api/v1/admin/master/sarpras/jenis-bantuan` | `master_sarpras_jenis_bantuan` | `Rehabilitasi Ruang Kelas`, `Pembangunan RKB`, `Bantuan TIK`, `Pengadaan Mobiler` |
-
----
-
-### 16.9–16.14 Master Pelengkap Lainnya (`/admin/master/*`)
-Enam tabel master pelengkap berikut juga memiliki struktur kolom standar (`id`, `uraian`, `nip`, `unit_kerja`, `created_by`, `created_at`):
-| No | Submodul | Route Frontend | Endpoint API | Nama Tabel PostgreSQL | Contoh Seed Data (`uraian`) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **16.9** | **BK Jenis Layanan** | `/admin/master/bk-jenis-layanan` | `/api/v1/admin/master/bk-jenis-layanan` | `master_bk_jenis_layanan` | `Layanan Orientasi`, `Konseling Perorangan`, `Bimbingan Kelompok`, `Layanan Mediasi` |
-| **16.10** | **BK Kegiatan Layanan** | `/admin/master/bk-kegiatan-layanan` | `/api/v1/admin/master/bk-kegiatan-layanan` | `master_bk_kegiatan_layanan` | `Asesmen Diagnostik Non-Kognitif`, `Konseling Regulasi Emosi`, `Konsultasi Karir`, `Home Visit` |
-| **16.11** | **Model Pembelajaran** | `/admin/master/model-pembelajaran` | `/api/v1/admin/master/model-pembelajaran` | `master_model_pembelajaran` | `Problem Based Learning (PBL)`, `Project Based Learning (PjBL)`, `Discovery Learning`, `Diferensiasi` |
-| **16.12** | **Pendampingan** | `/admin/master/pendampingan` | `/api/v1/admin/master/pendampingan` | `master_pendampingan` | `Pendampingan Perencanaan Program`, `Supervisi Akademik`, `Supervisi Manajerial`, `Evaluasi Kinerja` |
-| **16.13** | **Tugas Pokok** | `/admin/master/tugas` | `/api/v1/admin/master/tugas` | `master_tugas` | `Manajerial Satuan Pendidikan`, `Supervisi Guru dan Tendik`, `Pengembangan Kewirausahaan` |
-| **16.14** | **Kategori Berkas** | `/admin/master/kategori` | `/api/v1/admin/master/kategori` | `master_kategori` | `Laporan BOSP (BKU & Pajak)`, `SK Pembagian Tugas`, `Sertifikat Pendidik`, `Rekomendasi Dinas` |
-
-
----
-
-## 17. Modul Publish / Portal Publik (`/admin/*` & `/api/v1/public/*`)
-
-Bagian ini mengatur konten yang dikelola melalui menu **Publish** di panel Admin dan ditampilkan pada halaman publik (`app/(publish)/**`). Setiap modul menyediakan:
-- **Endpoint Admin (`/api/v1/admin/...`)**: Memerlukan JWT Auth & Permission RBAC.
-- **Endpoint Publik (`/api/v1/public/...`)**: Tanpa Auth (`GET` untuk pembacaan portal publik, serta `POST /api/v1/public/kontak` untuk pengiriman pesan pengunjung).
-
----
-
-### 17.1 Berita (`/admin/berita` & `/berita`)
-- **File Frontend**:
-  - Admin: [`app/(admin)/admin/berita/news-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/berita/news-management.tsx)
-  - Publik: [`app/(publish)/berita/news-data.ts`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/berita/news-data.ts), [`app/(publish)/berita/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/berita/page.tsx), [`app/(publish)/berita/[slug]/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/berita/%5Bslug%5D/page.tsx)
-- **Endpoint**:
-  - Admin: `GET /api/v1/admin/berita`, `POST /api/v1/admin/berita`, `PUT /api/v1/admin/berita/{id}`, `DELETE /api/v1/admin/berita/{id}`
-  - Publik: `GET /api/v1/public/berita?category=&search=&featured=`, `GET /api/v1/public/berita/{slug}`
-- **Skema Tabel `publish_news` (Kompatibel Penuh dengan Admin RichText, Portal Publik, & Kontrak Legacy)**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | UUID / Kode Berita |
-| `slug` | `VARCHAR(255)` | `UNIQUE NOT NULL INDEX` | URL slug otomatis/manual dari `title` |
-| `title` | `VARCHAR(255)` | `NOT NULL` | Judul berita (alias Pydantic legacy: `judul`) |
-| `category` | `VARCHAR(80)` | `NOT NULL INDEX` | `"Program Prioritas"`, `"Kurikulum & Pembelajaran"`, `"Prestasi Siswa"`, `"Kebudayaan"`, `"Sarana Prasarana"` |
-| `author` | `VARCHAR(120)` | `NOT NULL` | Nama penulis / redaktur (alias legacy: `sumber`) |
-| `author_role` | `VARCHAR(120)` | `DEFAULT 'Tim Humas Disdikbud'` | Jabatan penulis di halaman detail (`authorRole`) |
-| `excerpt` | `TEXT` | `NOT NULL` | Ringkasan berita di kartu berita (alias legacy: `deskripsi`) |
-| `content` | `TEXT` | `NOT NULL` | Konten artikel HTML dari RichTextEditor (alias legacy: `isi`) |
-| `lead` | `TEXT` | `NULLABLE` | Paragraf pembuka halaman detail (otomatis diekstrak dari `excerpt` jika kosong) |
-| `paragraphs` | `JSONB` | `DEFAULT '[]'` | Array paragraf teks (opsional untuk kompatibilitas `news-data.ts`) |
-| `quote` | `JSONB` | `NULLABLE` | Objek `{ "text": "...", "speaker": "...", "role": "..." }` |
-| `highlights` | `JSONB` | `DEFAULT '[]'` | Array poin sorotan utama (`string[]`) |
-| `tags` | `JSONB` | `DEFAULT '[]'` | Array tag topik (`string[]`) |
-| `image` | `TEXT` | `NOT NULL` | URL gambar sampul utama (alias legacy: `foto`) |
-| `image_caption` | `VARCHAR(255)` | `NULLABLE` | Keterangan foto (`imageCaption`) |
-| `read_time` | `VARCHAR(40)` | `DEFAULT '4 menit baca'` | Estimasi waktu baca (`readTime`) |
-| `status` | `VARCHAR(20)` | `NOT NULL DEFAULT 'Terbit'` | `"Terbit"` atau `"Draft"` |
-| `featured` | `BOOLEAN` | `NOT NULL DEFAULT FALSE` | Berita utama / sorotan (`true` / `false`) |
-| `views_count` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah pembaca |
-| `date` | `VARCHAR(40)` | `NOT NULL` | Tanggal publikasi terformat / ISO (`published_at`) |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-### 17.2 Pengumuman (`/admin/pengumuman` & `/pengumuman`)
-- **File Frontend**:
-  - Admin: [`app/(admin)/admin/pengumuman/announcements-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/pengumuman/announcements-management.tsx)
-  - Publik: [`app/(publish)/pengumuman/announcements-data.ts`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/pengumuman/announcements-data.ts), [`app/(publish)/pengumuman/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/pengumuman/page.tsx)
-- **Endpoint**:
-  - Admin: `GET /api/v1/admin/pengumuman`, `POST /api/v1/admin/pengumuman`, `PUT /api/v1/admin/pengumuman/{id}`, `DELETE /api/v1/admin/pengumuman/{id}`
-  - Publik: `GET /api/v1/public/pengumuman?category=&important=&search=`, `GET /api/v1/public/pengumuman/{id}`
-- **Skema Tabel `publish_announcements`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"PGM-2026-014"` |
-| `number` | `VARCHAR(100)` | `NOT NULL` | Nomor surat edaran resmi (contoh: `"800/142/DISDIKBUD/2026"`) |
-| `title` | `VARCHAR(255)` | `NOT NULL` | Judul pengumuman |
-| `category` | `VARCHAR(80)` | `NOT NULL INDEX` | `"Akademik & ANBK"`, `"Kepegawaian / PPPK"`, `"Pendataan & Dapodik"`, `"Kebudayaan & Event"` |
-| `summary` | `TEXT` | `NOT NULL` | Ringkasan / isi pengumuman |
-| `target_audience` | `VARCHAR(150)` | `NOT NULL` | Sasaran penerima (`targetAudience`, contoh: `"Kepala SD & SMP se-Konawe Selatan"`) |
-| `date` | `VARCHAR(50)` | `NOT NULL` | Tanggal surat diterbitkan |
-| `deadline` | `VARCHAR(50)` | `NOT NULL` | Batas waktu tindak lanjut |
-| `attachment_name` | `VARCHAR(255)` | `NULLABLE` | Nama dokumen lampiran PDF (`attachmentName`) |
-| `attachment_url` | `TEXT` | `NULLABLE` | URL unduhan file PDF lampiran (`attachmentUrl`) |
-| `attachment_size` | `VARCHAR(30)` | `DEFAULT '1.4 MB'` | Ukuran berkas (`attachmentSize`) |
-| `signatory` | `VARCHAR(150)` | `DEFAULT 'Kepala Dinas Pendidikan dan Kebudayaan'` | Pejabat penandatangan |
-| `key_points` | `JSONB` | `DEFAULT '[]'` | Array poin penting (`keyPoints: string[]`) |
-| `important` | `BOOLEAN` | `NOT NULL DEFAULT FALSE` | Penanda pengumuman prioritas (`true` / `false`) |
-| `status` | `VARCHAR(20)` | `NOT NULL DEFAULT 'Aktif'` | `"Aktif"`, `"Draft"`, atau `"Selesai"` |
-| `nip`, `unit_kerja`, `unit_kerja_id`, `created_by`, `created_at`, `updated_at` | *AuditScopeMixin* | Otomatis | Diisi otomatis dari session |
-
----
-
-### 17.3 Pendidikan per Jenjang (`/admin/pendidikan` & `/pendidikan`)
-- **File Frontend**: [`app/(admin)/admin/pendidikan/education-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/pendidikan/education-management.tsx) & [`app/(publish)/pendidikan/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/pendidikan/page.tsx)
-- **Endpoint**:
-  - Admin: `GET /api/v1/admin/pendidikan`, `POST /api/v1/admin/pendidikan`, `PUT /api/v1/admin/pendidikan/{id}`, `DELETE /api/v1/admin/pendidikan/{id}`
-  - Publik: `GET /api/v1/public/pendidikan`
-- **Skema Tabel `publish_education_levels`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"paud"`, `"sd"`, `"smp"`, `"pkbm"` |
-| `code` | `VARCHAR(30)` | `NOT NULL` | Kode singkat (`"PAUD / TK"`, `"SD"`, `"SMP"`, `"PKBM"`) |
-| `title` | `VARCHAR(150)` | `NOT NULL` | Nama lengkap jenjang layanan |
-| `age_range` | `VARCHAR(60)` | `NOT NULL` | Rentang usia (`ageRange`, contoh: `"Usia 7 - 12 Tahun"`) |
-| `schools_count` | `VARCHAR(40)` | `NOT NULL` | Jumlah sekolah (`schoolsCount`, contoh: `"342 Sekolah"`) |
-| `students_count` | `VARCHAR(40)` | `NOT NULL` | Jumlah peserta didik (`studentsCount`) |
-| `teachers_count` | `VARCHAR(40)` | `NOT NULL` | Jumlah pendidik (`teachersCount`) |
-| `lead_division` | `VARCHAR(150)` | `NOT NULL` | Bidang penanggung jawab (`leadDivision`) |
-| `description` | `TEXT` | `NOT NULL` | Deskripsi layanan pendidikan |
-| `programs` | `JSONB` | `DEFAULT '[]'` | Daftar program unggulan (`string[]` atau dipisah baris di UI) |
-| `status` | `VARCHAR(20)` | `DEFAULT 'Aktif'` | `"Aktif"` atau `"Draft"` |
-| `created_at`, `updated_at` | `TIMESTAMPTZ` | Otomatis | Waktu pembaruan |
-
----
-
-### 17.4 Direktori Sekolah (`/admin/sekolah`, `/admin/master/sekolah/*` & `/sekolah`)
-- **File Frontend**:
-  - Admin: [`app/(admin)/admin/sekolah/schools-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/sekolah/schools-management.tsx)
-  - Publik: [`app/(publish)/sekolah/schools-data.ts`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/sekolah/schools-data.ts), [`app/(publish)/sekolah/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/sekolah/page.tsx), [`app/(publish)/sekolah/[npsn]/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/sekolah/%5Bnpsn%5D/page.tsx)
-- **Endpoint**:
-  - Admin: `GET /api/v1/admin/sekolah?level=&status=&accreditation=&district=&search=`, `POST /api/v1/admin/sekolah`, `PUT /api/v1/admin/sekolah/{npsn}`, `DELETE /api/v1/admin/sekolah/{npsn}`
-  - Publik: `GET /api/v1/public/sekolah`, `GET /api/v1/public/sekolah/{npsn}`
-- **Skema Tabel `schools`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `npsn` | `VARCHAR(20)` | `PRIMARY KEY` | Nomor Pokok Sekolah Nasional (8 digit, contoh: `"40401821"`) |
-| `name` | `VARCHAR(200)` | `NOT NULL INDEX` | Nama satuan pendidikan |
-| `level` | `VARCHAR(30)` | `NOT NULL INDEX` | `"PAUD/TK"`, `"SD"`, `"SMP"`, atau `"PKBM"` |
-| `status` | `VARCHAR(20)` | `NOT NULL INDEX` | `"Negeri"` atau `"Swasta"` |
-| `accreditation` | `VARCHAR(5)` | `NOT NULL` | `"A"`, `"B"`, `"C"`, atau `"TT"` |
-| `district` | `VARCHAR(100)` | `NOT NULL INDEX` | Kecamatan (25 Kecamatan di Konawe Selatan) |
-| `village` | `VARCHAR(100)` | `NULLABLE` | Desa / Kelurahan |
-| `address` | `TEXT` | `NOT NULL` | Alamat lengkap jalan |
-| `postal_code` | `VARCHAR(10)` | `NULLABLE` | Kode pos (`postalCode`) |
-| `principal` | `VARCHAR(150)` | `NOT NULL` | Nama Kepala Sekolah / Ketua PKBM |
-| `operator_name` | `VARCHAR(150)` | `NULLABLE` | Nama Operator Dapodik (`operatorName`) |
-| `curriculum` | `VARCHAR(100)` | `DEFAULT 'Kurikulum Merdeka'` | Kurikulum yang digunakan |
-| `students` | `INTEGER` | `NOT NULL DEFAULT 0` | Total peserta didik |
-| `teachers` | `INTEGER` | `NOT NULL DEFAULT 0` | Total guru & tendik |
-| `rombel` | `INTEGER` | `NOT NULL DEFAULT 0` | Total rombongan belajar |
-| `classrooms` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah ruang kelas |
-| `laboratories` | `INTEGER` | `NOT NULL DEFAULT 0` | Jumlah laboratorium |
-| `library_count` | `INTEGER` | `NOT NULL DEFAULT 1` | Jumlah perpustakaan (`libraryCount`) |
-| `land_area` | `VARCHAR(50)` | `NULLABLE` | Luas tanah (`landArea`, contoh: `"12.500 m²"`) |
-| `building_area` | `VARCHAR(50)` | `NULLABLE` | Luas bangunan (`buildingArea`) |
-| `electricity` | `VARCHAR(50)` | `DEFAULT 'PLN'` | Sumber listrik |
-| `internet_provider` | `VARCHAR(100)` | `NULLABLE` | Layanan internet (`internetProvider`) |
-| `phone` | `VARCHAR(50)` | `NOT NULL` | Nomor telepon / kontak |
-| `email` | `VARCHAR(150)` | `NOT NULL` | Email resmi sekolah |
-| `website` | `VARCHAR(200)` | `NULLABLE` | Website sekolah |
-| `latitude` | `NUMERIC(10,7)` | `NULLABLE` | Titik koordinat lintang |
-| `longitude` | `NUMERIC(10,7)` | `NULLABLE` | Titik koordinat bujur |
-| `image` | `TEXT` | `NULLABLE` | Foto profil sekolah |
-| `description` | `TEXT` | `NULLABLE` | Deskripsi profil sekolah |
-| `programs` | `JSONB` | `DEFAULT '[]'` | Program unggulan (`string[]`) |
-| `extracurriculars` | `JSONB` | `DEFAULT '[]'` | Daftar ekstrakurikuler (`string[]`) |
-| `facilities` | `JSONB` | `DEFAULT '[]'` | Daftar fasilitas (`string[]`) |
-| `achievements` | `JSONB` | `DEFAULT '[]'` | Daftar prestasi sekolah (`string[]`) |
-| `created_at`, `updated_at` | `TIMESTAMPTZ` | Otomatis | Waktu pembaruan |
-
----
-
-### 17.5 Kebudayaan (`/admin/kebudayaan` & `/kebudayaan`)
-- **File Frontend**: [`app/(admin)/admin/kebudayaan/culture-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/kebudayaan/culture-management.tsx) & [`app/(publish)/kebudayaan/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/kebudayaan/page.tsx)
-- **Endpoint**:
-  - Admin: `GET /api/v1/admin/kebudayaan`, `POST /api/v1/admin/kebudayaan`, `PUT /api/v1/admin/kebudayaan/{id}`, `DELETE /api/v1/admin/kebudayaan/{id}`
-  - Publik: `GET /api/v1/public/kebudayaan?category=&search=`
-- **Skema Tabel `publish_culture_items`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"BUD-001"` |
-| `title` | `VARCHAR(200)` | `NOT NULL` | Nama objek budaya / cagar budaya / sanggar / festival |
-| `category` | `VARCHAR(80)` | `NOT NULL INDEX` | `"Warisan Budaya Takbenda"`, `"Cagar Budaya"`, `"Sanggar Seni"`, `"Agenda & Festival"`, `"Bahasa & Aksara Daerah"` |
-| `regNumber` | `VARCHAR(100)` | `NOT NULL` | Nomor registrasi / SK penetapan (`reg_number`) |
-| `district` | `VARCHAR(100)` | `NOT NULL` | Kecamatan lokasi / sebaran |
-| `custodian` | `VARCHAR(150)` | `NOT NULL` | Pengelola / maestro / komunitas pelestari |
-| `description` | `TEXT` | `NOT NULL` | Deskripsi sejarah dan nilai budaya |
-| `scheduleOrCondition` | `VARCHAR(150)` | `NULLABLE` | Jadwal pelaksanaan atau kondisi keterawatan (`schedule_or_condition`) |
-| `image` | `TEXT` | `NULLABLE` | Foto dokumentasi budaya |
-| `status` | `VARCHAR(40)` | `DEFAULT 'Terdaftar Resmi'` | `"Terdaftar Resmi"`, `"Proses Verifikasi"`, atau `"Aktif"` |
-| `created_at`, `updated_at` | `TIMESTAMPTZ` | Otomatis | Waktu pembaruan |
-
----
-
-### 17.6 Layanan Publik (`/admin/layanan` & `/layanan`)
-- **File Frontend**: [`app/(admin)/admin/layanan/services-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/layanan/services-management.tsx) & [`app/(publish)/layanan/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/layanan/page.tsx)
-- **Endpoint**:
-  - Admin: `GET /api/v1/admin/layanan`, `POST /api/v1/admin/layanan`, `PUT /api/v1/admin/layanan/{id}`, `DELETE /api/v1/admin/layanan/{id}`
-  - Publik: `GET /api/v1/public/layanan?category=&search=`
-- **Skema Tabel `publish_services`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"LAY-001"` |
-| `title` | `VARCHAR(200)` | `NOT NULL` | Nama standar pelayanan publik |
-| `category` | `VARCHAR(80)` | `NOT NULL INDEX` | `"Kesiswaan & Ijazah"`, `"PTK & Kepegawaian"`, `"Kelembagaan & Perizinan"`, `"Kebudayaan"`, `"Bantuan & Beasiswa"` |
-| `sla` | `VARCHAR(80)` | `NOT NULL` | Estimasi waktu penyelesaian (contoh: `"1 - 2 Hari Kerja"`) |
-| `cost` | `VARCHAR(80)` | `DEFAULT 'Gratis (Rp 0)'` | Biaya layanan |
-| `channel` | `VARCHAR(80)` | `NOT NULL` | Kanal layanan (`"Loket Terpadu & Daring"`, `"Daring Penuh"`, `"Loket Pelayanan Dinas"`) |
-| `unit` | `VARCHAR(150)` | `NOT NULL` | Bidang / Seksi pelaksana |
-| `description` | `TEXT` | `NOT NULL` | Deskripsi layanan |
-| `requirements` | `TEXT` | `NOT NULL` | Daftar persyaratan berkas |
-| `steps` | `TEXT` | `NOT NULL` | Alur / tahapan prosedur layanan |
-| `status` | `VARCHAR(20)` | `DEFAULT 'Aktif'` | `"Aktif"` atau `"Pemeliharaan"` |
-| `created_at`, `updated_at` | `TIMESTAMPTZ` | Otomatis | Waktu pembaruan |
-
----
-
-### 17.7 Statistik Pendidikan (`/admin/statistik` & `/statistik`)
-- **File Frontend**: [`app/(admin)/admin/statistik/statistics-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/statistik/statistics-management.tsx) & [`app/(publish)/statistik/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/statistik/page.tsx)
-- **Endpoint**:
-  - Admin: `GET /api/v1/admin/statistik`, `POST /api/v1/admin/statistik`, `PUT /api/v1/admin/statistik/{id}`, `DELETE /api/v1/admin/statistik/{id}`
-  - Publik: `GET /api/v1/public/statistik?category=&period=`
-- **Skema Tabel `publish_statistics`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"STAT-001"` |
-| `indicatorName` | `VARCHAR(200)` | `NOT NULL` | Nama indikator (`indicator_name`, contoh: `"Angka Partisipasi Murni (APM) SD"`) |
-| `category` | `VARCHAR(80)` | `NOT NULL INDEX` | `"Capaian Makro (APM/APK)"`, `"Satuan Pendidikan"`, `"Pendidik & Tendik"`, `"Peserta Didik"`, `"Sarana & Prasarana"` |
-| `level` | `VARCHAR(50)` | `NOT NULL` | `"Semua Jenjang"`, `"PAUD/TK"`, `"SD"`, `"SMP"`, `"PKBM"` |
-| `value` | `VARCHAR(60)` | `NOT NULL` | Nilai capaian aktual |
-| `unit` | `VARCHAR(40)` | `NOT NULL` | Satuan (`"%"`, `"Sekolah"`, `"Orang"`, `"Ruang"`) |
-| `target` | `VARCHAR(60)` | `NOT NULL` | Target Renstra |
-| `trend` | `VARCHAR(40)` | `NOT NULL` | Pertumbuhan YoY (contoh: `"+1.4%"`) |
-| `period` | `VARCHAR(60)` | `NOT NULL` | Periode semester / tahun ajaran |
-| `source` | `VARCHAR(150)` | `NOT NULL` | Sumber data (`"Dapodik Kemendikdasmen"`, `"BPS"`, dll.) |
-| `notes` | `TEXT` | `NULLABLE` | Catatan analisis capaian |
-| `status` | `VARCHAR(30)` | `DEFAULT 'Terverifikasi'` | `"Terverifikasi"` atau `"Sementara"` |
-| `created_at`, `updated_at` | `TIMESTAMPTZ` | Otomatis | Waktu pembaruan |
-
----
-
-### 17.8 Profil Dinas (`/admin/profil` & `/profil`)
-- **File Frontend**: [`app/(admin)/admin/profil/profile-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/profil/profile-management.tsx) & [`app/(publish)/profil/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/profil/page.tsx)
-- **Endpoint**:
-  - Admin: `GET /api/v1/admin/profil`, `POST /api/v1/admin/profil`, `PUT /api/v1/admin/profil/{id}`, `DELETE /api/v1/admin/profil/{id}`
-  - Publik: `GET /api/v1/public/profil`
-- **Skema Tabel `publish_agency_profiles`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"PRF-PUB-001"` |
-| `sectionType` | `VARCHAR(80)` | `NOT NULL INDEX` | `"Visi & Misi"`, `"Pimpinan & Pejabat"`, `"Struktur Bidang / UPTD"`, `"Tugas Pokok & Fungsi"`, `"Sejarah & Identitas"` (`section_type`) |
-| `title` | `VARCHAR(200)` | `NOT NULL` | Judul bagian / Nama jabatan struktural |
-| `officialName` | `VARCHAR(150)` | `NULLABLE` | Nama pejabat & gelar (`official_name`) |
-| `nipOrPeriod` | `VARCHAR(100)` | `NULLABLE` | NIP / Pangkat / Periode jabatan (`nip_or_period`) |
-| `order` | `INTEGER` | `NOT NULL DEFAULT 1` | Urutan tampil |
-| `summary` | `TEXT` | `NOT NULL` | Ringkasan / kutipan |
-| `content` | `TEXT` | `NOT NULL` | Uraian lengkap tupoksi / misi / profil |
-| `image` | `TEXT` | `NULLABLE` | Foto pejabat / bagan organisasi |
-| `status` | `VARCHAR(20)` | `DEFAULT 'Aktif'` | `"Aktif"` atau `"Draft"` |
-| `created_at`, `updated_at` | `TIMESTAMPTZ` | Otomatis | Waktu pembaruan |
-
----
-
-### 17.9 Banner Beranda (`/admin/banner` & `/`)
-- **File Frontend**: [`app/(admin)/admin/banner/banner-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/banner/banner-management.tsx)
-- **Endpoint**:
-  - Admin: `GET /api/v1/admin/banner`, `POST /api/v1/admin/banner`, `PUT /api/v1/admin/banner/{id}`, `DELETE /api/v1/admin/banner/{id}`
-  - Publik: `GET /api/v1/public/banner` (Hanya mengembalikan `status = 'Aktif'` terurut `order ASC`)
-- **Skema Tabel `publish_banners`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"BNR-001"` |
-| `title` | `VARCHAR(200)` | `NOT NULL` | Judul utama hero banner |
-| `subtitle` | `TEXT` | `NOT NULL` | Sub-judul / deskripsi pendek banner |
-| `badgeText` | `VARCHAR(100)` | `NULLABLE` | Teks lencana atas (`badge_text`) |
-| `primaryButtonLabel` | `VARCHAR(80)` | `NULLABLE` | Label tombol aksi utama (`primary_button_label`) |
-| `primaryButtonLink` | `VARCHAR(255)` | `NULLABLE` | Tautan tujuan tombol (`primary_button_link`) |
-| `image` | `TEXT` | `NOT NULL` | URL gambar banner resolusi tinggi (`1920x800`) |
-| `order` | `INTEGER` | `NOT NULL DEFAULT 1` | Urutan slide |
-| `status` | `VARCHAR(20)` | `NOT NULL DEFAULT 'Aktif'` | `"Aktif"` atau `"Nonaktif"` |
-| `created_at`, `updated_at` | `TIMESTAMPTZ` | Otomatis | Waktu pembaruan |
-
----
-
-### 17.10 Pesan Kontak & Pengaduan (`/admin/kontak` & `/kontak`)
-- **File Frontend**: [`app/(admin)/admin/kontak/contact-management.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/admin/kontak/contact-management.tsx) & [`app/(publish)/kontak/page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(publish)/kontak/page.tsx)
-- **Endpoint**:
-  - Publik: `POST /api/v1/public/kontak` (Pengunjung mengirim pesan/aspirasi dari halaman `/kontak`)
-  - Admin:
-    - `GET /api/v1/admin/kontak?category=&status=&search=`
-    - `POST /api/v1/admin/kontak` (Pencatatan tiket manual dari loket/WhatsApp)
-    - `PUT /api/v1/admin/kontak/{id}` (Update status & kirim tanggapan `replyText`)
-    - `DELETE /api/v1/admin/kontak/{id}`
-- **Skema Tabel `publish_contacts`**:
-| Kolom | Tipe PostgreSQL | Constraints | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `id` | `VARCHAR(36)` | `PRIMARY KEY` | Contoh: `"MSG-001"` |
-| `senderName` | `VARCHAR(150)` | `NOT NULL` | Nama lengkap pengirim (`sender_name`) |
-| `email` | `VARCHAR(150)` | `NOT NULL` | Alamat email pengirim |
-| `phone` | `VARCHAR(40)` | `NOT NULL` | Nomor telepon / WhatsApp |
-| `subject` | `VARCHAR(255)` | `NOT NULL` | Subjek pesan |
-| `category` | `VARCHAR(60)` | `NOT NULL INDEX` | `"Pengaduan"`, `"Permohonan Informasi"`, `"Aspirasi / Saran"`, `"Umum"` |
-| `message` | `TEXT` | `NOT NULL` | Isi pesan lengkap |
-| `date` | `VARCHAR(40)` | `NOT NULL` | Tanggal pesan masuk |
-| `status` | `VARCHAR(30)` | `NOT NULL DEFAULT 'Belum Dibalas'` | `"Belum Dibalas"`, `"Diproses"`, atau `"Selesai"` |
-| `replyText` | `TEXT` | `NULLABLE` | Isi tanggapan/balasan resmi dari admin (`reply_text`) |
-| `replied_by` | `VARCHAR(100)` | `NULLABLE` | Admin penjawab |
-| `replied_at` | `TIMESTAMPTZ` | `NULLABLE` | Waktu dibalas |
-| `created_at`, `updated_at` | `TIMESTAMPTZ` | Otomatis | Waktu dibuat |
-
----
-
-## 18. Spesifikasi Upload Berkas, Keamanan, & Rekomendasi Struktur Proyek FastAPI
-
-### 18.1 Endpoint & Aturan Upload Berkas (`/api/v1/admin/upload`)
-Seluruh form yang memiliki field bertipe `file` (`application/pdf` atau `image/*`) dapat dikirim secara langsung melalui `multipart/form-data` pada endpoint modul masing-masing **atau** melalui endpoint upload terpusat:
-- **Endpoint Terpusat**: `POST /api/v1/admin/upload`
-- **Form Data**:
-  - `file`: `UploadFile`
-  - `folder`: `str` (contoh: `"sarpras"`, `"usulan-tunjangan"`, `"bosp"`, `"jurnal"`, `"gallery"`, `"ppdb"`, `"berita"`)
-- **Validasi File**:
-  - Dokumen (`accept: "application/pdf"`): Maksimal `10 MB`, validasi *magic bytes* `%PDF-`.
-  - Gambar (`accept: "image/*"`): Format `.jpg`, `.jpeg`, `.png`, `.webp`, maksimal `5 MB`.
-- **Response `200 OK`**:
+**Daftar Data (List / Query):**
 ```json
 {
-  "success": true,
-  "statusCode": 200,
-  "message": "Berkas berhasil diunggah",
-  "data": {
-    "url": "/uploads/usulan-tunjangan/2026/04/sktp-198208102008011009.pdf",
-    "filename": "sktp-198208102008011009.pdf",
-    "mime_type": "application/pdf",
-    "type": "pdf",
-    "size": 1458290
+  "status": "success",
+  "message": "Data berhasil diambil",
+  "data": [ ... ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total_items": 45,
+    "total_pages": 5
   }
 }
 ```
 
-### 18.2 Rekomendasi Struktur Direktori Backend FastAPI + SQLAlchemy
-```text
-edusetara-backend/
-├── alembic/                        # Migrasi database PostgreSQL
-├── app/
-│   ├── main.py                     # Inisialisasi FastAPI, CORS, StaticFiles (/uploads)
-│   ├── core/
-│   │   ├── config.py               # Pydantic BaseSettings (DATABASE_URL, JWT_SECRET, SIMPEG_URL)
-│   │   ├── database.py             # AsyncEngine, AsyncSessionLocal, DeclarativeBase
-│   │   ├── security.py             # JWT encode/decode, password hashing (passlib/bcrypt)
-│   │   └── deps.py                 # get_current_user, require_permission(menu_path, action), apply_unit_scope()
-│   ├── models/                     # Model SQLAlchemy 2.0
-│   │   ├── base.py                 # AuditScopeMixin
-│   │   ├── auth.py                 # AuthMenu, AuthGroup, AuthGroupPermission, User
-│   │   ├── master.py               # Seluruh 26 tabel master_*
-│   │   ├── sarpras.py              # SarprasTanah, SarprasBangunan, SarprasRuang, SarprasPeralatan
-│   │   ├── usulan.py               # UsulanTunjanganGuru (+Lampiran), PipDataPendukung, PipDataPenerima, UsulanAssessment, UsulanRekonBosp (+Lampiran, +Rekomendasi)
-│   │   ├── operasional.py          # KegiatanSekolah, Rombel, KomunitasBelajar (+Pengurus), PiagamSertifikat
-│   │   ├── jurnal.py               # JurnalGuruKelas, JurnalKepalaSekolah, JurnalPengawas, JurnalBk
-│   │   ├── gallery.py              # Gallery, GalleryVideoTestimoni
-│   │   ├── gtk_profile.py          # GtkPengumuman, GtkModulMateri, GtkRegulasi, ProfileKelembagaan
-│   │   ├── ppdb.py                 # PpdbPendaftar, KuotaPpdb
-│   │   └── publish.py              # PublishNews, PublishAnnouncement, PublishEducationLevel, School, PublishCultureItem, PublishService, PublishStatistic, PublishAgencyProfile, PublishBanner, PublishContact
-│   ├── schemas/                    # Pydantic v2 Request/Response Schemas & Envelope
-│   ├── api/
-│   │   └── v1/
-│   │       ├── router.py           # Menggabungkan seluruh router modul
-│   │       ├── auth.py             # /api/v1/auth/* & /api/v1/simpeg/*
-│   │       ├── dashboard.py        # /api/v1/admin/dashboard/*
-│   │       ├── sarpras.py          # /api/v1/admin/sarpras/*
-│   │       ├── usulan.py           # /api/v1/admin/usulan/* & /api/v1/admin/verifikasi/*
-│   │       ├── operasional.py      # /api/v1/admin/{kegiatan-sekolah,rombel,komunitas-belajar,piagam-sertifikat}
-│   │       ├── jurnal.py           # /api/v1/admin/jurnal/*
-│   │       ├── gallery.py          # /api/v1/admin/gallery/*
-│   │       ├── gtk_profile.py      # /api/v1/admin/{regulasi-gtk,profile}/*
-│   │       ├── ppdb.py             # /api/v1/admin/{ppdb,kuota-ppdb}/*
-│   │       ├── master.py           # /api/v1/admin/master/*
-│   │       └── publish.py          # /api/v1/admin/{berita..kontak} & /api/v1/public/*
-│   └── seed/
-│       └── initial_data.py         # Seeder untuk Menu Sidebar (admin-menu.json), Group RBAC, & Data Master
-├── pyproject.toml / requirements.txt
-└── .env
-```
-
-### 18.3 Rekapitulasi Seluruh Tabel PostgreSQL (Total: 61 Tabel)
-1. **Auth & RBAC (4 Tabel)**: `auth_menus`, `auth_groups`, `auth_group_permissions`, `users` (`auth_asn_registrations`).
-2. **Sarana & Prasarana (4 Tabel)**: `sarpras_tanah`, `sarpras_bangunan`, `sarpras_ruang`, `sarpras_peralatan`.
-3. **Usulan & Verifikasi (8 Tabel)**: `usulan_tunjangan_guru`, `usulan_tunjangan_lampiran`, `pip_data_pendukung`, `pip_data_penerima`, `usulan_assessment`, `usulan_rekon_bosp`, `usulan_rekon_bosp_lampiran`, `rekomendasi_bosp`.
-4. **Operasional Sekolah (5 Tabel)**: `kegiatan_sekolah`, `rombel`, `komunitas_belajar`, `komunitas_belajar_pengurus`, `piagam_sertifikat`.
-5. **Jurnal V2 (4 Tabel)**: `jurnal_guru_kelas`, `jurnal_kepala_sekolah`, `jurnal_pengawas`, `jurnal_bk`.
-6. **Gallery (2 Tabel)**: `galleries`, `gallery_video_testimoni`.
-7. **Regulasi GTK & Profile Kelembagaan (4 Tabel)**: `gtk_pengumuman`, `gtk_modul_materi`, `gtk_regulasi`, `profile_kelembagaan`.
-8. **PPDB & Kuota (2 Tabel)**: `ppdb_pendaftar`, `kuota_ppdb`.
-9. **Data Master (22 Tabel)**:
-   - Siswa: `master_siswa`
-   - Usulan (3): `master_usulan_triwulan`, `master_usulan_jenis_penerima`, `master_usulan_kelas_penerima`
-   - Jurnal (4): `master_jurnal_bahan_ajar`, `master_jurnal_materi_ajar`, `master_jurnal_kelas`, `master_jurnal_mata_pelajaran`
-   - Jenjang (1): `master_jenjang`
-   - PPDB (6): `master_ppdb_agama`, `master_ppdb_tempat_tinggal`, `master_ppdb_transportasi`, `master_ppdb_pendidikan`, `master_ppdb_pekerjaan`, `master_ppdb_penghasilan`
-   - Sarpras (5): `master_sarpras_bangunan`, `master_sarpras_kepemilikan`, `master_sarpras_sumber_dana`, `master_sarpras_kondisi_alat`, `master_sarpras_jenis_bantuan`
-   - Pelengkap (6): `master_bk_jenis_layanan`, `master_bk_kegiatan_layanan`, `master_model_pembelajaran`, `master_pendampingan`, `master_tugas`, `master_kategori`
-10. **Publish & Portal Publik (10 Tabel)**: `publish_news`, `publish_announcements`, `publish_education_levels`, `schools`, `publish_culture_items`, `publish_services`, `publish_statistics`, `publish_agency_profiles`, `publish_banners`, `publish_contacts`.
-
-
----
-
-## 19. Peta Relasi Data Lengkap (ERD, Relasi Data Master ke Tabel Operasional, & Implementasi SQLAlchemy)
-
-Bagian ini menjelaskan secara eksplisit **bagaimana seluruh 26+ tabel Data Master, tabel Auth/RBAC, referensi SIMPEG, dan tabel Induk-Anak saling berelasi** di PostgreSQL dan SQLAlchemy 2.0.
-
----
-
-### 19.1 Matriks Lengkap Relasi **Data Master $\rightarrow$ Tabel Operasional (`1 : N`)**
-
-Setiap tabel di menu **Data Master (`/admin/master/*`)** berfungsi sebagai *Parent / Lookup Table* (`1`) yang direferensikan melalui *Foreign Key* oleh satu atau lebih *Child / Operational Table* (`N`). Aturan penghapusan default pada seluruh referensi Data Master adalah **`ON DELETE RESTRICT` / `ON UPDATE CASCADE`** (agar data master yang sudah dipakai di transaksi sekolah tidak bisa terhapus secara tidak sengaja).
-
-| No | Kelompok Master | Tabel Data Master (`PK`) | Tabel Operasional Pemakai (Child) | Kolom Foreign Key (`FK`) | Kardinalitas & Aturan `ON DELETE` |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **1** | **Master Auth** | `auth_menus (id)` | `auth_menus` *(Self-Referential)*<br>`auth_group_permissions` | `parent_id`<br>`menu_id` | `1 : N` (`CASCADE`)<br>`1 : N` (`CASCADE`) |
-| **2** | **Master Auth** | `auth_groups (id)` | `auth_group_permissions`<br>`users` (`auth_asn_registrations`) | `group_id`<br>`group_id` | `1 : N` (`CASCADE`)<br>`1 : N` (`RESTRICT`) |
-| **3** | **Master Sekolah** | `schools (npsn)` | Seluruh Tabel Operasional (`AuditScopeMixin`)<br>`users`<br>`kuota_ppdb`<br>`jurnal_pengawas` | `unit_kerja_id`<br>`unit_kerja_id`<br>`unit_kerja_id`<br>`unit_kerja_id` | `1 : N` (`RESTRICT`)<br>`1 : N` (`RESTRICT`)<br>`1 : 1` (`CASCADE`)<br>`1 : N` (`RESTRICT`) |
-| **4** | **Master Siswa** | `master_siswa (id)` | `pip_data_penerima` | `siswa_id` | `1 : N` (`RESTRICT`) |
-| **5** | **Master Jenjang** | `master_jenjang (id)` | `schools`<br>`rombel`<br>`ppdb_pendaftar`<br>`kuota_ppdb` | `level` / `jenjang_id`<br>`jenjang`<br>`jenjang`<br>`jenjang` | `1 : N` (`RESTRICT`) |
-| **6** | **Master Usulan** | `master_usulan_triwulan (id)` | `usulan_tunjangan_guru`<br>`usulan_rekon_bosp` | `triwulan_id`<br>`triwulan_id` | `1 : N` (`RESTRICT`) |
-| **7** | **Master Usulan** | `master_usulan_jenis_penerima (id)` | `usulan_tunjangan_guru` | `jenis_id` | `1 : N` (`RESTRICT`) |
-| **8** | **Master Usulan** | `master_usulan_kelas_penerima (id)` | `usulan_tunjangan_guru` *(opsional filter golongan)* | `kelas_penerima_id` | `1 : N` (`RESTRICT`) |
-| **9** | **Master Jurnal** | `master_jurnal_kelas (id)` | `master_jurnal_mata_pelajaran`<br>`sarpras_ruang`<br>`rombel`<br>`jurnal_guru_kelas`<br>`master_siswa`<br>`pip_data_penerima` | `kelas_id`<br>`kelas_id`<br>`kelas_id`<br>`kelas_id`<br>`kelas_id`<br>`kelas` / `kelas_id` | `1 : N` (`RESTRICT`) — **Tabel Master paling banyak direferensikan (6 tabel)** |
-| **10** | **Master Jurnal** | `master_jurnal_mata_pelajaran (id)` | `jurnal_guru_kelas` | `mapel_id` | `1 : N` (`RESTRICT`) — *Berjenjang dari `master_jurnal_kelas`* |
-| **11** | **Master Jurnal** | `master_jurnal_materi_ajar (id)` | `jurnal_guru_kelas` | `materi_id` | `1 : N` (`RESTRICT`) |
-| **12** | **Master Jurnal** | `master_jurnal_bahan_ajar (id)` | `jurnal_guru_kelas` | `bahan_id` | `1 : N` (`RESTRICT`) |
-| **13** | **Master Sarpras** | `master_sarpras_kepemilikan (id)` | `sarpras_tanah`<br>`sarpras_bangunan` | `kepemilikan_id`<br>`kepemilikan_id` | `1 : N` (`RESTRICT`) |
-| **14** | **Master Sarpras** | `master_sarpras_bangunan (id)` *(Kondisi)* | `sarpras_bangunan`<br>`sarpras_ruang` | `kondisi_bangunan_id`<br>`kondisi_id` | `1 : N` (`RESTRICT`) |
-| **15** | **Master Sarpras** | `master_sarpras_jenis_bantuan (id)` | `sarpras_bangunan` | `bantuan_id` | `1 : N` (`RESTRICT`) |
-| **16** | **Master Sarpras** | `master_sarpras_sumber_dana (id)` | `sarpras_bangunan`<br>`sarpras_peralatan` | `sumber_dana_id`<br>`sumber_dana_id` | `1 : N` (`RESTRICT`) |
-| **17** | **Master Sarpras** | `master_sarpras_kondisi_alat (id)` | `sarpras_peralatan` | `kondisi_id` | `1 : N` (`RESTRICT`) |
-| **18** | **Master PPDB** | `master_ppdb_agama (id)` | `ppdb_pendaftar`<br>`master_siswa` | `agama`<br>`agama` | `1 : N` (`RESTRICT`) |
-| **19** | **Master PPDB** | `master_ppdb_tempat_tinggal (id)` | `ppdb_pendaftar`<br>`master_siswa` | `tmp_tinggal`<br>`tmp_tinggal` | `1 : N` (`RESTRICT`) |
-| **20** | **Master PPDB** | `master_ppdb_transportasi (id)` | `ppdb_pendaftar`<br>`master_siswa` | `moda_transportasi`<br>`moda_transportasi` | `1 : N` (`RESTRICT`) |
-| **21** | **Master PPDB** | `master_ppdb_pendidikan (id)` | `ppdb_pendaftar`<br>`master_siswa` *(3 kolom sekaligus)* | `pendidikan_ayah`<br>`pendidikan_ibu`<br>`pendidikan_wali` | `1 : N` (`RESTRICT`) — *Triple Foreign Key ke 1 tabel master* |
-| **22** | **Master PPDB** | `master_ppdb_pekerjaan (id)` | `ppdb_pendaftar`<br>`master_siswa` *(3 kolom sekaligus)* | `pekerjaan_ayah`<br>`pekerjaan_ibu`<br>`pekerjaan_wali` | `1 : N` (`RESTRICT`) — *Triple Foreign Key ke 1 tabel master* |
-| **23** | **Master PPDB** | `master_ppdb_penghasilan (id)` | `ppdb_pendaftar`<br>`master_siswa` *(3 kolom sekaligus)* | `penghasilan_ayah`<br>`penghasilan_ibu`<br>`penghasilan_wali` | `1 : N` (`RESTRICT`) — *Triple Foreign Key ke 1 tabel master* |
-| **24** | **Master Pelengkap** | `master_model_pembelajaran (id)` | `jurnal_guru_kelas` | `model_pembelajaran_id` | `1 : N` (`RESTRICT`) |
-| **25** | **Master Pelengkap** | `master_tugas (id)` | `jurnal_kepala_sekolah` | `tugas_id` | `1 : N` (`RESTRICT`) |
-| **26** | **Master Pelengkap** | `master_pendampingan (id)` | `jurnal_pengawas` | `pendampingan_id` | `1 : N` (`RESTRICT`) |
-| **27** | **Master Pelengkap** | `master_bk_jenis_layanan (id)` | `jurnal_bk` | `jns_layanan_id` | `1 : N` (`RESTRICT`) |
-| **28** | **Master Pelengkap** | `master_bk_kegiatan_layanan (id)` | `jurnal_bk` | `kegiatan_layanan_id` | `1 : N` (`RESTRICT`) |
-| **29** | **Master Pelengkap** | `master_kategori (id)` | `usulan_rekon_bosp_lampiran` | `kategori_id` | `1 : N` (`RESTRICT`) |
-
----
-
-### 19.2 Matriks Relasi Berjenjang Antar Tabel Operasional (Parent $\rightarrow$ Child)
-
-Selain berelasi ke Data Master, beberapa tabel operasional memiliki **relasi berjenjang (Parent-Child) dengan sesama tabel operasional**:
-
-| No | Domain | Tabel Induk (Parent) | Tabel Anak (Child) | Kolom FK di Tabel Anak | Kardinalitas & `ON DELETE` | Penjelasan Alur Relasi |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1** | **Sarpras & Rombel** | `sarpras_bangunan` | `sarpras_ruang` | `bangunan_id` | `1 : N` (`RESTRICT`) | Satu Gedung/Bangunan memiliki banyak Ruang (Ruang Kelas, Lab, Perpustakaan). |
-| **2** | **Sarpras** | `sarpras_ruang` | `sarpras_peralatan` | `ruang_id` | `1 : N` (`RESTRICT`) | Satu Ruang menyimpan banyak Peralatan / Aset Mobiler / TIK. |
-| **3** | **Sarpras & Rombel** | `sarpras_ruang` | `rombel` | `ruang_id` | `1 : N` (`SET NULL`) | Satu Ruang Kelas ditempati oleh Rombongan Belajar (`rombel`). |
-| **4** | **Sarpras & PPDB** | `sarpras_ruang` + `ppdb_pendaftar` | `kuota_ppdb` | `unit_kerja_id` *(Agregasi)* | `N : 1` (Rekalkulasi) | Jumlah ruang kelas di `sarpras_ruang` dikali standar rombel dikurangi pendaftar di `ppdb_pendaftar` menghasilkan `kuota_ppdb`. |
-| **5** | **Usulan Tunjangan** | `usulan_tunjangan_guru` | `usulan_tunjangan_lampiran` | `usulan_id` | `1 : N` (`CASCADE`) | Satu pengajuan tunjangan guru memiliki banyak file PDF lampiran syarat (SKTP, SPTJM, Rekening). |
-| **6** | **Usulan PIP** | `pip_data_pendukung` | `pip_data_penerima` | `pendukung_id` | `1 : N` (`CASCADE`) | Satu paket berkas kolektif PIP (SPTJM, SKTM, Rekomendasi) menaungi banyak siswa penerima (`pip_data_penerima`). |
-| **7** | **Usulan & Verifikasi BOSP** | `usulan_rekon_bosp` | `usulan_rekon_bosp_lampiran`<br>`rekomendasi_bosp` | `usulan_id`<br>`rekon_id` | `1 : N` (`CASCADE`)<br>`1 : 1 / 1 : N` (`CASCADE`) | Satu pengajuan rekon BOSP memiliki banyak lampiran per `kategori_id` dan menghasilkan Surat Rekomendasi BOSP pasca verifikasi Tahap 1 & 2. |
-| **8** | **Komunitas Belajar** | `komunitas_belajar` | `komunitas_belajar_pengurus` | `kombel_id` | `1 : N` (`CASCADE`) | Satu Komunitas Belajar memiliki daftar pengurus (`Ketua`, `Wakil`, `Sekretaris`, `Koordinator`). |
-
----
-
-### 19.3 Diagram Entity-Relationship (ERD) Utama dengan Mermaid
-
-#### A. ERD Domain Auth, RBAC, Sekolah, Sarpras, & Rombel
-```mermaid
-erDiagram
-    auth_menus ||--o{ auth_menus : "parent_id (Submenu)"
-    auth_menus ||--o{ auth_group_permissions : "menu_id"
-    auth_groups ||--o{ auth_group_permissions : "group_id"
-    auth_groups ||--o{ users : "group_id"
-    schools ||--o{ users : "unit_kerja_id"
-
-    master_sarpras_kepemilikan ||--o{ sarpras_tanah : "kepemilikan_id"
-    master_sarpras_kepemilikan ||--o{ sarpras_bangunan : "kepemilikan_id"
-    master_sarpras_bangunan ||--o{ sarpras_bangunan : "kondisi_bangunan_id"
-    master_sarpras_jenis_bantuan ||--o{ sarpras_bangunan : "bantuan_id"
-    master_sarpras_sumber_dana ||--o{ sarpras_bangunan : "sumber_dana_id"
-
-    sarpras_bangunan ||--o{ sarpras_ruang : "bangunan_id"
-    master_sarpras_bangunan ||--o{ sarpras_ruang : "kondisi_id"
-    master_jurnal_kelas ||--o{ sarpras_ruang : "kelas_id"
-
-    sarpras_ruang ||--o{ sarpras_peralatan : "ruang_id"
-    master_sarpras_kondisi_alat ||--o{ sarpras_peralatan : "kondisi_id"
-    master_sarpras_sumber_dana ||--o{ sarpras_peralatan : "sumber_dana_id"
-
-    sarpras_ruang ||--o{ rombel : "ruang_id"
-    master_jurnal_kelas ||--o{ rombel : "kelas_id"
-```
-
-#### B. ERD Domain Usulan, Verifikasi, Jurnal V2, & PPDB
-```mermaid
-erDiagram
-    master_usulan_triwulan ||--o{ usulan_tunjangan_guru : "triwulan_id"
-    master_usulan_jenis_penerima ||--o{ usulan_tunjangan_guru : "jenis_id"
-    usulan_tunjangan_guru ||--o{ usulan_tunjangan_lampiran : "usulan_id"
-
-    master_usulan_triwulan ||--o{ usulan_rekon_bosp : "triwulan_id"
-    usulan_rekon_bosp ||--o{ usulan_rekon_bosp_lampiran : "usulan_id"
-    master_kategori ||--o{ usulan_rekon_bosp_lampiran : "kategori_id"
-    usulan_rekon_bosp ||--o| rekomendasi_bosp : "rekon_id"
-
-    pip_data_pendukung ||--o{ pip_data_penerima : "pendukung_id"
-    master_siswa ||--o{ pip_data_penerima : "siswa_id"
-    master_jurnal_kelas ||--o{ master_siswa : "kelas_id"
-
-    master_jurnal_kelas ||--o{ master_jurnal_mata_pelajaran : "kelas_id"
-    master_model_pembelajaran ||--o{ jurnal_guru_kelas : "model_pembelajaran"
-
-    master_tugas ||--o{ jurnal_kepala_sekolah : "tugas_id"
-    master_pendampingan ||--o{ jurnal_pengawas : "pendampingan_id"
-    master_bk_jenis_layanan ||--o{ jurnal_bk : "jns_layanan_id"
-    master_bk_kegiatan_layanan ||--o{ jurnal_bk : "kegiatan_layanan_id"
-
-    master_ppdb_agama ||--o{ ppdb_pendaftar : "agama"
-    master_ppdb_tempat_tinggal ||--o{ ppdb_pendaftar : "tmp_tinggal"
-    master_ppdb_transportasi ||--o{ ppdb_pendaftar : "moda_transportasi"
-    master_ppdb_pendidikan ||--o{ ppdb_pendaftar : "pendidikan_ayah/ibu/wali"
-    master_ppdb_pekerjaan ||--o{ ppdb_pendaftar : "pekerjaan_ayah/ibu/wali"
-    master_ppdb_penghasilan ||--o{ ppdb_pendaftar : "penghasilan_ayah/ibu/wali"
-```
-
----
-
-### 19.4 Pola Implementasi SQLAlchemy 2.0 & Strategi Resolusi `ID` vs `Uraian` untuk Frontend
-
-> **Penting untuk Kompatibilitas dengan Frontend (`ContractCrudPage`)**:
-> Pada komponen frontend [`contract-crud-page.tsx`](file:///Users/dinaskominfo/kiken/Project/next/edusetara/app/(admin)/_components/contract-crud-page.tsx), tabel dan form menggunakan nama field berakhiran `*_id` (seperti `kepemilikan_id`, `kondisi_bangunan_id`, `triwulan_id`, `kelas_id`, `mapel_id`), dan pada saat ditampilkan di tabel UI, pengguna mengharapkan **teks label (`uraian`)** yang mudah dibaca (misalnya `"Triwulan I (Januari - Maret)"` atau `"Baik"`), bukan sekadar UUID/kode mentah.
-
-Oleh karena itu, pada backend FastAPI + SQLAlchemy 2.0 kita menerapkan **3 aturan emas**:
-
-#### 1. Contoh Definisi Model SQLAlchemy 2.0 (`relationship` dengan `lazy="joined"`)
-```python
-from sqlalchemy import ForeignKey, String, SmallInteger, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.models.base import Base, AuditScopeMixin
-
-class MasterUsulanTriwulan(Base):
-    __tablename__ = "master_usulan_triwulan"
-
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    uraian: Mapped[str] = mapped_column(String(150), nullable=False, unique=True)
-
-class MasterUsulanJenisPenerima(Base):
-    __tablename__ = "master_usulan_jenis_penerima"
-
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    uraian: Mapped[str] = mapped_column(String(150), nullable=False, unique=True)
-
-class UsulanTunjanganGuru(Base, AuditScopeMixin):
-    __tablename__ = "usulan_tunjangan_guru"
-
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    tahun: Mapped[int] = mapped_column(SmallInteger, nullable=False, index=True)
-    triwulan_id: Mapped[str] = mapped_column(
-        String(36),
-        ForeignKey("master_usulan_triwulan.id", ondelete="RESTRICT", onupdate="CASCADE"),
-        nullable=False,
-        index=True,
-    )
-    jenis_id: Mapped[str] = mapped_column(
-        String(36),
-        ForeignKey("master_usulan_jenis_penerima.id", ondelete="RESTRICT", onupdate="CASCADE"),
-        nullable=False,
-        index=True,
-    )
-    guru_id: Mapped[str] = mapped_column(String(100), nullable=False)
-    uraian: Mapped[str] = mapped_column(Text, nullable=False)
-    status: Mapped[int] = mapped_column(SmallInteger, default=0, nullable=False)
-    pesan: Mapped[str | None] = mapped_column(Text, nullable=True)
-
-    # Relasi ke Data Master (Eager Loaded)
-    triwulan_rel: Mapped["MasterUsulanTriwulan"] = relationship(lazy="joined")
-    jenis_rel: Mapped["MasterUsulanJenisPenerima"] = relationship(lazy="joined")
-
-    # Relasi 1:N ke Tabel Anak Lampiran
-    lampiran: Mapped[list["UsulanTunjanganLampiran"]] = relationship(
-        back_populates="usulan",
-        cascade="all, delete-orphan",
-        lazy="selectin",
-    )
-```
-
-#### 2. Resolver Fleksibel saat `POST` / `PUT` (Menerima `id` maupun `uraian`)
-Jika dropdown di frontend mengirimkan `id` (contoh: `"TW-01"`) **atau** mengirimkan teks `uraian` langsung (contoh: `"Triwulan I"`), helper service di FastAPI dapat me-resolve secara otomatis:
-```python
-async def resolve_master_id(session: AsyncSession, model, value: str) -> str:
-    """Menerima ID master atau Uraian master, dan mengembalikan ID primary key yang valid."""
-    stmt = select(model.id).where((model.id == value) | (model.uraian == value))
-    result = await session.scalar(stmt)
-    if not result:
-        raise HTTPException(status_code=422, detail=f"Referensi master '{value}' tidak ditemukan pada {model.__tablename__}")
-    return result
-```
-
-#### 3. Response Serializer yang Menyertakan `id` Sekaligus `uraian`
-Dalam response `GET`, kembalikan nilai yang ramah untuk tabel `ContractCrudPage` sekaligus objek relasinya:
+**Operasi Tunggal / Mutasi (Create / Update / Delete):**
 ```json
 {
-  "id": "UTG-001",
+  "status": "success",
+  "message": "Data berhasil disimpan",
+  "data": { ... }
+}
+```
+
+**Respons Galat (Error):**
+```json
+{
+  "status": "error",
+  "message": "Rincian pesan validasi atau alasan kegagalan",
+  "code": 400,
+  "details": null
+}
+```
+
+---
+
+### 1.4 Pola Arsitektur Frontend (Hooks, TanStack Query, & Fetch Data)
+Seluruh modul admin (termasuk Data Master) wajib mengadopsi pola arsitektur yang konsisten sesuai standar `guru-kelas` dan implementasi referensi `master-ref-taspen`:
+
+1. **Struktur Direktori Komponen Modul**:
+   ```
+   app/(admin)/admin/[kategori]/[modul]/
+   ├── page.tsx                 # Halaman utama (PageHeader, MetricStatCards, Table, Filter)
+   ├── types.ts                 # Definisi tipe TypeScript (Item, FormInput, ApiResponse)
+   ├── data.ts                  # Mock data fallback & definisi kolom tabel
+   ├── Form[Modul]Modal.tsx     # Modal Tambah & Ubah (Form handling)
+   ├── Detail[Modul]Modal.tsx   # Modal Detail (Read-only viewer)
+   ├── DeleteConfirmModal.tsx   # Modal konfirmasi hapus data
+   └── hooks/
+       └── crud.tsx             # Custom React Hook TanStack Query (CRUD operations)
+   ```
+
+2. **Pola Custom Hook TanStack Query (`hooks/crud.tsx`)**:
+   Setiap modul menyediakan custom hook yang merangkum:
+   * `useQuery`: Mengambil data dengan cache key spesifik (e.g., `["master-jenjang", params]`), pagination, dan debounced search.
+   * `useMutation` (Create, Update, Delete): Melakukan mutasi via API client `fetchData` dan otomatis menjalankan `queryClient.invalidateQueries({ queryKey: [...] })` saat mutasi berhasil.
+
+3. **Penanganan Autentikasi & Token**:
+   Panggilan API menggunakan token JWT Bearer yang tersimpan di cookies/session. Jika sesi kedaluwarsa atau tidak valid, sistem secara otomatis mengarahkan pengguna ke halaman login publik (`http://localhost:3000/login` atau `http://localhost:3000/`).
+
+---
+
+## 2. Tabel Ringkasan Rute & Modul Admin EduSetara
+
+| No | Modul | Kategori | Route Frontend | Endpoint Backend | Tabel Database |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 1 | **Berita** | Publish & Informasi | `/admin/berita` | `/api/v1/admin/berita` | `berita` |
+| 2 | **Tanah Sekolah** | Sarana dan Prasarana | `/admin/sarpras/tanah` | `/api/v1/admin/sarpras/tanah` | `sarpras_tanah` |
+| 3 | **Bangunan (Fisik Gedung)** | Sarana dan Prasarana | `/admin/sarpras/bangunan` | `/api/v1/admin/sarpras/bangunan` | `sarpras_bangunan` |
+| 4 | **Ruang** | Sarana dan Prasarana | `/admin/sarpras/ruang` | `/api/v1/admin/sarpras/ruang` | `sarpras_ruang` |
+| 5 | **Peralatan/Aset** | Sarana dan Prasarana | `/admin/sarpras/peralatan` | `/api/v1/admin/sarpras/peralatan` | `sarpras_peralatan` |
+| 6 | **Usulan Tunjangan Guru** | Usulan Sekolah | `/admin/usulan/tunjangan-guru` | `/api/v1/admin/usulan/tunjangan-guru` | `usulan_tunjangan_guru` |
+| 7 | **Data Pendukung (Bantuan PIP)** | Usulan Sekolah > Usulan Bantuan PIP | `/admin/usulan/pip/data-pendukung` | `/api/v1/admin/usulan/pip/data-pendukung` | `usulan_pip_pendukung` |
+| 8 | **Data Penerima (Bantuan PIP)** | Usulan Sekolah > Usulan Bantuan PIP | `/admin/usulan/pip/data-penerima` | `/api/v1/admin/usulan/pip/data-penerima` | `usulan_pip_penerima` |
+| 9 | **Usulan Data Assessment** | Usulan Sekolah | `/admin/usulan/assessment` | `/api/v1/admin/usulan/assessment` | `usulan_assessment` |
+| 10 | **Usulan Rekonsiliasi Dana BOSP** | Usulan Sekolah | `/admin/usulan/rekonsiliasi-bosp` | `/api/v1/admin/usulan/rekonsiliasi-bosp` | `usulan_rekonsiliasi_bosp` |
+| 11 | **Kegiatan Sekolah** | Operasional Sekolah | `/admin/kegiatan-sekolah` | `/api/v1/admin/kegiatan-sekolah` | `kegiatan_sekolah` |
+| 12 | **Rombel Jenjang PAUD** | Rombel | `/admin/rombel/paud` | `/api/v1/admin/rombel/paud` | `rombel_paud` |
+| 13 | **Rombel Jenjang SD** | Rombel | `/admin/rombel/sd` | `/api/v1/admin/rombel/sd` | `rombel_sd` |
+| 14 | **Rombel Jenjang SMP** | Rombel | `/admin/rombel/smp` | `/api/v1/admin/rombel/smp` | `rombel_smp` |
+| 15 | **Komunitas Belajar** | Operasional Sekolah | `/admin/komunitas-belajar` | `/api/v1/admin/komunitas-belajar` | `komunitas_belajar` |
+| 16 | **Jurnal Guru Kelas** | Jurnal V2 | `/admin/jurnal/guru-kelas` | `/api/v1/admin/jurnal/guru-kelas` | `jurnal_guru_kelas` |
+| 17 | **Jurnal Kepala Sekolah** | Jurnal V2 | `/admin/jurnal/kepala-sekolah` | `/api/v1/admin/jurnal/kepala-sekolah` | `jurnal_kepala_sekolah` |
+| 18 | **Jurnal Pengawas** | Jurnal V2 | `/admin/jurnal/pengawas` | `/api/v1/admin/jurnal/pengawas` | `jurnal_pengawas` |
+| 19 | **Jurnal BK** | Jurnal V2 | `/admin/jurnal/bk` | `/api/v1/admin/jurnal/bk` | `jurnal_bk` |
+| 20 | **Sekolah Penggerak** | Gallery | `/admin/gallery/sekolah-penggerak` | `/api/v1/admin/gallery/sekolah-penggerak` | `gallery_sekolah_penggerak` |
+| 21 | **Gallery Program Guru Penggerak** | Gallery | `/admin/gallery/guru-penggerak` | `/api/v1/admin/gallery/guru-penggerak` | `gallery_guru_penggerak` |
+| 22 | **Gallery Program Organisasi Penggerak** | Gallery | `/admin/gallery/organisasi-penggerak` | `/api/v1/admin/gallery/organisasi-penggerak` | `gallery_organisasi_penggerak` |
+| 23 | **Gallery Kegiatan Kepala Sekolah** | Gallery | `/admin/gallery/kegiatan-kepala-sekolah` | `/api/v1/admin/gallery/kegiatan-kepala-sekolah` | `gallery_kegiatan_kepala_sekolah` |
+| 24 | **Gallery Kegiatan KKG SD** | Gallery | `/admin/gallery/kegiatan-kkg-sd` | `/api/v1/admin/gallery/kegiatan-kkg-sd` | `gallery_kegiatan_kkg_sd` |
+| 25 | **Gallery Kegiatan Guru MGMP** | Gallery | `/admin/gallery/kegiatan-guru-mgmp` | `/api/v1/admin/gallery/kegiatan-guru-mgmp` | `gallery_kegiatan_guru_mgmp` |
+| 26 | **Gallery Kegiatan TK & PAUD** | Gallery | `/admin/gallery/kegiatan-tk-paud` | `/api/v1/admin/gallery/kegiatan-tk-paud` | `gallery_kegiatan_tk_paud` |
+| 27 | **Gallery Kegiatan Pengawas Satdik** | Gallery | `/admin/gallery/kegiatan-pengawas` | `/api/v1/admin/gallery/kegiatan-pengawas` | `gallery_kegiatan_pengawas` |
+| 28 | **Video Testimoni** | Gallery | `/admin/gallery/video-testimoni` | `/api/v1/admin/gallery/video-testimoni` | `gallery_video_testimoni` |
+| 29 | **Piagam Sertifikat** | Penghargaan | `/admin/piagam-sertifikat` | `/api/v1/admin/piagam-sertifikat` | `piagam_sertifikat` |
+| 30 | **Verifikasi Tunjangan Guru** | Verifikasi | `/admin/verifikasi/tunjangan-guru` | `/api/v1/admin/verifikasi/tunjangan-guru` | `verifikasi_tunjangan_guru` |
+| 31 | **Verifikasi Usulan Rekonsiliasi Dana BOSP** | Verifikasi | `/admin/verifikasi/rekonsiliasi-bosp` | `/api/v1/admin/verifikasi/rekonsiliasi-bosp` | `verifikasi_rekonsiliasi_bosp` |
+| 32 | **Pengumuman GTK** | Regulasi dan Info GTK | `/admin/regulasi-gtk/pengumuman` | `/api/v1/admin/regulasi-gtk/pengumuman` | `gtk_pengumuman` |
+| 33 | **Modul dan Materi Pelatihan** | Regulasi dan Info GTK | `/admin/regulasi-gtk/modul-materi` | `/api/v1/admin/regulasi-gtk/modul-materi` | `gtk_modul_pelatihan` |
+| 34 | **Regulasi GTK** | Regulasi dan Info GTK | `/admin/regulasi-gtk/regulasi` | `/api/v1/admin/regulasi-gtk/regulasi` | `gtk_regulasi` |
+| 35 | **PPDB PAUD** | PPDB | `/admin/ppdb/paud` | `/api/v1/admin/ppdb/paud` | `ppdb_paud` |
+| 36 | **PPDB SD** | PPDB | `/admin/ppdb/sd` | `/api/v1/admin/ppdb/sd` | `ppdb_sd` |
+| 37 | **PPDB SMP** | PPDB | `/admin/ppdb/smp` | `/api/v1/admin/ppdb/smp` | `ppdb_smp` |
+| 38 | **Kuota PPDB** | PPDB | `/admin/kuota-ppdb` | `/api/v1/admin/kuota-ppdb` | `kuota_ppdb` |
+| 39 | **Renstra (Rencana Strategis)** | Profile | `/admin/profile/renstra` | `/api/v1/admin/profile/renstra` | `profile_renstra` |
+| 40 | **Tugas Dan Fungsi** | Profile | `/admin/profile/tugas-fungsi` | `/api/v1/admin/profile/tugas-fungsi` | `profile_tugas_fungsi` |
+| 41 | **Visi dan Misi** | Profile | `/admin/profile/visi-misi` | `/api/v1/admin/profile/visi-misi` | `profile_visi_misi` |
+| 42 | **Auth Menu** | Data Master > Auth | `/admin/master/auth/menu` | `/api/v1/admin/master/auth/menu` | `auth_menus` |
+| 43 | **Auth Group (Role & Hak Akses)** | Data Master > Auth | `/admin/master/auth/group` | `/api/v1/admin/master/auth/group` | `auth_groups` |
+| 44 | **Auth Registrasi ASN** | Data Master > Auth | `/admin/master/auth/registrasi` | `/api/v1/admin/master/auth/registrasi` | `users` |
+| 45 | **Master Siswa** | Data Master | `/admin/master/siswa` | `/api/v1/admin/master/siswa` | `master_siswa` |
+| 46 | **Master Triwulan** | Data Master > Master Usulan | `/admin/master/usulan/triwulan` | `/api/v1/admin/master/usulan/triwulan` | `master_usulan_triwulan` |
+| 47 | **Master Jenis Penerima** | Data Master > Master Usulan | `/admin/master/usulan/jenis-penerima` | `/api/v1/admin/master/usulan/jenis-penerima` | `master_usulan_jenis_penerima` |
+| 48 | **Master Kelas Penerima** | Data Master > Master Usulan | `/admin/master/usulan/kelas-penerima` | `/api/v1/admin/master/usulan/kelas-penerima` | `master_usulan_kelas_penerima` |
+| 49 | **Master Bahan Ajar** | Data Master > Master Jurnal | `/admin/master/jurnal/bahan-ajar` | `/api/v1/admin/master/jurnal/bahan-ajar` | `master_jurnal_bahan_ajar` |
+| 50 | **Master Materi Ajar** | Data Master > Master Jurnal | `/admin/master/jurnal/materi-ajar` | `/api/v1/admin/master/jurnal/materi-ajar` | `master_jurnal_materi_ajar` |
+| 51 | **Master Kelas** | Data Master > Master Jurnal | `/admin/master/jurnal/kelas` | `/api/v1/admin/master/jurnal/kelas` | `master_jurnal_kelas` |
+| 52 | **Master Mata Pelajaran** | Data Master > Master Jurnal | `/admin/master/jurnal/mata-pelajaran` | `/api/v1/admin/master/jurnal/mata-pelajaran` | `master_jurnal_mata_pelajaran` |
+| 53 | **Master Jenjang** | Data Master | `/admin/master/jenjang` | `/api/v1/admin/master/jenjang` | `master_jenjang` |
+| 54 | **Master Agama** | Data Master > Master PPDB | `/admin/master/ppdb/agama` | `/api/v1/admin/master/ppdb/agama` | `master_ppdb_agama` |
+| 55 | **Master Tempat Tinggal** | Data Master > Master PPDB | `/admin/master/ppdb/tempat-tinggal` | `/api/v1/admin/master/ppdb/tempat-tinggal` | `master_ppdb_tempat_tinggal` |
+| 56 | **Master Mode Transportasi** | Data Master > Master PPDB | `/admin/master/ppdb/transportasi` | `/api/v1/admin/master/ppdb/transportasi` | `master_ppdb_transportasi` |
+| 57 | **Master Pendidikan** | Data Master > Master PPDB | `/admin/master/ppdb/pendidikan` | `/api/v1/admin/master/ppdb/pendidikan` | `master_ppdb_pendidikan` |
+| 58 | **Master Pekerjaan** | Data Master > Master PPDB | `/admin/master/ppdb/pekerjaan` | `/api/v1/admin/master/ppdb/pekerjaan` | `master_ppdb_pekerjaan` |
+| 59 | **Master Penghasilan** | Data Master > Master PPDB | `/admin/master/ppdb/penghasilan` | `/api/v1/admin/master/ppdb/penghasilan` | `master_ppdb_penghasilan` |
+| 60 | **Master Bangunan (Kelaikan/Kerusakan)** | Data Master > Master Sarpras | `/admin/master/sarpras/bangunan` | `/api/v1/admin/master/sarpras/bangunan` | `master_sarpras_bangunan` |
+| 61 | **Master Kepemilikan** | Data Master > Master Sarpras | `/admin/master/sarpras/kepemilikan` | `/api/v1/admin/master/sarpras/kepemilikan` | `master_sarpras_kepemilikan` |
+| 62 | **Master Sumber Dana** | Data Master > Master Sarpras | `/admin/master/sarpras/sumber-dana` | `/api/v1/admin/master/sarpras/sumber-dana` | `master_sarpras_sumber_dana` |
+| 63 | **Master Kondisi Alat** | Data Master > Master Sarpras | `/admin/master/sarpras/kondisi-alat` | `/api/v1/admin/master/sarpras/kondisi-alat` | `master_sarpras_kondisi_alat` |
+| 64 | **Master Jenis Bantuan** | Data Master > Master Sarpras | `/admin/master/sarpras/jenis-bantuan` | `/api/v1/admin/master/sarpras/jenis-bantuan` | `master_sarpras_jenis_bantuan` |
+| 65 | **Master BK Jenis Layanan** | Data Master | `/admin/master/bk-jenis-layanan` | `/api/v1/admin/master/bk-jenis-layanan` | `master_bk_jenis_layanan` |
+| 66 | **Master BK Kegiatan Layanan** | Data Master | `/admin/master/bk-kegiatan-layanan` | `/api/v1/admin/master/bk-kegiatan-layanan` | `master_bk_kegiatan_layanan` |
+| 67 | **Master Model Pembelajaran** | Data Master | `/admin/master/model-pembelajaran` | `/api/v1/admin/master/model-pembelajaran` | `master_model_pembelajaran` |
+| 68 | **Master Pendampingan** | Data Master | `/admin/master/pendampingan` | `/api/v1/admin/master/pendampingan` | `master_pendampingan` |
+| 69 | **Master Tugas** | Data Master | `/admin/master/tugas` | `/api/v1/admin/master/tugas` | `master_tugas` |
+| 70 | **Master Kategori** | Data Master | `/admin/master/kategori` | `/api/v1/admin/master/kategori` | `master_kategori` |
+
+---
+
+## 3. Spesifikasi Lengkap Modul (1 s/d 70)
+
+### 1. Berita
+**Kategori:** `Publish & Informasi`  
+**Route Frontend:** [`/admin/berita`](http://localhost:3000/admin/berita)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/berita`  
+**Tabel Database:** `berita`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan pengelolaan informasi dan publikasi kegiatan/berita seputar kegiatan sekolah.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "judul": "string <input>, (Judul utama artikel/berita)",
+  "sumber": "string <input>, (misal: 'Humas Sekolah', 'Dinas Pendidikan')",
+  "deskripsi": "string <input>, (Ringkasan/lead singkat berita untuk cuplikan thumbnail)",
+  "isi": "string <input>, (Konten lengkap berita dalam format teks panjang / HTML WYSIWYG)",
+  "foto": "string <input>, (Berkas gambar banner/thumbnail berita / URL foto)",
+  "created_at": "date, <generate otomatis | backend>",
+  "created_by": "string, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Judul: Siswa SD Negeri 1 Ranomeeto Raih Juara 1 Olimpiade Sains Tingkat Kabupaten
+Sumber: Tim Humas SD Negeri 1 Ranomeeto
+Deskripsi: Prestasi membanggakan kembali ditorehkan oleh siswa SD Negeri 1 Ranomeeto dalam ajang Olimpiade Sains tingkat kabupaten.
+Isi Berita: Siswa perwakilan sekolah berhasil menyabet medali emas setelah melalui serangkaian babak penyisihan dan final praktik eksperimen sains yang digelar secara serentak... (konten lengkap artikel).
+Foto: prestasi_olimpiade_sains_2026.jpg
+```
+
+---
+### 2. Tanah Sekolah
+**Kategori:** `Sarana dan Prasarana`  
+**Route Frontend:** [`/admin/sarpras/tanah`](http://localhost:3000/admin/sarpras/tanah)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/sarpras/tanah`  
+**Tabel Database:** `sarpras_tanah`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini kita disajikan daftar data bidang tanah yang dimiliki atau dikuasai oleh satuan pendidikan, mencakup identitas sekolah pemilik hak dan total luasan area tanah.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "title": "number <input>, (Luas tanah sekolah)",
+"file": "string <input>, (Berkas dokumen bukti kepemilikan/sertifikat tanah atau path URL file)",
+"file_type": "string <generate otomatis | backend>, (Tipe atau ekstensi berkas, misal: 'pdf', 'jpg', 'png')",
+  "nip ": "string, <generate otomatis | backend>"
+  "unit_kerja ": "string, <generate otomatis | backend>"
+  "created_at": "date, <generate otomatis | backend>",
+  "created_by": "string, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+SDN 5 KOLONO: Bidang lahan sekolah dengan total luasan area 3.300 m².
+SD-SMPN SATAP 16 KONSEL: Bidang lahan sekolah dengan luas area 2.400 m².
+SD NEGERI 6 LAINEA: Bidang lahan sekolah dengan ukuran dimensi panjang 125 m dan lebar 75 m.
+SDN 7 BUKE: Bidang lahan kawasan persekolahan dengan luas area 1,19 ha.
+```
+
+---
+### 3. Bangunan (Fisik Gedung)
+**Kategori:** `Sarana dan Prasarana`  
+**Route Frontend:** [`/admin/sarpras/bangunan`](http://localhost:3000/admin/sarpras/bangunan)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/sarpras/bangunan`  
+**Tabel Database:** `sarpras_bangunan`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini list data fisik gedung atau unit bangunan yang berdiri di atas lahan sekolah, mencakup nama unit gedung, luasan tapak bangunan, serta status hak kepemilikan/penguasaan fisik.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "nama": "string <input>, (nama bangunan sekolah)",
+  "luas": "string <input>, (luas bangunan sekolah)",
+" kepemilikan_id ": "string  <option>, (di pilih dari list kepemilikan yang sudah kita buat sebelumnya <16.6.2>)",
+  "tahun": "string <input>, (tahun bangunan sekolah)",
+  "persentase": "number <input>, (persentase kerusakan bangunan sekolah)",
+" kondisi_id ": "string  <option>, (di pilih dari list kondisi yang sudah kita buat sebelumnya <16.6.4>)",
+" jns_bantuan_id ": "string  <option>, (di pilih dari list jenis bantuan yang sudah kita buat sebelumnya <16.6.5>)",
+" sumber _id ": "string  <option>, (di pilih dari list sumber dana yang sudah kita buat sebelumnya <16.6.3>)",
+  "nip ": "string, <generate otomatis | backend>"
+  "unit_kerja ": "string, <generate otomatis | backend>"
+  "created_at": "date, <generate otomatis | backend>",
+  "created_by": "string, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Gedung Kelas 1 (SDN 2 BUKE): Unit gedung seluas 800 m² dengan status kepemilikan Milik Sendiri.
+Gedung Kelas 2 (SDN 2 BUKE): Unit gedung seluas 800 m² dengan status kepemilikan Pinjam.
+RKB UNIT 1 (SDN 5 PALANGGA SELATAN): Bangunan Ruang Kelas Baru seluas 144 m² berstatus Milik Sendiri.
+BANGUNAN SMPN SATAP 16 KONAWE SELATAN (SD-SMPN SATAP 16 KONSEL): Unit fasilitas gedung seluas 2.400 m² berstatus Milik Sendiri.
+```
+
+---
+### 4. Ruang
+**Kategori:** `Sarana dan Prasarana`  
+**Route Frontend:** [`/admin/sarpras/ruang`](http://localhost:3000/admin/sarpras/ruang)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/sarpras/ruang`  
+**Tabel Database:** `sarpras_ruang`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini berisikan list data pemetaan unit ruangan spesifik yang berada di dalam bangunan yang telauh inputkan pada menu bangunan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "bangunan_id": "string <option>, (di pilih dari list bangunan yang sudah kita buat sebelumnya <3.2>)",
+" kelas_id ": "string  <option>, (di pilih dari list kelas yang sudah kita buat sebelumnya <16.4.3>)",
+  "nama ": "string <input>, (nama ruangan)",
+  "luas ": "string <input>, (luas ruangan)",
+" kondisi_id ": "string  <option>, (di pilih dari list kondisi yang sudah kita buat sebelumnya <16.6.4>)",
+  "nip ": "string, <generate otomatis | backend>"
+  "unit_kerja ": "string, <generate otomatis | backend>"
+  "created_at": "date, <generate otomatis | backend>",
+  "created_by": "string, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Contoh Ruangan Kelas 1A (SDN 2 BUKE): Ruangan belajar seluas 400 m² pada unit Gedung Kelas 1.
+Kelas 1 (SDN 5 KOLONO): Ruang belajar kelas dasar seluas 9 m² pada unit gedung SD Negeri 5 Kolono.
+RUANG KELAS 3 (SDN 3 MORAMO): Ruang kelas seluas 56 m² pada unit fasilitas BANGUNAN GEDUNG 1.
+Ruang kelas 1 (SDN 5 PALANGGA SELATAN): Ruangan belajar seluas 56 m² pada unit RKB UNIT 1.
+```
+
+---
+### 5. Peralatan/Aset
+**Kategori:** `Sarana dan Prasarana`  
+**Route Frontend:** [`/admin/sarpras/peralatan`](http://localhost:3000/admin/sarpras/peralatan)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/sarpras/peralatan`  
+**Tabel Database:** `sarpras_peralatan`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data inventaris barang berupa, perangkat TIK, alat elektronik, dan furnitur penunjang kegiatan operasional yang ditempatkan pada masing-masing unit ruangan sekolah beserta kuantitas peralatan/aset.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "ruang_id": "string <option>, (di pilih dari list ruangan yang sudah kita buat sebelumnya <3.3>)",
+  "nama ": "string <input>, (nama peralatan/aset)",
+  "jml_alat ": "number <input>, (jumlat peralatan/aset)",
+" kondisi_id ": "string  <option>, (di pilih dari list kondisi yang sudah kita buat sebelumnya <16.6.4>)",
+  "tahun ": "number <input>, (tahun pengadaan peralatan/aset)",
+" sumber _id ": "string  <option>, (di pilih dari list sumber dana yang sudah kita buat sebelumnya <16.6.3>)",
+  "nip ": "string, <generate otomatis | backend>"
+  "unit_kerja ": "string, <generate otomatis | backend>"
+  "created_at": "date, <generate otomatis | backend>",
+  "created_by": "string, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Komputer Asus (SDN 2 BUKE): Perangkat komputer sebanyak 2 unit yang terinventarisir di Ruangan Kelas 1A.
+Printer Epson L300 (SDN 2 BUKE): Perangkat cetak dokumen sebanyak 5 unit yang dialokasikan di Ruangan Kelas 1A.
+Speaker Kecil (SD NEGERI 2 MOWILA): Fasilitas pengeras suara sebanyak 1 unit yang ditempatkan di Ruang kelas 1.
+Kursi Futura Biru (SD NEGERI 2 MOWILA): Perabot kursi duduk sebanyak 5 unit yang ditempatkan di Ruang kelas 1.
+```
+
+---
+### 6. Usulan Tunjangan Guru
+**Kategori:** `Usulan Sekolah`  
+**Route Frontend:** [`/admin/usulan/tunjangan-guru`](http://localhost:3000/admin/usulan/tunjangan-guru)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/usulan/tunjangan-guru`  
+**Tabel Database:** `usulan_tunjangan_guru`  
+
+#### Deskripsi & Bisnis Logika
+> Modul ini digunakan oleh guru maupun operator sekolah untuk mengajukan permohonan aneka tunjangan pendidik (Tunjangan Profesi Guru/TPG sertifikasi, Tambahan Penghasilan/Tamsil non-sertifikasi, maupun Tunjangan Khusus Guru/TKG daerah terpencil) ke Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan. Pengusul memilih periode tahun anggaran, triwulan pengajuan, jenis tunjangan, dan kelas penerima, kemudian mengunggah dokumen digital prasyarat (seperti SKTP, SPTJM bermaterai, SK Pembagian Tugas Mengajar 24 jam tatap muka, dan buku rekening aktif) untuk diverifikasi oleh tim dinas.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "tahun": "string <option>, (dipilih dari list tahun anggaran: '2025', '2026')",
+  "triwulan_id": "string <option>, (dipilih dari list triwulan: 1 = 'Triwulan I', 2 = 'Triwulan II', 3 = 'Triwulan III', 4 = 'Triwulan IV')",
+  "jns_penerimaan_id": "string <option>, (dipilih dari list jenis penerima: TPG PNS, TPG PPPK, Tamsil PNS, Tamsil PPPK, Tunjangan Khusus)",
+  "kelas_penerima_id": "string <option>, (dipilih dari list kelas penerima: Guru Kelas TK, Guru Kelas SD, Guru Mapel SMP, Guru BK, Kepala Sekolah)",
+  "nama": "string <readonly / auto-fill>, (nama lengkap pengusul beserta gelar dari profil SIMPEG)",
+  "nip": "string <readonly / auto-fill>, (NIP/NIPPPK pengusul)"
+}
+```
+
+**Form Lampiran Berkas Usulan**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "usulan_id": "string <relation: usulan.id>",
+  "uraian": "string <input>, (nama dokumen: misal 'SK Beban Mengajar 24 Jam', 'SPTJM Bermaterai', 'Rekening Bank Sultra')",
+  "file": "file (PDF), (berkas digital dokumen usulan)"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Usulan TPG Guru Mapel SMPN 22 Konawe Selatan:
+{
+  "id": "usul-tpg-2026-001",
+  "tahun": "2026",
+  "triwulan_id": "1",
+  "jns_penerimaan_id": "jns-tpg-pns",
+  "kelas_penerima_id": "kls-guru-mapel-smp",
+  "nama": "Nurul Hidayah, S.Pd., M.Pd.",
+  "nip": "198405122009032008"
+}
+Usulan Tambahan Penghasilan (Tamsil) Guru Kelas SDN 4 Ranomeeto:
+{
+  "id": "usul-tamsil-2026-015",
+  "tahun": "2026",
+  "triwulan_id": "1",
+  "jns_penerimaan_id": "jns-tamsil-pppk",
+  "kelas_penerima_id": "kls-guru-kelas-sd",
+  "nama": "La Ode Muh. Ridwan, S.Pd.",
+  "nip": "199108152024211012"
+}
+Usulan TPG Kepala Sekolah SMP Satap 16 Konawe Selatan:
+{
+  "id": "usul-tamsil-2026-015",
+  "tahun": "2026",
+  "triwulan_id": "1",
+  "jns_penerimaan_id": "jns-tamsil-pppk",
+  "kelas_penerima_id": "kls-guru-kelas-sd",
+  "nama": "La Ode Muh. Ridwan, S.Pd.",
+  "nip": "199108152024211012"
+}
+Usulan Bantuan PIP;
+```
+
+---
+### 7. Data Pendukung (Bantuan PIP)
+**Kategori:** `Usulan Sekolah > Usulan Bantuan PIP`  
+**Route Frontend:** [`/admin/usulan/pip/data-pendukung`](http://localhost:3000/admin/usulan/pip/data-pendukung)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/usulan/pip/data-pendukung`  
+**Tabel Database:** `usulan_pip_pendukung`  
+
+#### Deskripsi & Bisnis Logika
+> Modul ini digunakan oleh satuan pendidikan untuk mendokumentasikan alokasi program bantuan PIP, seperti Surat Rekomendasi/Pengantar Dinas Pendidikan, atau Berita Acara Rapat Penetapan Siswa Layak PIP. Sekolah menginput nama uraian SK, jenjang pendidikan, besaran pagu nominal per siswa, tahun penetapan, serta melampirkan berkas dokumen digital (PDF). Data ini menjadi induk rujukan sebelum sekolah menentukan daftar siswa penerima bantuan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "uraian": "string <input>, (nama dokumen pendukung: misal nomor SK Nominasi/Pemberian PIP Kemendikbudristek atau Surat Pengantar)",
+  "jenjang_id": "string <option>, (dipilih dari list jenjang yang telah kita buat sebelumnya <16.6>)",
+  "nominal": "string/number <input>, (besaran nominal bantuan)",
+  "tahun": "number <input>, (tahun anggaran penyaluran PIP)",
+  "file": "string <string>, (lampiran dokumen SK / Berita Acara penetapan dalam format)"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+SK Pemberian PIP SD Tahap I T.A 2026:
+{
+  "id": "pip-dukung-2026-sd-01",
+  "uraian": "SK Puslapdik Kemendikbudristek No. 0412/P3/PIP/2026 tentang Penetapan Siswa Penerima PIP SD Tahap I",
+  "jenjang_id": "2",
+  "nominal": 450000,
   "tahun": 2026,
-  "triwulan_id": "Triwulan I",
-  "triwulan_raw_id": "TW-01",
-  "triwulan": {
-    "id": "TW-01",
-    "uraian": "Triwulan I"
+  "file": "sk_pemberian_pip_sd_tahap1_2026.pdf"
+}
+SK Pemberian PIP SMP Tahap I T.A 2026:
+{
+  "id": "pip-dukung-2026-smp-01",
+  "uraian": "SK Penetapan Penerima Program Indonesia Pintar (PIP) Jenjang SMP Kelas VII-IX Tahap I Tahun 2026",
+  "jenjang_id": "3",
+  "nominal": 750000,
+  "tahun": 2026,
+  "file": "sk_penetapan_pip_smp_tahap1_2026.pdf"
+}
+Berita Acara Penetapan Siswa Kurang Mampu Layak PIP SDN 2 Buke:
+{
+  "id": "pip-dukung-2026-sd-02",
+  "uraian": "Berita Acara Rapat Dewan Guru & Komite Sekolah Usulan Nominasi Tambahan PIP Afirmasi 2026",
+  "jenjang_id": "2",
+  "nominal": 450000,
+  "tahun": 2026,
+  "file": "ba_usulan_afirmasi_pip_sdn2buke_2026.pdf"
+}
+SK Pemberian PIP Tahap II Relaksasi SMPN Satap 16 Konsel:
+{
+  "id": "pip-dukung-2026-smp-02",
+  "uraian": "SK Kuota Penerima PIP Jenjang SMP Jalur DTKS dan Rekomendasi Pemda Tahap II Tahun 2026",
+  "jenjang_id": "3",
+  "nominal": 750000,
+  "tahun": 2026,
+  "file": "sk_kuota_pip_smp_satap16_tahap2.pdf"
+}
+```
+
+---
+### 8. Data Penerima (Bantuan PIP)
+**Kategori:** `Usulan Sekolah > Usulan Bantuan PIP`  
+**Route Frontend:** [`/admin/usulan/pip/data-penerima`](http://localhost:3000/admin/usulan/pip/data-penerima)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/usulan/pip/data-penerima`  
+**Tabel Database:** `usulan_pip_penerima`  
+
+#### Deskripsi & Bisnis Logika
+> Modul ini digunakan untuk memetakan dan menetapkan peserta didik aktif yang berhak menerima penyaluran dana bantuan PIP berdasarkan induk dokumen data pendukung yang telah diinput sebelumnya. Operator sekolah memilih program data pendukung PIP terkait, kemudian mencentang nama-nama siswa (terintegrasi dari database master siswa sekolah) yang terdaftar pada rekening SimPel (Simpanan Pelajar) BRI/BNI untuk didaftarkan sebagai penerima bantuan tunai.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "pendukung_id": "string <option>, (dipilih dari list data pendukung PIP yang telah dibuat sebelumnya <4.2.1>)",
+  "siswa_id": "string <option> (di pilih dari list siswa yang sudah kita buat sebelumnya <16.2>)"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Penetapan Siswa Penerima PIP SDN 4 Ranomeeto:
+{
+  "form": {
+    "pendukung_id": "pip-dukung-2026-sd-01"
   },
-  "jenis_id": "TPG (Tunjangan Profesi Guru)",
-  "jenis_raw_id": "JP-01",
-  "jenis": {
-    "id": "JP-01",
-    "uraian": "TPG (Tunjangan Profesi Guru)"
-  },
-  "guru_id": "Hj. Rasni, S.Pd (197804122005012004)",
-  "uraian": "Pengajuan berkas SKTP dan daftar hadir Triwulan I",
-  "status": 1,
-  "pesan": "Berkas lengkap dan sesuai.",
-  "lampiran": [
+  "lokasi": [
     {
-      "id": "UTL-001",
-      "usulan_id": "UTG-001",
-      "uraian": "SKTP Semester Genap 2026",
-      "file": "/uploads/usulan-tunjangan/sktp.pdf"
+      "id": "siswa-sd-0101",
+      "nama": "Aditya Pratama Saputra",
+      "nisn": "0145892301",
+      "kelas": "Kelas IV A"
+    },
+    {
+      "id": "siswa-sd-0102",
+      "nama": "Siti Nur Halizah",
+      "nisn": "0152489104",
+      "kelas": "Kelas IV A"
+    }
+  ]
+}
+Penetapan Siswa Penerima PIP SMPN 22 Konawe Selatan:
+{
+  "form": {
+    "pendukung_id": "pip-dukung-2026-smp-01"
+  },
+  "lokasi": [
+    {
+      "id": "siswa-smp-0205",
+      "nama": "Fahri Alamsyah",
+      "nisn": "0104889211",
+      "kelas": "Kelas VIII B"
+    },
+    {
+      "id": "siswa-smp-0206",
+      "nama": "Aisyah Putri Rahmadani",
+      "nisn": "0112456782",
+      "kelas": "Kelas VIII C"
+    }
+  ]
+}
+Penetapan Siswa Tambahan PIP Afirmasi SDN 2 Buke:
+{
+  "form": {
+    "pendukung_id": "pip-dukung-2026-sd-02"
+  },
+  "lokasi": [
+    {
+      "id": "siswa-sd-0312",
+      "nama": "Muhamad Rizky Kurniawan",
+      "nisn": "0167812903",
+      "kelas": "Kelas V"
+    }
+  ]
+}
+Penetapan Siswa PIP SMP Satap 16 Konawe Selatan:
+{
+  "form": {
+    "pendukung_id": "pip-dukung-2026-smp-02"
+  },
+  "lokasi": [
+    {
+      "id": "siswa-smp-0401",
+      "nama": "Rian Hidayatullah",
+      "nisn": "0098471205",
+      "kelas": "Kelas IX A"
+    },
+    {
+      "id": "siswa-smp-0402",
+      "nama": "Dewi Sartika",
+      "nisn": "0097612984",
+      "kelas": "Kelas IX B"
     }
   ]
 }
 ```
 
-#### 4. Endpoint Gabungan untuk Dropdown Form (`/api/v1/admin/master/lookup`)
-Agar frontend tidak perlu memanggil banyak request terpisah saat membuka halaman yang memiliki banyak dropdown master (seperti **Sarpras Bangunan**, **Jurnal Guru Kelas**, atau **PPDB**), sediakan satu endpoint *batch lookup*:
-- `GET /api/v1/admin/master/lookup?keys=kepemilikan,bangunan,jenis_bantuan,sumber_dana`
-- **Response `200 OK`**:
+---
+### 9. Usulan Data Assessment
+**Kategori:** `Usulan Sekolah`  
+**Route Frontend:** [`/admin/usulan/assessment`](http://localhost:3000/admin/usulan/assessment)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/usulan/assessment`  
+**Tabel Database:** `usulan_assessment`  
+
+#### Deskripsi & Bisnis Logika
+> Modul ini digunakan oleh satuan pendidikan untuk menginput status moda pelaksanaan sekolah (Mandiri atau Menumpang pada sekolah lain), jumlah siswa peserta asesmen (siswa kelas 6 untuk jenjang SD, atau siswa kelas 7/8 untuk jenjang SMP), rincian gender peserta (Laki-laki dan Perempuan), jumlah peserta berdasarkan implementasi kurikulum (K-13 atau Kurikulum Merdeka).
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
 ```json
 {
-  "success": true,
-  "statusCode": 200,
-  "data": {
-    "kepemilikan": [
-      { "id": "KPM-01", "uraian": "Milik" },
-      { "id": "KPM-02", "uraian": "Sewa" },
-      { "id": "KPM-03", "uraian": "Pinjam" },
-      { "id": "KPM-04", "uraian": "Bukan Milik" }
-    ],
-    "bangunan": [
-      { "id": "KBG-01", "uraian": "Baik" },
-      { "id": "KBG-02", "uraian": "Rusak Ringan" },
-      { "id": "KBG-03", "uraian": "Rusak Sedang" },
-      { "id": "KBG-04", "uraian": "Rusak Berat" }
-    ],
-    "jenis_bantuan": [
-      { "id": "JBT-01", "uraian": "DAK Fisik Pendidikan" },
-      { "id": "JBT-02", "uraian": "APBD Kabupaten" }
-    ],
-    "sumber_dana": [
-      { "id": "SDN-01", "uraian": "DAK" },
-      { "id": "SDN-02", "uraian": "APBD" },
-      { "id": "SDN-03", "uraian": "BOS" }
-    ]
-  }
+  "id": "string, <generate otomatis | backend>",
+  "status_sekolah_id": "string <option>, (dipilih dari list status pelaksanaan: 0 = 'Negeri', 1 = Swasta, 2 = Satuan Pendidikan Kerjasama)",
+  "jml_siswa": "number <input>, (total jumlah siswa peserta asesmen; kelas 6 untuk SD / kelas 7 untuk SMP)",
+  "jml_laki": "number <input>, (jumlah peserta asesmen berjenis kelamin laki-laki)",
+  "jml_perempuan": "number <input>, (jumlah peserta asesmen berjenis kelamin perempuan)",
+  "kurikulum_k13": "number <input>, (jumlah siswa yang mengikuti asesmen dengan acuan Kurikulum 2013)",
+  "kurikulum_kurmer": "number <input>, (jumlah siswa yang mengikuti asesmen dengan acuan Kurikulum Merdeka)",
+  "file": "string <input>, (lampiran file excel data nominasi dan kesiapan peserta asesmen)"
 }
 ```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Kesiapan ANBK Mandiri SMPN 22 Konawe Selatan:
+{
+  "id": "asesmen-smp22-2026",
+  "status_sekolah_id": "1",
+  "jml_siswa": 50,
+  "jml_laki": 24,
+  "jml_perempuan": 26,
+  "kurikulum_k13": 0,
+  "kurikulum_kurmer": 50,
+  "file": "dnt_peserta_anbk_smpn22_konsel_2026.xlsx"
+}
+Kesiapan Asesmen Mandiri SDN 4 Ranomeeto:
+{
+  "id": "asesmen-sd4-2026",
+  "status_sekolah_id": "1",
+  "jml_siswa": 35,
+  "jml_laki": 18,
+  "jml_perempuan": 17,
+  "kurikulum_k13": 0,
+  "kurikulum_kurmer": 35,
+  "file": "dnt_nominasi_anbk_sdn4_ranomeeto.xlsx"
+}
+Kesiapan Asesmen Menumpang SMP Satap 16 Konawe Selatan:
+{
+  "id": "asesmen-satap16-2026",
+  "status_sekolah_id": "2",
+  "jml_siswa": 22,
+  "jml_laki": 12,
+  "jml_perempuan": 10,
+  "kurikulum_k13": 0,
+  "kurikulum_kurmer": 22,
+  "file": "data_peserta_anbk_menumpang_satap16.xlsx"
+}
+Kesiapan ANBK Mandiri SDN 2 Buke:
+{
+  "id": "asesmen-sd2buke-2026",
+  "status_sekolah_id": "1",
+  "jml_siswa": 30,
+  "jml_laki": 14,
+  "jml_perempuan": 16,
+  "kurikulum_k13": 0,
+  "kurikulum_kurmer": 30,
+  "file": "form_peserta_asesmen_sdn2buke_2026.xlsx"
+}
+```
+
+---
+### 10. Usulan Rekonsiliasi Dana BOSP
+**Kategori:** `Usulan Sekolah`  
+**Route Frontend:** [`/admin/usulan/rekonsiliasi-bosp`](http://localhost:3000/admin/usulan/rekonsiliasi-bosp)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/usulan/rekonsiliasi-bosp`  
+**Tabel Database:** `usulan_rekonsiliasi_bosp`  
+
+#### Deskripsi & Bisnis Logika
+> Modul ini digunakan oleh Kepala Satuan Pendidikan sekolah untuk mengajukan rekonsiliasi laporan pertanggungjawaban (SPJ) keuangan dan aset BOSP ke Dinas Pendidikan dan Kebudayaan. Pengusul membuat usulan per semester dan tahun anggaran berjalan, kemudian mengunggah 25-26 rincian kategori dokumen fisik pertanggungjawaban (Buku Kas Umum, Buku Kas Pembantu Pajak, Rekening Koran Giro Bank Sultra, SPTJM BOSP bermaterai, Kuitansi/Nota SIPLah, Berita Acara Rekonsiliasi Aset, dan dokumen perubahan RKAS). Modul ini juga memfasilitasi monitoring hasil koreksi verifikator dinas (tahap Cek Benar dan Cek Lengkap) serta pengunduhan Surat Rekomendasi Bebas Rekonsiliasi setelah seluruh dokumen dinyatakan valid.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "tahun": "string <option>, (dipilih dari list tahun anggaran: '2025', '2026')",
+  "semester_id": "string <option>, (dipilih dari list semester: '1' = 'Semester I (Januari - Juni)', '2' = 'Semester II (Juli - Desember)')"
+}
+```
+
+**Form Unggah Lampiran Kategori Rekonsiliasi (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "usulan_id": "string <relation: usulan_rekon.id>",
+  "kategori_id": "string <option>, (di pilih dari list kategori yang sudah kita buat sebelumnya <16.13>)",
+  "uraian": "string <input>, (keterangan nama dokumen yang diunggah)",
+  "file": "string <input>, (lampiran dokumen digital laporan BOSP)"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Usulan Rekonsiliasi BOSP Semester I - SDN 4 Ranomeeto:
+Sekolah / Unit Kerja: SD Negeri 4 Ranomeeto
+Tahun Anggaran: 2026
+Semester: Semester I (Januari - Juni)
+Status Usulan: Sedang Diproses Verifikasi
+Rincian Dokumen Lampiran yang Diunggah:
+Kategori 1 (Buku Kas Umum): Buku Kas Umum (BKU) Periode Januari - Juni 2026 SDN 4 Ranomeeto (File: bku_sdn4_ranomeeto_sem1_2026.pdf)
+Kategori 3 (Buku Pembantu Bank): Rekening Koran Giro BOSP Bank Sultra Cap Asli Semester I (File: rekening_koran_bank_sultra_sdn4.pdf)
+Kategori 4 (Buku Pembantu Pajak): Rekapitulasi Pajak PPh 21, PPh 23, dan PPN beserta Bukti Setor NTPN (File: pajak_bosp_sem1_sdn4.pdf)
+Kategori 6 (SPTJM): Surat Pernyataan Tanggung Jawab Mutlak Belanja BOSP Bermaterai Rp 10.000,- (File: sptjm_bosp_sdn4_sem1.pdf)
+Usulan Rekonsiliasi BOSP Semester I - SMPN 22 Konawe Selatan
+Sekolah / Unit Kerja: SMP Negeri 22 Konawe Selatan
+Tahun Anggaran: 2026
+Semester: Semester I (Januari - Juni)
+Status Usulan: Sedang Diproses Verifikasi
+Rincian Dokumen Lampiran yang Diunggah:
+Kategori 1 (Buku Kas Umum): Buku Kas Umum (BKU) Penutupan Semester I Tahun 2026 (File: bku_smpn22_konsel_sem1.pdf)
+Kategori 4 (Buku Pembantu Pajak): Buku Pembantu Pajak dan Bukti Transaksi e-Billing (File: buku_pembantu_pajak_smpn22.pdf)
+Kategori 7 (Rincian Objek Belanja): Kuitansi Pembayaran Honor GTT/PTT dan Langganan Daya & Jasa Internet (File: spj_belanja_pegawai_jasa_smpn22.pdf)
+Kategori 8 (LRA BOSP): Laporan Realisasi Penyerapan Dana BOS Reguler Tahap 1 (File: lra_bos_reguler_tahap1_smpn22.pdf)
+Usulan Rekonsiliasi BOSP Semester II - SDN 2 Buke
+Sekolah / Unit Kerja: SD Negeri 2 Buke
+Tahun Anggaran: 2026
+Semester: Semester II (Juli - Desember)
+Status Usulan: Sedang Diproses Verifikasi
+Rincian Dokumen Lampiran yang Diunggah:
+Kategori 1 (Buku Kas Umum): Buku Kas Umum (BKU) Akhir Tahun Anggaran 2026 (File: bku_tahunan_sdn2buke_2026.pdf)
+Kategori 8 (LRA BOSP): Laporan Realisasi Anggaran (LRA) Penyerapan Dana BOS Reguler Semester II (File: lra_bosp_sem2_sdn2buke_2026.pdf)
+Kategori 11 (Belanja Modal): Faktur Pembelian Buku Teks Utama Kurikulum Merdeka via SIPLah (File: faktur_siplah_buku_sdn2buke.pdf)
+Kategori 25 (RKAS): Dokumen Kertas Kerja RKAS Perubahan Tahun Anggaran 2026 (File: rkas_perubahan_2026_sdn2buke.pdf)
+Usulan Rekonsiliasi BOSP Semester II - SMP Satap 16 Konawe Selatan
+Sekolah / Unit Kerja: SMP Satap 16 Konawe Selatan
+Tahun Anggaran: 2026
+Semester: Semester II (Juli - Desember)
+Status Usulan: Sedang Diproses Verifikasi
+Rincian Dokumen Lampiran yang Diunggah:
+Kategori 1 (Buku Kas Umum): BKU Periode Juli sampai Desember 2026 SMP Satap 16 (File: bku_sem2_smp_satap16.pdf)
+Kategori 3 (Buku Pembantu Bank): Saldo Kas Bank Sultra per 31 Desember 2026 (File: buku_bank_desember_satap16.pdf)
+Kategori 14 (Aset/Inventaris): Berita Acara Rekonsiliasi Aset Peralatan TIK Chromebook BOSP Kinerja (File: ba_rekonsiliasi_aset_chromebook.pdf)
+Kategori 26 (Dana Hibah): Laporan Pertanggungjawaban Bantuan Dana Hibah Operasional Sekolah (File: spj_dana_hibah_satap16_2026.pdf)
+```
+
+---
+### 11. Kegiatan Sekolah
+**Kategori:** `Operasional Sekolah`  
+**Route Frontend:** [`/admin/kegiatan-sekolah`](http://localhost:3000/admin/kegiatan-sekolah)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/kegiatan-sekolah`  
+**Tabel Database:** `kegiatan_sekolah`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini menampilkan dokumentasi dan pelaporan aktivitas sekolah di mana seluruh guru dapat mengunggah bukti pelaksanaan kegiatan belajar, ekstrakurikuler, workshop, maupun peringatan hari besar ke dalam sistem.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "judul ": "string <input>, (judul kegiatan)",
+  "deskripsi ": "string <input>, (deskripsi kegiatan)",
+  "tanggal ": "date <input>, (tanggal kegiatan)",
+  "tahun ": "number <input>, (tahun pengadaan peralatan/aset)",
+"file": "string <input>, (Berkas dokumen bukti kepemilikan/sertifikat tanah atau path URL file)",
+  "link ": "string <input>, (link youtube)",
+  "nip ": "string, <generate otomatis | backend>"
+  "unit_kerja ": "string, <generate otomatis | backend>"
+  "created_at": "date, <generate otomatis | backend>",
+  "created_by": "string, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Nama Kegiatan: Upacara Peringatan Hari Pendidikan Nasional dan Pentas Seni Siswa
+Deskripsi Kegiatan: Pelaksanaan upacara bendera bersama seluruh staf dewan guru dan murid yang dilanjutkan dengan penampilan bakat seni tari daerah serta pembagian apresiasi siswa berprestasi.
+Tanggal Kegiatan: 2026-05-02
+Foto: dokumentasi_hardiknas_2026.jpg
+Link YouTube: [https://www.youtube.com/watch?v=kEg123XYZ01](https://www.youtube.com/watch?v=kEg123XYZ01)
+```
+
+---
+### 12. Rombel Jenjang PAUD
+**Kategori:** `Rombel`  
+**Route Frontend:** [`/admin/rombel/paud`](http://localhost:3000/admin/rombel/paud)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/rombel/paud`  
+**Tabel Database:** `rombel_paud`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan daftar rombongan belajar khusus kelompok bermain dan pendidikan anak usia dini (PAUD/TK/KB) sebagai acuan pengelompokan usia perkembangan dan penugasan guru pendamping.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "kategori": "string, <generate otomatis | frontend: 'Jenjang PAUD'>",
+  "jns_rombel": "number <option>, (dipilih dari list jenis rombel [0: 'Kelas', 1: 'Kelas Jauh/Kecil', 2: 'Kelas Terbuka'])",
+  "tgkt_pendidikan": "string <option>, (di pilih dari list jenjang yang sudah kita buat sebelumnya <16.5>)",
+  "kurikulum": "string <input>, (kurikulum pembelajaran)",
+  "nama": "string <input>, (nama rombongan belajar)",
+  "wali_kelas": "string <option>, (dipilih dari list guru/pegawai sebagai wali kelas yang namanya ada pada simpeg)",
+  "ruang_kelas": "string <option>, (di pilih dari list ruang yang sudah kita buat sebelumnya <3.3>)",
+  "unit_kerja": "string, <generate otomatis | backend>",
+  "nip": "string, <generate otomatis | backend>",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Kelompok Bermain Kasih Ibu: Rombel kelompok bermain (KB) untuk rentang usia 3–4 tahun.
+TK-A Melati: Rombel tingkat TK-A untuk anak usia 4–5 tahun pada semester aktif.
+TK-B Bintang: Rombel tingkat TK-B persiapan masuk jenjang pendidikan dasar.
+```
+
+---
+### 13. Rombel Jenjang SD
+**Kategori:** `Rombel`  
+**Route Frontend:** [`/admin/rombel/sd`](http://localhost:3000/admin/rombel/sd)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/rombel/sd`  
+**Tabel Database:** `rombel_sd`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan daftar rombongan belajar tingkat sekolah dasar sebagai acuan pengelompokan usia perkembangan dan penugasan guru pendamping.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "kategori": "string, <generate otomatis | frontend: 'Jenjang SD>",
+  "jns_rombel": "number <option>, (dipilih dari list jenis rombel [0: 'Kelas', 1: 'Kelas Jauh/Kecil', 2: 'Kelas Terbuka'])",
+  "tgkt_pendidikan": "string <option>, (di pilih dari list jenjang yang sudah kita buat sebelumnya <16.5>)",
+  "kurikulum": "string <input>, (kurikulum pembelajaran)",
+  "nama": "string <input>, (nama rombongan belajar)",
+  "wali_kelas": "string <option>, (dipilih dari list guru/pegawai sebagai wali kelas yang namanya ada pada simpeg)",
+  "ruang_kelas": "string <option>, (di pilih dari list ruang yang sudah kita buat sebelumnya <3.3>)",
+  "unit_kerja": "string, <generate otomatis | backend>",
+  "nip": "string, <generate otomatis | backend>",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Kelas 1A: Rombel fase A tingkat awal untuk siswa kelas 1 paralel A di SDN 1 Ranomeeto.
+Kelas 3: Rombel tingkat 3 tunggal untuk kegiatan pembelajaran tematik terpadu di SDN 5 Kolono.
+Kelas 6B: Rombel tingkat akhir fase C persiapan kelulusan di SDN 3 Konda.
+```
+
+---
+### 14. Rombel Jenjang SMP
+**Kategori:** `Rombel`  
+**Route Frontend:** [`/admin/rombel/smp`](http://localhost:3000/admin/rombel/smp)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/rombel/smp`  
+**Tabel Database:** `rombel_smp`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan daftar rombongan belajar tingkat Sekolah Menengah Pertama (kelas 7 hingga kelas 9) untuk memetakan penugasan guru mata pelajaran, wali kelas, serta pembagian jadwal jurnal mengajar per rombel.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "kategori": "string, <generate otomatis | frontend: 'Jenjang SMP>",
+  "jns_rombel": "number <option>, (dipilih dari list jenis rombel [0: 'Kelas', 1: 'Kelas Jauh/Kecil', 2: 'Kelas Terbuka'])",
+  "tgkt_pendidikan": "string <option>, (di pilih dari list jenjang yang sudah kita buat sebelumnya <16.5>)",
+  "kurikulum": "string <input>, (kurikulum pembelajaran)",
+  "nama": "string <input>, (nama rombongan belajar)",
+  "wali_kelas": "string <option>, (dipilih dari list guru/pegawai sebagai wali kelas yang namanya ada pada simpeg)",
+  "ruang_kelas": "string <option>, (di pilih dari list ruang yang sudah kita buat sebelumnya <3.3>)",
+  "unit_kerja": "string, <generate otomatis | backend>",
+  "nip": "string, <generate otomatis | backend>",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Kelas 7A: Rombel fase D tingkat awal kelas 7 paralel A di SMPN Satap 16 Konsel.
+Kelas 8B: Rombel tingkat menengah kelas 8 paralel B untuk distribusi jadwal guru mapel.
+Kelas 9A: Rombel tingkat akhir kelas 9 persiapan asesmen akhir jenjang pendidikan menengah pertama.
+```
+
+---
+### 15. Komunitas Belajar
+**Kategori:** `Operasional Sekolah`  
+**Route Frontend:** [`/admin/komunitas-belajar`](http://localhost:3000/admin/komunitas-belajar)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/komunitas-belajar`  
+**Tabel Database:** `komunitas_belajar`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan pengelolaan kelompok komunitas belajar pendidik di satuan pendidikan, mencakup identitas komunitas serta struktur kepengurusan guru penggerak yang dapat ditambahkan secara fleksibel sesuai peran dan fungsi jabatan masing-masing.
+
+#### Kontrak Payload JSON (API Contract)
+**Form Komunitas Belajar (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "uraian": "string <input>, (nama komunitas belajar)",
+  "jns_kegiatan": "string <option>, (dipilih dari list jenis kegiatan: 0 = 'Siklus Refleksi Awal', 1 = 'Siklus Perencanaan', 2 = 'Siklus Implementasi', 3 = 'Siklus Evaluasi')",
+  "deskripsi": "string (HTML/Text) <input: q-editor>, (deskripsi kegiatan komunitas belajar)",
+  "file": "file/binary <upload>, (lampiran dokumen foto kegiatan atau berkas PDF)",
+  "type": "string, <generate otomatis | backend>",
+  "unit_kerja": "string, <generate otomatis | backend>",
+  "nip": "string, <generate otomatis | backend>",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+**Form Komunitas Belajar (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "kombel_id": "string, <di pilih dari kombel yang sudah kita buat sebelumnya)",
+  "nama_id": "string <option>, (dipilih dari list guru/pegawai yang namanya ada pada simpeg)",
+  "jabatan": "string <option>, (dipilih dari list jabatan: 'Ketua', 'Wakil', 'Sekretaris', 'Koordinator')",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Ketua: Pendidik yang bertindak sebagai penanggung jawab utama dan pengarah agenda kegiatan komunitas belajar.
+Wakil: Pendidik yang mendampingi ketua dalam koordinasi teknis pelaksanaan program kombel.
+Sekretaris: Pendidik yang bertugas mendokumentasikan notula diskusi, daftar hadir, serta administrasi pelaporan kombel.
+Koordinator: Pendidik yang memimpin bidang atau kelompok kerja teknis spesifik dalam forum kombel.
+```
+
+---
+### 16. Jurnal Guru Kelas
+**Kategori:** `Jurnal V2`  
+**Route Frontend:** [`/admin/jurnal/guru-kelas`](http://localhost:3000/admin/jurnal/guru-kelas)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/jurnal/guru-kelas`  
+**Tabel Database:** `jurnal_guru_kelas`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan pencatatan aktivitas harian pembelajaran tematik terpadu oleh Guru Kelas, mencakup tema dan materi pokok, nomor pertemuan, integrasi model dan metode pembelajaran, catatan sintaks kegiatan belajar, instrumen penilaian, rekapitulasi kehadiran peserta didik secara terperinci (hadir, izin, sakit, alpa, beserta persentasenya), hingga dokumentasi foto kegiatan kelas.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "tema": "string <input>, (tema pembelajaran yang diajarkan)",
+  "materi_pokok": "string <input>, (materi pokok atau subtema pembelajaran)",
+  "pertemuan_ke": "number <input>, (nomor urut pertemuan pembelajaran)",
+  "tgl": "date <input>, (tanggal pelaksanaan pembelajaran)",
+  "model_pembelajaran": "array/string <option: multiple>, (di pilih dari list model pembelajaran yang sudah kita buat sebelumnya <16.10>)",
+  "metode_pembelajaran": "array/string <option: multiple>, (dipilih dari list metode pembelajaran: 'Ceramah', 'Diskusi', 'Tanya Jawab', 'Demonstrasi', 'Penugasan')",
+  "kegiatan": "string (HTML/Text) <input: q-editor>, (uraian tahapan kegiatan belajar mengajar)",
+  "penilaian": "array/string <option: multiple>, (dipilih dari list penilaian pembelajaran: 'Penilaian Sikap', 'Penilaian Pengetahuan', 'Penilaian Keterampilan')",
+  "siswa_hadir": "number <input>, (jumlah peserta didik yang hadir)",
+  "siswa_izin": "number <input>, (jumlah peserta didik yang izin)",
+  "siswa_sakit": "number <input>, (jumlah peserta didik yang sakit)",
+  "siswa_alpa": "number <input>, (jumlah peserta didik tanpa keterangan)",
+  "persentase": "number <input>, (persentase kehadiran siswa, contoh: 95)",
+  "keterangan": "string <input>, (catatan refleksi atau kendala saat pembelajaran berlangsung)",
+  "file": "file/binary <upload>, (lampiran foto dokumentasi suasana kegiatan belajar di kelas)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+a. Tema 1 Diriku (SDN 2 BUKE): Pertemuan ke-1 materi "Aku dan Teman Baru" menggunakan model Problem Based Learning dan metode Diskusi, dengan tingkat kehadiran 100%.
+b. Tema 2 Kegemaranku (SDN 5 PALANGGA SELATAN): Pertemuan ke-3 materi "Gemar Berolahraga dan Pola Hidup Sehat" menggunakan metode Demonstrasi dan Praktik, dengan tingkat kehadiran 96%.
+c. Tema Indahnya Kebersamaan (SDN 1 BAULA): Pertemuan ke-4 materi "Keberagaman Budaya Bangsaku" menerapkan model Project Based Learning membuat kliping rumah adat, dengan kehadiran 93%.
+d. Tema Lingkungan Bersih dan Sehat (SDN 3 LAEYA): Pertemuan ke-2 materi "Menjaga Kebersihan Lingkungan Sekolah" dengan model Discovery Learning dan penilaian sikap observasi, kehadiran 95%.
+```
+
+---
+### 17. Jurnal Kepala Sekolah
+**Kategori:** `Jurnal V2`  
+**Route Frontend:** [`/admin/jurnal/kepala-sekolah`](http://localhost:3000/admin/jurnal/kepala-sekolah)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/jurnal/kepala-sekolah`  
+**Tabel Database:** `jurnal_kepala_sekolah`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan rekaman jurnal tugas kepemimpinan dan manajerial Kepala Sekolah, mencakup uraian agenda manajerial maupun supervisi, target capaian yang ditetapkan, hasil/output yang terealisasi, stakeholder yang dilibatkan dalam kegiatan, uraian catatan evaluasi pelaksanaan, serta bukti fisik dokumentasi.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "uraian": "string <input>, (uraian tugas atau kegiatan kepala sekolah)",
+  "target": "string <input>, (target atau sasaran yang ingin dicapai dari kegiatan)",
+  "hasil": "string <input>, (hasil atau output nyata yang berhasil dicapai)",
+  "keterlibatan": "string <input>, (pihak-pihak terkait yang dilibatkan, contoh: 'Dewan Guru', 'Pengawas Sekolah', 'Komite')",
+  "tgl": "date <input>, (tanggal pelaksanaan kegiatan kepala sekolah)",
+  "keterangan": "string (HTML/Text) <input: q-editor>, (catatan detail, evaluasi manajerial, atau arahan tindak lanjut)",
+  "file": "file/binary <upload>, (lampiran foto kegiatan, notula rapat dinas, atau berkas pendukung)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Supervisi Akademik Guru (SMPN SATAP 16 KONSEL): Penilaian KBM pada 3 guru mata pelajaran dengan target kesiapan modul ajar berdiferensiasi, hasil terlaksana 100% melibatkan pengawas sekolah.
+Rapat Pleno Komite Sekolah (SDN 2 BUKE): Pembahasan program penguatan literasi dan sarpras pendukung bersama seluruh pengurus komite dan perwakilan orang tua murid.
+Evaluasi Penggunaan Anggaran BOS (SDN 5 PALANGGA SELATAN): Verifikasi berkas SPJ belanja operasional triwulan berjalan bersama tim pengelola BOS dengan hasil dokumen lengkap dan akuntabel.
+Pembinaan Disiplin dan Kinerja Guru (SDN 1 BAULA): Briefing rutin mingguan terkait ketertiban administrasi mengajar dan presensi ASN/P3K dengan hasil kesepakatan target administrasi tepat waktu.
+```
+
+---
+### 18. Jurnal Pengawas
+**Kategori:** `Jurnal V2`  
+**Route Frontend:** [`/admin/jurnal/pengawas`](http://localhost:3000/admin/jurnal/pengawas)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/jurnal/pengawas`  
+**Tabel Database:** `jurnal_pengawas`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan laporan kegiatan visitasi, pembinaan, pemantauan standar nasional pendidikan, dan evaluasi oleh Pengawas Sekolah terhadap sekolah binaan, mencakup identitas sekolah tujuan, kepala sekolah yang didampingi, jenis pendampingan, temuan akademik, temuan manajerial, rumusan tindak lanjut pembinaan, dan tugas kepengawasan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "unit_kerja": "string <option>, (dipilih dari list sekolah binaan yang dikunjungi pengawas, untuk data unit kerja diambil dari simpeg)",
+  "kepsek": "string <option>, (dipilih dari list kepala sekolah / biodata PTK penanggung jawab sekolah)",
+  "pendampingan_id": "string <option>, (di pilih dari list master pendampingan yang sudah kita buat sebelumnya <16.11>)",
+  "temuan_akademik": "string <input>, (poin temuan pengawasan pada aspek proses kegiatan belajar mengajar dan perangkat guru)",
+  "temuan_manajerial": "string <input>, (poin temuan pengawasan pada aspek administrasi, sarpras, dan tata kelola)",
+  "tindak_lanjut": "string <input: textarea>, (arahan rekomendasi dan tindak lanjut perbaikan untuk sekolah)",
+  "tugas_id": "string <option>, (di pilih dari list master tugas yang sudah kita buat sebelumnya <16.12>)",
+  "tgl": "date <input>, (tanggal pelaksanaan visitasi pengawas)",
+  "file": "file/binary <upload>, (lampiran foto visitasi atau lembar instrumen hasil pengawasan)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Pendampingan Implementasi Kurikulum Merdeka (SDN 2 BUKE): Temuan akademik perangkat ajar Fase B masih menggunakan pola lama; tindak lanjut berupa bimbingan teknis penyusunan modul ajar berbasis asesmen awal.
+Monitoring Asesmen Nasional Berbasis Komputer (SMPN SATAP 16 KONSEL): Temuan manajerial berupa keterbatasan bandwidth internet; tindak lanjut berupa rekomendasi koordinasi penyedia jaringan dan penyiapan cadangan tethering modem.
+Supervisi Tata Kelola Dokumen KOSP (SDN 5 PALANGGA SELATAN): Evaluasi keselarasan kurikulum operasional satuan pendidikan dengan karakteristik lokal sekolah; tindak lanjut revisi pengesahan KOSP tahun ajaran berjalan.
+Evaluasi Standar Sarana dan Prasarana (SDN 3 LAEYA): Temuan kondisi ruang kelas yang membutuhkan perbaikan plafon; tindak lanjut verifikasi pengajuan usulan rehabilitasi melalui sistem Sikola Pindara.
+```
+
+---
+### 19. Jurnal BK
+**Kategori:** `Jurnal V2`  
+**Route Frontend:** [`/admin/jurnal/bk`](http://localhost:3000/admin/jurnal/bk)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/jurnal/bk`  
+**Tabel Database:** `jurnal_bk`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan rekam jejak penyelenggaraan layanan Bimbingan dan Konseling bagi peserta didik, mencakup nama peserta didik, kelas, topik materi bimbingan, identifikasi permasalahan, model kegiatan layanan (individual/kelompok), jenis bidang layanan BK (pribadi, sosial, belajar, karir), hasil konseling yang dicapai, rencana tindak lanjut penanganan, serta dokumen bukti penanganan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "nm_siswa": "string <input>, (nama lengkap siswa yang menerima layanan BK || mengambil dari data master siswa yang telah di buat sebelumnya <16.2>)",
+  "kelas_id": "string <option>, (di pilih dari list master kelas yang sudah kita buat sebelumnya <16.4.3>)",
+  "tgl": "date <input>, (tanggal pelaksanaan sesi layanan bimbingan konseling)",
+  "materi_layanan": "string <input: textarea>, (topik atau materi bimbingan yang diberikan)",
+  "permasalahan": "string <input: textarea>, (uraian gejala atau latar belakang masalah yang dihadapi siswa)",
+  "mdl_kegiatan_id": "string <option>, (di pilih dari list BK kegiatan layanan yang sudah kita buat sebelumnya <16.9>)",
+  "jns_layanan_id": "string <option>, (di pilih dari list BK jenis layanan yang sudah kita buat sebelumnya <16.8>)",
+  "hasil": "string <input: textarea>, (hasil capaian atau kesepakatan komitmen solusi setelah sesi konseling)",
+  "rnc_tindak_lanjut": "string <input: textarea>, (rencana tindak lanjut)",
+  "keterangan": "string <input: textarea>, (catatan perkembangan kondisi siswa atau status kasus)",
+  "file": "file/binary <upload>, (lampiran foto sesi saat bimbingan konseling)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Konseling Individual Penanganan Kedisiplinan (SMPN SATAP 16 KONSEL): Kasus sering terlambat pada siswa Kelas VIII A dengan jenis Layanan Pribadi, hasil berupa komitmen jadwal bangun pagi dan tindak lanjut pemantauan buku monitoring harian.
+Bimbingan Kelompok Peningkatan Motivasi Belajar (SMPN SATAP 16 KONSEL): Sesi Layanan Belajar bagi 5 peserta didik Kelas IX B yang mengalami kejenuhan belajar menjelang ujian akhir, menghasilkan kesepakatan kelompok belajar terpadu.
+Mediasi Hubungan Sosial Antar Peserta Didik (SMPN 2 KONSEL): Penyelesaian perselisihan kesalahpahaman pergaulan di Kelas VII C melalui Layanan Sosial, menghasilkan penandatanganan kesepakatan damai dan saling menghargai.
+Bimbingan Karir Peminatan Studi Lanjutan (SMPN 1 PALANGGA): Pendampingan penjajakan minat dan potensi akademis bagi siswa Kelas IX A melalui Layanan Karir, untuk persiapan pemilihan jurusan jenjang SMA/SMK.
+```
+
+---
+### 20. Sekolah Penggerak
+**Kategori:** `Gallery`  
+**Route Frontend:** [`/admin/gallery/sekolah-penggerak`](http://localhost:3000/admin/gallery/sekolah-penggerak)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/gallery/sekolah-penggerak`  
+**Tabel Database:** `gallery_sekolah_penggerak`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan dokumentasi publikasi program dan kegiatan Program Sekolah Penggerak di satuan pendidikan, mencakup nama kegiatan, tujuan pelaksanaan, tahapan/proses kegiatan, hasil capaian transformasi sekolah, tautan video YouTube kegiatan, serta lampiran foto dokumentasi.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "kategori": "string, <generate otomatis | frontend/backend: 'Program Sekolah Penggerak'>",
+  "judul": "string <input>, (nama kegiatan Program Sekolah Penggerak)",
+"tujuan": "string <input: textarea>, (maksud dan tujuan pelaksanaan kegiatan)",
+  "tujuan": "string <input: textarea>, (penjelasan singkat pelaksanaan kegiatan)",
+  "proses": "string <input: textarea>, (tahapan alur atau proses pelaksanaan kegiatan)",
+  "hasil": "string <input: textarea>, (capaian atau dampak positif yang diraih sekolah)",
+  "link": "string <input: optional>, (tautan/link video kegiatan di YouTube jika ada)",
+  "file": "file/binary <upload>, (lampiran foto dokumentasi kegiatan)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Lokakarya Penguatan Komite Pembelajaran (SDN 2 BUKE): Peningkatan kapasitas guru dalam merancang modul ajar berbasis diferensiasi dengan hasil 100% guru menyusun perangkat ajar mandiri.
+Gelar Karya P5 Kewirausahaan (SMPN SATAP 16 KONSEL): Pameran hasil karya olahan pangan lokal siswa sebagai implementasi Projek Profil Pelajar Pancasila.
+Refleksi dan Evaluasi Implementasi Kurikulum Merdeka (SDN 5 PALANGGA SELATAN): Forum evaluasi berkala capaian numerasi dan literasi bersama fasilitator sekolah penggerak.
+Desiminasi Praktik Baik Digitalisasi Pembelajaran (SMPN 2 KONSEL): Pemanfaatan akun belajar.id dan Chromebook dalam asesmen formatif harian kelas.
+```
+
+---
+### 21. Gallery Program Guru Penggerak
+**Kategori:** `Gallery`  
+**Route Frontend:** [`/admin/gallery/guru-penggerak`](http://localhost:3000/admin/gallery/guru-penggerak)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/gallery/guru-penggerak`  
+**Tabel Database:** `gallery_guru_penggerak`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan portofolio kegiatan aksi nyata dan karya kepemimpinan pembelajaran oleh Calon Guru Penggerak maupun Guru Penggerak, mencakup deskripsi prakarsa perubahan, tujuan pembelajaran berpusat pada murid, proses implementasi di kelas/sekolah, hasil refleksi, tautan video, dan dokumentasi visual.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "kategori": "string, <generate otomatis | frontend/backend: 'Program Guru Penggerak'>",
+  "judul": "string <input>, (nama aksi nyata/kegiatan guru penggerak)",
+  "tujuan": "string <input: textarea>, (tujuan aksi nyata bagi murid dan ekosistem sekolah)",
+  "proses": "string <input: textarea>, (langkah pelaksanaan menggunakan alur BAGJA/metode aksi nyata)",
+  "hasil": "string <input: textarea>, (perubahan budaya positif dan capaian karakter peserta didik)",
+  "link": "string <input: optional>, (tautan video aksi nyata di YouTube)",
+  "file": "file/binary <upload>, (lampiran foto dokumentasi pelaksanaan aksi nyata)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Aksi Nyata Modul 1.4 Budaya Positif (SDN 2 BUKE): Pembentukan keyakinan kelas dan penerapan segitiga restitusi dalam mendisiplinkan murid tanpa hukuman fisik.
+Pendampingan Individu Praktik Coaching (SMPN SATAP 16 KONSEL): Sesi coaching rekan sejawat untuk mengidentifikasi potensi dan hambatan belajar siswa.
+Berbagi Praktik Baik Pemetaan Aset Sekolah Modul 3.2 (SDN 3 LAEYA): Pemanfaatan 7 modal aset utama lingkungan sekolah guna mendukung pembelajaran intrakurikuler.
+```
+
+---
+### 22. Gallery Program Organisasi Penggerak
+**Kategori:** `Gallery`  
+**Route Frontend:** [`/admin/gallery/organisasi-penggerak`](http://localhost:3000/admin/gallery/organisasi-penggerak)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/gallery/organisasi-penggerak`  
+**Tabel Database:** `gallery_organisasi_penggerak`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan dokumentasi pelaksanaan kegiatan program pendampingan dari Organisasi dalam upaya peningkatan kompetensi literasi, numerasi, dan penguatan karakter pendidik di sekolah sasaran.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "kategori": "string, <generate otomatis | frontend/backend: 'Program Organisasi Penggerak'>",
+  "judul": "string <input>, (nama kegiatan kemitraan POP)",
+  "tujuan": "string <input: textarea>, (tujuan program kemitraan organisasi penggerak)",
+  "proses": "string <input: textarea>, (metode pendampingan, bimtek, atau workshop yang diselenggarakan)",
+  "hasil": "string <input: textarea>, (peningkatan skor kompetensi pedagogik dan mutu pembelajaran)",
+  "link": "string <input: optional>, (tautan video dokumentasi di YouTube)",
+  "file": "file/binary <upload>, (lampiran foto kegiatan kemitraan)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Pelatihan Pembelajaran Berbasis Numerasi Kontekstual (SDN 2 BUKE): Workshop penerapan media matematika realistik bekerja sama dengan yayasan mitra POP.
+Penguatan Literasi Awal Kelas Bawah (SDN 5 PALANGGA SELATAN): Bimbingan teknis membaca terbimbing menggunakan buku bacaan berjenjang.
+Workshop Manajemen Berbasis Sekolah Ramah Anak (SMPN SATAP 16 KONSEL): Pelatihan tata kelola lingkungan belajar aman dan bebas dari perundungan.
+Pendampingan Model Asesmen Diagnostik Cepat (SDN 1 BAULA): Evaluasi baseline kemampuan calistung siswa pasca-pandemi bersama fasilitator organisasi mitra.
+```
+
+---
+### 23. Gallery Kegiatan Kepala Sekolah
+**Kategori:** `Gallery`  
+**Route Frontend:** [`/admin/gallery/kegiatan-kepala-sekolah`](http://localhost:3000/admin/gallery/kegiatan-kepala-sekolah)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/gallery/kegiatan-kepala-sekolah`  
+**Tabel Database:** `gallery_kegiatan_kepala_sekolah`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan dokumentasi kegiatan manajerial, supervisi akademik, dan forum Kelompok Kerja Kepala Sekolah, mencakup tajuk kegiatan kepemimpinan, target peningkatan tata kelola sekolah, rangkaian jalannya kegiatan, hasil evaluasi, link tayangan, serta berkas foto kegiatan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "kategori": "string, <generate otomatis | frontend/backend: 'Kegiatan Kepala Sekolah'>",
+  "judul": "string <input>, (nama agenda/kegiatan kepala sekolah atau MKKS)",
+  "tujuan": "string <input: textarea>, (tujuan kegiatan manajerial atau rapat koordinasi)",
+  "proses": "string <input: textarea>, (tahapan jalannya musyawarah, supervisi, atau lokakarya kepsek)",
+  "hasil": "string <input: textarea>, (keputusan manajerial, kesepakatan tata kelola, atau tindak lanjut supervisi)",
+  "link": "string <input: optional>, (tautan video dokumentasi di YouTube)",
+  "file": "file/binary <upload>, (lampiran foto kegiatan)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Rapat Koordinasi MKKS SMP Se-Konawe Selatan (SMPN SATAP 16 KONSEL): Pembahasan kesiapan teknis pelaksanaan Asesmen Sumatif Akhir Jenjang berbasis aplikasi digital.
+Workshop Perencanaan Berbasis Data (PBD) Melalui Rapor Pendidikan (SDN 2 BUKE): Penyusunan Rencana Kerja Tahunan (RKT) dan RKAS berdasarkan rekomendasi indikator prioritas.
+Supervisi Klinis Tata Kelola Administrasi Pembelajaran (SDN 5 PALANGGA SELATAN): Evaluasi berkala dokumen perangkat ajar dan instrumen penilaian guru kelas.
+Focus Group Discussion (FGD) Manajemen Pengelolaan Dana BOS (SDN 3 LAEYA): Sosialisasi kepatuhan pelaporan pertanggungjawaban belanja operasional melalui ARKAS.
+```
+
+---
+### 24. Gallery Kegiatan KKG SD
+**Kategori:** `Gallery`  
+**Route Frontend:** [`/admin/gallery/kegiatan-kkg-sd`](http://localhost:3000/admin/gallery/kegiatan-kkg-sd)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/gallery/kegiatan-kkg-sd`  
+**Tabel Database:** `gallery_kegiatan_kkg_sd`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan dokumentasi forum Kelompok Kerja Guru Sekolah Dasar (KKG SD) tingkat gugus atau kecamatan, memuat agenda peningkatan kompetensi keprofesian berkelanjutan, pembuatan perangkat ajar bersama, proses diskusi/bedah modul, hasil rekomendasi pembelajaran, serta dokumentasi foto.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "kategori": "string, <generate otomatis | frontend/backend: 'Kegiatan KKG SD'>",
+  "judul": "string <input>, (nama kegiatan)",
+  "tujuan": "string <input: textarea>, (tujuan kegiatan)",
+  "proses": "string <input: textarea>, (proses pembahasan materi, microteaching, atau bedah kisi-kisi)",
+  "hasil": "string <input: textarea>, (produk ajar bersama, bank soal, atau peningkatan wawasan)",
+  "link": "string <input: optional>, (tautan video YouTube kegiatan KKG)",
+  "file": "file/binary <upload>, (lampiran foto pelaksanaan KKG SD)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Bedah CP dan Penyusunan Alur Tujuan Pembelajaran Fase C (Gugus I Buke): Penyelarasan capaian pembelajaran Matematika dan Bahasa Indonesia untuk Kelas 5 dan 6.
+Workshop Pembuatan Alat Peraga Edukatif Sederhana (Gugus Palangga Selatan): Pelatihan merakit media pecahan dan jaring-jaring bangun ruang dari bahan daur ulang.
+Bimbingan Teknis Penyusunan Asesmen Formatif & Sumatif (Gugus Laeya): Perumusan rubrik penilaian performa dan portofolio siswa kelas rendah.
+Simulasi Pembelajaran Berdiferensiasi Produk (Gugus Baula): Praktik microteaching strategi penugasan bertingkat berdasarkan tingkat kesiapan belajar siswa.
+```
+
+---
+### 25. Gallery Kegiatan Guru MGMP
+**Kategori:** `Gallery`  
+**Route Frontend:** [`/admin/gallery/kegiatan-guru-mgmp`](http://localhost:3000/admin/gallery/kegiatan-guru-mgmp)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/gallery/kegiatan-guru-mgmp`  
+**Tabel Database:** `gallery_kegiatan_guru_mgmp`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan dokumentasi kegiatan Musyawarah Guru Mata Pelajaran (MGMP) jenjang SMP tingkat subrayon atau kabupaten, mencakup peningkatan kompetensi bidang studi, pembedahan materi esensial, proses lokakarya instrumen soal, output perangkat ajar, dan lampiran dokumentasi.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "kategori": "string, <generate otomatis | frontend/backend: 'Kegiatan Guru MGMP'>",
+  "judul": "string <input>, (nama kegiatan forum MGMP mapel)",
+  "tujuan": "string <input: textarea>, (tujuan kegiatan peningkatan kompetensi guru mapel)",
+  "proses": "string <input: textarea>, (jalannya diskusi materi pelajaran, simulasi lab, atau bedah modul)",
+  "hasil": "string <input: textarea>, (kesepakatan modul ajar, instrumen ujian, atau karya inovasi mapel)",
+  "link": "string <input: optional>, (tautan video dokumentasi di YouTube)",
+  "file": "file/binary <upload>, (lampiran foto kegiatan MGMP)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Musyawarah Kerja MGMP IPA SMP (Subrayon Konsel): Pelatihan praktikum virtual lab materi sistem peredaran darah manusia bagi guru IPA.
+Penyusunan Kisi-Kisi Asesmen Sumatif Akhir Semester MGMP Matematika (SMPN 2 KONSEL): Pembuatan paket instrumen soal pilihan ganda kompleks berbasis penalaran numerasi.
+Workshop Pengajaran Bahasa Inggris Komunikatif (MGMP Bahasa Inggris Konsel): Penerapan teknik Role Play dan Storytelling untuk meningkatkan kepercayaan diri berbicara siswa.
+```
+
+---
+### 26. Gallery Kegiatan TK & PAUD
+**Kategori:** `Gallery`  
+**Route Frontend:** [`/admin/gallery/kegiatan-tk-paud`](http://localhost:3000/admin/gallery/kegiatan-tk-paud)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/gallery/kegiatan-tk-paud`  
+**Tabel Database:** `gallery_kegiatan_tk_paud`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan dokumentasi ragam kegiatan belajar sambil bermain dan penguatan karakter anak usia dini pada jenjang TK/PAUD, mencakup stimulasi motorik, proses pengenalan lingkungan, capaian tumbuh kembang anak, video YouTube, serta foto kegiatan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "kategori": "string, <generate otomatis | frontend/backend: 'Kegiatan TK & PAUD'>",
+  "judul": "string <input>, (nama kegiatan pembelajaran atau festival anak PAUD)",
+  "tujuan": "string <input: textarea>, (tujuan stimulasi aspek perkembangan motorik, kognitif, atau sosio-emosional)",
+  "proses": "string <input: textarea>, (proses aktivitas bermain peran, eksplorasi alam, atau sentra kreasi)",
+  "hasil": "string <input: textarea>, (perkembangan kemandirian anak dan kebiasaan positif yang terbangun)",
+  "link": "string <input: optional>, (tautan video kegiatan di YouTube)",
+  "file": "file/binary <upload>, (lampiran foto dokumentasi kegiatan anak TK/PAUD)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Kegiatan Berkebun dan Mengenal Tanaman Obat Keluarga (TK NEGERI 1 PALANGGA): Pengenalan jenis tanaman herbal melalui sentra alam untuk melatih sensori dan motorik halus anak.
+Peringatan Hari Kartini dengan Parade Busana Adat Nusantara (PAUD MELATI BUKE): Penanaman rasa cinta tanah air dan keberagaman budaya sejak usia dini.
+Praktik Cuci Tangan Pakai Sabun dan Gosok Gigi Bersama (TK KARTIKA KONSEL): Pembiasaan pola hidup bersih dan sehat (PHBS) melalui demonstrasi interaktif.
+Outing Class Pengenalan Profesi ke Pemadam Kebakaran (PAUD CEMPAKA LAEYA): Edukasi pengenalan mitigasi keselamatan bahaya api dan tugas mulia petugas pemadam kebakaran.
+```
+
+---
+### 27. Gallery Kegiatan Pengawas Satdik
+**Kategori:** `Gallery`  
+**Route Frontend:** [`/admin/gallery/kegiatan-pengawas`](http://localhost:3000/admin/gallery/kegiatan-pengawas)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/gallery/kegiatan-pengawas`  
+**Tabel Database:** `gallery_kegiatan_pengawas`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan dokumentasi forum pembinaan, rapat koordinasi asosiasi pengawas dan workshop peningkatan profesionalisme Pengawas Satuan Pendidikan, mencakup tema pembinaan manajerial, sasaran pendampingan, proses diseminasi kebijakan, hasil pengawasan, tautan video, serta dokumentasi foto.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "kategori": "string, <generate otomatis | frontend/backend: 'Kegiatan Pengawas'>",
+  "judul": "string <input>, (nama forum atau kegiatan pengawas sekolah)",
+  "tujuan": "string <input: textarea>, (tujuan kegiatan pembinaan kepengawasan satuan pendidikan)",
+  "proses": "string <input: textarea>, (alur pemaparan instrumen evaluasi atau diskusi kelompok terpumpun)",
+  "hasil": "string <input: textarea>, (rekomendasi peta mutu sekolah binaan dan program tindak lanjut pembinaan)",
+  "link": "string <input: optional>, (tautan video pengawasan di YouTube)",
+  "file": "file/binary <upload>, (lampiran foto kegiatan kepengawasan)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Rapat Koordinasi Kelompok Kerja Pengawas Sekolah (Korwas Konsel): Penyusunan program pengawasan tahunan berbasis Rapor Pendidikan sekolah binaan.
+Workshop Pemanfaatan Platform Rapor Pendidikan dalam Supervisi (Dinas Dikbud Konsel): Pelatihan integrasi analisis data mutu sekolah ke dalam instrumen pembinaan manajerial.
+Diseminasi Transformasi Peran Pengawas Sekolah Sebagai Pendamping (Konawe Selatan): Sosialisasi Perdirjen GTK No. 4831 tentang peran baru pengawas sekolah sebagai coach dan fasilitator.
+Evaluasi Hasil Uji Coba Asesmen Nasional Jenjang SD (Korwas Palangga): Pemetaan kendala sarana Chromebook dan rekomendasi sharing sumber daya antar-sekolah berdekatan.
+```
+
+---
+### 28. Video Testimoni
+**Kategori:** `Gallery`  
+**Route Frontend:** [`/admin/gallery/video-testimoni`](http://localhost:3000/admin/gallery/video-testimoni)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/gallery/video-testimoni`  
+**Tabel Database:** `gallery_video_testimoni`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan unggahan video testimoni, apresiasi, serta ulasan dampak dari para pemangku kepentingan pendidikan (Bupati/Pimpinan Daerah, Kepala Dinas, Kepala Sekolah, Guru, Orang Tua, dan Murid) terkait kebermanfaatan implementasi program Sikola Pindara di Kabupaten Konawe Selatan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "judul": "string <input>, (judul atau narasi pokok video testimoni,)",
+  "file": "file/video <upload: mp4/webm>, (berkas rekaman video testimoni langsung yang diunggah ke server)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Testimoni Bupati Konawe Selatan: Apresiasi atas peluncuran portal digital Sikola Pindara sebagai langkah terobosan percepatan digitalisasi pendidikan daerah.
+Ulasan Kepala Sekolah SDN 2 BUKE: Pengalaman kemudahan dalam menginventarisasi kondisi sarpras gedung dan pelaporan KBM secara real-time.
+Pengakuan Guru Penggerak SMPN SATAP 16 KONSEL: Manfaat fitur jurnal pembelajaran dan komunitas belajar dalam meningkatkan budaya kolaborasi guru.
+Testimoni Pengawas Pembina Kecamatan Palangga: Efisiensi pemantauan mutu sekolah binaan dan rekapitulasi data akreditasi sekolah secara terpusat.
+```
+
+---
+### 29. Piagam Sertifikat
+**Kategori:** `Penghargaan`  
+**Route Frontend:** [`/admin/piagam-sertifikat`](http://localhost:3000/admin/piagam-sertifikat)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/piagam-sertifikat`  
+**Tabel Database:** `piagam_sertifikat`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan pengelolaan portofolio dokumen piagam penghargaan, sertifikat bimbingan teknis (Bimtek), pelatihan keprofesian berkelanjutan, seminar/lokakarya, maupun apresiasi prestasi yang diraih oleh Pendidik dan Tenaga Kependidikan (PTK). Modul ini mendata nama kegiatan yang diikuti, lembaga penyelenggara, tahun pelaksanaan, lokasi kegiatan, peran keikutsertaan (sebagai peserta, narasumber, juri, atau pemenang lomba), serta arsip digital berkas sertifikat dalam format PDF.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend: uniqid()>",
+  "kegiatan": "string <input: textarea>, (nama pelatihan, workshop, bimtek, seminar, atau lomba yang diikuti)",
+  "penyelenggara": "string <input: textarea>, (nama instansi, kementerian, dinas, atau organisasi penyelenggara)",
+  "tahun": "number <input>, (tahun perolehan sertifikat atau pelaksanaan kegiatan)",
+  "tempat_pelaksana": "string <input>, (lokasi pelaksanaan kegiatan)",
+  "sebagai": "string <input>, (peran/status dalam kegiatan)",
+  "file": "file/binary <upload: pdf>, (berkas digital scan piagam/sertifikat dalam format PDF)",
+  "createdBy": "string, <generate otomatis | backend >",
+  "createdAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Bimbingan Teknis Implementasi Kurikulum Merdeka (SDN 2 BUKE): Pelatihan penyusunan Modul Ajar dan KOSP yang diselenggarakan oleh Balai Guru Penggerak (BGP) Provinsi Sulawesi Tenggara Tahun 2023 bertempat di Kendari dengan peran sebagai Peserta.
+Piagam Penghargaan Kelulusan Program Pendidikan Guru Penggerak Angkatan 7 (SMPN SATAP 16 KONSEL): Diterbitkan oleh Ditjen GTK Kemendikbudristek RI Tahun 2023 atas penuntasan masa pendidikan kepemimpinan pembelajaran selama 6 bulan sebagai Peserta / Guru Penggerak.
+Workshop Penguatan Komunitas Belajar Sekolah Penggerak (SDN 5 PALANGGA SELATAN): Kegiatan peningkatan mutu pembelajaran yang diselenggarakan oleh Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan Tahun 2024 bertempat di Aula Dinas dengan peran sebagai Narasumber.
+Piagam Apresiasi Guru Berprestasi dan Berdedikasi Jenjang SD (SDN 1 BAULA): Penganugerahan penghargaan Hari Guru Nasional oleh Pemerintah Daerah Kabupaten Konawe Selatan Tahun 2023 sebagai Juara 1 Lomba Inovasi Pembelajaran.
+```
+
+---
+### 30. Verifikasi Tunjangan Guru
+**Kategori:** `Verifikasi`  
+**Route Frontend:** [`/admin/verifikasi/tunjangan-guru`](http://localhost:3000/admin/verifikasi/tunjangan-guru)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/verifikasi/tunjangan-guru`  
+**Tabel Database:** `verifikasi_tunjangan_guru`  
+
+#### Deskripsi & Bisnis Logika
+> Modul ini digunakan oleh verifikator untuk memvalidasi kelengkapan berkas digital (PDF), serta menentukan status usulan tunjangan guru (seperti Tunjangan Profesi Guru/TPG sertifikasi, Tambahan Penghasilan/Tamsil non-sertifikasi, maupun Tunjangan Khusus Guru. Verifikator dapat memeriksa kelengkapan bukti pendukung (SKTP, SPTJM bermaterai, SK Pembagian Tugas Mengajar, rekening aktif, dan rekap presensi), memberikan persetujuan berkas (status = 1 / Diterima), atau menolak berkas dengan menyertakan catatan/alasan perbaikan (status = 2 / Dikembalikan) agar segera diperbaiki oleh guru/sekolah yang bersangkutan. Modul ini juga dilengkapi fitur cetak lembar rekapitulasi verifikasi usulan per unit kerja dan triwulan berjalan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form Aksi Verifikasi Berkas (Contract API)**
+```json
+{
+  "id": "string <relation: usulan.id, diambil dari baris data usulan yang diverifikasi>",
+  "status": "number <system/action>, (1 = 'Diterima / Disetujui', 2 = 'Dikembalikan / Ditolak')",
+  "pesan": "string <input: textarea>, (catatan verifikasi, catatan kelengkapan dokumen, atau rincian alasan pengembalian berkas usulan)"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Usulan Tunjangan Profesi Guru (TPG) Sertifikasi PNS Triwulan I - Diterima:
+{
+"id": "usul-tpg-2026-001",
+"status": 1,
+"pesan": "Berkas lengkap dan sah. SKTP nomor: 0142.0824/B5.2/GT.01.03/2026 telah valid, beban kerja linier 24 jam tatap muka terpenuhi, dan SPTJM telah ditandatangani Kepala Sekolah. Berkas disetujui untuk diteruskan ke SPM pencairan."
+}
+Usulan Tambahan Penghasilan (Tamsil) Guru Non-Sertifikasi PPPK Triwulan I - Dikembalikan:
+{
+  "id": "usul-tamsil-2026-042",
+  "status": 2,
+  "pesan": "Berkas dikembalikan. Surat Pertanggungjawaban Mutlak (SPTJM) belum berstempel basah sekolah dan nomor rekening Bank Sultra yang dilampirkan tidak sesuai dengan nama pada KTP. Silakan perbarui dokumen lampiran paling lambat 20 April 2026."
+}
+Usulan Tunjangan Profesi Guru (TPG) PPPK Triwulan II - Diterima:
+{
+  "id": "usul-tpg-2026-088",
+  "status": 1,
+  "pesan": "Dokumen digital lengkap dan telah diverifikasi. Rekapitulasi absensi kehadiran aplikasi Si-Hadir bulan Januari-Maret 2026 di atas 95% dan rekening gaji aktif. Usulan diterima."
+}
+```
+
+---
+### 31. Verifikasi Usulan Rekonsiliasi Dana BOSP
+**Kategori:** `Verifikasi`  
+**Route Frontend:** [`/admin/verifikasi/rekonsiliasi-bosp`](http://localhost:3000/admin/verifikasi/rekonsiliasi-bosp)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/verifikasi/rekonsiliasi-bosp`  
+**Tabel Database:** `verifikasi_rekonsiliasi_bosp`  
+
+#### Deskripsi & Bisnis Logika
+> Verifikasi Usulan Rekonsiliasi Dana BOSP
+
+Modul ini digunakan oleh Tim Manajemen BOSP (Bantuan Operasional Satuan Pendidikan) Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan untuk memverifikasi laporan pertanggungjawaban (SPJ) realisasi belanja dana BOSP satuan pendidikan tingkat PAUD, SD, dan SMP per semester dan tahun anggaran. Modul ini menerapkan mekanisme Verifikasi Berjenjang 2 Tahap (Dual Verification):
+
+Tahap 1 (Cek Benar): Verifikasi keabsahan fisik bukti transaksi, kuitansi, nota/faktur, cap perpajakan, dan kesesuaian nominal rincian belanja (status_1 dan pesan_1).
+
+Tahap 2 (Cek Lengkap): Verifikasi kelengkapan administrasi pembukuan dan instrumen pelaporan akuntansi, meliputi 26 rincian dokumen wajib rekonsiliasi seperti Buku Kas Umum (BKU), Buku Pembantu Pajak beserta bukti setor NTPN e-Billing, Buku Pembantu Kas & Bank, Rekening Koran, LRA BOSP, Berita Acara Rekonsiliasi Aset, dan dokumen RKAS perubahan (status_2 dan pesan_2).
+
+Satuan pendidikan yang telah lolos kedua tahap verifikasi (Cek Benar & Cek Lengkap) akan diterbitkan Surat Rekomendasi Hasil Rekonsiliasi Dana BOSP dari dinas sebagai syarat utama penyaluran dana BOSP tahap/semester berikutnya.
+
+#### Kontrak Payload JSON (API Contract)
+**Form Verifikasi Tahap 1 - Cek Benar (Contract API)**
+```json
+{
+  "id": "string <relation: lampiran_rekon.id, diambil dari baris berkas instrumen rekonsiliasi yang diperiksa>",
+  "status_1": "number <system/action>, (1 = 'Terverifikasi / Benar', 2 = 'Penolakan / Perbaikan')",
+  "pesan_1": "string <input: textarea>, (catatan koreksi kebenaran transaksi, nota, rincian kuitansi, atau faktur belanja)"
+}
+```
+
+**Form Verifikasi Tahap 2 - Cek Lengkap (Contract API)**
+```json
+{
+  "id": "string <relation: lampiran_rekon.id, diambil dari baris berkas instrumen rekonsiliasi yang diperiksa>",
+  "status_2": "number <system/action>, (1 = 'Terverifikasi / Lengkap', 2 = 'Penolakan / Belum Lengkap')",
+  "pesan_2": "string <input: textarea>, (catatan kelengkapan dokumen pendukung pelaporan, SPTJM, buku pembantu, dan lembar pengesahan)"
+}
+```
+
+**Form Tambah Surat Rekomendasi BOSP (Contract API - Post Verification)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "rekon_id": "string <relation: rekon.id, ID usulan rekonsiliasi sekolah>",
+  "uraian": "string <input>, (nama / perihal nomor surat rekomendasi bebas rekon BOSP)",
+  "file": "file (PDF) <upload: q-file>, (dokumen surat rekomendasi hasil rekonsiliasi BOSP bertanda tangan pejabat dinas)"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Verifikasi Buku Kas Umum (BKU) Semester I - SDN 4 Ranomeeto (Tahap 1 & Tahap 2 Diterima):
+{
+  "id": "rekon-lamp-2026-0012",
+  "status_1": 1,
+  "pesan_1": "Cek Benar: Saldo akhir BKU per 30 Juni 2026 cocok dan sesuai dengan fisik kas tunai dan saldo pada rekening koran Giro BOSP Bank Sultra.",
+  "status_2": 1,
+  "pesan_2": "Cek Lengkap: BKU telah ditutup dan ditandatangani lengkap oleh Kepala Sekolah dan Bendahara BOSP beserta cap stempel resmi sekolah."
+}
+Verifikasi Buku Pembantu Pajak Semester I - SMPN 22 Konawe Selatan (Tahap 1 Ditolak / Perbaikan):
+{
+  "id": "rekon-lamp-2026-0045",
+  "status_1": 2,
+  "pesan_1": "Cek Benar Ditolak: Terdapat selisih pemotongan PPh Pasal 21 dan PPN atas belanja ATK bulan Mei sebesar Rp 425.000,- yang bukti Nomor Transaksi Penerimaan Negara (NTPN) e-Billing belum terlampir jelas.",
+  "status_2": 1,
+  "pesan_2": "Cek Lengkap: Format Buku Pembantu Pajak lengkap sesuai juknis BOS Kemendikbudristek."
+}
+Verifikasi Buku Pembantu Rincian Obyek Belanja Modal Semester II - SDN 9 Buke (Tahap 2 Ditolak / Belum Lengkap):
+{
+  "id": "rekon-lamp-2026-0089",
+  "status_1": 1,
+  "pesan_1": "Cek Benar: Nilai perolehan belanja modal perangkat Chromebook dan proyektor telah sesuai dengan faktur SIPLah Kemendikbudristek.",
+  "status_2": 2,
+  "pesan_2": "Cek Lengkap Ditolak: Berita Acara Serah Terima (BAST) Barang dan Berita Acara Pemeriksaan Barang Milik Daerah belum diunggah. Wajib melampirkan lembar inventarisasi aset KIB B."
+}
+Penerbitan Surat Rekomendasi Hasil Rekonsiliasi Dana BOSP Semester II - SMP Satap 16 Konawe Selatan (Selesai Diverifikasi):
+{
+  "id": "rekom-bosp-2026-007",
+  "rekon_id": "rekon-smp-satap-16-2026-s2",
+  "uraian": "Surat Rekomendasi Bebas Temuan Rekonsiliasi BOSP Semester II T.A 2026 No. 421/782/DISDIKBUD/2026",
+  "file": "rekomendasi_rekon_bosp_smp_satap_16_konsel_sem2.pdf"
+}
+```
+
+---
+### 32. Pengumuman GTK
+**Kategori:** `Regulasi dan Info GTK`  
+**Route Frontend:** [`/admin/regulasi-gtk/pengumuman`](http://localhost:3000/admin/regulasi-gtk/pengumuman)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/regulasi-gtk/pengumuman`  
+**Tabel Database:** `gtk_pengumuman`  
+
+#### Deskripsi & Bisnis Logika
+> Modul ini digunakan oleh Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan untuk mempublikasikan surat edaran resmi, informasi pemutakhiran data Info GTK, jadwal verifikasi validasi aneka tunjangan, serta pengumuman penting lainnya bagi Guru dan Tenaga Kependidikan (GTK). Setiap rilis pengumuman memuat judul pengumuman.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "judul": "string <input>, (judul pengumuman informasi GTK)",
+  "deskripsi": "string <input>, (isi uraian lengkap surat edaran/pengumuman GTK)",
+  "file": "string <input>, (lampiran berkas surat edaran)",
+  "file_type": "string, <generate otomatis | backend>",
+  "unit_kerja": "string, <generate otomatis | backend>",
+  "nip": "string, <generate otomatis | backend>",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Pemberitahuan Batas Waktu Sinkronisasi Dapodik untuk Penerbitan SKTP Semester I: Edaran batas akhir pemutakhiran data rombel dan jam mengajar linier 24 jam bagi calon penerima Tunjangan Profesi Guru (TPG) tahun anggaran berjalan.
+Jadwal Verifikasi dan Validasi Tambahan Penghasilan (Tamsil) Guru Non-Sertifikasi: Pengumuman jadwal pengumpulan berkas fisik dan digital usulan tamsil bagi pendidik berstatus ASN dan PPPK yang belum bersertifikat pendidik.
+Panggilan Mengikuti Uji Kompetensi Kenaikan Jabatan Fungsional Guru (UKKJ): Pengumuman daftar nama peserta seleksi kenaikan jenjang jabatan fungsional Guru Pertama ke Guru Muda dan Guru Muda ke Guru Madya se-Kabupaten Konawe Selatan.
+Instruksi Pemutakhiran Rekening Gaji dan Tunjangan Bank Sultra: Surat edaran terkait validasi nomor rekening aktif guru penerima aneka tunjangan daerah tertinggal dan terpencil (TKG) untuk mengantisipasi retur dana SP2D.
+```
+
+---
+### 33. Modul dan Materi Pelatihan
+**Kategori:** `Regulasi dan Info GTK`  
+**Route Frontend:** [`/admin/regulasi-gtk/modul-materi`](http://localhost:3000/admin/regulasi-gtk/modul-materi)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/regulasi-gtk/modul-materi`  
+**Tabel Database:** `gtk_modul_pelatihan`  
+
+#### Deskripsi & Bisnis Logika
+> Modul ini digunakan sebagai repositori digital sumber belajar dan pengembangan keprofesian berkelanjutan bagi pendidik dan tenaga kependidikan. Pengelola dinas mengunggah modul pelatihan, panduan teknis implementasi kurikulum, pedoman penyusunan perangkat ajar, materi lokakarya, hingga bahan bimtek peningkatan kompetensi literasi dan numerasi yang dapat diunduh dan dipelajari mandiri oleh guru dan kepala sekolah.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "judul": "string <input>, (nama judul modul atau materi pelatihan keprofesian)",
+  "deskripsi": "string <input>, (ringkasan kompetensi, silabus, atau deskripsi modul pembelajaran)",
+  "file": "string <input >, (lampiran dokumen modul / handout pelatihan)",
+  "file_type": "string, <generate otomatis | backend>",
+  "unit_kerja": "string, <generate otomatis | backend>",
+  "nip": "string, <generate otomatis | backend>",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Modul Panduan Pengembangan Pembelajaran Berdiferensiasi Kurikulum Merdeka: Materi strategi merancang asesmen diagnostik dan diferensiasi konten, proses, serta produk di jenjang SD dan SMP.
+Handout Bimbingan Teknis Penguatan Komunitas Belajar (Kombel) Ramah Guru: Panduan fasilitasi siklus inkuiri (refleksi awal, perencanaan, implementasi, dan evaluasi) dalam kelompok kerja guru.
+Buku Saku Pengelolaan Kinerja Guru dan Kepala Sekolah di PMM: Panduan teknis penetapan target Rencana Hasil Kerja (RHK) serta pelaksanaan observasi kelas pada Platform Merdeka Mengajar.
+Materi Pelatihan Pembelajaran Coding dan Kecerdasan Artifisial Tingkat Dasar: Modul bimtek pengenalan computational thinking bagi guru matematika dan IPA jenjang sekolah dasar dan menengah.
+```
+
+---
+### 34. Regulasi GTK
+**Kategori:** `Regulasi dan Info GTK`  
+**Route Frontend:** [`/admin/regulasi-gtk/regulasi`](http://localhost:3000/admin/regulasi-gtk/regulasi)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/regulasi-gtk/regulasi`  
+**Tabel Database:** `gtk_regulasi`  
+
+#### Deskripsi & Bisnis Logika
+> Modul ini berfungsi sebagai pusat dokumentasi produk hukum dan peraturan perundang-undangan di bidang pendidikan, mencakup Undang-Undang, Peraturan Menteri (Permendikbudristek), Keputusan Bersama, Peraturan Daerah (Perda), Peraturan Bupati (Perbup), hingga Surat Keputusan Kepala Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "judul": "string <input>, (nama dan nomor peraturan / keputusan resmi)",
+  "deskripsi": "string <input>  (tentang / konsideran ringkas isi regulasi hukum)",
+  "tahun": "number <input>, (tahun penerbitan / penetapan regulasi)",
+  "file": "string <input>, (salinan lembaran hukum peraturan)",
+  "file_type": "string, <generate otomatis | backend>",
+  "unit_kerja": "string, <generate otomatis | backend>",
+  "nip": "string, <generate otomatis | backend>",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Peraturan Bupati Konawe Selatan tentang Petunjuk Teknis Penerimaan Peserta Didik Baru: Regulasi penataan jalur zonasi, afirmasi, perpindahan tugas orang tua, dan prestasi untuk jenjang TK, SD, dan SMP (Tahun 2026).
+Keputusan Kepala Dinas tentang Kalender Pendidikan Kabupaten Konawe Selatan: Pedoman hari efektif belajar mengajar, jadwal asesmen, dan libur semester satuan pendidikan (Tahun 2026).
+Permendikbudristek tentang Petunjuk Teknis Pengelolaan Dana Bantuan Operasional Satuan Pendidikan (BOSP): Regulasi pedoman perencanaan, penganggaran, pelaksanaan, dan pelaporan pertanggungjawaban dana BOS (Tahun 2025).
+Peraturan Bupati tentang Pemberian Tambahan Penghasilan Pegawai bagi Guru ASN Daerah: Kebijakan pemerintah daerah terkait alokasi dan syarat penyaluran tambahan kesejahteraan bagi aparatur sipil negara di lingkungan dinas pendidikan (Tahun 2025).
+```
+
+---
+### 35. PPDB PAUD
+**Kategori:** `PPDB`  
+**Route Frontend:** [`/admin/ppdb/paud`](http://localhost:3000/admin/ppdb/paud)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/ppdb/paud`  
+**Tabel Database:** `ppdb_paud`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan pengelolaan pendaftaran calon peserta didik baru jenjang Pendidikan Anak Usia Dini (PAUD/TK/Kelompok Bermain) di berbagai satuan pendidikan yang dientri langsung operator sekolah, mencakup identitas diri anak usia dini, status tempat tinggal, kepemilikan dokumen kelahiran, serta kelengkapan data orang tua/wali sebagai pemenuhan syarat awal masuk sekolah.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "nama": "string <input>, (Nama lengkap calon siswa PAUD/TK)",
+  "nm_panggilan": "string <input>, (Nama panggilan)",
+  "jns_kelamin": "string <option>, (Laki-laki, Perempuan)",
+  "nisn": "number <input>, (Nomor Induk Siswa Nasional, opsional jika belum terbit)",
+  "nik": "number <input>, (Nomor Induk Kependudukan anak tercantum di Kartu Keluarga)",
+  "tmp_lahir": "string <input>, (Tempat lahir anak)",
+  "tgl_lahir": "string <input>, (Format tanggal: 'YYYY-MM-DD')",
+  "agama": "string <option>, (dipilih dari list agama yang sudah dibuat sebelumnya <16.6.1>)",
+  "anak_keberapa": "string <input>, (Urutan kelahiran anak dalam keluarga)",
+  "jml_saudara": "string <input>, (Jumlah saudara kandung)",
+  "kecamatan_id": "string <option>, (ID wilayah kecamatan)",
+  "des_kel_id": "string <option>, (ID wilayah desa/kelurahan)",
+  "alamat": "string <input>, (Alamat jalan / tempat tinggal calon siswa)",
+  "rt_rw": "string <input>, (Nomor RT/RW)",
+  "dusun": "string <input>, (Nama dusun / lingkungan)",
+  "kode_pos": "string <input>, (Kode pos wilayah)",
+  "tmp_tinggal": "string <option>, (dipilih dari list tempat tinggal yang sudah dibuat sebelumnya <16.6.2>)",
+  "lainnya": "string <input>, (Keterangan jika tmp_tinggal bernilai '9' / Lainnya)",
+  "moda_transportasi": "string <option>, (dipilih dari list moda transportasi yang sudah dibuat sebelumnya <16.6.3>)",
+  "file": "file | string <input>, (File lampiran pasfoto resmi calon siswa / multipart form-data)",
+  "nama_ayah": "string <input>, (Nama lengkap ayah kandung)",
+  "nik_ayah": "number <input>, (NIK ayah kandung)",
+  "thn_lahir_ayah": "number <input>, (Tahun lahir ayah, misal: 1988)",
+  "pendidikan_ayah": "string <option>, (dipilih dari list pendidikan yang sudah dibuat sebelumnya <16.6.4>)",
+  "pekerjaan_ayah": "string <option>, (dipilih dari list pekerjaan yang sudah dibuat sebelumnya <16.6.5>)",
+  "penghasilan_ayah": "string <option>, (dipilih dari list penghasilan yang sudah dibuat sebelumnya <16.6.6>)",
+  "nama_ibu": "string <input>, (Nama lengkap ibu kandung)",
+  "nik_ibu": "number <input>, (NIK ibu kandung)",
+  "thn_lahir_ibu": "number <input>, (Tahun lahir ibu, misal: 1992)",
+  "pendidikan_ibu": "string <option>, (dipilih dari list pendidikan yang sudah dibuat sebelumnya <16.6.4>)",
+  "pekerjaan_ibu": "string <option>, (dipilih dari list pekerjaan yang sudah dibuat sebelumnya <16.6.5>)",
+  "penghasilan_ibu": "string <option>, (dipilih dari list penghasilan yang sudah dibuat sebelumnya <16.6.6>)",
+  "nama_wali": "string <input>, (Nama lengkap wali murid jika diasuh wali)",
+  "nik_wali": "number <input>, (NIK wali murid)",
+  "thn_lahir_wali": "number <input>, (Tahun lahir wali, misal: 1970)",
+  "pendidikan_wali": "string <option>, (dipilih dari list pendidikan yang sudah dibuat sebelumnya <16.6.4>)",
+  "pekerjaan_wali": "string <option>, (dipilih dari list pekerjaan yang sudah dibuat sebelumnya <16.6.5>)",
+  "penghasilan_wali": "string <option>, (dipilih dari list penghasilan yang sudah dibuat sebelumnya <16.6.6>)",
+  "kategori": "string, <generate otomatis | backend: 'PPDB PAUD'>",
+  "created_at": "date, <generate otomatis | backend>",
+  "created_by": "string, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+a. AQILA KHAIRUNNISA: Calon peserta didik baru usia 5 tahun yang mendaftar pada TK NEGERI PEMBINA RANOMEETO.
+b. MUHAMMAD ARKAN AL-FARIZI: Calon peserta didik baru usia 4 tahun yang mendaftar pada PAUD TERPADU ANDOOLO.
+c. NAUFAL ATHALLAH SAPUTRA: Calon peserta didik baru usia 5,5 tahun yang mendaftar pada TK TUNAS HARAPAN KONDA.
+d. ALULA SALSABILA AZZAHRA: Calon peserta didik baru usia 4,5 tahun yang mendaftar pada PAUD AL-FALAH BUKE.
+```
+
+---
+### 36. PPDB SD
+**Kategori:** `PPDB`  
+**Route Frontend:** [`/admin/ppdb/sd`](http://localhost:3000/admin/ppdb/sd)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/ppdb/sd`  
+**Tabel Database:** `ppdb_sd`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan pengelolaan pendaftaran calon peserta didik baru jenjang Sekolah Dasar (SD) yang dientri dan diverifikasi langsung oleh operator sekolah dasar tujuan, mencakup data identitas anak, verifikasi batas usia masuk sekolah dasar (prioritas 7 tahun atau minimal 6 tahun), titik koordinat domisili zonasi tempat tinggal, serta data sosial ekonomi orang tua/wali calon murid.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "nama": "string <input>, (Nama lengkap calon siswa SD)",
+  "nm_panggilan": "string <input>, (Nama panggilan)",
+  "jns_kelamin": "string <option>, (Laki-laki, Perempuan)",
+  "nisn": "number <input>, (Nomor Induk Siswa Nasional dari jenjang TK/PAUD)",
+  "nik": "number <input>, (Nomor Induk Kependudukan calon siswa)",
+  "tmp_lahir": "string <input>, (Tempat lahir calon siswa)",
+  "tgl_lahir": "string <input>, (Format tanggal: 'YYYY-MM-DD')",
+  "agama": "string <option>, (dipilih dari list agama yang sudah dibuat sebelumnya <16.6.1>)",
+  "anak_keberapa": "string <input>, (Urutan anak dalam keluarga)",
+  "jml_saudara": "string <input>, (Jumlah saudara kandung)",
+  "kecamatan_id": "string <option>, (ID wilayah kecamatan domisili zonasi)",
+  "des_kel_id": "string <option>, (ID wilayah desa/kelurahan domisili zonasi)",
+  "alamat": "string <input>, (Alamat jalan / tempat tinggal sesuai Kartu Keluarga)",
+  "rt_rw": "string <input>, (Nomor RT/RW)",
+  "dusun": "string <input>, (Nama dusun / lingkungan)",
+  "kode_pos": "string <input>, (Kode pos wilayah)",
+  "tmp_tinggal": "string <option>, (dipilih dari list tempat tinggal yang sudah dibuat sebelumnya <16.6.2>)",
+  "lainnya": "string <input>, (Keterangan jika tmp_tinggal bernilai '9' / Lainnya)",
+  "moda_transportasi": "string <option>, (dipilih dari list moda transportasi yang sudah dibuat sebelumnya <16.6.3>)",
+  "file": "file | string <input>, (File lampiran pasfoto resmi calon siswa / multipart form-data)",
+  "nama_ayah": "string <input>, (Nama lengkap ayah kandung)",
+  "nik_ayah": "number <input>, (NIK ayah kandung)",
+  "thn_lahir_ayah": "number <input>, (Tahun lahir ayah, misal: 1982)",
+  "pendidikan_ayah": "string <option>, (dipilih dari list pendidikan yang sudah dibuat sebelumnya <16.6.4>)",
+  "pekerjaan_ayah": "string <option>, (dipilih dari list pekerjaan yang sudah dibuat sebelumnya <16.6.5>)",
+  "penghasilan_ayah": "string <option>, (dipilih dari list penghasilan yang sudah dibuat sebelumnya <16.6.6>)",
+  "nama_ibu": "string <input>, (Nama lengkap ibu kandung)",
+  "nik_ibu": "number <input>, (NIK ibu kandung)",
+  "thn_lahir_ibu": "number <input>, (Tahun lahir ibu, misal: 1986)",
+  "pendidikan_ibu": "string <option>, (dipilih dari list pendidikan yang sudah dibuat sebelumnya <16.6.4>)",
+  "pekerjaan_ibu": "string <option>, (dipilih dari list pekerjaan yang sudah dibuat sebelumnya <16.6.5>)",
+  "penghasilan_ibu": "string <option>, (dipilih dari list penghasilan yang sudah dibuat sebelumnya <16.6.6>)",
+  "nama_wali": "string <input>, (Nama lengkap wali murid jika bersama wali)",
+  "nik_wali": "number <input>, (NIK wali murid)",
+  "thn_lahir_wali": "number <input>, (Tahun lahir wali, misal: 1968)",
+  "pendidikan_wali": "string <option>, (dipilih dari list pendidikan yang sudah dibuat sebelumnya <16.6.4>)",
+  "pekerjaan_wali": "string <option>, (dipilih dari list pekerjaan yang sudah dibuat sebelumnya <16.6.5>)",
+  "penghasilan_wali": "string <option>, (dipilih dari list penghasilan yang sudah dibuat sebelumnya <16.6.6>)",
+  "kategori": "string, <generate otomatis | backend: 'PPDB SD'>",
+  "created_at": "date, <generate otomatis | backend>",
+  "created_by": "string, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+FAHRI KURNIAWAN SAPUTRA: Calon peserta didik baru yang mendaftar pada jalur zonasi di SD NEGERI 4 RANOMEETO.
+ANDI AHMAD FADIL: Calon peserta didik baru yang mendaftar pada jalur zonasi di SD NEGERI 2 BUKE.
+CITRA LESTARI DEWI: Calon peserta didik baru yang mendaftar pada jalur afirmasi keluarga kurang mampu di SD NEGERI 9 LAEYA.
+MUHAMMAD ILHAM RAMADHAN: Calon peserta didik baru yang mendaftar pada jalur perpindahan orang tua di SD NEGERI 1 ANDOOLO.
+```
+
+---
+### 37. PPDB SMP
+**Kategori:** `PPDB`  
+**Route Frontend:** [`/admin/ppdb/smp`](http://localhost:3000/admin/ppdb/smp)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/ppdb/smp`  
+**Tabel Database:** `ppdb_smp`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan pengelolaan pendaftaran calon peserta didik baru jenjang Sekolah Menengah Pertama (SMP) yang dientri dan diverifikasi oleh panitia PPDB sekolah menengah, mencakup biodata lulusan SD/MI, kepemilikan NISN terdaftar di Dapodik pusat, validasi Kartu Keluarga untuk jalur zonasi, serta data penunjang orang tua/wali murid guna pemenuhan kuota seleksi penerimaan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "nama": "string <input>, (Nama lengkap calon siswa SMP)",
+  "nm_panggilan": "string <input>, (Nama panggilan)",
+  "jns_kelamin": "string <option>, (Laki-laki, Perempuan)",
+  "nisn": "number <input>, (Nomor Induk Siswa Nasional aktif dari Dapodik SD)",
+  "nik": "number <input>, (Nomor Induk Kependudukan calon siswa)",
+  "tmp_lahir": "string <input>, (Tempat lahir calon siswa)",
+  "tgl_lahir": "string <input>, (Format tanggal: 'YYYY-MM-DD')",
+  "agama": "string <option>, (dipilih dari list agama yang sudah dibuat sebelumnya <16.6.1>)",
+  "anak_keberapa": "string <input>, (Urutan anak dalam keluarga)",
+  "jml_saudara": "string <input>, (Jumlah saudara kandung)",
+  "kecamatan_id": "string <option>, (ID wilayah kecamatan domisili zonasi)",
+  "des_kel_id": "string <option>, (ID wilayah desa/kelurahan domisili zonasi)",
+  "alamat": "string <input>, (Alamat jalan / tempat tinggal sesuai Kartu Keluarga)",
+  "rt_rw": "string <input>, (Nomor RT/RW)",
+  "dusun": "string <input>, (Nama dusun / lingkungan)",
+  "kode_pos": "string <input>, (Kode pos wilayah)",
+  "tmp_tinggal": "string <option>, (dipilih dari list tempat tinggal yang sudah dibuat sebelumnya <16.6.2>)",
+  "lainnya": "string <input>, (Keterangan jika tmp_tinggal bernilai '9' / Lainnya)",
+  "moda_transportasi": "string <option>, (dipilih dari list moda transportasi yang sudah dibuat sebelumnya <16.6.3>)",
+  "file": "file | string <input>, (File lampiran pasfoto calon siswa / multipart form-data)",
+  "nama_ayah": "string <input>, (Nama lengkap ayah kandung)",
+  "nik_ayah": "number <input>, (NIK ayah kandung)",
+  "thn_lahir_ayah": "number <input>, (Tahun lahir ayah, misal: 1978)",
+  "pendidikan_ayah": "string <option>, (dipilih dari list pendidikan yang sudah dibuat sebelumnya <16.6.4>)",
+  "pekerjaan_ayah": "string <option>, (dipilih dari list pekerjaan yang sudah dibuat sebelumnya <16.6.5>)",
+  "penghasilan_ayah": "string <option>, (dipilih dari list penghasilan yang sudah dibuat sebelumnya <16.6.6>)",
+  "nama_ibu": "string <input>, (Nama lengkap ibu kandung)",
+  "nik_ibu": "number <input>, (NIK ibu kandung)",
+  "thn_lahir_ibu": "number <input>, (Tahun lahir ibu, misal: 1982)",
+  "pendidikan_ibu": "string <option>, (dipilih dari list pendidikan yang sudah dibuat sebelumnya <16.6.4>)",
+  "pekerjaan_ibu": "string <option>, (dipilih dari list pekerjaan yang sudah dibuat sebelumnya <16.6.5>)",
+  "penghasilan_ibu": "string <option>, (dipilih dari list penghasilan yang sudah dibuat sebelumnya <16.6.6>)",
+  "nama_wali": "string <input>, (Nama lengkap wali murid jika bersama wali)",
+  "nik_wali": "number <input>, (NIK wali murid)",
+  "thn_lahir_wali": "number <input>, (Tahun lahir wali, misal: 1965)",
+  "pendidikan_wali": "string <option>, (dipilih dari list pendidikan yang sudah dibuat sebelumnya <16.6.4>)",
+  "pekerjaan_wali": "string <option>, (dipilih dari list pekerjaan yang sudah dibuat sebelumnya <16.6.5>)",
+  "penghasilan_wali": "string <option>, (dipilih dari list penghasilan yang sudah dibuat sebelumnya <16.6.6>)",
+  "kategori": "string, <generate otomatis | backend: 'PPDB SMP'>",
+  "created_at": "date, <generate otomatis | backend>",
+  "created_by": "string, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+DIMAS ADITYA NUGRAHA: Calon peserta didik baru yang mendaftar pada jalur prestasi akademik di SMP NEGERI 22 KONAWE SELATAN.
+SITI AISYAH NUR CAHYANI: Calon peserta didik baru yang mendaftar pada jalur zonasi di SMP SATAP 16 KONAWE SELATAN.
+REVALDO PRATAMA: Calon peserta didik baru yang mendaftar pada jalur afirmasi KIP di SMP NEGERI 2 KONAWE SELATAN.
+ZAHRA AULIA RAHMADANI: Calon peserta didik baru yang mendaftar pada jalur perpindahan tugas orang tua di SMP NEGERI 5 KONAWE SELATAN.
+```
+
+---
+### 38. Kuota PPDB
+**Kategori:** `PPDB`  
+**Route Frontend:** [`/admin/kuota-ppdb`](http://localhost:3000/admin/kuota-ppdb)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/kuota-ppdb`  
+**Tabel Database:** `kuota_ppdb`  
+
+#### Deskripsi & Bisnis Logika
+> Modul ini merupakan panel pemantauan dan kalkulasi daya tampung peserta didik baru secara otomatis berbasis integrasi data Sarana Prasarana (Sarpras) dan Rombel. Sistem menghitung kuota maksimal penerimaan dengan mengalikan Jumlah Ruang Kelas Fisik yang Tersedia dengan Standar Rasio Maksimal Siswa per Rombel sesuai Permendikbudristek:
+
+Jenjang TK/PAUD: Maksimal 22 siswa per rombel
+
+Jenjang SD: Maksimal 28 siswa per rombel
+
+Jenjang SMP: Maksimal 32 siswa per rombel
+
+Panel ini menyajikan perbandingan real-time antara jumlah pendaftar yang telah diverifikasi dengan kapasitas pagu, lengkap dengan indikator warna status keterisian:
+
+Hijau: Daya tampung masih tersedia (pendaftar < kuota maksimal)
+
+Oranye: Daya tampung telah terisi penuh (pendaftar = kuota maksimal)
+
+Merah: Melebihi kapasitas tampung (over-kuota / pendaftar > kuota)
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "unit_kerja_id": "string <simpeg.unit_kerja.id>",
+  "nama_sekolah": "string, (nama satuan pendidikan)",
+  "jenjang": "string, (PAUD / SD / SMP)",
+  "jml_ruang_tersedia": "number <ruang.total>, (total ruang kelas siap pakai di sekolah)",
+  "standar_maks_rombel": "number, (standar kapasitas: PAUD=22, SD=28, SMP=32)",
+  "total_daya_tampung": "number, (kalkulasi: jml_ruang_tersedia * standar_maks_rombel)",
+  "siswa_terdaftar": "number <ppdb.total>, (jumlah calon siswa yang telah mendaftar)",
+  "sisa_kuota": "number, (kalkulasi: total_daya_tampung - siswa_terdaftar)",
+  "status_kuota": "string, ('Tersedia' [Hijau] | 'Penuh' [Oranye] | 'Melebihi Kuota' [Merah])"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+SMP Negeri 22 Konawe Selatan (Kuota Tersedia / Hijau): Memiliki 4 ruang kelas baru (standar 32 siswa/rombel = total daya tampung 128 siswa), jumlah pendaftar masuk 102 siswa, sisa kuota tersedia 26 kursi.
+SD Negeri 4 Ranomeeto (Kuota Penuh / Oranye): Memiliki 2 ruang kelas 1 (standar 28 siswa/rombel = total daya tampung 56 siswa), jumlah pendaftar tepat 56 siswa, pendaftaran otomatis ditutup.
+SMP Negeri 2 Konawe Selatan (Melebihi Kuota / Merah): Memiliki 5 ruang kelas (kapasitas 160 siswa), jumlah pendaftar mencapai 184 calon siswa, memicu sistem perangkingan seleksi jarak zonasi dan nilai prestasi.
+TK Negeri Pembina Ranomeeto (Kuota Tersedia / Hijau): Memiliki 3 ruang belajar (standar 22 siswa/rombel = kapasitas 66 anak), jumlah murid terdaftar 48 anak, sisa kuota tersedia 18 anak.
+```
+
+---
+### 39. Renstra (Rencana Strategis)
+**Kategori:** `Profile`  
+**Route Frontend:** [`/admin/profile/renstra`](http://localhost:3000/admin/profile/renstra)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/profile/renstra`  
+**Tabel Database:** `profile_renstra`  
+
+#### Deskripsi & Bisnis Logika
+> Modul ini digunakan untuk mengelola dan mempublikasikan Rencana Strategis (Renstra) Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan periode 5 tahunan. Berisi arah kebijakan pembangunan sektor pendidikan daerah, sasaran strategis peningkatan mutu, rencana perluasan akses belajar merata, pemerataan sarana prasarana sekolah di wilayah terpencil, serta target indikator kinerja utama (IKU).
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "isi": "string  <input>, (uraian lengkap)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Program Peningkatan Kualitas dan Pemerataan Sarana Prasarana Sekolah: Target pemenuhan ruang kelas layak, laboratorium komputer, dan sanitasi sehat di seluruh satuan pendidikan 3T Kabupaten Konawe Selatan.
+Kebijakan Peningkatan Angka Partisipasi Kasar (APK) dan Murni (APM): Rencana strategis penuntasan program wajib belajar 12 tahun dan pencegahan anak putus sekolah melalui intervensi beasiswa daerah.
+Peningkatan Kualifikasi, Kompetensi, dan Distribusi Tenaga Pendidik: Program pemenuhan kuota guru penggerak, sertifikasi pendidik, serta redistribusi guru ASN merata ke seluruh kecamatan.
+Digitalisasi Tata Kelola Ekosistem Pendidikan Berbasis Sikola Pindara: Sasaran integrasi satu data pendidikan daerah (profil sekolah, rekonsiliasi BOSP, verval GTK, dan layanan publik PPDB terpusat).
+```
+
+---
+### 40. Tugas Dan Fungsi
+**Kategori:** `Profile`  
+**Route Frontend:** [`/admin/profile/tugas-fungsi`](http://localhost:3000/admin/profile/tugas-fungsi)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/profile/tugas-fungsi`  
+**Tabel Database:** `profile_tugas_fungsi`  
+
+#### Deskripsi & Bisnis Logika
+> Modul ini mendokumentasikan kedudukan hukum, tugas pokok, dan fungsi struktural organisasi Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan sebagaimana diatur dalam Peraturan Bupati tentang Struktur Organisasi dan Tata Kerja (SOTK). Menjelaskan uraian tugas Kepala Dinas, Sekretariat, Bidang Pembinaan PAUD dan Pendidikan Non-
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "isi": "string  <input>, (uraian lengkap)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Tugas Pokok dan Fungsi Kepala Dinas Pendidikan dan Kebudayaan: Memimpin, merumuskan kebijakan teknis, mengoordinasikan pembinaan, serta mengevaluasi penyelenggaraan urusan pemerintahan di bidang pendidikan dan kebudayaan daerah.
+Fungsi Bidang Pembinaan Ketenagaan (GTK): Penyiapan bahan perumusan kebijakan, pembinaan profesi, pemetaan kebutuhan, peningkatan kualifikasi, serta fasilitasi verifikasi kesejahteraan dan aneka tunjangan guru.
+Fungsi Bidang Pembinaan Pendidikan Dasar (Dikdas): Pengelolaan operasional kurikulum, kelembagaan sekolah, pemantauan akreditasi, serta pengendalian pelaksanaan asesmen nasional jenjang SD dan SMP.
+Fungsi Sekretariat Dinas: Pengoordinasian perencanaan program kerja, penatausahaan keuangan dan aset (termasuk verifikasi rekonsiliasi BOSP), administrasi kepegawaian, dan pelayanan umum.
+```
+
+---
+### 41. Visi dan Misi
+**Kategori:** `Profile`  
+**Route Frontend:** [`/admin/profile/visi-misi`](http://localhost:3000/admin/profile/visi-misi)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/profile/visi-misi`  
+**Tabel Database:** `profile_visi_misi`  
+
+#### Deskripsi & Bisnis Logika
+> Modul ini digunakan untuk menampilkan rumusan Visi dan Misi pembangunan pendidikan Pemerintah Kabupaten Konawe Selatan. Konten ini menjadi landasan filosofis dan pedoman moral bagi seluruh insan pendidik, aparatur sipil negara di lingkungan dinas, pengawas sekolah, dan pemangku kepentingan dalam mewujudkan pelayanan pendidikan yang berkualitas, berkarakter, dan berdaya saing.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "isi": "string  <input>, (uraian lengkap)",
+  "createBy": "string, <generate otomatis | backend>",
+  "createAt": "date, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Rumusan Visi Pendidikan Daerah: "Terwujudnya Generasi Emas Konawe Selatan yang Cerdas, Berkarakter, Berakhlak Mulia, dan Unggul Menuju Masyarakat Sejahtera dan Berdaya Saing."
+Misi Perluasan Akses Layanan Pendidikan Berkualitas: Memperluas keterjangkauan layanan pendidikan bermutu dan berkeadilan bagi seluruh lapisan masyarakat hingga ke pelosok desa.
+Misi Peningkatan Profesionalisme Pendidik dan Tenaga Kependidikan: Mewujudkan guru dan tenaga kependidikan yang berintegritas, kompeten, sejahtera, dan adaptif terhadap transformasi digital pembelajaran.
+Misi Tata Kelola Pendidikan Transparan dan Akuntabel: Mengembangkan tata kelola birokrasi pendidikan yang bersih, inovatif, melayani, dan berbasis pemanfaatan teknologi informasi terpadu.
+```
+
+---
+### 42. Auth Menu
+**Kategori:** `Data Master > Auth`  
+**Route Frontend:** [`/admin/master/auth/menu`](http://localhost:3000/admin/master/auth/menu)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/auth/menu`  
+**Tabel Database:** `auth_menus`  
+
+#### Deskripsi & Bisnis Logika
+> Menu Merupakan modul untuk menambahkan menu/sub-menu yang nampak pada sidemenu versi admin. Setelah kita menambahkan data menu, kita boleh menambahkan sub-menu dan seterusnya dari menu/sub-menu yang baru saja kita tambahkan sebelumnya.
+
+#### Kontrak Payload JSON (API Contract)
+**Form**
+```json
+{
+Id : string, <generate otomatis>
+title : string (Nama menu/sub-menu), <input>
+Icon : string <input>
+Path : string, <input>
+Index : number, <input>
+Children : []<default null.nested dengan key yang sama seperti induknya >,
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+---
+### 43. Auth Group (Role & Hak Akses)
+**Kategori:** `Data Master > Auth`  
+**Route Frontend:** [`/admin/master/auth/group`](http://localhost:3000/admin/master/auth/group)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/auth/group`  
+**Tabel Database:** `auth_groups`  
+
+#### Deskripsi & Bisnis Logika
+> Group merupkan modul untuk menentukan role pengguna berdasarkan menu/sub-menu yang sudah kita tambahkan sebelumnya <16.1.1>.
+
+#### Kontrak Payload JSON (API Contract)
+**Form 1 (contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>
+title : string <input> (Nama Role)
+level : number <option> (Level akses. 1 = Semua Satuan Pendidikan, 2 = Unit pendidikan user),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+**Form 2 (Contract API)**
+```json
+{
+Id : string, <generate otomatis  | backend >
+group_id : string <input> (di ambil dari id form 1 dan sifatnya unique | backend)
+create : boolean <checkbox>,
+read : boolean <checkbox>,
+update : boolean <checkbox>,
+delete : boolean <checkbox>,
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+---
+### 44. Auth Registrasi ASN
+**Kategori:** `Data Master > Auth`  
+**Route Frontend:** [`/admin/master/auth/registrasi`](http://localhost:3000/admin/master/auth/registrasi)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/auth/registrasi`  
+**Tabel Database:** `users`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini kita akan disajikan semua list data ASN untuk Semua Satuan Pendidikan. Ada beberapa yang di sajikan yaitu :- nama lengkap,
+
+Nip;
+
+Satuan Pendidikan;
+
+Role Group <6.1.2> (ditampilkan hanya title saja);
+
+Button untuk pengaturan level akses/group/role dan view;
+
+Pada dasarnya data-data ASN yang ditampilkan bersumber dari data lain di aplikasi yang berbeda (SIMPEG). Jadi sebenarnya semua ASN telah memiliki akun masing, kita gak perlu regis atau pengaturan akun lainnya lagi dan hanya sekedar mengatur level aksesnya.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+nip : string, (sifatnya unique dan dipilih otomatis ketika kita menekan button pengaturan level akses),
+group_id : string <option> (di pilih dari list Group yang sudah kita buat sebelumnya <6.1.2>),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+---
+### 45. Master Siswa
+**Kategori:** `Data Master`  
+**Route Frontend:** [`/admin/master/siswa`](http://localhost:3000/admin/master/siswa)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/siswa`  
+**Tabel Database:** `master_siswa`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data profil peserta didik dari berbagai satuan pendidikan yang dientri dan dikelola langsung oleh operator masing-masing sekolah, mencakup informasi identitas siswa dan status keaktifan siswa
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+  "id": "string, <generate otomatis | backend>",
+  "nama": "string <input>, (Nama lengkap siswa)",
+  "nm_panggilan": "string <input>, (Nama panggilan)",
+  "jns_kelamin": "string <option>, (1. Laki-laki, 2. Perempuan)",
+  "nisn": "number <input>, (Nomor Induk Siswa Nasional)",
+  "nik": "number <input>, (Nomor Induk Kependudukan siswa)",
+  "tmp_lahir": "string <input>, (Tempat lahir)",
+  "tgl_lahir": "string <input>, (Format tanggal: 'YYYY-MM-DD')",
+  "agama": "string  <option>, (di pilih dari list agama yang sudah kita buat sebelumnya <16.6.1>)",
+  "anak_keberapa": "string <input>, (Urutan anak)",
+  "jml_saudara": "string <input>, (Jumlah saudara kandung)",
+  "kecamatan_id": "string < option >, (ID wilayah kecamatan)",
+  "des_kel_id": "string < option >, (ID wilayah desa/kelurahan)",
+  "alamat": "string <input>, (Alamat jalan / tempat tinggal)",
+  "rt_rw": "string <input>, (Nomor RT/RW)",
+  "dusun": "string <input>, (Nama dusun / lingkungan)",
+  "kode_pos": "string <input>, (Kode pos wilayah)",
+  "tmp_tinggal": "string < option >, (di pilih dari list tempat tinggal yang sudah kita buat sebelumnya <16.6.2>)",
+  "lainnya": "string <input>, (Keterangan jika tmp_tinggal bernilai '9' / Lainnya)",
+  "moda_transportasi": "string <option>, (di pilih dari list mode transportasi yang sudah kita buat sebelumnya <16.6.3>)",
+  "file": "file | string <input>, (File lampiran foto siswa / multipart form-data)",
+  "nama_ayah": "string <input>, (Nama lengkap ayah kandung)",
+  "nik_ayah": "number <input>, (NIK ayah kandung)",
+  "thn_lahir_ayah": "number <input>, (Tahun lahir ayah, misal: 1980)",
+  "pendidikan_ayah": "string <option>, (di pilih dari list pendidikan yang sudah kita buat sebelumnya <16.6.4>)",
+  "pekerjaan_ayah": "string <option>, (di pilih dari list pekerjaan yang sudah kita buat sebelumnya <16.6.5)>)",
+  "penghasilan_ayah": "string <option>, (di pilih dari list penghasilan yang sudah kita buat sebelumnya <16.6.6>)",
+  "nama_ibu": "string <input>, (Nama lengkap ibu kandung)",
+  "nik_ibu": "number <input>, (NIK ibu kandung)",
+  "thn_lahir_ibu": "number <input>, (Tahun lahir ibu, misal: 1985)",
+  "pendidikan_ibu": "string <option>, (di pilih dari list pendidikan yang sudah kita buat sebelumnya <16.6.4>)",
+  "pekerjaan_ibu": "string <option>, (di pilih dari list pekerjaan yang sudah kita buat sebelumnya <16.6.5>)",
+  "penghasilan_ibu": "string <option>, (di pilih dari list penghasilan yang sudah kita buat sebelumnya <16.6.6>)",
+  "nama_wali": "string <input>, (Nama lengkap wali murid)",
+  "nik_wali": "number <input>, (NIK wali murid)",
+  "thn_lahir_wali": "number <input>, (Tahun lahir wali, misal: 1975)",
+  "pendidikan_wali": "string <option>, (di pilih dari list pendidikan yang sudah kita buat sebelumnya <16.6.4>)",)",
+  "pekerjaan_wali": "string <option>, (di pilih dari list pekerjaan yang sudah kita buat sebelumnya <16.6.5>)",
+  "penghasilan_wali": "string <option>, (di pilih dari list penghasilan yang sudah kita buat sebelumnya <16.6.6>)",)",
+  "created_at": "date, <generate otomatis | backend>",
+  "created_by": "string, <generate otomatis | backend>"
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+ADHITAMA ELVAN SYAHREZA MUSLIH: Peserta didik dengan status aktif terdaftar pada pangkalan data SD NEGERI 1 RANOMEETO.
+ALVARO GAVRIEL TAPAHING: Peserta didik dengan status aktif terdaftar pada pangkalan data SD NEGERI 1 RANOMEETO.
+NUR TSANIAH: Peserta didik dengan status aktif terdaftar pada pangkalan data SDN 3 KONDA.
+Muhamad Wahyu Saputra: Peserta didik dengan status aktif terdaftar pada pangkalan data SDN 3 KONDA.
+```
+
+---
+### 46. Master Triwulan
+**Kategori:** `Data Master > Master Usulan`  
+**Route Frontend:** [`/admin/master/usulan/triwulan`](http://localhost:3000/admin/master/usulan/triwulan)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/usulan/triwulan`  
+**Tabel Database:** `master_usulan_triwulan`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini kita akan disajikan semua list data jadwal periodisasi pencairan atau penyaluran tunjangan guru dalam satu tahun anggaran yang dibagi setiap 3 bulan sekali
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+ title : string <input>, (nama periodisasi),
+desc : string <input>, (Penjelasan singkat terkait periodisasi),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Triwulan I: Periode pembayaran untuk bulan Januari, Februari, dan Maret (Pencairan biasanya dimulai sekitar bulan Maret).
+Triwulan II: Periode pembayaran untuk bulan April, Mei, dan Juni (Pencairan biasanya dimulai sekitar bulan Juni).
+Triwulan III: Periode pembayaran untuk bulan Juli, Agustus, dan September (Pencairan biasanya dimulai sekitar bulan September).
+Triwulan IV: Periode pembayaran untuk bulan Oktober, November, dan Desember (Pencairan biasanya dimulai sekitar bulan November).
+```
+
+---
+### 47. Master Jenis Penerima
+**Kategori:** `Data Master > Master Usulan`  
+**Route Frontend:** [`/admin/master/usulan/jenis-penerima`](http://localhost:3000/admin/master/usulan/jenis-penerima)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/usulan/jenis-penerima`  
+**Tabel Database:** `master_usulan_jenis_penerima`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini kita akan disajikan semua list data jenis penerimaan tunjangan atau tambahan penghasilan resmi bagi guru di Indonesia, baik dari jalur Kemendikdasmen maupun Kementerian Agama;
+
+Contoh :
+
+Tunjangan Profesi Guru (TPG)
+
+Definisi: Tunjangan yang diberikan kepada guru yang sudah memiliki sertifikat pendidik sebagai penghargaan atas profesionalitasnya.
+
+Sasaran: Guru ASN maupun Non-ASN yang telah lulus sertifikasi.
+
+Tunjangan Khusus Guru (TKG)
+
+Definisi: Tunjangan yang diberikan kepada guru yang bertugas di daerah khusus (seperti daerah terpencil, tertinggal, terluar, atau perbatasan).
+
+Sasaran: Guru yang menjalankan tugas pada kondisi geografis atau sosial yang menantang.
+
+Tambahan Penghasilan (TAMSIL)
+
+Definisi: Uang tambahan penghasilan di luar gaji pokok bagi guru ASN yang belum memiliki sertifikat pendidik.
+
+Besaran: Umumnya diberikan untuk membantu kesejahteraan guru yang belum sertifikasi sebelum mereka mengikuti atau lulus program pendidik.
+
+Tamsil Khusus Pendidikan Agama / Bantuan Insentif Guru Agama
+
+Definisi: Tambahan atau insentif khusus yang dialokasikan bagi guru pendidikan agama (seperti Guru PAI atau guru madrasah di bawah naungan Kementerian Agama) yang statusnya Non-ASN dan belum bersertifikasi.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+ title : string <input>, (nama penerimaan),
+desc : string <input>, (Penjelasan singkat terkait penerimaan),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Tunjangan Profesi Guru (TPG)
+Definisi: Tunjangan yang diberikan kepada guru yang sudah memiliki sertifikat pendidik sebagai penghargaan atas profesionalitasnya.
+Sasaran: Guru ASN maupun Non-ASN yang telah lulus sertifikasi.
+Tunjangan Khusus Guru (TKG)
+Definisi: Tunjangan yang diberikan kepada guru yang bertugas di daerah khusus (seperti daerah terpencil, tertinggal, terluar, atau perbatasan).
+Sasaran: Guru yang menjalankan tugas pada kondisi geografis atau sosial yang menantang.
+Tambahan Penghasilan (TAMSIL)
+Definisi: Uang tambahan penghasilan di luar gaji pokok bagi guru ASN yang belum memiliki sertifikat pendidik.
+Besaran: Umumnya diberikan untuk membantu kesejahteraan guru yang belum sertifikasi sebelum mereka mengikuti atau lulus program pendidik.
+Tamsil Khusus Pendidikan Agama / Bantuan Insentif Guru Agama
+Definisi: Tambahan atau insentif khusus yang dialokasikan bagi guru pendidikan agama (seperti Guru PAI atau guru madrasah di bawah naungan Kementerian Agama) yang statusnya Non-ASN dan belum bersertifikasi.
+Form (Contract API):{
+Id : string, <generate otomatis | backend>,
+ title : string <input>, (nama penerimaan),
+desc : string <input>, (Penjelasan singkat terkait penerimaan),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}.
+```
+
+---
+### 48. Master Kelas Penerima
+**Kategori:** `Data Master > Master Usulan`  
+**Route Frontend:** [`/admin/master/usulan/kelas-penerima`](http://localhost:3000/admin/master/usulan/kelas-penerima)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/usulan/kelas-penerima`  
+**Tabel Database:** `master_usulan_kelas_penerima`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini kita akan disajikan semua list data jabatan fungsional atau profesi pendidik yang menjadi sasaran penerima tunjangan dan tambahan penghasilan dalam dunia pendidikan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+ title : string <input>, (nama sasaran penerima),
+desc : string <input>, (Penjelasan singkat terkait sasaran penerima),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Guru: Pendidik profesional yang tugas utamanya mendidik, mengajar, membimbing, dan mengevaluasi peserta didik di kelas.
+Kepala Sekolah: Guru yang diberi tugas tambahan untuk memimpin, mengelola, dan mengawasi jalannya seluruh kegiatan di satuan pendidikan (sekolah).
+Pengawas: Guru ASN yang diangkat dalam jabatan fungsional untuk melakukan tugas pengawasan akademik dan manajerial pada satuan pendidikan yang menjadi binaannya.
+```
+
+---
+### 49. Master Bahan Ajar
+**Kategori:** `Data Master > Master Jurnal`  
+**Route Frontend:** [`/admin/master/jurnal/bahan-ajar`](http://localhost:3000/admin/master/jurnal/bahan-ajar)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/jurnal/bahan-ajar`  
+**Tabel Database:** `master_jurnal_bahan_ajar`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan daftar pilihan metode, pendekatan, atau aktivitas instruksional (bentuk pembelajaran) yang digunakan guru saat melaksanakan kegiatan belajar mengajar di kelas, yang nantinya dipilih saat pengisian agenda jurnal harian.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+ title : string <input>, (nama bahan ajar),
+desc : string <input>, (penjelasan singkat bahan ajar),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Ceramah/Teori: Metode penyampaian konsep, fakta, dan prinsip pembelajaran secara terstruktur oleh guru melalui penjelasan langsung di depan kelas.
+Diskusi: Metode interaktif yang melibatkan pertukaran gagasan, tanya jawab, atau pembahasan studi kasus secara kolaboratif antarpeserta didik.
+Praktek: Aktivitas unjuk kerja langsung atau simulasi terpandu di laboratorium/bengkel untuk menguji dan menerapkan pemahaman teori ke keterampilan riil.
+Tugas: Instruksi pengerjaan latihan mandiri atau kelompok, baik berupa lembar kerja di kelas maupun pekerjaan rumah (PR) untuk mengukur ketercapaian materi.
+```
+
+---
+### 50. Master Materi Ajar
+**Kategori:** `Data Master > Master Jurnal`  
+**Route Frontend:** [`/admin/master/jurnal/materi-ajar`](http://localhost:3000/admin/master/jurnal/materi-ajar)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/jurnal/materi-ajar`  
+**Tabel Database:** `master_jurnal_materi_ajar`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan daftar media atau moda pelaksanaan (sarana/platform penyampaian) yang digunakan guru dalam berinteraksi dengan siswa pada sesi pembelajaran jurnal tersebut.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+ title : string <input>, (nama materi ajar),
+desc : string <input>, (penjelasan singkat bahan ajar),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Tatap Muka: Pembelajaran secara langsung (luring) di dalam ruang kelas atau laboratorium sekolah.
+Zoom: Pembelajaran tatap maya jarak jauh (daring sync) melalui konferensi video Zoom.
+Google Meet: Pembelajaran tatap maya daring interaktif menggunakan Google Workspace / Meet.
+Quiz: Pelaksanaan evaluasi pemahaman, asesmen formatif harian, atau tes interaktif berbasis web/aplikasi.
+```
+
+---
+### 51. Master Kelas
+**Kategori:** `Data Master > Master Jurnal`  
+**Route Frontend:** [`/admin/master/jurnal/kelas`](http://localhost:3000/admin/master/jurnal/kelas)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/jurnal/kelas`  
+**Tabel Database:** `master_jurnal_kelas`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan daftar seluruh tingkat kelas yang aktif dalam periode akademik berjalan sebagai sasaran pelaksanaan jurnal mengajar guru.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+ title : string <input>, (nama kelas),
+desc : string <input>, (penjelasan singkat kelas),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+1: Rombongan belajar tingkat dasar kelas 1 untuk jenjang pendidikan dasar.
+7: Rombongan belajar umum tingkat kelas 7 untuk jenjang sekolah menengah pertama.
+7A: Rombongan belajar spesifik kelas 7 paralel A pada tahun ajaran aktif.
+8B: Rombongan belajar spesifik kelas 8 paralel B pada tahun ajaran aktif.
+```
+
+---
+### 52. Master Mata Pelajaran
+**Kategori:** `Data Master > Master Jurnal`  
+**Route Frontend:** [`/admin/master/jurnal/mata-pelajaran`](http://localhost:3000/admin/master/jurnal/mata-pelajaran)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/jurnal/mata-pelajaran`  
+**Tabel Database:** `master_jurnal_mata_pelajaran`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan daftar seluruh mata pelajaran yang masuk ke dalam struktur kurikulum yang menjadi rujukan materi pelajaran guru pada agenda jurnal kelas.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+kelas_id : string <option> (di pilih dari list kelas yang sudah kita buat sebelumnya <16.4.3>),
+ title : string <input>, (nama mata pelajaran),
+desc : string <input>, (keterangan mata pelajaran),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+1 - Guru Kelas SD: Mata pelajaran pengajaran umum wali kelas untuk tingkat 1 sekolah dasar.
+1 - Tematik SD: Pembelajaran tematik terpadu kurikulum dasar untuk siswa tingkat 1 sekolah dasar.
+7 - Agama Budha: Mata pelajaran pendidikan agama Buddha umum untuk tingkatan kelas 7.
+7A - Agama Budha: Mata pelajaran pendidikan agama Buddha khusus untuk rombongan belajar kelas 7A.
+```
+
+---
+### 53. Master Jenjang
+**Kategori:** `Data Master`  
+**Route Frontend:** [`/admin/master/jenjang`](http://localhost:3000/admin/master/jenjang)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/jenjang`  
+**Tabel Database:** `master_jenjang`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan daftar data tingkat jenjang pendidikan mulai dari kelas 1 Sekolah Dasar hingga kelas 9 Sekolah Menengah Pertama.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama jenjang),
+desc : string <input>, (penjelasan singkat jenjang),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+1: Tingkatan jenjang awal kelas 1 pada jenjang Sekolah Dasar (SD).
+6: Tingkatan jenjang akhir kelas 6 pada jenjang Sekolah Dasar (SD).
+7: Tingkatan jenjang awal kelas 7 pada jenjang Sekolah Menengah Pertama (SMP).
+9: Tingkatan jenjang akhir kelas 9 pada jenjang Sekolah Menengah Pertama (SMP).
+```
+
+---
+### 54. Master Agama
+**Kategori:** `Data Master > Master PPDB`  
+**Route Frontend:** [`/admin/master/ppdb/agama`](http://localhost:3000/admin/master/ppdb/agama)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/ppdb/agama`  
+**Tabel Database:** `master_ppdb_agama`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data agama resmi yang diakui oleh negara untuk melengkapi data profil dan identitas keagamaan calon peserta didik pada formulir pendaftaran PPDB.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama agama),
+desc : string <input>, (penjelasan singkat agama),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Islam: Data identitas pemeluk agama Islam bagi calon peserta didik.
+Kristen/Protestan: Data identitas pemeluk agama Kristen/Protestan bagi calon peserta didik.
+Katholik: Data identitas pemeluk agama Katholik bagi calon peserta didik.
+Hindu: Data identitas pemeluk agama Hindu bagi calon peserta didik.
+```
+
+---
+### 55. Master Tempat Tinggal
+**Kategori:** `Data Master > Master PPDB`  
+**Route Frontend:** [`/admin/master/ppdb/tempat-tinggal`](http://localhost:3000/admin/master/ppdb/tempat-tinggal)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/ppdb/tempat-tinggal`  
+**Tabel Database:** `master_ppdb_tempat_tinggal`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data pilihan status kepemilikan atau kondisi tempat tinggal calon peserta didik selama menempuh masa studi guna pemetaan domisili dan pengawasan siswa.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama tempat tinggal),
+desc : string <input>, (penjelasan singkat tempat tinggal),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Bersama Orang Tua: Calon peserta didik berdomisili tetap di rumah bersama orang tua kandung.
+Wali: Calon peserta didik tinggal bersama pihak keluarga wali/pengampu.
+Kos: Calon peserta didik bertempat tinggal di hunian sewa mandiri/kamar kos.
+Asrama: Calon peserta didik bertempat tinggal di asrama resmi naungan yayasan/sekolah.
+```
+
+---
+### 56. Master Mode Transportasi
+**Kategori:** `Data Master > Master PPDB`  
+**Route Frontend:** [`/admin/master/ppdb/transportasi`](http://localhost:3000/admin/master/ppdb/transportasi)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/ppdb/transportasi`  
+**Tabel Database:** `master_ppdb_transportasi`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data pilihan sarana transportasi yang digunakan oleh calon peserta didik untuk mobilitas harian berangkat dan pulang sekolah.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama mode transportasi),
+desc : string <input>, (penjelasan singkat mode transportasi),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Jalan Kaki: Calon peserta didik menuju ke sekolah dengan berjalan kaki karena jarak dekat.
+Kendaraan Pribadi: Penggunaan kendaraan milik keluarga (motor/mobil) secara mandiri atau diantar.
+Kendaraan Umum/Angkot: Penggunaan angkutan kota, bus kota, atau moda umum reguler.
+Jemputan Sekolah: Layanan mobil atau bus antar-jemput khusus peserta didik.
+```
+
+---
+### 57. Master Pendidikan
+**Kategori:** `Data Master > Master PPDB`  
+**Route Frontend:** [`/admin/master/ppdb/pendidikan`](http://localhost:3000/admin/master/ppdb/pendidikan)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/ppdb/pendidikan`  
+**Tabel Database:** `master_ppdb_pendidikan`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data tingkatan kualifikasi jenjang pendidikan formal terakhir bagi orang tua/wali.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama pendidikan),
+desc : string <input>, (penjelasan singkat pendidikan),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+SD Sederajat: Kualifikasi tamat pendidikan dasar formal 6 tahun.
+SMP Sederajat: Kualifikasi tamat sekolah menengah pertama.
+SMA Sederajat: Kualifikasi tamat pendidikan menengah atas atau juruan.
+D4/S1: Kualifikasi pendidikan sarjana terapan maupun strata satu perguruan tinggi.
+```
+
+---
+### 58. Master Pekerjaan
+**Kategori:** `Data Master > Master PPDB`  
+**Route Frontend:** [`/admin/master/ppdb/pekerjaan`](http://localhost:3000/admin/master/ppdb/pekerjaan)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/ppdb/pekerjaan`  
+**Tabel Database:** `master_ppdb_pekerjaan`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data klasifikasi bidang pekerjaan atau mata pencaharian orang tua/wali murid untuk kelengkapan data administratif.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama pekerjaan),
+desc : string <input>, (penjelasan singkat pekerjaan),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Petani: Mata pencaharian di sektor agraris dan pengolahan lahan tani.
+PNS/TNI/POLRI: Aparatur sipil negara atau personel pertahanan dan keamanan pemerintah.
+Karyawan Swasta: Tenaga kerja tetap maupun kontrak di instansi atau perusahaan komersial.
+Wiraswasta: Aktivitas perniagaan atau penyedia jasa usaha mandiri.
+```
+
+---
+### 59. Master Penghasilan
+**Kategori:** `Data Master > Master PPDB`  
+**Route Frontend:** [`/admin/master/ppdb/penghasilan`](http://localhost:3000/admin/master/ppdb/penghasilan)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/ppdb/penghasilan`  
+**Tabel Database:** `master_ppdb_penghasilan`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data rentang skala pendapatan bulanan orang tua/wali murid.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama penghasilan),
+desc : string <input>, (penjelasan singkat penghasilan),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Kurang dari 500.000: Kelompok rentang penghasilan keluarga di bawah batas lima ratus ribu rupiah per bulan.
+1.000.000 - 1.999.999: Kelompok rentang penghasilan keluarga kelas menengah ke bawah.
+2.000.000 - 4.999.999: Kelompok rentang penghasilan upah minimum rata-rata daerah per bulan.
+5.000.000 - 20.000.000: Kelompok rentang penghasilan menengah ke atas.
+```
+
+---
+### 60. Master Bangunan (Kelaikan/Kerusakan)
+**Kategori:** `Data Master > Master Sarpras`  
+**Route Frontend:** [`/admin/master/sarpras/bangunan`](http://localhost:3000/admin/master/sarpras/bangunan)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/sarpras/bangunan`  
+**Tabel Database:** `master_sarpras_bangunan`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data klasifikasi tingkat kelaikan fisik atau kerusakan infrastruktur gedung/ruangan sekolah.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama bangunan),
+desc : string <input>, (penjelasan singkat bangunan),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Baik: Kondisi fisik gedung/ruangan utuh tanpa kerusakan struktural maupun non-struktural sehingga laik fungsi optimal.
+Rusak Ringan: Kondisi bangunan mengalami kerusakan non-struktural minor (seperti cat mengelupas, plafon retak, atau daun pintu rusak) tanpa mengganggu keamanan.
+Rusak Sedang: Kondisi bangunan mengalami kerusakan pada sebagian komponen non-struktural dan/atau sebagian kecil struktural (seperti kebocoran atap signifikan atau dinding retak parsial).
+Rusak Berat: Kondisi bangunan mengalami kerusakan parah pada elemen struktur utama (pondasi, kolom, rangka atap) sehingga membahayakan dan memerlukan renovasi total.
+```
+
+---
+### 61. Master Kepemilikan
+**Kategori:** `Data Master > Master Sarpras`  
+**Route Frontend:** [`/admin/master/sarpras/kepemilikan`](http://localhost:3000/admin/master/sarpras/kepemilikan)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/sarpras/kepemilikan`  
+**Tabel Database:** `master_sarpras_kepemilikan`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data status legalitas hak penguasaan atau pemanfaatan atas tanah, gedung, maupun fasilitas sarana prasarana yang digunakan oleh satuan pendidikan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama kepemilikan),
+desc : string <input>, (penjelasan singkat kepemilikan),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Milik Sendiri: Aset tanah atau sarana prasarana sepenuhnya merupakan aset tetap milik sah lembaga/pemerintah daerah.
+Sewa: Aset sarana prasarana dimanfaatkan melalui mekanisme perjanjian sewa berjangka dengan pihak ketiga.
+Pinjam: Pemanfaatan fasilitas sarana/gedung melalui status pinjam pakai dari instansi pemerintah lain atau hibah pihak lain tanpa kompensasi sewa.
+```
+
+---
+### 62. Master Sumber Dana
+**Kategori:** `Data Master > Master Sarpras`  
+**Route Frontend:** [`/admin/master/sarpras/sumber-dana`](http://localhost:3000/admin/master/sarpras/sumber-dana)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/sarpras/sumber-dana`  
+**Tabel Database:** `master_sarpras_sumber_dana`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data referensi asal alokasi anggaran atau pos pembiayaan yang digunakan untuk pengadaan, pembangunan, pemeliharaan, serta belanja modal sarana prasarana sekolah.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama sumber dana),
+desc : string <input>, (penjelasan singkat sumber dana),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Dana Alokasi Khusus (DAK): Anggaran transfer pemerintah pusat yang dialokasikan khusus untuk mendanai kegiatan fisik/sarana pendidikan.
+Bantuan Operasional Sekolah (BOS): Anggaran operasional reguler yang dapat digunakan untuk belanja alat, pemeliharaan berkala, dan bahan ajar sekolah.
+Dana Hibah: Penerimaan pembiayaan sarana prasarana yang bersumber dari bantuan pihak ketiga/yayasan/CSR yang tidak mengikat.
+```
+
+---
+### 63. Master Kondisi Alat
+**Kategori:** `Data Master > Master Sarpras`  
+**Route Frontend:** [`/admin/master/sarpras/kondisi-alat`](http://localhost:3000/admin/master/sarpras/kondisi-alat)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/sarpras/kondisi-alat`  
+**Tabel Database:** `master_sarpras_kondisi_alat`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data status kelaikan operasional untuk peralatan penunjang belajar, instrumen laboratorium, perangkat TIK, maupun perabot kelas.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama kondisi alat),
+desc : string <input>, (penjelasan singkat kondisi alat),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Baik: Peralatan berfungsi normal, utuh, dan siap digunakan untuk kegiatan operasional/praktikum harian.
+Rusak Ringan: Peralatan mengalami penurunan fungsi parsial atau cacat fisik minor namun masih dapat diperbaiki secara cepat.
+Rusak Berat: Peralatan mengalami malfungsi permanen, komponen utama hancur, atau tidak bernilai ekonomis untuk diperbaiki sehingga masuk usulan afkir/penghapusan.
+```
+
+---
+### 64. Master Jenis Bantuan
+**Kategori:** `Data Master > Master Sarpras`  
+**Route Frontend:** [`/admin/master/sarpras/jenis-bantuan`](http://localhost:3000/admin/master/sarpras/jenis-bantuan)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/sarpras/jenis-bantuan`  
+**Tabel Database:** `master_sarpras_jenis_bantuan`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data klasifikasi skema intervensi atau program bantuan formal yang diterima oleh satuan pendidikan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama jenis bantuan),
+desc : string <input>, (penjelasan singkat jenis bantuan),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Dana Alokasi Khusus (DAK): Skema program bantuan fisik untuk rehabilitasi ruang kelas, pembangunan lab baru, atau pengadaan TIK terpusat.
+Bantuan Operasional Sekolah (BOS): Skema bantuan operasional yang mendukung pengadaan fasilitas penunjang KBM harian dan perlengkapan sarana rutin sekolah.
+```
+
+---
+### 65. Master BK Jenis Layanan
+**Kategori:** `Data Master`  
+**Route Frontend:** [`/admin/master/bk-jenis-layanan`](http://localhost:3000/admin/master/bk-jenis-layanan)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/bk-jenis-layanan`  
+**Tabel Database:** `master_bk_jenis_layanan`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data klasifikasi bidang atau ranah bimbingan konseling yang menjadi rujukan guru BK saat mencatat intervensi, konseling individu/kelompok, maupun penanganan kasus.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama jenis layanan bimbingan konseling),
+desc : string <input>, (penjelasan singkat jenis layanan bimbingan konseling),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Pribadi: Layanan pendampingan terkait pemahaman diri, manajemen emosi, pembentukan karakter, moral, atau permasalahan internal peserta didik.
+Sosial: Layanan bimbingan interaksi antarteman sebaya, adaptasi lingkungan sekolah, dinamika pergaulan, serta mediasi konflik antarsiswa.
+Belajar: Layanan konseling strategi akademik, penanganan kesulitan belajar, motivasi belajar, manajemen waktu belajar, atau tindak lanjut penurunan nilai.
+Karir: Layanan arahan peminatan jurusan, eksplorasi potensi bakat/profesi, serta perencanaan studi lanjutan atau persiapan dunia kerja.
+```
+
+---
+### 66. Master BK Kegiatan Layanan
+**Kategori:** `Data Master`  
+**Route Frontend:** [`/admin/master/bk-kegiatan-layanan`](http://localhost:3000/admin/master/bk-kegiatan-layanan)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/bk-kegiatan-layanan`  
+**Tabel Database:** `master_bk_kegiatan_layanan`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan daftar bentuk atau metode operasional pemberian layanan Bimbingan dan Konseling oleh guru BK kepada peserta didik, baik yang bersifat preventif, kuratif.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama jenis kegiatan layanan),
+desc : string <input>, (penjelasan singkat jenis kegiatan layanan),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Bimbingan Klasikal: Kegiatan layanan bimbingan yang dilaksanakan langsung di dalam ruang kelas terjadwal untuk seluruh siswa dalam satu rombongan belajar.
+Konseling Individu: Sesi tatap muka tatap pribadi interaktif antara guru BK dan seorang konseli untuk membantu menuntaskan masalah pribadi/khusus.
+Home Visit: Kunjungan langsung guru BK ke tempat tinggal orang tua/wali murid guna konfirmasi, investigasi latar belakang, atau membangun komitmen penanganan siswa.
+Referal/Alih Tangan Kasus: Pengalihan penanganan masalah peserta didik kepada pihak ahli atau profesional lain yang lebih berkompeten (seperti psikolog, psikiater, atau aparat kepolisian) karena berada di luar kewenangan guru BK.
+```
+
+---
+### 67. Master Model Pembelajaran
+**Kategori:** `Data Master`  
+**Route Frontend:** [`/admin/master/model-pembelajaran`](http://localhost:3000/admin/master/model-pembelajaran)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/model-pembelajaran`  
+**Tabel Database:** `master_model_pembelajaran`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan kerangka konseptual atau sintaks strategi pembelajaran terstruktur (pedagogi) yang diterapkan oleh guru saat merancang modul ajar (RPP).
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama jenis model pembelajaran),
+desc : string <input>, (penjelasan singkat jenis model pembelajaran),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Bimbingan Klasikal: Format pembelajaran atau penyampaian materi tatap muka secara terstruktur yang dilakukan di dalam ruang kelas untuk satu rombongan belajar reguler.
+Bimbingan Kelas Besar: Kegiatan pembelajaran terpadu atau pengarahan bersama yang melibatkan gabungan beberapa rombel atau satu angkatan sekaligus di ruang serbaguna/aula.
+Konseling Individu: Sesi tatap muka pembelajaran mandiri atau pendampingan personal satu lawan satu guna menuntaskan kendala pemahaman peserta didik secara intensif.
+Konseling Kelompok: Sesi diskusi terarah berbasis kelompok kecil untuk menelaah topik atau menyelesaikan problematika tugas bersama dengan dinamika kelompok.
+```
+
+---
+### 68. Master Pendampingan
+**Kategori:** `Data Master`  
+**Route Frontend:** [`/admin/master/pendampingan`](http://localhost:3000/admin/master/pendampingan)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/pendampingan`  
+**Tabel Database:** `master_pendampingan`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan list data tahapan siklus pendampingan manajerial dan supervisi program kerja sekolah (seperti pendampingan oleh pengawas sekolah, kepala sekolah, atau tim penjamin mutu).
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama pendampingan),
+desc : string <input>, (penjelasan singkat pendampingan),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Pendampingan Perencanaan Kerja: Bimbingan dan penyelarasan target kinerja individu maupun tim pendidik sebelum tahun ajaran atau periode program dimulai.
+Pendampingan Perencanaan Program Sekolah: Asistensi penyusunan dokumen Rencana Kerja Sekolah (RKS) serta Rencana Kegiatan dan Anggaran Sekolah (RKAS).
+Pendampingan Pelaksana Program Sekolah: Pengawalan, observasi, dan supervisi gsung terhadap implementasi program kerja yang sedang berjalan di lapangan.
+Pelaporan Kinerja Yang Bersiklus: Pembinaan rekapitulasi capaian, refleksi berbasis data, penyusunan laporan pertanggungjawaban program, serta rencana tindak lanjut perbaikan berkelanjutan.
+```
+
+---
+### 69. Master Tugas
+**Kategori:** `Data Master`  
+**Route Frontend:** [`/admin/master/tugas`](http://localhost:3000/admin/master/tugas)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/tugas`  
+**Tabel Database:** `master_tugas`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan daftar peran atau fungsi penugasan formal yang diemban oleh pendidik, tenaga kependidikan, maupun pihak eksternal saat terlibat dalam suatu agenda kegiatan sekolah, asesmen, atau program pendampingan.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama jenis tugas),
+desc : string <input>, (penjelasan singkat jenis tugas),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+Pendampingan Perencanaan Kerja: Bimbingan dan penyelarasan target kinerja individu maupun tim pendidik sebelum tahun ajaran atau periode program dimulai.
+Pendampingan Perencanaan Program Sekolah: Asistensi penyusunan dokumen Rencana Kerja Sekolah (RKS) serta Rencana Kegiatan dan Anggaran Sekolah (RKAS).
+Pendampingan Pelaksana Program Sekolah: Pengawalan, observasi, dan supervisi gsung terhadap implementasi program kerja yang sedang berjalan di lapangan.
+Pelaporan Kinerja Yang Bersiklus: Pembinaan rekapitulasi capaian, refleksi berbasis data, penyusunan laporan pertanggungjawaban program, serta rencana tindak lanjut perbaikan berkelanjutan.
+```
+
+---
+### 70. Master Kategori
+**Kategori:** `Data Master`  
+**Route Frontend:** [`/admin/master/kategori`](http://localhost:3000/admin/master/kategori)  
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/kategori`  
+**Tabel Database:** `master_kategori`  
+
+#### Deskripsi & Bisnis Logika
+> Pada modul ini disajikan daftar klasifikasi instrumen berkas dan dokumen pertanggungjawaban (SPJ) dana BOSP yang menjadi data rujukan utama bagi sekolah saat mengunggah lampiran usulan rekonsiliasi dan bagi dinas saat melakukan verifikasi.
+
+#### Kontrak Payload JSON (API Contract)
+**Form (Contract API)**
+```json
+{
+Id : string, <generate otomatis | backend>,
+title : string <input>, (nama jenis tugas),
+desc : string <input>, (penjelasan singkat jenis tugas),
+created_at : date, <generate otomatis | backend>,
+created_by : string, <generate otomatis | backend>,
+}
+```
+
+#### Contoh Data Riil (Konawe Selatan)
+```text
+seluruh transaksi penerimaan dan pengeluaran kas dana BOSP yang telah ditutup dan disahkan Kepala Sekolah serta Bendahara.
+Buku Pembantu Pajak: Rekapitulasi pemotongan dan penyetoran kewajiban perpajakan belanja BOSP yang dilengkapi bukti NTPN/e-Billing yang sah.
+Surat Pernyataan Tanggung Jawab Mutlak (SPTJM): Surat pernyataan keabsahan dan kebenaran penggunaan belanja dana BOSP bermaterai resmi dari Kepala Satuan Pendidikan.
+Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggaran dana BOSP per semester yang dicocokkan dengan rekening koran bank.
+```
+
+---
