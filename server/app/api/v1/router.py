@@ -2,8 +2,8 @@
 
 from fastapi import APIRouter
 
+from app.api.v1.endpoints.admin import admin_router
 from app.api.v1.endpoints.auth.route import router as auth_router
-from app.api.v1.endpoints.master.router import router as master_router
 from app.api.v1.endpoints.master_data.router import router as master_data_router
 from app.api.v1.endpoints.users.route import router as users_router
 
@@ -28,4 +28,4 @@ async def health_check() -> dict:
 api_v1_router.include_router(auth_router)
 api_v1_router.include_router(users_router)
 api_v1_router.include_router(master_data_router)
-api_v1_router.include_router(master_router)
+api_v1_router.include_router(admin_router)
