@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Swal from "sweetalert2";
 import {
   Badge,
   Button,
@@ -16,36 +17,59 @@ import {
   JenjangRecord,
   KATEGORI_JENJANG_OPTIONS,
   STATUS_JENJANG_OPTIONS,
+  ResponseInterface,
 } from "./types";
-import { DUMMY_JENJANG } from "./data";
 import FormJenjangModal from "./components/FormJenjangModal";
 import DetailJenjangModal from "./components/DetailJenjangModal";
-import { fetchData } from "@/lib/api_secure";
-import { useUrlStore } from "@/store/useUrlStore";
+import {
+  useResponseListMaster,
+  useDeleteMaster,
+  useCreateMaster,
+  useUpdateMaster,
+} from "./hooks/crud";
+import { listindex } from "@/utilities/pagination";
 
 export default function MasterJenjangPage() {
-  const apiUrl = useUrlStore((state) => state.URL.APP);
-
-  // Data Source State
-  const [data, setData] = useState<JenjangRecord[]>(DUMMY_JENJANG);
+  // Filter & Search State
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [kategoriFilter, setKategoriFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [isLoadingApi, setIsLoadingApi] = useState(false);
 
   // Pagination State
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
+
+  // Debounce Search input (e-office pattern)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 400);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  // TanStack Query CRUD Hooks
+  const { List, isLoading, isError, error, refetch } = useResponseListMaster(
+    page,
+    pageSize,
+    debouncedSearch
+  );
+  const deleteMutation = useDeleteMaster();
+  const createMutation = useCreateMaster();
+  const updateMutation = useUpdateMaster();
 
   // Modal State
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<JenjangRecord | null>(null);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form Field State
-  const [formData, setFormData] = useState<Partial<JenjangRecord>>({
+  const initialForm: Partial<JenjangRecord> = {
     id: "",
     uraian: "",
     nip: "",
@@ -53,85 +77,61 @@ export default function MasterJenjangPage() {
     keterangan: "",
     kategori: "Formal",
     status: "Aktif",
-  });
-
-  // Fetch data dari FastAPI Backend
-  const loadDataFromBackend = async () => {
-    setIsLoadingApi(true);
-    try {
-      const res = await fetchData<{ total: number; data: any[] }>(
-        `${apiUrl}/api/v1/admin/master/jenjang?skip=0&limit=100`
-      );
-      if (res && Array.isArray(res.data) && res.data.length > 0) {
-        const mapped: JenjangRecord[] = res.data.map((item, idx) => ({
-          id: item.id || `JJG-0${idx + 1}`,
-          uraian: item.uraian || "",
-          nip: item.nip || null,
-          unit_kerja: item.unit_kerja || "Dinas Pendidikan & Kebudayaan",
-          keterangan:
-            item.keterangan ||
-            (item.uraian.includes("PAUD") || item.uraian.includes("TK")
-              ? "Pendidikan Anak Usia Dini formal & non-formal (TK, KB, TPA, SPS)"
-              : item.uraian.includes("SD")
-              ? "Pendidikan dasar wajib belajar 6 tahun (Kelas 1 s/d Kelas 6)"
-              : item.uraian.includes("SMP")
-              ? "Pendidikan menengah pertama wajib belajar 3 tahun (Kelas 7 s/d 9)"
-              : "Pendidikan kesetaraan & non-formal masyarakat"),
-          kategori: item.uraian.includes("PKBM") ? "Non-Formal" : "Formal",
-          status: "Aktif",
-          created_at: item.created_at,
-          created_by: item.created_by || "Administrator SIMPEG",
-        }));
-        setData(mapped);
-      }
-    } catch {
-      // Jika backend belum aktif atau error, gunakan data dummy fallback
-    } finally {
-      setIsLoadingApi(false);
-    }
   };
 
-  useEffect(() => {
-    loadDataFromBackend();
-  }, [apiUrl]);
+  const [formData, setFormData] = useState<Partial<JenjangRecord>>(initialForm);
 
-  // Filter Data (Pencarian & Multi-Kriteria)
+  const emptyForm = () => {
+    setFormData(initialForm);
+  };
+
+  // Raw data from query
+  const rawList: JenjangRecord[] = useMemo(() => {
+    if (!List?.data || !Array.isArray(List.data)) return [];
+    return List.data.map((item, idx) => ({
+      ...item,
+      id: item.id || `JJG-0${idx + 1}`,
+      uraian: item.uraian || "",
+      nip: item.nip || null,
+      unit_kerja: item.unit_kerja || "Dinas Pendidikan & Kebudayaan",
+      kategori: item.kategori || (item.uraian.includes("PKBM") ? "Non-Formal" : "Formal"),
+      status: item.status || "Aktif",
+      keterangan:
+        item.keterangan ||
+        (item.uraian.includes("PAUD") || item.uraian.includes("TK")
+          ? "Pendidikan Anak Usia Dini formal & non-formal (TK, KB, TPA, SPS)"
+          : item.uraian.includes("SD")
+          ? "Pendidikan dasar wajib belajar 6 tahun (Kelas 1 s/d Kelas 6)"
+          : item.uraian.includes("SMP")
+          ? "Pendidikan menengah pertama wajib belajar 3 tahun (Kelas 7 s/d 9)"
+          : "Pendidikan kesetaraan & non-formal masyarakat"),
+      created_by: item.created_by || "Administrator SIMPEG",
+    }));
+  }, [List]);
+
+  // Filter Data (Client-side secondary filtering for Jalur / Status)
   const filteredData = useMemo(() => {
-    return data.filter((item) => {
-      const q = search.toLowerCase();
-      const matchSearch =
-        item.uraian.toLowerCase().includes(q) ||
-        item.id.toLowerCase().includes(q) ||
-        (item.unit_kerja || "").toLowerCase().includes(q) ||
-        (item.keterangan || "").toLowerCase().includes(q);
-
+    return rawList.filter((item) => {
       const matchKategori = kategoriFilter === "all" || item.kategori === kategoriFilter;
       const matchStatus = statusFilter === "all" || item.status === statusFilter;
-
-      return matchSearch && matchKategori && matchStatus;
+      return matchKategori && matchStatus;
     });
-  }, [data, search, kategoriFilter, statusFilter]);
-
-  // Paginasi Data
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredData.slice(start, start + pageSize);
-  }, [filteredData, page, pageSize]);
+  }, [rawList, kategoriFilter, statusFilter]);
 
   // Statistik Ringkasan Metrik
   const stats = useMemo(() => {
-    const total = data.length;
-    const formalCount = data.filter((d) => d.kategori === "Formal").length;
-    const nonFormalCount = data.filter((d) => d.kategori === "Non-Formal").length;
-    const activeCount = data.filter((d) => (d.status || "Aktif") === "Aktif").length;
+    const total = List?.total ?? rawList.length;
+    const formalCount = rawList.filter((d) => d.kategori === "Formal").length;
+    const nonFormalCount = rawList.filter((d) => d.kategori === "Non-Formal").length;
+    const activeCount = rawList.filter((d) => (d.status || "Aktif") === "Aktif").length;
     return { total, formalCount, nonFormalCount, activeCount };
-  }, [data]);
+  }, [List, rawList]);
 
   // Modal Handlers
   const openAddModal = () => {
     setFormMode("add");
     setFormData({
-      id: `JJG-${String(data.length + 1).padStart(2, "0")}`,
+      id: `JJG-${String((List?.total ?? 0) + 1).padStart(2, "0")}`,
       uraian: "",
       nip: "",
       unit_kerja: "Bidang Pembinaan Sekolah Dasar",
@@ -154,78 +154,71 @@ export default function MasterJenjangPage() {
     setIsDetailOpen(true);
   };
 
-  const handleDelete = async (id: string, uraian: string) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus Master Jenjang "${uraian}" (${id})?`)) {
-      try {
-        await fetchData(`${apiUrl}/api/v1/admin/master/jenjang/${id}`, {
-          method: "DELETE",
-        });
-      } catch {
-        // Abaikan jika fallback
+  const handleDelete = (id: string, uraian: string) => {
+    Swal.fire({
+      title: "Konfirmasi Hapus",
+      text: `Apakah Anda yakin ingin menghapus data Jenjang "${uraian}" (${id})?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#e11d48",
+      cancelButtonColor: "#71717a",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteMutation.mutate(id);
       }
-      setData((prev) => prev.filter((item) => item.id !== id));
-    }
+    });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.uraian || !formData.id) {
-      alert("Silakan lengkapi Kode dan Nama Jenjang Pendidikan!");
+      Swal.fire({
+        title: "Pemberitahuan!",
+        text: "Silakan lengkapi Kode dan Nama Jenjang Pendidikan!",
+        icon: "warning",
+      });
       return;
     }
 
-    setIsSubmitting(true);
+    if (formMode === "add") {
+      const payload: Partial<ResponseInterface> = {
+        id: formData.id,
+        uraian: formData.uraian,
+        nip: formData.nip || null,
+        unit_kerja: formData.unit_kerja || null,
+      };
 
-    try {
-      if (formMode === "add") {
-        const payload = {
-          id: formData.id,
-          uraian: formData.uraian,
-          nip: formData.nip || null,
-          unit_kerja: formData.unit_kerja || null,
-        };
+      createMutation.mutate(payload, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          emptyForm();
+        },
+      });
+    } else if (formMode === "edit" && selectedRecord) {
+      const payload: Partial<ResponseInterface> = {
+        uraian: formData.uraian,
+        nip: formData.nip || null,
+        unit_kerja: formData.unit_kerja || null,
+      };
 
-        try {
-          await fetchData(`${apiUrl}/api/v1/admin/master/jenjang`, {
-            method: "POST",
-            body: JSON.stringify(payload),
-          });
-        } catch {
-          // Tetap update state lokal jika offline
+      updateMutation.mutate(
+        {
+          id: selectedRecord.id,
+          body: payload,
+        },
+        {
+          onSuccess: () => {
+            setIsFormOpen(false);
+            emptyForm();
+          },
         }
-
-        const newRecord: JenjangRecord = {
-          ...(formData as JenjangRecord),
-          created_at: new Date().toISOString(),
-          created_by: "Administrator SIMPEG",
-        };
-        setData([newRecord, ...data]);
-      } else if (formMode === "edit" && selectedRecord) {
-        const payload = {
-          uraian: formData.uraian,
-          unit_kerja: formData.unit_kerja || null,
-        };
-
-        try {
-          await fetchData(`${apiUrl}/api/v1/admin/master/jenjang/${selectedRecord.id}`, {
-            method: "PUT",
-            body: JSON.stringify(payload),
-          });
-        } catch {
-          // Tetap update state lokal jika offline
-        }
-
-        setData((prev) =>
-          prev.map((item) =>
-            item.id === selectedRecord.id ? { ...item, ...(formData as JenjangRecord) } : item
-          )
-        );
-      }
-      setIsFormOpen(false);
-    } finally {
-      setIsSubmitting(false);
+      );
     }
   };
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   return (
     <div className="space-y-6 pb-12">
@@ -243,7 +236,7 @@ export default function MasterJenjangPage() {
       {/* 2. PageHeader Standar EduSetara */}
       <PageHeader
         title="Master Jenjang Pendidikan"
-        description="Konfigurasi dan klasifikasi jenjang satuan pendidikan (PAUD/TK, SD, SMP, PKBM) untuk sinkronisasi Dapodik, PPDB, dan penugasan guru."
+        description="Konfigurasi dan klasifikasi jenjang satuan pendidikan (PAUD/TK, SD, SMP, PKBM) terintegrasi TanStack Query & FastAPI SIMPEG."
         badge={<Badge variant="gold">Data Master</Badge>}
         action={
           <Button variant="gold" onClick={openAddModal}>
@@ -258,7 +251,7 @@ export default function MasterJenjangPage() {
           <div>
             <p className="text-xs font-semibold text-[#7d7152]">Total Jenjang</p>
             <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.total} Jenjang</h4>
-            <span className="text-[11px] text-emerald-700 font-medium">Terdaftar di Sistem</span>
+            <span className="text-[11px] text-emerald-700 font-medium">Terdaftar di SIMPEG</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
             🎓
@@ -291,7 +284,7 @@ export default function MasterJenjangPage() {
           <div>
             <p className="text-xs font-semibold text-[#7d7152]">Status Keaktifan</p>
             <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.activeCount} Aktif</h4>
-            <span className="text-[11px] text-emerald-700 font-semibold">100% Terintegrasi Dapodik</span>
+            <span className="text-[11px] text-emerald-700 font-semibold">Sinkron Dapodik</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
             ⚡
@@ -352,6 +345,15 @@ export default function MasterJenjangPage() {
                 Reset Filter
               </Button>
             )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              title="Muat Ulang Data"
+            >
+              🔄 Refresh
+            </Button>
           </div>
         </div>
 
@@ -384,19 +386,53 @@ export default function MasterJenjangPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/60 bg-transparent">
-              {filteredData.length === 0 ? (
+              {isLoading ? (
+                // Shimmer Loading Skeleton Rows
+                Array.from({ length: pageSize }).map((_, idx) => (
+                  <tr key={`skeleton-${idx}`} className="animate-pulse">
+                    <td className="px-4 py-3.5 text-center">
+                      <div className="h-4 w-4 bg-amber-200/50 rounded-md mx-auto" />
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="h-5 w-16 bg-amber-200/50 rounded-lg" />
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="h-4 w-40 bg-amber-200/50 rounded-md mb-1.5" />
+                      <div className="h-3 w-56 bg-amber-200/30 rounded-md" />
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="h-5 w-20 bg-amber-200/40 rounded-md" />
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="h-4 w-32 bg-amber-200/40 rounded-md" />
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <div className="h-5 w-14 bg-amber-200/40 rounded-md mx-auto" />
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      <div className="h-7 w-20 bg-amber-200/40 rounded-lg ml-auto" />
+                    </td>
+                  </tr>
+                ))
+              ) : isError ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-12 text-rose-600 text-xs font-semibold">
+                    Gagal mengambil data dari server: {(error as any)?.message || "Koneksi terputus"}
+                  </td>
+                </tr>
+              ) : filteredData.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center py-12 text-[#7d7152] text-xs font-medium">
                     Tidak ada data master jenjang ditemukan.
                   </td>
                 </tr>
               ) : (
-                paginatedData.map((row, idx) => {
+                filteredData.map((row, idx) => {
                   return (
                     <tr key={row.id} className="hover:bg-white/50 transition-colors duration-150">
-                      {/* 1. Nomor Baris */}
-                      <td className="px-4 py-3.5 text-xs text-[#2d2410] align-middle text-center font-semibold text-[#a89b7b]">
-                        {(page - 1) * pageSize + idx + 1}
+                      {/* 1. Nomor Baris dengan listindex */}
+                      <td className="px-4 py-3.5 text-xs align-middle text-center font-semibold text-[#a89b7b]">
+                        {listindex(pageSize, page, idx)}
                       </td>
 
                       {/* 2. Kode Jenjang */}
@@ -455,7 +491,7 @@ export default function MasterJenjangPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => openDetailModal(row)}
-                            title="Lihat Detail Jenjang"
+                            title="Lihat Lembar Data Jenjang"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -501,8 +537,11 @@ export default function MasterJenjangPage() {
             page={page}
             onPageChange={setPage}
             pageSize={pageSize}
-            onPageSizeChange={setPageSize}
-            total={filteredData.length}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setPage(1);
+            }}
+            total={List?.total ?? filteredData.length}
             pageSizeOptions={[3, 5, 10, 20]}
           />
         </div>
