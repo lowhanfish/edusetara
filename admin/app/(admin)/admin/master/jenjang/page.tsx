@@ -10,15 +10,9 @@ import {
   Input,
   PageHeader,
   Pagination,
-  Select,
 } from "../../../_components/ui";
 
-import {
-  JenjangRecord,
-  KATEGORI_JENJANG_OPTIONS,
-  STATUS_JENJANG_OPTIONS,
-  ResponseInterface,
-} from "./types";
+import { ResponseInterface, JenjangRecord } from "./types";
 import FormJenjangModal from "./components/FormJenjangModal";
 import DetailJenjangModal from "./components/DetailJenjangModal";
 import {
@@ -33,8 +27,6 @@ export default function MasterJenjangPage() {
   // Filter & Search State
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [kategoriFilter, setKategoriFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
 
   // Pagination State
   const [page, setPage] = useState(1);
@@ -68,84 +60,48 @@ export default function MasterJenjangPage() {
   const [selectedRecord, setSelectedRecord] = useState<JenjangRecord | null>(null);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
 
-  // Form Field State
-  const initialForm: Partial<JenjangRecord> = {
-    id: "",
+  // Form Field State - strictly follows data contract: uraian, unit_kerja, nip
+  const initialForm: Partial<ResponseInterface> = {
     uraian: "",
+    unit_kerja: "",
     nip: "",
-    unit_kerja: "Bidang Pembinaan Sekolah Dasar",
-    keterangan: "",
-    kategori: "Formal",
-    status: "Aktif",
   };
 
-  const [formData, setFormData] = useState<Partial<JenjangRecord>>(initialForm);
+  const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
 
   const emptyForm = () => {
     setFormData(initialForm);
   };
 
-  // Raw data from query
+  // Raw data from TanStack Query
   const rawList: JenjangRecord[] = useMemo(() => {
     if (!List?.data || !Array.isArray(List.data)) return [];
-    return List.data.map((item, idx) => ({
-      ...item,
-      id: item.id || `JJG-0${idx + 1}`,
-      uraian: item.uraian || "",
-      nip: item.nip || null,
-      unit_kerja: item.unit_kerja || "Dinas Pendidikan & Kebudayaan",
-      kategori: item.kategori || (item.uraian.includes("PKBM") ? "Non-Formal" : "Formal"),
-      status: item.status || "Aktif",
-      keterangan:
-        item.keterangan ||
-        (item.uraian.includes("PAUD") || item.uraian.includes("TK")
-          ? "Pendidikan Anak Usia Dini formal & non-formal (TK, KB, TPA, SPS)"
-          : item.uraian.includes("SD")
-          ? "Pendidikan dasar wajib belajar 6 tahun (Kelas 1 s/d Kelas 6)"
-          : item.uraian.includes("SMP")
-          ? "Pendidikan menengah pertama wajib belajar 3 tahun (Kelas 7 s/d 9)"
-          : "Pendidikan kesetaraan & non-formal masyarakat"),
-      created_by: item.created_by || "Administrator SIMPEG",
-    }));
+    return List.data;
   }, [List]);
-
-  // Filter Data (Client-side secondary filtering for Jalur / Status)
-  const filteredData = useMemo(() => {
-    return rawList.filter((item) => {
-      const matchKategori = kategoriFilter === "all" || item.kategori === kategoriFilter;
-      const matchStatus = statusFilter === "all" || item.status === statusFilter;
-      return matchKategori && matchStatus;
-    });
-  }, [rawList, kategoriFilter, statusFilter]);
 
   // Statistik Ringkasan Metrik
   const stats = useMemo(() => {
     const total = List?.total ?? rawList.length;
-    const formalCount = rawList.filter((d) => d.kategori === "Formal").length;
-    const nonFormalCount = rawList.filter((d) => d.kategori === "Non-Formal").length;
-    const activeCount = rawList.filter((d) => (d.status || "Aktif") === "Aktif").length;
-    return { total, formalCount, nonFormalCount, activeCount };
+    const withUnitKerja = rawList.filter((d) => Boolean(d.unit_kerja)).length;
+    const withNip = rawList.filter((d) => Boolean(d.nip)).length;
+    return { total, withUnitKerja, withNip };
   }, [List, rawList]);
 
   // Modal Handlers
   const openAddModal = () => {
     setFormMode("add");
-    setFormData({
-      id: `JJG-${String((List?.total ?? 0) + 1).padStart(2, "0")}`,
-      uraian: "",
-      nip: "",
-      unit_kerja: "Bidang Pembinaan Sekolah Dasar",
-      keterangan: "",
-      kategori: "Formal",
-      status: "Aktif",
-    });
+    emptyForm();
     setIsFormOpen(true);
   };
 
   const openEditModal = (item: JenjangRecord) => {
     setFormMode("edit");
     setSelectedRecord(item);
-    setFormData({ ...item });
+    setFormData({
+      uraian: item.uraian || "",
+      unit_kerja: item.unit_kerja || "",
+      nip: item.nip || "",
+    });
     setIsFormOpen(true);
   };
 
@@ -157,7 +113,7 @@ export default function MasterJenjangPage() {
   const handleDelete = (id: string, uraian: string) => {
     Swal.fire({
       title: "Konfirmasi Hapus",
-      text: `Apakah Anda yakin ingin menghapus data Jenjang "${uraian}" (${id})?`,
+      text: `Apakah Anda yakin ingin menghapus Master Jenjang "${uraian}"?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Ya, Hapus!",
@@ -173,10 +129,10 @@ export default function MasterJenjangPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.uraian || !formData.id) {
+    if (!formData.uraian?.trim()) {
       Swal.fire({
         title: "Pemberitahuan!",
-        text: "Silakan lengkapi Kode dan Nama Jenjang Pendidikan!",
+        text: "Silakan isi Nama Jenjang Pendidikan (Uraian)!",
         icon: "warning",
       });
       return;
@@ -184,10 +140,9 @@ export default function MasterJenjangPage() {
 
     if (formMode === "add") {
       const payload: Partial<ResponseInterface> = {
-        id: formData.id,
-        uraian: formData.uraian,
-        nip: formData.nip || null,
-        unit_kerja: formData.unit_kerja || null,
+        uraian: formData.uraian.trim(),
+        unit_kerja: formData.unit_kerja?.trim() || null,
+        nip: formData.nip?.trim() || null,
       };
 
       createMutation.mutate(payload, {
@@ -198,9 +153,9 @@ export default function MasterJenjangPage() {
       });
     } else if (formMode === "edit" && selectedRecord) {
       const payload: Partial<ResponseInterface> = {
-        uraian: formData.uraian,
-        nip: formData.nip || null,
-        unit_kerja: formData.unit_kerja || null,
+        uraian: formData.uraian.trim(),
+        unit_kerja: formData.unit_kerja?.trim() || null,
+        nip: formData.nip?.trim() || null,
       };
 
       updateMutation.mutate(
@@ -236,7 +191,7 @@ export default function MasterJenjangPage() {
       {/* 2. PageHeader Standar EduSetara */}
       <PageHeader
         title="Master Jenjang Pendidikan"
-        description="Konfigurasi dan klasifikasi jenjang satuan pendidikan (PAUD/TK, SD, SMP, PKBM) terintegrasi TanStack Query & FastAPI SIMPEG."
+        description="Pengelolaan klasifikasi jenjang pendidikan resmi Kabupaten Konawe Selatan sesuai kontrak data master_jenjang."
         badge={<Badge variant="gold">Data Master</Badge>}
         action={
           <Button variant="gold" onClick={openAddModal}>
@@ -260,31 +215,31 @@ export default function MasterJenjangPage() {
 
         <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
           <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Pendidikan Formal</p>
-            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.formalCount} Tingkat</h4>
-            <span className="text-[11px] text-emerald-700 font-semibold">PAUD, SD & SMP</span>
+            <p className="text-xs font-semibold text-[#7d7152]">Unit Kerja Terpetakan</p>
+            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.withUnitKerja} Bidang</h4>
+            <span className="text-[11px] text-[#a86a00] font-semibold">Pembina Satuan</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
-            🏫
+            🏛️
           </div>
         </Card>
 
         <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
           <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Non-Formal / PKBM</p>
-            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.nonFormalCount} Jalur</h4>
-            <span className="text-[11px] text-[#a86a00] font-medium">Paket A, B, C Kesetaraan</span>
+            <p className="text-xs font-semibold text-[#7d7152]">Penanggung Jawab</p>
+            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.withNip} NIP</h4>
+            <span className="text-[11px] text-[#a86a00] font-medium">Pejabat Pembina</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
-            📚
+            👤
           </div>
         </Card>
 
         <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
           <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Status Keaktifan</p>
-            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.activeCount} Aktif</h4>
-            <span className="text-[11px] text-emerald-700 font-semibold">Sinkron Dapodik</span>
+            <p className="text-xs font-semibold text-[#7d7152]">Integrasi Dapodik</p>
+            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Aktif</h4>
+            <span className="text-[11px] text-emerald-700 font-semibold">Sinkronisasi Penuh</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
             ⚡
@@ -296,53 +251,23 @@ export default function MasterJenjangPage() {
       <Card className="border border-white/80 shadow-xs">
         {/* Toolbar Filter & Pencarian Data */}
         <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="w-full md:w-80">
+          <div className="w-full md:w-96">
             <Input
               value={search}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
-              placeholder="Cari kode, nama jenjang, atau unit kerja..."
+              placeholder="Cari uraian jenjang, unit kerja, atau NIP..."
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-            <Select
-              value={kategoriFilter}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setKategoriFilter(e.target.value)}
-              className="text-xs"
-            >
-              <option value="all">Semua Jalur Pendidikan</option>
-              {KATEGORI_JENJANG_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  Jalur {opt}
-                </option>
-              ))}
-            </Select>
-
-            <Select
-              value={statusFilter}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value)}
-              className="text-xs"
-            >
-              <option value="all">Semua Status</option>
-              {STATUS_JENJANG_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </Select>
-
-            {(search || kategoriFilter !== "all" || statusFilter !== "all") && (
+          <div className="flex items-center gap-2.5 w-full md:w-auto">
+            {search && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  setSearch("");
-                  setKategoriFilter("all");
-                  setStatusFilter("all");
-                }}
+                onClick={() => setSearch("")}
                 className="text-rose-600 hover:text-rose-700"
               >
-                Reset Filter
+                Reset Cari
               </Button>
             )}
 
@@ -362,25 +287,19 @@ export default function MasterJenjangPage() {
           <table className="w-full text-left text-sm border-collapse">
             <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
               <tr>
-                <th className="w-[5%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">
+                <th className="w-[6%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">
                   No
                 </th>
-                <th className="w-[12%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
-                  Kode
+                <th className="w-[36%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
+                  Nama Jenjang Pendidikan (Uraian)
                 </th>
-                <th className="w-[28%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
-                  Jenjang Pendidikan
+                <th className="w-[26%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
+                  Unit Kerja / Bidang Pembina
                 </th>
-                <th className="w-[14%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
-                  Jalur
+                <th className="w-[18%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
+                  NIP Pembina
                 </th>
-                <th className="w-[22%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
-                  Unit Kerja Pembina
-                </th>
-                <th className="w-[10%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">
-                  Status
-                </th>
-                <th className="w-[9%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">
+                <th className="w-[14%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">
                   Aksi
                 </th>
               </tr>
@@ -394,20 +313,13 @@ export default function MasterJenjangPage() {
                       <div className="h-4 w-4 bg-amber-200/50 rounded-md mx-auto" />
                     </td>
                     <td className="px-4 py-3.5">
-                      <div className="h-5 w-16 bg-amber-200/50 rounded-lg" />
+                      <div className="h-4 w-48 bg-amber-200/50 rounded-md" />
                     </td>
                     <td className="px-4 py-3.5">
-                      <div className="h-4 w-40 bg-amber-200/50 rounded-md mb-1.5" />
-                      <div className="h-3 w-56 bg-amber-200/30 rounded-md" />
+                      <div className="h-4 w-36 bg-amber-200/40 rounded-md" />
                     </td>
                     <td className="px-4 py-3.5">
-                      <div className="h-5 w-20 bg-amber-200/40 rounded-md" />
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <div className="h-4 w-32 bg-amber-200/40 rounded-md" />
-                    </td>
-                    <td className="px-4 py-3.5 text-center">
-                      <div className="h-5 w-14 bg-amber-200/40 rounded-md mx-auto" />
+                      <div className="h-4 w-28 bg-amber-200/40 rounded-md" />
                     </td>
                     <td className="px-4 py-3.5 text-right">
                       <div className="h-7 w-20 bg-amber-200/40 rounded-lg ml-auto" />
@@ -416,18 +328,18 @@ export default function MasterJenjangPage() {
                 ))
               ) : isError ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-rose-600 text-xs font-semibold">
+                  <td colSpan={5} className="text-center py-12 text-rose-600 text-xs font-semibold">
                     Gagal mengambil data dari server: {(error as any)?.message || "Koneksi terputus"}
                   </td>
                 </tr>
-              ) : filteredData.length === 0 ? (
+              ) : rawList.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-[#7d7152] text-xs font-medium">
+                  <td colSpan={5} className="text-center py-12 text-[#7d7152] text-xs font-medium">
                     Tidak ada data master jenjang ditemukan.
                   </td>
                 </tr>
               ) : (
-                filteredData.map((row, idx) => {
+                rawList.map((row, idx) => {
                   return (
                     <tr key={row.id} className="hover:bg-white/50 transition-colors duration-150">
                       {/* 1. Nomor Baris dengan listindex */}
@@ -435,56 +347,28 @@ export default function MasterJenjangPage() {
                         {listindex(pageSize, page, idx)}
                       </td>
 
-                      {/* 2. Kode Jenjang */}
+                      {/* 2. Uraian Jenjang */}
                       <td className="px-4 py-3.5 text-xs text-[#2d2410] align-middle">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-bold bg-white/70 text-[#2d2410] border border-white/80 shadow-2xs font-mono">
-                          {row.id}
+                        <span className="font-bold text-[#2d2410] hover:text-[#a86a00] transition-colors">
+                          {row.uraian}
                         </span>
                       </td>
 
-                      {/* 3. Jenjang Pendidikan */}
-                      <td className="px-4 py-3.5 text-xs text-[#2d2410] align-middle">
-                        <div className="space-y-0.5">
-                          <p className="font-bold text-[#2d2410] hover:text-[#a86a00] transition-colors">
-                            {row.uraian}
-                          </p>
-                          <p className="text-[11px] text-[#7d7152] line-clamp-1">
-                            {row.keterangan || "Jenjang pendidikan terdaftar"}
-                          </p>
-                        </div>
-                      </td>
-
-                      {/* 4. Kategori Jalur */}
-                      <td className="px-4 py-3.5 text-xs text-[#2d2410] align-middle">
-                        <span
-                          className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-md border ${
-                            row.kategori === "Non-Formal"
-                              ? "bg-amber-100/70 text-amber-900 border-amber-300/50"
-                              : "bg-blue-50 text-blue-800 border-blue-200/60"
-                          }`}
-                        >
-                          {row.kategori || "Formal"}
-                        </span>
-                      </td>
-
-                      {/* 5. Unit Kerja */}
+                      {/* 3. Unit Kerja Pembina */}
                       <td className="px-4 py-3.5 text-xs text-[#2d2410] align-middle">
                         <span className="text-xs text-[#5e5133] font-medium">
-                          {row.unit_kerja || "Dinas Pendidikan"}
+                          {row.unit_kerja || "-"}
                         </span>
                       </td>
 
-                      {/* 6. Status */}
-                      <td className="px-4 py-3.5 text-xs text-[#2d2410] align-middle text-center">
-                        <Badge
-                          variant={row.status === "Non-Aktif" ? "neutral" : "success"}
-                          size="sm"
-                        >
-                          {row.status || "Aktif"}
-                        </Badge>
+                      {/* 4. NIP */}
+                      <td className="px-4 py-3.5 text-xs text-[#2d2410] align-middle">
+                        <span className="font-mono text-xs text-[#7d7152]">
+                          {row.nip || "-"}
+                        </span>
                       </td>
 
-                      {/* 7. Tombol Aksi (Detail, Edit, Hapus) */}
+                      {/* 5. Tombol Aksi (Detail, Edit, Hapus) */}
                       <td className="px-4 py-3.5 text-xs text-[#2d2410] align-middle text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Button
@@ -541,13 +425,13 @@ export default function MasterJenjangPage() {
               setPageSize(newSize);
               setPage(1);
             }}
-            total={List?.total ?? filteredData.length}
+            total={List?.total ?? rawList.length}
             pageSizeOptions={[3, 5, 10, 20]}
           />
         </div>
       </Card>
 
-      {/* 5. Modal Formulir Tambah/Edit Terpisah */}
+      {/* 5. Modal Formulir Tambah/Edit */}
       <FormJenjangModal
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
@@ -558,7 +442,7 @@ export default function MasterJenjangPage() {
         isLoading={isSubmitting}
       />
 
-      {/* 6. Modal Detail Pratinjau Terpisah */}
+      {/* 6. Modal Detail Pratinjau */}
       <DetailJenjangModal
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
