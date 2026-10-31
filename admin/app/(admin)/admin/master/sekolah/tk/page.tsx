@@ -1,31 +1,21 @@
-import { AdminPageScaffold } from "../../../../_components/admin-page-scaffold";
+import SekolahManager from "../components/SekolahManager";
 
 export const metadata = {
-  title: "Master TK",
-  description: "Manajemen Master TK Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
+  title: "Master TK & PAUD",
+  description: "Manajemen Master Taman Kanak-Kanak (TK) dan PAUD Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 
 export default function MasterTKPage() {
   return (
-    <AdminPageScaffold
-      title="Master TK"
+    <SekolahManager
+      jenjang="TK"
+      title="Master TK & PAUD"
       category="Data Master"
-      description="Kelola dan konfigurasi data Master TK secara berkala untuk mendukung tata kelola pendidikan terpadu."
+      description="Kelola dan konfigurasi direktori Satuan Pendidikan Taman Kanak-Kanak (TK Negeri/Swasta) dan PAUD se-Kabupaten Konawe Selatan berbasis data terintegrasi SIMPEG."
       icon="🧸"
       breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master Sekolah",
-              "href": null
-      },
-      {
-              "label": "Master TK",
-              "href": "/admin/master/sekolah/tk"
-      }
-]}
+        { label: "Master Sekolah", href: null },
+      ]}
     />
   );
 }

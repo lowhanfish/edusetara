@@ -1,31 +1,21 @@
-import { AdminPageScaffold } from "../../../../_components/admin-page-scaffold";
+import SekolahManager from "../components/SekolahManager";
 
 export const metadata = {
   title: "Master SMP",
-  description: "Manajemen Master SMP Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
+  description: "Manajemen Master SMP dan SMP Satu Atap (SATAP) Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 
 export default function MasterSMPPage() {
   return (
-    <AdminPageScaffold
+    <SekolahManager
+      jenjang="SMP"
       title="Master SMP"
       category="Data Master"
-      description="Kelola dan konfigurasi data Master SMP secara berkala untuk mendukung tata kelola pendidikan terpadu."
+      description="Kelola dan konfigurasi direktori Satuan Pendidikan Sekolah Menengah Pertama (SMP) dan SMP Satu Atap (SATAP) se-Kabupaten Konawe Selatan berbasis data terintegrasi SIMPEG."
       icon="🏫"
       breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master Sekolah",
-              "href": null
-      },
-      {
-              "label": "Master SMP",
-              "href": "/admin/master/sekolah/smp"
-      }
-]}
+        { label: "Master Sekolah", href: null },
+      ]}
     />
   );
 }

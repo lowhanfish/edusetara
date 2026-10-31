@@ -1,31 +1,21 @@
-import { AdminPageScaffold } from "../../../../_components/admin-page-scaffold";
+import SekolahManager from "../components/SekolahManager";
 
 export const metadata = {
-  title: "Master PKBM",
-  description: "Manajemen Master PKBM Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
+  title: "Master PKBM & SKB",
+  description: "Manajemen Master Sanggar Kegiatan Belajar (SKB) dan PKBM Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
 };
 
 export default function MasterPKBMPage() {
   return (
-    <AdminPageScaffold
-      title="Master PKBM"
+    <SekolahManager
+      jenjang="PKBM"
+      title="Master PKBM & SKB"
       category="Data Master"
-      description="Kelola dan konfigurasi data Master PKBM secara berkala untuk mendukung tata kelola pendidikan terpadu."
+      description="Kelola dan konfigurasi direktori Satuan Pendidikan Nonformal Sanggar Kegiatan Belajar (SKB) dan PKBM se-Kabupaten Konawe Selatan berbasis data terintegrasi SIMPEG."
       icon="📖"
       breadcrumbs={[
-      {
-              "label": "Data Master",
-              "href": null
-      },
-      {
-              "label": "Master Sekolah",
-              "href": null
-      },
-      {
-              "label": "Master PKBM",
-              "href": "/admin/master/sekolah/pkbm"
-      }
-]}
+        { label: "Master Sekolah", href: null },
+      ]}
     />
   );
 }

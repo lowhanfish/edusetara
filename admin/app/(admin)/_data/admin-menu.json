@@ -592,12 +592,6 @@
         "children": null
       },
       {
-        "title": "Data Sekolah",
-        "path": "/admin/sekolah",
-        "icon": "🏫",
-        "children": null
-      },
-      {
         "title": "Kebudayaan",
         "path": "/admin/kebudayaan",
         "icon": "🎭",

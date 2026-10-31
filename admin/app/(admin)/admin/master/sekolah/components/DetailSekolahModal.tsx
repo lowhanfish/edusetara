@@ -1,0 +1,130 @@
+"use client";
+
+import React from "react";
+import { Badge, Button, Modal } from "../../../../_components/ui";
+import { SekolahRecord } from "../types";
+
+interface DetailSekolahModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  record: SekolahRecord | null;
+  onEditClick?: (record: SekolahRecord) => void;
+}
+
+export default function DetailSekolahModal({
+  isOpen,
+  onClose,
+  record,
+  onEditClick,
+}: DetailSekolahModalProps) {
+  if (!record) return null;
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Lembar Data Profil Satuan Pendidikan"
+      description="Rincian identitas resmi satuan pendidikan hasil integrasi data kepegawaian SIMPEG dan metadata EduSetara."
+      maxWidth="lg"
+      footer={
+        <div className="flex items-center justify-between w-full">
+          <div>
+            {record.url && (
+              <a
+                href={record.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-sky-600 hover:underline inline-flex items-center gap-1 font-medium"
+              >
+                Cek Profil Kemendikdasmen ↗
+              </a>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={onClose}>
+              Tutup
+            </Button>
+            {onEditClick && (
+              <Button
+                variant="gold"
+                size="sm"
+                onClick={() => {
+                  onClose();
+                  onEditClick(record);
+                }}
+              >
+                ✏️ Edit Profil
+              </Button>
+            )}
+          </div>
+        </div>
+      }
+    >
+      <div className="space-y-4">
+        {/* Banner Ringkasan Lembaga */}
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-300/30 flex items-start justify-between gap-3">
+          <div>
+            <span className="text-[11px] font-mono font-bold text-amber-800 bg-amber-200/60 px-2 py-0.5 rounded">
+              ID SIMPEG: {record.unit_kerja_id}
+            </span>
+            <h3 className="text-base font-bold text-[#2d2410] mt-1.5">{record.nama_sekolah}</h3>
+            <p className="text-xs text-[#7d7152] mt-0.5">{record.alamat || "Alamat belum tercatat di SIMPEG"}</p>
+          </div>
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
+            <Badge variant={record.status_sekolah === "NEGERI" ? "success" : "neutral"} size="sm">
+              {record.status_sekolah}
+            </Badge>
+            <Badge variant="gold" size="sm">
+              Jenjang {record.jenjang}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Grid Parameter Pendidikan */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div className="p-3.5 rounded-lg bg-white/40 border border-white/80 space-y-1">
+            <span className="text-[#7d7152] font-medium block">Nomor Pokok Sekolah Nasional (NPSN)</span>
+            <span className="font-mono font-bold text-sm text-[#2d2410] block">
+              {record.npsn ? record.npsn : "Belum diisi"}
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-white/40 border border-white/80 space-y-1">
+            <span className="text-[#7d7152] font-medium block">Peringkat Akreditasi BAN-S/M</span>
+            <span className="font-bold text-sm text-[#2d2410] block">
+              {record.akreditasi ? `Peringkat ${record.akreditasi}` : "Belum Terakreditasi"}
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-white/40 border border-white/80 space-y-1">
+            <span className="text-[#7d7152] font-medium block">Kecamatan (Kab. Konawe Selatan)</span>
+            <span className="font-semibold text-sm text-[#2d2410] block">
+              {record.kecamatan || "-"}
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-white/40 border border-white/80 space-y-1">
+            <span className="text-[#7d7152] font-medium block">Desa / Kelurahan</span>
+            <span className="font-semibold text-sm text-[#2d2410] block">
+              {record.desa_kelurahan || "-"}
+            </span>
+          </div>
+        </div>
+
+        {/* Informasi Sistem & Audit */}
+        <div className="p-3 rounded-lg bg-white/20 border border-white/60 text-[11px] text-[#7d7152] space-y-1">
+          <div className="flex items-center justify-between">
+            <span>Status Layanan EduSetara:</span>
+            <span className="font-semibold text-emerald-700">
+              {record.is_active ? "Aktif (Menerima Layanan/PPDB)" : "Nonaktif"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Sinkronisasi Terakhir:</span>
+            <span>{record.updated_at ? new Date(record.updated_at).toLocaleString("id-ID") : "-"}</span>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+}
