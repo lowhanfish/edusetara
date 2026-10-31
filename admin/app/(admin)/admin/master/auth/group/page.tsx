@@ -1,375 +1,590 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Swal from "sweetalert2";
-import {
-  Badge,
-  Button,
-  Card,
-  Input,
-  PageHeader,
-  Pagination,
-} from "../../../../_components/ui";
-
-import { GroupRecord } from "./types";
-import FormGroupModal from "./components/FormGroupModal";
-import DetailGroupModal from "./components/DetailGroupModal";
-import PermissionMatrixModal from "./components/PermissionMatrixModal";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { Badge, Button, Input, Modal, Select } from "../../../../_components/ui";
+import { GroupRecord, PermissionRule } from "./types";
 import {
   useResponseListMaster,
-  useDeleteMaster,
   useCreateMaster,
   useUpdateMaster,
+  useDeleteMaster,
+  useUpdateGroupPermissions,
 } from "./hooks/crud";
-import { listindex } from "@/utilities/pagination";
+import { useMenuTree } from "../menu/hooks/crud";
+import { MenuRecord } from "../menu/types";
+import Swal from "sweetalert2";
+
+type CrudPermission = {
+  create: boolean;
+  read: boolean;
+  update: boolean;
+  delete: boolean;
+};
+
+type PermissionAction = "create" | "read" | "update" | "delete";
+type PermissionMap = Record<string, CrudPermission>;
+
+const emptyPermission: CrudPermission = {
+  create: false,
+  read: false,
+  update: false,
+  delete: false,
+};
+
+function formatAuditDate(value: string | undefined) {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+function flattenMenus(items: MenuRecord[]): MenuRecord[] {
+  return items.flatMap((item) => [item, ...flattenMenus(item.children || [])]);
+}
+
+function filterPermissionMenus(items: MenuRecord[], query: string): MenuRecord[] {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return items;
+  return items.flatMap((item) => {
+    const children = filterPermissionMenus(item.children || [], normalized);
+    return item.title.toLowerCase().includes(normalized) || children.length > 0
+      ? [{ ...item, children }]
+      : [];
+  });
+}
+
+
+
+function PermissionRow({
+  item,
+  level,
+  permissions,
+  expandedIds,
+  query,
+  onToggleExpanded,
+  onTogglePermission,
+}: {
+  item: MenuRecord;
+  level: number;
+  permissions: PermissionMap;
+  expandedIds: Set<string>;
+  query: string;
+  onToggleExpanded: (id: string) => void;
+  onTogglePermission: (id: string, action: PermissionAction) => void;
+}) {
+  const hasChildren = Boolean(item.children && item.children.length > 0);
+  const expanded = query.trim() ? true : expandedIds.has(item.id);
+  const permission = permissions[item.id] ?? emptyPermission;
+
+  return (
+    <>
+      <div className="grid min-w-[650px] grid-cols-[minmax(260px,1fr)_repeat(4,72px)] items-center border-b border-slate-100 hover:bg-slate-50/80">
+        <div
+          className="flex min-w-0 items-center py-2.5 pr-3"
+          style={{ paddingLeft: `${12 + level * 22}px` }}
+        >
+          <button
+            type="button"
+            onClick={() => hasChildren && onToggleExpanded(item.id)}
+            className={`mr-2 grid h-6 w-6 shrink-0 place-items-center rounded text-[9px] ${
+              hasChildren
+                ? "text-slate-500 hover:bg-slate-200"
+                : "cursor-default text-slate-300"
+            }`}
+            aria-label={
+              hasChildren
+                ? `${expanded ? "Tutup" : "Buka"} ${item.title}`
+                : undefined
+            }
+          >
+            {hasChildren ? (expanded ? "▼" : "▶") : "•"}
+          </button>
+          <span className="mr-2 text-base">{item.icon || "📁"}</span>
+          <span className="truncate text-xs font-semibold text-[#2d2410]">
+            {item.title}
+          </span>
+          {level > 0 && (
+            <span className="ml-2 text-[9px] font-bold text-slate-400">
+              L{level + 1}
+            </span>
+          )}
+        </div>
+
+        {(["create", "read", "update", "delete"] as const).map((action) => (
+          <label
+            key={action}
+            className="grid h-full min-h-11 cursor-pointer place-items-center border-l border-slate-100"
+          >
+            <input
+              type="checkbox"
+              checked={permission[action]}
+              onChange={() => onTogglePermission(item.id, action)}
+              className="h-4 w-4 cursor-pointer accent-[#2d2410]"
+              aria-label={`${action} ${item.title}`}
+            />
+          </label>
+        ))}
+      </div>
+
+      {hasChildren &&
+        expanded &&
+        (item.children || []).map((child) => (
+          <PermissionRow
+            key={child.id}
+            item={child}
+            level={level + 1}
+            permissions={permissions}
+            expandedIds={expandedIds}
+            query={query}
+            onToggleExpanded={onToggleExpanded}
+            onTogglePermission={onTogglePermission}
+          />
+        ))}
+    </>
+  );
+}
 
 export default function MasterAuthGroupPage() {
-  // Filter & Search State
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-
-  // Pagination State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
-  // Debounce Search input
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(search);
-      setPage(1);
-    }, 400);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [search]);
-
-  // TanStack Query CRUD Hooks
-  const { List, isLoading, isError, error, refetch } = useResponseListMaster(
-    page,
-    pageSize,
-    debouncedSearch
-  );
-  const deleteMutation = useDeleteMaster();
+  const { List, isLoading } = useResponseListMaster(1, 100);
+  const { data: menuTreeData } = useMenuTree();
   const createMutation = useCreateMaster();
   const updateMutation = useUpdateMaster();
+  const deleteMutation = useDeleteMaster();
+  const updatePermissionsMutation = useUpdateGroupPermissions();
 
-  // Modal State
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [isPermOpen, setIsPermOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<GroupRecord | null>(null);
+  const groups = useMemo(() => List?.data || [], [List]);
+  const permissionMenus = useMemo(
+    () => menuTreeData?.data || [],
+    [menuTreeData],
+  );
+  const allPermissionMenus = useMemo(
+    () => flattenMenus(permissionMenus),
+    [permissionMenus],
+  );
 
-  // Handlers
-  const handleOpenCreate = () => {
-    setSelectedRecord(null);
-    setIsFormOpen(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<GroupRecord | null>(null);
+  const [title, setTitle] = useState("");
+  const [level, setLevel] = useState<1 | 2>(1);
+  const [permissions, setPermissions] = useState<PermissionMap>({});
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState("");
+  const [notice, setNotice] = useState("");
+
+  const visibleMenus = useMemo(
+    () => filterPermissionMenus(permissionMenus, query),
+    [permissionMenus, query],
+  );
+  const levelOneGroups = groups.filter((group) => group.level === 1).length;
+
+  // Initialize expanded parent IDs when menus load
+  useEffect(() => {
+    if (permissionMenus.length > 0) {
+      setExpandedIds(
+        new Set(
+          permissionMenus
+            .filter((item) => item.children && item.children.length > 0)
+            .map((item) => item.id),
+        ),
+      );
+    }
+  }, [permissionMenus]);
+
+  const openAdd = () => {
+    setEditingGroup(null);
+    setTitle("");
+    setLevel(1);
+    // Default read permissions
+    const defaultPerms: PermissionMap = {};
+    for (const m of allPermissionMenus) {
+      defaultPerms[m.id] = { create: false, read: true, update: false, delete: false };
+    }
+    setPermissions(defaultPerms);
+    setQuery("");
+    setIsModalOpen(true);
   };
 
-  const handleOpenEdit = (record: GroupRecord) => {
-    setSelectedRecord(record);
-    setIsFormOpen(true);
+  const openEdit = async (group: GroupRecord) => {
+    setEditingGroup(group);
+    setTitle(group.title);
+    setLevel(group.level as 1 | 2);
+    setQuery("");
+
+    // Fetch existing permissions matrix for this group from backend API
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/v1/admin/master/auth/group/${group.id}/permissions`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+          },
+        },
+      );
+      if (res.ok) {
+        const json = await res.json();
+        const permList: PermissionRule[] = json?.data?.permissions || [];
+        const pMap: PermissionMap = {};
+        for (const p of permList) {
+          pMap[p.menu_id] = {
+            create: p.create,
+            read: p.read,
+            update: p.update,
+            delete: p.delete,
+          };
+        }
+        setPermissions(pMap);
+      } else {
+        const defaultPerms: PermissionMap = {};
+        for (const m of allPermissionMenus) {
+          defaultPerms[m.id] = { create: false, read: true, update: false, delete: false };
+        }
+        setPermissions(defaultPerms);
+      }
+    } catch {
+      const defaultPerms: PermissionMap = {};
+      for (const m of allPermissionMenus) {
+        defaultPerms[m.id] = { create: false, read: true, update: false, delete: false };
+      }
+      setPermissions(defaultPerms);
+    }
+
+    setIsModalOpen(true);
   };
 
-  const handleOpenDetail = (record: GroupRecord) => {
-    setSelectedRecord(record);
-    setIsDetailOpen(true);
+  const togglePermission = (menuId: string, action: PermissionAction) => {
+    setPermissions((current) => ({
+      ...current,
+      [menuId]: {
+        ...(current[menuId] ?? emptyPermission),
+        [action]: !(current[menuId] ?? emptyPermission)[action],
+      },
+    }));
   };
 
-  const handleOpenPermissions = (record: GroupRecord) => {
-    setSelectedRecord(record);
-    setIsPermOpen(true);
+  const setAllPermissions = (checked: boolean) => {
+    setPermissions(() =>
+      Object.fromEntries(
+        allPermissionMenus.map((item) => [
+          item.id,
+          {
+            create: checked,
+            read: checked,
+            update: checked,
+            delete: checked,
+          },
+        ]),
+      ),
+    );
   };
 
-  const handleDelete = (record: GroupRecord) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const cleanTitle = title.trim();
+    if (!cleanTitle) return;
+
+    const formattedPerms: PermissionRule[] = allPermissionMenus.map((m) => {
+      const p = permissions[m.id] ?? emptyPermission;
+      return {
+        menu_id: m.id,
+        create: Boolean(p.create),
+        read: Boolean(p.read),
+        update: Boolean(p.update),
+        delete: Boolean(p.delete),
+      };
+    });
+
+    if (editingGroup) {
+      updateMutation.mutate(
+        {
+          id: editingGroup.id,
+          body: { title: cleanTitle, level },
+        },
+        {
+          onSuccess: () => {
+            updatePermissionsMutation.mutate({
+              groupId: editingGroup.id,
+              permissions: formattedPerms,
+            });
+            setNotice(`Role Group “${cleanTitle}” dan matriks hak akses berhasil disimpan ke database.`);
+            setIsModalOpen(false);
+          },
+        },
+      );
+    } else {
+      createMutation.mutate(
+        { title: cleanTitle, level },
+        {
+          onSuccess: (res: any) => {
+            const newGroupId = res?.data?.id;
+            if (newGroupId) {
+              updatePermissionsMutation.mutate({
+                groupId: newGroupId,
+                permissions: formattedPerms,
+              });
+            }
+            setNotice(`Role Group “${cleanTitle}” berhasil ditambahkan ke database.`);
+            setIsModalOpen(false);
+          },
+        },
+      );
+    }
+  };
+
+  const handleDelete = (group: GroupRecord) => {
     Swal.fire({
-      title: "Apakah anda yakin?",
-      text: `Role Group "${record.title}" akan dihapus secara permanen beserta matriks hak aksesnya.`,
+      title: `Hapus role group “${group.title}”?`,
+      text: "Group dan seluruh matriks izinnya akan dihapus permanen.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#0d9488",
-      cancelButtonColor: "#e11d48",
+      confirmButtonColor: "#e11d48",
+      cancelButtonColor: "#64748b",
       confirmButtonText: "Ya, Hapus!",
       cancelButtonText: "Batal",
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteMutation.mutate(record.id);
+        deleteMutation.mutate(group.id, {
+          onSuccess: () => {
+            setNotice(`Role Group “${group.title}” berhasil dihapus dari database.`);
+          },
+        });
       }
     });
   };
 
-  const handleFormSubmit = (formData: { title: string; level: number }) => {
-    if (selectedRecord) {
-      updateMutation.mutate(
-        {
-          id: selectedRecord.id,
-          body: formData,
-        },
-        {
-          onSuccess: () => {
-            setIsFormOpen(false);
-            setSelectedRecord(null);
-          },
-        }
-      );
-    } else {
-      createMutation.mutate(formData, {
-        onSuccess: () => {
-          setIsFormOpen(false);
-        },
-      });
-    }
-  };
-
-  const totalItems = List?.total || 0;
-  const totalPages = Math.ceil(totalItems / pageSize) || 1;
-  const records = List?.data || [];
-
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Master Auth Group (Role & Hak Akses)"
-        description="Kelola daftar role group pengguna dan konfigurasi matriks hak akses CRUD menu sistem."
-        breadcrumbs={[
-          { label: "Dashboard", href: "/admin" },
-          { label: "Data Master", href: "/admin/master" },
-          { label: "Auth", href: "/admin/master/auth/group" },
-          { label: "Group" },
-        ]}
-        action={
-          <Button variant="primary" onClick={handleOpenCreate}>
-            + Tambah Role Group
-          </Button>
-        }
-      />
+      <nav className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-slate-500" aria-label="Breadcrumb">
+        <Link href="/admin" className="hover:text-[#2d2410]">Dashboard</Link>
+        <span>/</span>
+        <span>Data Master</span>
+        <span>/</span>
+        <span>Auth</span>
+        <span>/</span>
+        <span className="font-bold text-[#2d2410]">Group</span>
+      </nav>
 
-      {/* Metrics Banner */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 bg-teal-50/50 dark:bg-teal-950/20 border-teal-200 dark:border-teal-900">
-          <div className="text-xs text-teal-600 dark:text-teal-400 font-semibold uppercase tracking-wider">
-            Total Role Group
+      <div className="flex flex-col gap-4 border-b border-slate-200/80 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="mb-2 flex items-center gap-2">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#f5b82e] text-xl shadow-sm">👥</span>
+            <Badge variant="gold">Data Master · Auth</Badge>
           </div>
-          <div className="text-2xl font-bold text-teal-900 dark:text-teal-100 mt-1">
-            {totalItems}
-          </div>
-          <div className="text-xs text-teal-600/80 mt-1">
-            Grup hak akses aktif di database
-          </div>
-        </Card>
-        <Card className="p-4 bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
-          <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider">
-            Level 1 (Dinas / Semua)
-          </div>
-          <div className="text-2xl font-bold text-blue-900 dark:text-blue-100 mt-1">
-            {records.filter((r) => r.level === 1).length}
-          </div>
-          <div className="text-xs text-blue-600/80 mt-1">
-            Akses tingkat pimpinan / dinas kabupaten
-          </div>
-        </Card>
-        <Card className="p-4 bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-900">
-          <div className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold uppercase tracking-wider">
-            Level 2 (Satuan Pendidikan)
-          </div>
-          <div className="text-2xl font-bold text-indigo-900 dark:text-indigo-100 mt-1">
-            {records.filter((r) => r.level === 2).length}
-          </div>
-          <div className="text-xs text-indigo-600/80 mt-1">
-            Akses lingkup sekolah / instansi unit kerja
-          </div>
-        </Card>
+          <h1 className="text-2xl font-black tracking-tight text-[#2d2410]">Role Group & Hak Akses</h1>
+          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-[#7d7152]">
+            Tentukan cakupan pengguna dan izin Create, Read, Update, Delete pada setiap menu admin.
+          </p>
+        </div>
+        <Button variant="gold" onClick={openAdd} icon={<span>＋</span>}>
+          Tambah Group
+        </Button>
       </div>
 
-      <Card className="p-6">
-        {/* Table Filter / Search bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-          <div className="w-full md:w-80">
-            <Input
-              type="text"
-              placeholder="Cari nama role group..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+      <section className="grid gap-3 sm:grid-cols-3" aria-label="Ringkasan group">
+        {[
+          { label: "Total Group", value: groups.length, icon: "👥", tone: "bg-sky-50 text-sky-700" },
+          { label: "Akses Semua Satdik", value: levelOneGroups, icon: "🌐", tone: "bg-amber-50 text-amber-700" },
+          { label: "Akses Unit Sendiri", value: groups.length - levelOneGroups, icon: "🏫", tone: "bg-emerald-50 text-emerald-700" },
+        ].map((stat) => (
+          <div key={stat.label} className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
+            <span className={`grid h-10 w-10 place-items-center rounded-xl text-lg ${stat.tone}`}>{stat.icon}</span>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{stat.label}</p>
+              <p className="text-xl font-black text-[#2d2410]">{stat.value}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">Tampilkan:</span>
-            <select
-              aria-label="Jumlah data per halaman"
-              className="text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg p-2"
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPage(1);
-              }}
-            >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-            </select>
-          </div>
-        </div>
+        ))}
+      </section>
 
-        {/* Content Table */}
+      {notice && (
+        <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-800">
+          <span>✓ {notice}</span>
+          <button type="button" onClick={() => setNotice("")} aria-label="Tutup pemberitahuan">✕</button>
+        </div>
+      )}
+
+      <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+        <div className="border-b border-slate-200 bg-slate-50/70 px-5 py-4">
+          <h2 className="text-sm font-extrabold text-[#2d2410]">Daftar Group</h2>
+          <p className="mt-0.5 text-[11px] text-slate-500">Pilih atur akses untuk mengatur level dan matriks izin menu.</p>
+        </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
-            <thead className="bg-slate-50 dark:bg-slate-800/50 text-xs uppercase font-semibold text-slate-500 border-b border-slate-200 dark:border-slate-800">
+          <table className="w-full min-w-[760px] text-left">
+            <thead className="border-b border-slate-200 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
               <tr>
-                <th className="py-3 px-4 w-12 text-center">No</th>
-                <th className="py-3 px-4">Nama Role Group</th>
-                <th className="py-3 px-4">Level Akses</th>
-                <th className="py-3 px-4 text-center">Anggota ASN</th>
-                <th className="py-3 px-4">Audit Info</th>
-                <th className="py-3 px-4 text-center w-64">Aksi</th>
+                <th className="px-5 py-3">Nama Group</th>
+                <th className="px-4 py-3">Level Akses</th>
+                <th className="px-4 py-3">Anggota ASN</th>
+                <th className="px-5 py-3 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-100">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-500">
-                    Memuat data role group dari database...
+                  <td colSpan={4} className="py-8 text-center text-slate-500 text-xs">
+                    Memuat data group dari database...
                   </td>
                 </tr>
-              ) : isError ? (
+              ) : groups.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-rose-500">
-                    Terjadi kesalahan saat memuat data: {(error as any)?.message || "Gagal memuat"}
-                    <div className="mt-2">
-                      <Button variant="outline" size="sm" onClick={() => refetch()}>
-                        Coba Lagi
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ) : records.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400">
-                    Tidak ada data role group yang ditemukan.
+                  <td colSpan={4} className="py-8 text-center text-slate-400 text-xs">
+                    Belum ada role group terdaftar.
                   </td>
                 </tr>
               ) : (
-                records.map((item, index) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
-                  >
-                    <td className="py-3 px-4 text-center font-medium">
-                      {listindex(page, pageSize, index)}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="font-semibold text-slate-900 dark:text-white">
-                        {item.title}
-                      </div>
-                      <div className="text-xs font-mono text-slate-400 mt-0.5">
-                        ID: {item.id}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge variant={item.level === 1 ? "primary" : "neutral"}>
-                        {item.level === 1 ? "Level 1 (Dinas/Semua)" : "Level 2 (Satuan Pendidikan)"}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {item.member_count ?? 0}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-xs text-slate-500">
-                      <div>Oleh: {item.created_by || "System"}</div>
-                      <div className="text-[11px] text-slate-400 font-mono mt-0.5">
-                        {item.created_at ? new Date(item.created_at).toLocaleDateString("id-ID") : "-"}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs py-1 px-2 border-teal-300 text-teal-700 dark:text-teal-300 hover:bg-teal-50"
-                          onClick={() => handleOpenPermissions(item)}
-                        >
-                          Hak Akses
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs py-1 px-2"
-                          onClick={() => handleOpenDetail(item)}
-                        >
-                          Detail
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs py-1 px-2 text-amber-600 hover:bg-amber-50"
-                          onClick={() => handleOpenEdit(item)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs py-1 px-2 text-rose-600 hover:bg-rose-50"
-                          onClick={() => handleDelete(item)}
-                        >
-                          Hapus
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                groups.map((group) => {
+                  return (
+                    <tr key={group.id} className="hover:bg-slate-50/70">
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#fff6dc]">🔐</span>
+                          <div>
+                            <p className="text-sm font-bold text-[#2d2410]">{group.title}</p>
+                            <p className="text-[10px] font-medium text-slate-400">{group.id}</p>
+                            <p className="mt-0.5 text-[9px] text-slate-400">
+                              {formatAuditDate(group.created_at)} · {group.created_by || "System"}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <Badge variant={group.level === 1 ? "info" : "success"}>
+                          {group.level === 1 ? "1 · Semua Satuan Pendidikan" : "2 · Unit Pengguna"}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="text-xs font-bold text-slate-700">
+                          {group.member_count ?? 0} Pegawai
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" variant="outline" onClick={() => openEdit(group)}>
+                            Atur Akses
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDelete(group)}
+                            className="text-rose-600 hover:bg-rose-50"
+                          >
+                            Hapus
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
+      </section>
 
-        {/* Pagination Section */}
-        <div className="mt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-          <div>
-            Menampilkan data{" "}
-            <span className="font-medium text-slate-700 dark:text-slate-300">
-              {totalItems === 0 ? 0 : (page - 1) * pageSize + 1}
-            </span>{" "}
-            sampai{" "}
-            <span className="font-medium text-slate-700 dark:text-slate-300">
-              {Math.min(page * pageSize, totalItems)}
-            </span>{" "}
-            dari{" "}
-            <span className="font-medium text-slate-700 dark:text-slate-300">
-              {totalItems}
-            </span>{" "}
-            data
-          </div>
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={(p: number) => setPage(p)}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingGroup ? "Edit Group & Hak Akses" : "Tambah Group & Hak Akses"}
+        description="Form identitas group dan matriks izin disimpan secara real-time ke database."
+        maxWidth="3xl"
+        footer={
+          <>
+            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              form="group-form"
+              variant="gold"
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
+              {createMutation.isPending || updateMutation.isPending
+                ? "Menyimpan..."
+                : editingGroup
+                  ? "Simpan Perubahan"
+                  : "Tambahkan Group"}
+            </Button>
+          </>
+        }
+      >
+        <form id="group-form" onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid gap-4 sm:grid-cols-[1fr_280px]">
+            <Input
+              label="Nama Role"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="Contoh: Operator Bidang GTK"
+              required
+              autoFocus
             />
-          )}
-        </div>
-      </Card>
+            <Select
+              label="Level Akses"
+              value={String(level)}
+              onChange={(event) => setLevel(Number(event.target.value) as 1 | 2)}
+              helperText="Menentukan cakupan data yang dapat dilihat."
+            >
+              <option value="1">Level 1 · Semua Satuan Pendidikan</option>
+              <option value="2">Level 2 · Unit Pendidikan Pengguna</option>
+            </Select>
+          </div>
 
-      {/* Modals */}
-      <FormGroupModal
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        onSubmit={handleFormSubmit}
-        initialData={selectedRecord}
-        isLoading={createMutation.isPending || updateMutation.isPending}
-      />
-
-      <DetailGroupModal
-        isOpen={isDetailOpen}
-        onClose={() => setIsDetailOpen(false)}
-        record={selectedRecord}
-      />
-
-      <PermissionMatrixModal
-        isOpen={isPermOpen}
-        onClose={() => setIsPermOpen(false)}
-        group={selectedRecord}
-      />
+          <div className="overflow-hidden rounded-2xl border border-slate-200">
+            <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50/80 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h3 className="text-sm font-extrabold text-[#2d2410]">Matriks Hak Akses Menu</h3>
+                <p className="text-[11px] text-slate-500">
+                  Centang tindakan yang diizinkan untuk setiap menu atau submenu.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Cari menu..."
+                  className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-[#f5b82e]"
+                />
+                <Button type="button" size="sm" variant="outline" onClick={() => setAllPermissions(true)}>
+                  Pilih Semua
+                </Button>
+                <Button type="button" size="sm" variant="outline" onClick={() => setAllPermissions(false)}>
+                  Kosongkan
+                </Button>
+              </div>
+            </div>
+            <div className="max-h-[44vh] overflow-auto">
+              <div className="sticky top-0 z-10 grid min-w-[650px] grid-cols-[minmax(260px,1fr)_repeat(4,72px)] border-b border-slate-200 bg-white text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
+                <div className="px-3 py-2.5">Menu / Submenu</div>
+                <div className="border-l border-slate-100 py-2.5 text-center">Create</div>
+                <div className="border-l border-slate-100 py-2.5 text-center">Read</div>
+                <div className="border-l border-slate-100 py-2.5 text-center">Update</div>
+                <div className="border-l border-slate-100 py-2.5 text-center">Delete</div>
+              </div>
+              {visibleMenus.map((item) => (
+                <PermissionRow
+                  key={item.id}
+                  item={item}
+                  level={0}
+                  permissions={permissions}
+                  expandedIds={expandedIds}
+                  query={query}
+                  onToggleExpanded={(id) =>
+                    setExpandedIds((current) => {
+                      const next = new Set(current);
+                      if (next.has(id)) next.delete(id);
+                      else next.add(id);
+                      return next;
+                    })
+                  }
+                  onTogglePermission={togglePermission}
+                />
+              ))}
+            </div>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

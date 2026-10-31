@@ -1,345 +1,412 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-  Badge,
-  Button,
-  Card,
-  Input,
-  PageHeader,
-  Pagination,
-} from "../../../../_components/ui";
-
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { Badge, Button, Modal, Select } from "../../../../_components/ui";
 import { AsnRecord } from "./types";
-import FormRegistrasiModal from "./components/FormRegistrasiModal";
-import DetailRegistrasiModal from "./components/DetailRegistrasiModal";
 import {
   useResponseListMaster,
-  useUpdateMaster,
   useGroupOption,
+  useUpdateMaster,
 } from "./hooks/crud";
-import { listindex } from "@/utilities/pagination";
+
+const PAGE_SIZE = 5;
+
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}
+
+function formatAuditDate(value: string | undefined) {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Makassar",
+  }).format(new Date(value));
+}
 
 export default function MasterAuthRegistrasiPage() {
-  // Filter & Search State
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [groupIdFilter, setGroupIdFilter] = useState("all");
-
-  // Pagination State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [query, setQuery] = useState("");
+  const [groupFilter, setGroupFilter] = useState("all");
 
-  // Group options for filter dropdown
-  const { List: groupOptions } = useGroupOption();
-
-  // Debounce Search input
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(search);
-      setPage(1);
-    }, 400);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [search]);
-
-  // TanStack Query CRUD Hooks
-  const { List, isLoading, isError, error, refetch } = useResponseListMaster(
+  // TanStack Query Hooks for live database
+  const { List, isLoading } = useResponseListMaster(
     page,
-    pageSize,
-    debouncedSearch,
-    groupIdFilter
+    PAGE_SIZE,
+    query,
+    groupFilter,
   );
+  const { List: groupOptions } = useGroupOption();
   const updateMutation = useUpdateMaster();
 
-  // Modal State
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<AsnRecord | null>(null);
+  const [selectedGroupId, setSelectedGroupId] = useState("");
+  const [modalMode, setModalMode] = useState<"access" | "detail" | null>(null);
+  const [notice, setNotice] = useState("");
 
-  // Handlers
-  const handleOpenAssignRole = (record: AsnRecord) => {
+  const records = useMemo(() => List?.data || [], [List]);
+  const totalCount = List?.total || 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  const rangeStart = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(page * PAGE_SIZE, totalCount);
+
+  // Quick stats
+  const assigned = records.filter((record) => record.group_id).length;
+  const units = new Set(records.map((record) => record.satuan_pendidikan)).size;
+
+  const openAccess = (record: AsnRecord) => {
     setSelectedRecord(record);
-    setIsFormOpen(true);
+    setSelectedGroupId(record.group_id ?? "");
+    setModalMode("access");
   };
 
-  const handleOpenDetail = (record: AsnRecord) => {
+  const openDetail = (record: AsnRecord) => {
     setSelectedRecord(record);
-    setIsDetailOpen(true);
+    setModalMode("detail");
   };
 
-  const handleFormSubmit = (formData: { group_id: string | null }) => {
-    if (selectedRecord) {
-      updateMutation.mutate(
-        {
-          id: selectedRecord.id,
-          body: formData,
+  const saveAccess = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedRecord) return;
+
+    updateMutation.mutate(
+      {
+        id: selectedRecord.id,
+        body: {
+          group_id: selectedGroupId || null,
         },
-        {
-          onSuccess: () => {
-            setIsFormOpen(false);
-            setSelectedRecord(null);
-          },
-        }
-      );
-    }
+      },
+      {
+        onSuccess: () => {
+          const selectedGroup = groupOptions.find((g) => g.id === selectedGroupId);
+          setNotice(
+            `Akses ${selectedRecord.nama_lengkap} berhasil diatur sebagai “${
+              selectedGroup?.value ?? "Tidak Ada Role"
+            }”.`,
+          );
+          setModalMode(null);
+        },
+      },
+    );
   };
-
-  const totalItems = List?.total || 0;
-  const totalPages = Math.ceil(totalItems / pageSize) || 1;
-  const records = List?.data || [];
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Master Auth Registrasi ASN"
-        description="Kelola akun ASN terdaftar dari SIMPEG dan tetapkan role group hak akses sistem per pegawai."
-        breadcrumbs={[
-          { label: "Dashboard", href: "/admin" },
-          { label: "Data Master", href: "/admin/master" },
-          { label: "Auth", href: "/admin/master/auth/registrasi" },
-          { label: "Registrasi ASN" },
-        ]}
-      />
+      <nav className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-slate-500" aria-label="Breadcrumb">
+        <Link href="/admin" className="hover:text-[#2d2410]">Dashboard</Link>
+        <span>/</span>
+        <span>Data Master</span>
+        <span>/</span>
+        <span>Auth</span>
+        <span>/</span>
+        <span className="font-bold text-[#2d2410]">Registrasi ASN</span>
+      </nav>
 
-      {/* Metrics Banner */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 bg-teal-50/50 dark:bg-teal-950/20 border-teal-200 dark:border-teal-900">
-          <div className="text-xs text-teal-600 dark:text-teal-400 font-semibold uppercase tracking-wider">
-            Total ASN Terdaftar
-          </div>
-          <div className="text-2xl font-bold text-teal-900 dark:text-teal-100 mt-1">
-            {totalItems}
-          </div>
-          <div className="text-xs text-teal-600/80 mt-1">
-            Pegawai ASN terdaftar di sistem
-          </div>
-        </Card>
-        <Card className="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900">
-          <div className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold uppercase tracking-wider">
-            Memiliki Role Akses
-          </div>
-          <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-100 mt-1">
-            {records.filter((r) => Boolean(r.group_id)).length}
-          </div>
-          <div className="text-xs text-emerald-600/80 mt-1">
-            ASN dengan grup hak akses aktif
-          </div>
-        </Card>
-        <Card className="p-4 bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
-          <div className="text-xs text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-wider">
-            Belum Ditetapkan Role
-          </div>
-          <div className="text-2xl font-bold text-amber-900 dark:text-amber-100 mt-1">
-            {records.filter((r) => !r.group_id).length}
-          </div>
-          <div className="text-xs text-amber-600/80 mt-1">
-            ASN tanpa hak akses modul
-          </div>
-        </Card>
+      <div className="border-b border-slate-200/80 pb-5">
+        <div className="mb-2 flex items-center gap-2">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#f5b82e] text-xl shadow-sm">👤</span>
+          <Badge variant="gold">Data Master · Auth</Badge>
+        </div>
+        <h1 className="text-2xl font-black tracking-tight text-[#2d2410]">Registrasi Akses ASN</h1>
+        <p className="mt-1 max-w-3xl text-xs leading-relaxed text-[#7d7152]">
+          Data ASN berasal dari SIMPEG. Modul ini mengatur penetapan role group dan hak akses sistem per pegawai.
+        </p>
       </div>
 
-      <Card className="p-6">
-        {/* Table Filter / Search bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-          <div className="w-full md:w-80">
-            <Input
-              type="text"
-              placeholder="Cari nama ASN, NIP, instansi..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Ringkasan registrasi ASN">
+        {[
+          { label: "Total ASN", value: totalCount, icon: "🪪", tone: "bg-sky-50 text-sky-700" },
+          { label: "Sudah Memiliki Group", value: assigned, icon: "✓", tone: "bg-emerald-50 text-emerald-700" },
+          { label: "Belum Diatur", value: totalCount - assigned, icon: "!", tone: "bg-rose-50 text-rose-700" },
+          { label: "Satuan Pendidikan", value: units, icon: "🏫", tone: "bg-amber-50 text-amber-700" },
+        ].map((stat) => (
+          <div key={stat.label} className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
+            <span className={`grid h-10 w-10 place-items-center rounded-xl text-lg font-black ${stat.tone}`}>{stat.icon}</span>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{stat.label}</p>
+              <p className="text-xl font-black text-[#2d2410]">{stat.value}</p>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500">Filter Role:</span>
-              <select
-                aria-label="Filter berdasarkan Role Group"
-                className="text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg p-2"
-                value={groupIdFilter}
-                onChange={(e) => {
-                  setGroupIdFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="all">Semua Role</option>
-                <option value="unassigned">Belum Memiliki Role</option>
-                {groupOptions.map((opt) => (
-                  <option key={opt.id} value={opt.id}>
-                    {opt.value}
-                  </option>
-                ))}
-              </select>
-            </div>
+        ))}
+      </section>
 
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500">Tampilkan:</span>
-              <select
-                aria-label="Jumlah data per halaman"
-                className="text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg p-2"
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setPage(1);
-                }}
-              >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-              </select>
-            </div>
+      {notice && (
+        <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-800">
+          <span>✓ {notice}</span>
+          <button type="button" onClick={() => setNotice("")} aria-label="Tutup pemberitahuan">✕</button>
+        </div>
+      )}
+
+      <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+        <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50/70 p-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="text-sm font-extrabold text-[#2d2410]">Daftar ASN Terintegrasi</h2>
+            <p className="mt-0.5 text-[11px] text-slate-500">Pilih atur akses untuk menetapkan role group kepada pegawai.</p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setPage(1);
+              }}
+              placeholder="Cari nama, NIP, atau satuan pendidikan..."
+              className="h-9 min-w-0 rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-[#f5b82e] sm:w-72"
+            />
+            <select
+              aria-label="Filter berdasarkan Role Group"
+              value={groupFilter}
+              onChange={(event) => {
+                setGroupFilter(event.target.value);
+                setPage(1);
+              }}
+              className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 outline-none focus:border-[#f5b82e]"
+            >
+              <option value="all">Semua Group</option>
+              <option value="unassigned">Belum Diatur</option>
+              {groupOptions.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.value}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Content Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
-            <thead className="bg-slate-50 dark:bg-slate-800/50 text-xs uppercase font-semibold text-slate-500 border-b border-slate-200 dark:border-slate-800">
+          <table className="w-full min-w-[940px] text-left">
+            <thead className="border-b border-slate-200 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
               <tr>
-                <th className="py-3 px-4 w-12 text-center">No</th>
-                <th className="py-3 px-4">Nama Lengkap & NIP</th>
-                <th className="py-3 px-4">Satuan Pendidikan</th>
-                <th className="py-3 px-4">Jabatan</th>
-                <th className="py-3 px-4">Role Group Terpasang</th>
-                <th className="py-3 px-4 text-center w-48">Aksi</th>
+                <th className="px-5 py-3">ASN</th>
+                <th className="px-4 py-3">NIP</th>
+                <th className="px-4 py-3">Satuan Pendidikan</th>
+                <th className="px-4 py-3">Role Group</th>
+                <th className="px-5 py-3 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-100">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-500">
+                  <td colSpan={5} className="px-5 py-12 text-center text-xs text-slate-500">
                     Memuat data ASN dari database...
-                  </td>
-                </tr>
-              ) : isError ? (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-rose-500">
-                    Terjadi kesalahan saat memuat data: {(error as any)?.message || "Gagal memuat"}
-                    <div className="mt-2">
-                      <Button variant="outline" size="sm" onClick={() => refetch()}>
-                        Coba Lagi
-                      </Button>
-                    </div>
                   </td>
                 </tr>
               ) : records.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400">
-                    Tidak ada data ASN yang ditemukan.
+                  <td colSpan={5} className="px-5 py-16 text-center text-xs text-slate-500">
+                    Data ASN tidak ditemukan.
                   </td>
                 </tr>
               ) : (
-                records.map((item, index) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
-                  >
-                    <td className="py-3 px-4 text-center font-medium">
-                      {listindex(page, pageSize, index)}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="font-semibold text-slate-900 dark:text-white">
-                        {item.nama_lengkap}
-                      </div>
-                      <div className="text-xs font-mono text-slate-400 mt-0.5">
-                        NIP: {item.nip || "-"}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-slate-800 dark:text-slate-200 font-medium">
-                        {item.satuan_pendidikan || "-"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-slate-600 dark:text-slate-400 text-xs">
-                        {item.jabatan || "-"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      {item.group_title ? (
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <Badge variant={item.group_level === 1 ? "primary" : "neutral"}>
-                            {item.group_level === 1 ? "Level 1" : "Level 2"}
-                          </Badge>
-                          <span className="font-semibold text-slate-900 dark:text-white text-xs">
-                            {item.group_title}
+                records.map((record) => {
+                  return (
+                    <tr key={record.id} className="hover:bg-slate-50/70">
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#2d2410] text-xs font-black text-white">
+                            {initials(record.nama_lengkap)}
                           </span>
+                          <div>
+                            <p className="text-sm font-bold text-[#2d2410]">{record.nama_lengkap}</p>
+                            <p className="text-[10px] text-slate-500">{record.jabatan || "-"}</p>
+                          </div>
                         </div>
-                      ) : (
-                        <Badge variant="neutral">Belum Ada Role</Badge>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs py-1 px-2"
-                          onClick={() => handleOpenDetail(item)}
-                        >
-                          Detail
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs py-1 px-2 border-teal-300 text-teal-700 dark:text-teal-300 hover:bg-teal-50"
-                          onClick={() => handleOpenAssignRole(item)}
-                        >
-                          Atur Role
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="px-4 py-4">
+                        <code className="whitespace-nowrap rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">
+                          {record.nip || "-"}
+                        </code>
+                      </td>
+                      <td className="px-4 py-4">
+                        <p className="max-w-56 text-xs font-semibold text-slate-700">
+                          {record.satuan_pendidikan || "-"}
+                        </p>
+                      </td>
+                      <td className="px-4 py-4">
+                        {record.group_title ? (
+                          <div>
+                            <Badge variant={record.group_level === 1 ? "info" : "success"}>
+                              {record.group_title}
+                            </Badge>
+                            <p className="mt-1 text-[9px] font-semibold text-slate-400">
+                              Level {record.group_level}
+                            </p>
+                          </div>
+                        ) : (
+                          <Badge variant="warning">Belum diatur</Badge>
+                        )}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" variant="outline" onClick={() => openAccess(record)}>
+                            Atur Akses
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => openDetail(record)}>
+                            Lihat
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Pagination Section */}
-        <div className="mt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-          <div>
-            Menampilkan data{" "}
-            <span className="font-medium text-slate-700 dark:text-slate-300">
-              {totalItems === 0 ? 0 : (page - 1) * pageSize + 1}
-            </span>{" "}
-            sampai{" "}
-            <span className="font-medium text-slate-700 dark:text-slate-300">
-              {Math.min(page * pageSize, totalItems)}
-            </span>{" "}
-            dari{" "}
-            <span className="font-medium text-slate-700 dark:text-slate-300">
-              {totalItems}
-            </span>{" "}
-            data
+        <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/60 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-[11px] text-slate-500">
+            <span>Menampilkan {rangeStart}–{rangeEnd} dari {totalCount} hasil</span>
+            <span className="mx-1.5 text-slate-300">·</span>
+            <span>{totalCount} total ASN</span>
           </div>
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={(p: number) => setPage(p)}
-            />
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((value) => Math.max(1, value - 1))}
+              disabled={page === 1}
+              className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-600 hover:border-slate-300 hover:text-[#2d2410] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              ‹ Sebelumnya
+            </button>
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+              <button
+                key={pageNumber}
+                type="button"
+                onClick={() => setPage(pageNumber)}
+                className={`grid h-8 min-w-8 place-items-center rounded-lg border px-2 text-[11px] font-extrabold ${
+                  page === pageNumber
+                    ? "border-[#2d2410] bg-[#2d2410] text-white"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-[#f5b82e]"
+                }`}
+                aria-label={`Halaman ${pageNumber}`}
+                aria-current={page === pageNumber ? "page" : undefined}
+              >
+                {pageNumber}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+              disabled={page === totalPages}
+              className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-600 hover:border-slate-300 hover:text-[#2d2410] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Berikutnya ›
+            </button>
+          </div>
         </div>
-      </Card>
+      </section>
 
-      {/* Modals */}
-      <FormRegistrasiModal
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        onSubmit={handleFormSubmit}
-        record={selectedRecord}
-        isLoading={updateMutation.isPending}
-      />
+      {/* Modal Atur Level Akses */}
+      <Modal
+        isOpen={modalMode === "access"}
+        onClose={() => setModalMode(null)}
+        title="Atur Level Akses ASN"
+        description="Pilih group untuk menentukan kewenangan menu pengguna pada aplikasi admin."
+        footer={
+          <>
+            <Button type="button" variant="ghost" onClick={() => setModalMode(null)}>
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              form="asn-access-form"
+              variant="gold"
+              disabled={updateMutation.isPending}
+            >
+              {updateMutation.isPending ? "Menyimpan..." : "Simpan Akses"}
+            </Button>
+          </>
+        }
+      >
+        {selectedRecord && (
+          <form id="asn-access-form" onSubmit={saveAccess} className="space-y-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-xs">
+              <p className="font-extrabold text-[#2d2410]">{selectedRecord.nama_lengkap}</p>
+              <p className="mt-0.5 text-slate-500">NIP: {selectedRecord.nip || "-"}</p>
+              <p className="mt-0.5 text-slate-500">
+                {selectedRecord.satuan_pendidikan || "-"} · {selectedRecord.jabatan || "-"}
+              </p>
+            </div>
 
-      <DetailRegistrasiModal
-        isOpen={isDetailOpen}
-        onClose={() => setIsDetailOpen(false)}
-        record={selectedRecord}
-      />
+            <Select
+              label="Pilih Role Group"
+              value={selectedGroupId}
+              onChange={(event) => setSelectedGroupId(event.target.value)}
+              helperText="Menentukan izin Create, Read, Update, Delete dan cakupan data."
+            >
+              <option value="">-- Belum Diatur (Nonaktifkan Akses) --</option>
+              {groupOptions.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.value}
+                </option>
+              ))}
+            </Select>
+          </form>
+        )}
+      </Modal>
+
+      {/* Modal Detail ASN */}
+      <Modal
+        isOpen={modalMode === "detail"}
+        onClose={() => setModalMode(null)}
+        title="Detail Akses ASN"
+        description="Ringkasan data ASN dan status akses sistem."
+        footer={
+          <Button type="button" variant="ghost" onClick={() => setModalMode(null)}>
+            Tutup
+          </Button>
+        }
+      >
+        {selectedRecord && (
+          <div className="space-y-3 text-xs">
+            <div className="grid gap-2 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase text-slate-400">Nama</p>
+                <p className="text-sm font-extrabold text-[#2d2410]">{selectedRecord.nama_lengkap}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-slate-400">NIP</p>
+                  <p className="font-mono text-slate-600">{selectedRecord.nip || "-"}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-slate-400">Jabatan</p>
+                  <p className="text-slate-600">{selectedRecord.jabatan || "-"}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-slate-400">Satuan Pendidikan</p>
+                <p className="text-slate-600">{selectedRecord.satuan_pendidikan || "-"}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-slate-400">Status Role Group</p>
+                <p className="text-slate-600">
+                  {selectedRecord.group_title ? (
+                    <span className="font-semibold text-emerald-700">
+                      {selectedRecord.group_title} (Level {selectedRecord.group_level})
+                    </span>
+                  ) : (
+                    <span className="text-amber-600 italic">Belum ditentukan</span>
+                  )}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-slate-400">Waktu Terdaftar</p>
+                <p className="font-mono text-slate-500">{formatAuditDate(selectedRecord.created_at)}</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
