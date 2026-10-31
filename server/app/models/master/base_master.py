@@ -1,0 +1,18 @@
+"""Base class and mixins for Master Data models."""
+
+import uuid
+
+from sqlalchemy import Column, DateTime, String
+from sqlalchemy.sql import func
+
+
+class MasterBaseMixin:
+    """Standard audit and descriptor columns for Master Data tables."""
+
+    id = Column(String(50), primary_key=True, default=lambda: str(uuid.uuid4()))
+    uraian = Column(String(255), nullable=False)
+    nip = Column(String(50), nullable=True, index=True)
+    unit_kerja = Column(String(150), nullable=True, index=True)
+    created_by = Column(String(100), nullable=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)

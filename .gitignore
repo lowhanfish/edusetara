@@ -3,4 +3,7 @@
 Thumbs.db
 
 # Root environment
-.env*
+.env
+.env.*
+!.env.example
+!server/.env.example
