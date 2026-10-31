@@ -9,6 +9,7 @@ from app.api.v1.endpoints.admin.master.lookup import router as lookup_router
 from app.api.v1.endpoints.admin.master.pelengkap import pelengkap_router
 from app.api.v1.endpoints.admin.master.ppdb import ppdb_router
 from app.api.v1.endpoints.admin.master.sarpras import sarpras_router
+from app.api.v1.endpoints.admin.master.sekolah import router as sekolah_router
 from app.api.v1.endpoints.admin.master.seed import router as seed_router
 from app.api.v1.endpoints.admin.master.siswa import siswa_router
 from app.api.v1.endpoints.admin.master.usulan import usulan_router
@@ -42,6 +43,9 @@ master_router.include_router(jurnal_router)
 
 # 9. Master Pelengkap (/bk-jenis-layanan, /model-pembelajaran, etc.)
 master_router.include_router(pelengkap_router)
+
+# 10. Master Sekolah (/sekolah)
+master_router.include_router(sekolah_router, prefix="/sekolah")
 
 # Alias for backward compatibility
 router = master_router

@@ -122,6 +122,29 @@ async def fetch_lookup_for_model(
     return [{"id": row.id, "uraian": row.uraian} for row in result.all()]
 
 
+async def fetch_sekolah_lookup(session: AsyncSession) -> list[dict[str, Any]]:
+    """Fetch all active schools for dropdown lookup."""
+    from sqlalchemy import text
+    sql = text("""
+        SELECT u.id, u.unit_kerja, m.jenjang, m.status_sekolah, m.kecamatan
+        FROM simpeg.unit_kerja u
+        INNER JOIN edusetara.master_sekolah_meta m ON u.id = m.unit_kerja_id
+        WHERE u.instansi = 'nCxELyiYZBPCeF85N' AND u.status = 1 AND m.is_active = 1
+        ORDER BY u.unit_kerja ASC
+    """)
+    result = await session.execute(sql)
+    return [
+        {
+            "id": r[0],
+            "uraian": (r[1] or "").replace("\u200c", "").strip(),
+            "jenjang": r[2],
+            "status": r[3],
+            "kecamatan": r[4],
+        }
+        for r in result.fetchall()
+    ]
+
+
 async def get_batch_lookups(
     session: AsyncSession,
     keys: list[str] | None = None,
@@ -133,16 +156,21 @@ async def get_batch_lookups(
     """
     results: dict[str, list[dict[str, Any]]] = {}
 
+    recognized_keys = set(MASTER_LOOKUP_REGISTRY.keys()) | {"sekolah"}
+
     if not keys:
         target_keys = list(MASTER_LOOKUP_REGISTRY.keys())
     else:
         # Filter only recognized keys
         target_keys = [
-            k.strip().lower() for k in keys if k.strip().lower() in MASTER_LOOKUP_REGISTRY
+            k.strip().lower() for k in keys if k.strip().lower() in recognized_keys
         ]
 
     for key in target_keys:
-        model = MASTER_LOOKUP_REGISTRY[key]
-        results[key] = await fetch_lookup_for_model(session, model)
+        if key == "sekolah":
+            results[key] = await fetch_sekolah_lookup(session)
+        else:
+            model = MASTER_LOOKUP_REGISTRY[key]
+            results[key] = await fetch_lookup_for_model(session, model)
 
     return results

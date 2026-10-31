@@ -169,10 +169,11 @@ Seluruh modul admin (termasuk Data Master) wajib mengadopsi pola arsitektur yang
 | 68 | **Master Pendampingan** | Data Master | `/admin/master/pendampingan` | `/api/v1/admin/master/pendampingan` | `master_pendampingan` |
 | 69 | **Master Tugas** | Data Master | `/admin/master/tugas` | `/api/v1/admin/master/tugas` | `master_tugas` |
 | 70 | **Master Kategori** | Data Master | `/admin/master/kategori` | `/api/v1/admin/master/kategori` | `master_kategori` |
+| 71 | **Master Sekolah** | Data Master > Master Sekolah | `/admin/master/sekolah/{sd,smp,tk,pkbm}` | `/api/v1/admin/master/sekolah` | `simpeg.unit_kerja` + `master_sekolah_meta` |
 
 ---
 
-## 3. Spesifikasi Lengkap Modul (1 s/d 70)
+## 3. Spesifikasi Lengkap Modul (1 s/d 71)
 
 ### 1. Berita
 **Kategori:** `Publish & Informasi`  
@@ -2919,6 +2920,91 @@ seluruh transaksi penerimaan dan pengeluaran kas dana BOSP yang telah ditutup da
 Buku Pembantu Pajak: Rekapitulasi pemotongan dan penyetoran kewajiban perpajakan belanja BOSP yang dilengkapi bukti NTPN/e-Billing yang sah.
 Surat Pernyataan Tanggung Jawab Mutlak (SPTJM): Surat pernyataan keabsahan dan kebenaran penggunaan belanja dana BOSP bermaterai resmi dari Kepala Satuan Pendidikan.
 Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggaran dana BOSP per semester yang dicocokkan dengan rekening koran bank.
+```
+
+---
+### 71. Master Sekolah (SD, SMP, TK, PKBM)
+**Kategori:** `Data Master > Master Sekolah`  
+**Route Frontend:** 
+- [`/admin/master/sekolah/sd`](http://localhost:3000/admin/master/sekolah/sd) (Master SD)
+- [`/admin/master/sekolah/smp`](http://localhost:3000/admin/master/sekolah/smp) (Master SMP)
+- [`/admin/master/sekolah/tk`](http://localhost:3000/admin/master/sekolah/tk) (Master TK & PAUD)
+- [`/admin/master/sekolah/pkbm`](http://localhost:3000/admin/master/sekolah/pkbm) (Master PKBM / SKB)
+- [`/admin/sekolah`](http://localhost:3000/admin/sekolah) (Direktori Seluruh Satuan Pendidikan)
+
+**Endpoint Backend:** `http://localhost:8000/api/v1/admin/master/sekolah`  
+**Tabel Database:** `simpeg.unit_kerja` (Identity Source) + `edusetara.master_sekolah_meta` (Bridge Extension)
+
+#### Deskripsi & Bisnis Logika
+> Modul ini menyajikan direktori data induk satuan pendidikan yang terintegrasi langsung dengan database kepegawaian SIMPEG (`instansi = "nCxELyiYZBPCeF85N"`). Identitas utama sekolah (`id`, `nama_sekolah`, dan `alamat`) dipelihara oleh SIMPEG tanpa penambahan kolom dan tanpa duplikasi data (*zero duplication*). Sementara pengelompokan jenjang (`PAUD`, `TK`, `SD`, `SMP`, `SATAP`, `PKBM`), status kelembagaan (`NEGERI`, `SWASTA`), identitas Dapodik (`NPSN`, `akreditasi`), serta kewilayahan disimpan di tabel ekstensi `edusetara.master_sekolah_meta`.
+
+#### Parameter Query (Filter & Pencarian)
+- `jenjang` (opsional): `SD` | `SMP` | `TK` | `PAUD` | `SATAP` | `PKBM`
+- `status_sekolah` (opsional): `NEGERI` | `SWASTA`
+- `kecamatan` (opsional): Filter per nama kecamatan (Andoolo, Ranomeeto, Konda, dll.)
+- `search` (opsional): Pencarian nama sekolah, NPSN, kecamatan, atau alamat
+- `skip` & `limit`: Standar paginasi data
+- `include_satap` (default: `true`): Otomatis menyertakan sekolah SATAP jika filter jenjang SD atau SMP
+
+#### Kontrak Payload JSON (API Contract)
+**Response List (`GET /api/v1/admin/master/sekolah`)**
+```json
+{
+  "total": 438,
+  "skip": 0,
+  "limit": 50,
+  "data": [
+    {
+      "id": "2bm7ule1ag5clatt2xxl",
+      "unit_kerja_id": "2bm7ule1ag5clatt2xxl",
+      "nama_sekolah": "SD-SMPN SATAP 2 KONSEL",
+      "name": "SD-SMPN SATAP 2 KONSEL",
+      "alamat": "Jl. Poros Desa Sindangkasih, Kec. Ranomeeto Barat",
+      "address": "Jl. Poros Desa Sindangkasih, Kec. Ranomeeto Barat",
+      "jenjang": "SATAP",
+      "level": "SATAP",
+      "status_sekolah": "NEGERI",
+      "status": "NEGERI",
+      "npsn": "40402064",
+      "akreditasi": "B",
+      "kecamatan": "Ranomeeto Barat",
+      "district": "Ranomeeto Barat",
+      "desa_kelurahan": "Sindangkasih",
+      "village": "Sindangkasih",
+      "is_active": true,
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402064",
+      "created_at": "2026-11-01T00:20:41",
+      "updated_at": "2026-11-01T00:20:41"
+    }
+  ]
+}
+```
+
+**Form Update Metadata (`PUT /api/v1/admin/master/sekolah/{unit_kerja_id}`)**
+```json
+{
+  "jenjang": "SD",
+  "status_sekolah": "NEGERI",
+  "npsn": "40402064",
+  "akreditasi": "A",
+  "kecamatan": "Ranomeeto Barat",
+  "desa_kelurahan": "Sindangkasih",
+  "is_active": true
+}
+```
+
+**Dropdown Lookup (`GET /api/v1/admin/master/sekolah/lookup?jenjang=SMP`)**
+```json
+[
+  {
+    "id": "2bm7ule1ag5clatsnttg",
+    "unit_kerja_id": "2bm7ule1ag5clatsnttg",
+    "nama": "SMPN 36 KONAWE SELATAN",
+    "jenjang": "SMP",
+    "status": "NEGERI",
+    "kecamatan": "Motaha"
+  }
+]
 ```
 
 ---
