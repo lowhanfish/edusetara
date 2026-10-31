@@ -1,24 +1,29 @@
-"""Pydantic schemas for Master Jenjang (e-office pattern)."""
+"""Pydantic schemas for Master Jenjang (uraian & keterangan)."""
 
-from pydantic import BaseModel
-
-from app.global_schemas.master.base_schema import (
-    MasterCreate,
-    MasterResponse,
-    MasterUpdate,
-)
+from datetime import datetime
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class JenjangCreate(MasterCreate):
-    pass
+class JenjangCreate(BaseModel):
+    id: str | None = Field(None, max_length=50)
+    uraian: str = Field(..., min_length=1, max_length=255, description="Nama / label jenjang")
+    keterangan: str | None = Field(None, description="Keterangan jenjang")
 
 
-class JenjangResponse(MasterResponse):
-    pass
+class JenjangUpdate(BaseModel):
+    uraian: str | None = Field(None, min_length=1, max_length=255)
+    keterangan: str | None = None
 
 
-class JenjangUpdate(MasterUpdate):
-    pass
+class JenjangResponse(BaseModel):
+    id: str
+    uraian: str
+    keterangan: str | None = None
+    created_by: str | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True, extra="allow")
 
 
 class JenjangResponseList(BaseModel):

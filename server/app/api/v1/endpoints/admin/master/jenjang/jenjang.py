@@ -42,7 +42,10 @@ async def read_jenjang(
 ):
     query = select(MasterJenjang)
     if search:
-        query = query.where(MasterJenjang.uraian.ilike(f"%{search}%"))
+        query = query.where(
+            (MasterJenjang.uraian.ilike(f"%{search}%"))
+            | (MasterJenjang.keterangan.ilike(f"%{search}%"))
+        )
 
     total_query = select(func.count()).select_from(query.subquery())
     total_result = await db.execute(total_query)

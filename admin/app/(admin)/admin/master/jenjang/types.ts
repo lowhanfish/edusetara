@@ -1,7 +1,6 @@
 export interface CreateInterface {
   uraian: string;
-  nip?: string | null;
-  unit_kerja?: string | null;
+  keterangan?: string | null;
 }
 
 export interface ResponseInterface extends CreateInterface {

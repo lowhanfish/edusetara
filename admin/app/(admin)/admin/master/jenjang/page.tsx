@@ -60,11 +60,10 @@ export default function MasterJenjangPage() {
   const [selectedRecord, setSelectedRecord] = useState<JenjangRecord | null>(null);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
 
-  // Form Field State - strictly follows data contract: uraian, unit_kerja, nip
+  // Form Field State - strictly follows database schema: uraian, keterangan
   const initialForm: Partial<ResponseInterface> = {
     uraian: "",
-    unit_kerja: "",
-    nip: "",
+    keterangan: "",
   };
 
   const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
@@ -82,9 +81,8 @@ export default function MasterJenjangPage() {
   // Statistik Ringkasan Metrik
   const stats = useMemo(() => {
     const total = List?.total ?? rawList.length;
-    const withUnitKerja = rawList.filter((d) => Boolean(d.unit_kerja)).length;
-    const withNip = rawList.filter((d) => Boolean(d.nip)).length;
-    return { total, withUnitKerja, withNip };
+    const withKeterangan = rawList.filter((d) => Boolean(d.keterangan && d.keterangan !== "-")).length;
+    return { total, withKeterangan };
   }, [List, rawList]);
 
   // Modal Handlers
@@ -99,8 +97,7 @@ export default function MasterJenjangPage() {
     setSelectedRecord(item);
     setFormData({
       uraian: item.uraian || "",
-      unit_kerja: item.unit_kerja || "",
-      nip: item.nip || "",
+      keterangan: item.keterangan || "",
     });
     setIsFormOpen(true);
   };
@@ -132,7 +129,7 @@ export default function MasterJenjangPage() {
     if (!formData.uraian?.trim()) {
       Swal.fire({
         title: "Pemberitahuan!",
-        text: "Silakan isi Nama Jenjang Pendidikan (Uraian)!",
+        text: "Silakan isi Uraian Jenjang Pendidikan!",
         icon: "warning",
       });
       return;
@@ -141,8 +138,7 @@ export default function MasterJenjangPage() {
     if (formMode === "add") {
       const payload: Partial<ResponseInterface> = {
         uraian: formData.uraian.trim(),
-        unit_kerja: formData.unit_kerja?.trim() || null,
-        nip: formData.nip?.trim() || null,
+        keterangan: formData.keterangan?.trim() || null,
       };
 
       createMutation.mutate(payload, {
@@ -154,8 +150,7 @@ export default function MasterJenjangPage() {
     } else if (formMode === "edit" && selectedRecord) {
       const payload: Partial<ResponseInterface> = {
         uraian: formData.uraian.trim(),
-        unit_kerja: formData.unit_kerja?.trim() || null,
-        nip: formData.nip?.trim() || null,
+        keterangan: formData.keterangan?.trim() || null,
       };
 
       updateMutation.mutate(
@@ -191,7 +186,7 @@ export default function MasterJenjangPage() {
       {/* 2. PageHeader Standar EduSetara */}
       <PageHeader
         title="Master Jenjang Pendidikan"
-        description="Pengelolaan klasifikasi jenjang pendidikan resmi Kabupaten Konawe Selatan sesuai kontrak data master_jenjang."
+        description="Kelola data klasifikasi jenjang pendidikan resmi (uraian & keterangan) sesuai basis data master_jenjang."
         badge={<Badge variant="gold">Data Master</Badge>}
         action={
           <Button variant="gold" onClick={openAddModal}>
@@ -200,13 +195,13 @@ export default function MasterJenjangPage() {
         }
       />
 
-      {/* 3. 4 Kartu Metrik Ringkasan (Glassmorphism Metric Cards) */}
+      {/* 3. Kartu Metrik Ringkasan */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
           <div>
             <p className="text-xs font-semibold text-[#7d7152]">Total Jenjang</p>
             <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.total} Jenjang</h4>
-            <span className="text-[11px] text-emerald-700 font-medium">Terdaftar di SIMPEG</span>
+            <span className="text-[11px] text-emerald-700 font-medium">Tabel master_jenjang</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
             🎓
@@ -215,31 +210,31 @@ export default function MasterJenjangPage() {
 
         <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
           <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Unit Kerja Terpetakan</p>
-            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.withUnitKerja} Bidang</h4>
-            <span className="text-[11px] text-[#a86a00] font-semibold">Pembina Satuan</span>
+            <p className="text-xs font-semibold text-[#7d7152]">Catatan Keterangan</p>
+            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.withKeterangan} Terisi</h4>
+            <span className="text-[11px] text-[#a86a00] font-semibold">Field Keterangan</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
-            🏛️
+            📝
           </div>
         </Card>
 
         <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
           <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Penanggung Jawab</p>
-            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.withNip} NIP</h4>
-            <span className="text-[11px] text-[#a86a00] font-medium">Pejabat Pembina</span>
+            <p className="text-xs font-semibold text-[#7d7152]">Basis Data</p>
+            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">MySQL</h4>
+            <span className="text-[11px] text-emerald-700 font-medium">Terhubung Langsung</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
-            👤
+            🗄️
           </div>
         </Card>
 
         <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
           <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Integrasi Dapodik</p>
+            <p className="text-xs font-semibold text-[#7d7152]">Sinkronisasi Sistem</p>
             <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Aktif</h4>
-            <span className="text-[11px] text-emerald-700 font-semibold">Sinkronisasi Penuh</span>
+            <span className="text-[11px] text-emerald-700 font-semibold">TanStack Query Cache</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
             ⚡
@@ -255,7 +250,7 @@ export default function MasterJenjangPage() {
             <Input
               value={search}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
-              placeholder="Cari uraian jenjang, unit kerja, atau NIP..."
+              placeholder="Cari uraian atau keterangan jenjang..."
             />
           </div>
 
@@ -290,14 +285,11 @@ export default function MasterJenjangPage() {
                 <th className="w-[6%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">
                   No
                 </th>
+                <th className="w-[44%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
+                  Uraian Jenjang Pendidikan
+                </th>
                 <th className="w-[36%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
-                  Nama Jenjang Pendidikan (Uraian)
-                </th>
-                <th className="w-[26%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
-                  Unit Kerja / Bidang Pembina
-                </th>
-                <th className="w-[18%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
-                  NIP Pembina
+                  Keterangan
                 </th>
                 <th className="w-[14%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">
                   Aksi
@@ -313,13 +305,10 @@ export default function MasterJenjangPage() {
                       <div className="h-4 w-4 bg-amber-200/50 rounded-md mx-auto" />
                     </td>
                     <td className="px-4 py-3.5">
-                      <div className="h-4 w-48 bg-amber-200/50 rounded-md" />
+                      <div className="h-4 w-56 bg-amber-200/50 rounded-md" />
                     </td>
                     <td className="px-4 py-3.5">
-                      <div className="h-4 w-36 bg-amber-200/40 rounded-md" />
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <div className="h-4 w-28 bg-amber-200/40 rounded-md" />
+                      <div className="h-4 w-48 bg-amber-200/40 rounded-md" />
                     </td>
                     <td className="px-4 py-3.5 text-right">
                       <div className="h-7 w-20 bg-amber-200/40 rounded-lg ml-auto" />
@@ -328,13 +317,13 @@ export default function MasterJenjangPage() {
                 ))
               ) : isError ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-12 text-rose-600 text-xs font-semibold">
+                  <td colSpan={4} className="text-center py-12 text-rose-600 text-xs font-semibold">
                     Gagal mengambil data dari server: {(error as any)?.message || "Koneksi terputus"}
                   </td>
                 </tr>
               ) : rawList.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-12 text-[#7d7152] text-xs font-medium">
+                  <td colSpan={4} className="text-center py-12 text-[#7d7152] text-xs font-medium">
                     Tidak ada data master jenjang ditemukan.
                   </td>
                 </tr>
@@ -354,21 +343,14 @@ export default function MasterJenjangPage() {
                         </span>
                       </td>
 
-                      {/* 3. Unit Kerja Pembina */}
+                      {/* 3. Keterangan */}
                       <td className="px-4 py-3.5 text-xs text-[#2d2410] align-middle">
-                        <span className="text-xs text-[#5e5133] font-medium">
-                          {row.unit_kerja || "-"}
+                        <span className="text-xs text-[#5e5133]">
+                          {row.keterangan || "-"}
                         </span>
                       </td>
 
-                      {/* 4. NIP */}
-                      <td className="px-4 py-3.5 text-xs text-[#2d2410] align-middle">
-                        <span className="font-mono text-xs text-[#7d7152]">
-                          {row.nip || "-"}
-                        </span>
-                      </td>
-
-                      {/* 5. Tombol Aksi (Detail, Edit, Hapus) */}
+                      {/* 4. Tombol Aksi (Detail, Edit, Hapus) */}
                       <td className="px-4 py-3.5 text-xs text-[#2d2410] align-middle text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Button

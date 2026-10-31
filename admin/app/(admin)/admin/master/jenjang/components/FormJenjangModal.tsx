@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Input, Modal } from "../../../../_components/ui";
+import { Button, Input, Modal, Textarea } from "../../../../_components/ui";
 import { ResponseInterface } from "../types";
 
 interface FormJenjangModalProps {
@@ -30,7 +30,7 @@ export default function FormJenjangModal({
           ? "+ Tambah Master Jenjang Pendidikan"
           : "✎ Edit Master Jenjang Pendidikan"
       }
-      description="Sesuai kontrak data master_jenjang (uraian, unit_kerja, nip)."
+      description="Kelola nama jenjang pendidikan (uraian) dan keterangan sesuai basis data master_jenjang."
       maxWidth="md"
       footer={
         <>
@@ -51,40 +51,29 @@ export default function FormJenjangModal({
         {/* Nama Jenjang Pendidikan (uraian) */}
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nama Jenjang Pendidikan (Uraian) <span className="text-rose-500">*</span>
+            Uraian Jenjang Pendidikan <span className="text-rose-500">*</span>
           </label>
           <Input
             required
             value={formData.uraian || ""}
             onChange={(e) => setFormData({ ...formData, uraian: e.target.value })}
-            placeholder="Contoh: PAUD / TK, SD (Sekolah Dasar), SMP, PKBM"
+            placeholder="Contoh: PAUD / TK, SD, SMP, PKBM"
           />
           <p className="text-[10px] text-[#9c8e6b] mt-1">
-            Deskripsi lengkap jenjang pendidikan yang diakui Dinas Dikbud.
+            Label deskriptor jenjang pendidikan (field uraian).
           </p>
         </div>
 
-        {/* Bidang Pembina / Unit Kerja (unit_kerja) */}
+        {/* Keterangan (keterangan) */}
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Unit Kerja / Bidang Pembina
+            Keterangan
           </label>
-          <Input
-            value={formData.unit_kerja || ""}
-            onChange={(e) => setFormData({ ...formData, unit_kerja: e.target.value })}
-            placeholder="Contoh: Bidang Pembinaan Sekolah Dasar"
-          />
-        </div>
-
-        {/* NIP Penanggung Jawab / Pembina (nip) */}
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            NIP Penanggung Jawab (Opsional)
-          </label>
-          <Input
-            value={formData.nip || ""}
-            onChange={(e) => setFormData({ ...formData, nip: e.target.value })}
-            placeholder="Contoh: 198208102008011009"
+          <Textarea
+            rows={3}
+            value={formData.keterangan || ""}
+            onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
+            placeholder="Tambahkan catatan atau keterangan jenjang bila diperlukan..."
           />
         </div>
       </form>

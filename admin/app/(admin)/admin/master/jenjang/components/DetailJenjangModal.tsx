@@ -42,30 +42,20 @@ export default function DetailJenjangModal({
           <div className="p-4 rounded-2xl bg-white/60 border border-white/80 space-y-3">
             <div>
               <span className="text-[#9c8e6b] block text-[10px] uppercase font-semibold">
-                Nama Jenjang Pendidikan (Uraian)
+                Uraian Jenjang Pendidikan
               </span>
               <h3 className="font-extrabold text-[#2d2410] text-base mt-0.5">
                 {record.uraian}
               </h3>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/60">
-              <div>
-                <span className="text-[#9c8e6b] block text-[10px] uppercase font-semibold">
-                  Unit Kerja / Bidang Pembina
-                </span>
-                <span className="font-semibold text-[#2d2410] text-xs">
-                  {record.unit_kerja || "-"}
-                </span>
-              </div>
-              <div>
-                <span className="text-[#9c8e6b] block text-[10px] uppercase font-semibold">
-                  NIP Penanggung Jawab
-                </span>
-                <span className="font-mono text-[#2d2410] text-xs">
-                  {record.nip || "-"}
-                </span>
-              </div>
+            <div className="pt-2 border-t border-white/60">
+              <span className="text-[#9c8e6b] block text-[10px] uppercase font-semibold">
+                Keterangan
+              </span>
+              <p className="text-[#5e5133] mt-0.5 leading-relaxed">
+                {record.keterangan || "-"}
+              </p>
             </div>
           </div>
 
