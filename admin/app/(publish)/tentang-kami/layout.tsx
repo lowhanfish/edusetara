@@ -1,6 +1,4 @@
-import { SiteFooter } from "../_components/home/site-footer";
-import { SiteHeader } from "../_components/home/site-header";
-
+import { SiteHeader, SiteFooter } from "../_components";
 export default function AboutLayout({ children }: { children: React.ReactNode }) {
   return (
     <main>

@@ -1,44 +1,50 @@
 import Link from "next/link";
-import { navItems } from "../../_components/home/home-data";
+import { navItems } from "../../_components/site-navigation";
 
-export function DataHero({
+export function EducationHero({
   title,
   description,
   current,
+  status = "Tahun Ajaran 2026/2027",
+  subStatus = "Penyelenggaraan Pendidikan Aktif",
+  tags = ["Kurikulum Merdeka", "Inklusif & Berkarakter", "Terakreditasi"],
 }: {
   title: string;
   description: string;
   current: string;
+  status?: string;
+  subStatus?: string;
+  tags?: string[];
 }) {
   return (
-    <section className="service-hero service-hero-glass data-service-hero">
+    <section className="service-hero service-hero-glass education-service-hero">
       <div className="service-hero-grid" aria-hidden="true" />
       <div className="container service-hero-inner">
         <nav className="service-breadcrumbs" aria-label="Breadcrumb">
           <Link href="/">Beranda</Link><span>/</span>
-          <Link href="/data-statistik">Data &amp; Statistik</Link><span>/</span>
+          <Link href="/pendidikan">Pendidikan</Link><span>/</span>
           <strong>{current}</strong>
         </nav>
         <div className="service-hero-layout">
           <div className="service-hero-copy">
             <p className="service-overline">
-              <span /> Satu Data Pendidikan &amp; Kebudayaan
+              <span /> Pilar Pendidikan Kabupaten Konawe Selatan
             </p>
             <h1>{title}</h1>
             <p>{description}</p>
           </div>
-          <aside className="service-hero-aside" aria-label="Informasi Satu Data Dikbud">
+          <aside className="service-hero-aside" aria-label="Informasi pendidikan daerah">
             <div className="service-status">
               <span className="service-status-dot" />
               <div>
-                <small>Portal Satu Data</small>
-                <strong>Sinkronisasi Dapodik &amp; Dinas</strong>
+                <small>{status}</small>
+                <strong>{subStatus}</strong>
               </div>
             </div>
             <div className="service-hero-meta">
-              <span>Data terbuka</span>
-              <span>Terverifikasi</span>
-              <span>Pembaruan berkala</span>
+              {tags.map((tag) => (
+                <span key={tag}>{tag}</span>
+              ))}
             </div>
           </aside>
         </div>
@@ -48,21 +54,21 @@ export function DataHero({
 }
 
 const sectionNumbers: Record<string, string> = {
-  "data-education-statistics": "01",
-  "data-satisfaction-index": "02",
-  "data-announcements": "03",
+  "education-levels": "01",
+  "education-curriculum": "02",
+  "education-teachers": "03",
 };
 
-export function DataNavigation({ active }: { active: string }) {
+export function EducationNavigation({ active }: { active: string }) {
   const items =
-    navItems.find((item) => item.id === "nav-data")?.children ?? [];
+    navItems.find((item) => item.id === "nav-education")?.children ?? [];
 
   return (
     <div className="service-nav-wrap quick-glass-nav">
-      <nav className="container service-page-nav" aria-label="Navigasi Data dan Statistik">
+      <nav className="container service-page-nav" aria-label="Navigasi Pendidikan">
         <div className="service-nav-label">
           <small>Direktori</small>
-          <strong>Data &amp; Statistik</strong>
+          <strong>Pendidikan</strong>
         </div>
         {items.map((item, index) => (
           <Link
@@ -86,19 +92,19 @@ export function DataNavigation({ active }: { active: string }) {
   );
 }
 
-export function DataHelp() {
+export function EducationHelp() {
   return (
-    <section className="service-help data-help-box">
+    <section className="service-help edu-help-box">
       <div className="service-help-mark" aria-hidden="true">?</div>
       <div>
-        <p className="section-kicker">Layanan Satu Data Pendidikan</p>
-        <h2>Butuh permohonan data atau informasi statistik khusus?</h2>
+        <p className="section-kicker">Pusat Informasi &amp; Konsultasi Pendidikan</p>
+        <h2>Membutuhkan informasi teknis atau layanan kedinasan?</h2>
         <p>
-          Ajukan permohonan data agregat resmi untuk kebutuhan riset, kebijakan, atau kemitraan melalui layanan PPID dan persuratan dinas.
+          Tim Bidang Pembinaan PAUD, Dikdas, dan Ketenagaan Dikbud Konawe Selatan siap membantu pertanyaan seputar kurikulum, mutasi siswa, Dapodik, dan PPG.
         </p>
       </div>
       <Link className="service-help-action" href="/tentang-kami/kontak">
-        <span><small>Layanan resmi</small>Hubungi Tim Data</span><b aria-hidden="true">→</b>
+        <span><small>Layanan resmi</small>Hubungi Dikbud Konsel</span><b aria-hidden="true">→</b>
       </Link>
     </section>
   );

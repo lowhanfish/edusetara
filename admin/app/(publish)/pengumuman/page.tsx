@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AnnouncementsHero, AnnouncementsHelp } from "./_components/announcements-shell";
-import { AnnouncementsFeed } from "./_components/announcements-feed";
+import { AnnouncementsHero, AnnouncementsHelp } from "./components/announcements-shell";
+import { AnnouncementsFeed } from "./components/announcements-feed";
 import { announcementsData } from "./_data/announcements-data";
 
 export const metadata: Metadata = {

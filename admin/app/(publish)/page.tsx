@@ -1,13 +1,12 @@
-import { AudienceSection } from "./_components/home/audience-section";
-import { HeroSection } from "./_components/home/hero-section";
-import { HomeDashboard } from "./_components/home/home-dashboard";
-import { SiteFooter } from "./_components/home/site-footer";
-import { SiteHeader } from "./_components/home/site-header";
+import { SiteHeader, SiteFooter } from "./_components";
+import { AudienceSection } from "./components/audience-section";
+import { HeroSection } from "./components/hero-section";
+import { HomeDashboard } from "./components/home-dashboard";
 
 export default function Home() {
   return (
     <main>
-      <SiteHeader />
+      <SiteHeader activeSection="home" />
       <HeroSection />
       <div className="content-shell container">
         <AudienceSection />

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { NewsHero, NewsHelp } from "./_components/news-shell";
-import { NewsFeed } from "./_components/news-feed";
+import { NewsHero, NewsHelp } from "./components/news-shell";
+import { NewsFeed } from "./components/news-feed";
 import { getAllNews } from "./_data/news-data";
 
 export const metadata: Metadata = {

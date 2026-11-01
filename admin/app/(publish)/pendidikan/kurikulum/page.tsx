@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { EducationHero, EducationNavigation, EducationHelp } from "../_components/education-shell";
+import { EducationHero, EducationNavigation, EducationHelp } from "../components/education-shell";
 
 export const metadata: Metadata = {
   title: "Kurikulum & Pembelajaran",

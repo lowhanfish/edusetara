@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { navItems } from "../../_components/home/home-data";
+import { navItems } from "../../_components/site-navigation";
 
 const sectionNumbers: Record<string, string> = {
   "service-by-audience": "01",

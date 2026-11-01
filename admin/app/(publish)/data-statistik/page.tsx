@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DataHero, DataNavigation, DataHelp } from "./_components/data-shell";
+import { DataHero, DataNavigation, DataHelp } from "./components/data-shell";
 
 export const metadata: Metadata = {
   title: "Statistik Pendidikan",

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { AboutServiceHero, AboutServiceNavigation } from "../_components/about-shell";
+import { AboutServiceHero, AboutServiceNavigation } from "../components/about-shell";
 
 export const metadata: Metadata = {
   title: "Standar Pelayanan",

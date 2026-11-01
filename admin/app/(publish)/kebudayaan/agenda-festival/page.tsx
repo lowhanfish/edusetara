@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CultureHero, CultureNavigation, CultureHelp } from "../_components/culture-shell";
+import { CultureHero, CultureNavigation, CultureHelp } from "../components/culture-shell";
 
 export const metadata: Metadata = {
   title: "Agenda & Festival Budaya",

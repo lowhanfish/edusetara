@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { navItems } from "../../_components/home/home-data";
+import { navItems } from "../../_components/site-navigation";
 
-export function EducationHero({
+export function CultureHero({
   title,
   description,
   current,
-  status = "Tahun Ajaran 2026/2027",
-  subStatus = "Penyelenggaraan Pendidikan Aktif",
-  tags = ["Kurikulum Merdeka", "Inklusif & Berkarakter", "Terakreditasi"],
+  status = "Data Kebudayaan 2026",
+  subStatus = "18 Situs & 12 WBTb Terdata",
+  tags = ["Kearifan Lokal Tolaki", "Kalosara & Mosehe", "Warisan Budaya"],
 }: {
   title: string;
   description: string;
@@ -17,23 +17,23 @@ export function EducationHero({
   tags?: string[];
 }) {
   return (
-    <section className="service-hero service-hero-glass education-service-hero">
+    <section className="service-hero service-hero-glass culture-service-hero">
       <div className="service-hero-grid" aria-hidden="true" />
       <div className="container service-hero-inner">
         <nav className="service-breadcrumbs" aria-label="Breadcrumb">
           <Link href="/">Beranda</Link><span>/</span>
-          <Link href="/pendidikan">Pendidikan</Link><span>/</span>
+          <Link href="/kebudayaan">Kebudayaan</Link><span>/</span>
           <strong>{current}</strong>
         </nav>
         <div className="service-hero-layout">
           <div className="service-hero-copy">
             <p className="service-overline">
-              <span /> Pilar Pendidikan Kabupaten Konawe Selatan
+              <span /> Pelestarian Nilai Luhur Kebudayaan Konawe Selatan
             </p>
             <h1>{title}</h1>
             <p>{description}</p>
           </div>
-          <aside className="service-hero-aside" aria-label="Informasi pendidikan daerah">
+          <aside className="service-hero-aside" aria-label="Informasi kebudayaan daerah">
             <div className="service-status">
               <span className="service-status-dot" />
               <div>
@@ -54,21 +54,21 @@ export function EducationHero({
 }
 
 const sectionNumbers: Record<string, string> = {
-  "education-levels": "01",
-  "education-curriculum": "02",
-  "education-teachers": "03",
+  "culture-heritage": "01",
+  "culture-communities": "02",
+  "culture-agenda": "03",
 };
 
-export function EducationNavigation({ active }: { active: string }) {
+export function CultureNavigation({ active }: { active: string }) {
   const items =
-    navItems.find((item) => item.id === "nav-education")?.children ?? [];
+    navItems.find((item) => item.id === "nav-culture")?.children ?? [];
 
   return (
     <div className="service-nav-wrap quick-glass-nav">
-      <nav className="container service-page-nav" aria-label="Navigasi Pendidikan">
+      <nav className="container service-page-nav" aria-label="Navigasi Kebudayaan">
         <div className="service-nav-label">
           <small>Direktori</small>
-          <strong>Pendidikan</strong>
+          <strong>Kebudayaan</strong>
         </div>
         {items.map((item, index) => (
           <Link
@@ -92,19 +92,19 @@ export function EducationNavigation({ active }: { active: string }) {
   );
 }
 
-export function EducationHelp() {
+export function CultureHelp() {
   return (
-    <section className="service-help edu-help-box">
-      <div className="service-help-mark" aria-hidden="true">?</div>
+    <section className="service-help culture-help-box">
+      <div className="service-help-mark" aria-hidden="true">✦</div>
       <div>
-        <p className="section-kicker">Pusat Informasi &amp; Konsultasi Pendidikan</p>
-        <h2>Membutuhkan informasi teknis atau layanan kedinasan?</h2>
+        <p className="section-kicker">Pusat Pelestarian &amp; Fasilitasi Kebudayaan</p>
+        <h2>Ingin mendaftarkan cagar budaya, sanggar seni, atau berpartisipasi festival?</h2>
         <p>
-          Tim Bidang Pembinaan PAUD, Dikdas, dan Ketenagaan Dikbud Konawe Selatan siap membantu pertanyaan seputar kurikulum, mutasi siswa, Dapodik, dan PPG.
+          Tim Bidang Kebudayaan Dikbud Konawe Selatan siap mendampingi pendaftaran Nomor Induk Kesenian (NIK), fasilitasi sarana sanggar, pencatatan WBTb, dan kurasi pementasan seni daerah.
         </p>
       </div>
       <Link className="service-help-action" href="/tentang-kami/kontak">
-        <span><small>Layanan resmi</small>Hubungi Dikbud Konsel</span><b aria-hidden="true">→</b>
+        <span><small>Layanan resmi</small>Hubungi Bidang Kebudayaan</span><b aria-hidden="true">→</b>
       </Link>
     </section>
   );

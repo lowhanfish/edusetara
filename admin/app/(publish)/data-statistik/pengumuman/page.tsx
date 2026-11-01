@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DataHero, DataNavigation, DataHelp } from "../_components/data-shell";
-import { AnnouncementsFeed, type AnnouncementItem } from "./_components/announcements-feed";
+import { DataHero, DataNavigation, DataHelp } from "../components/data-shell";
+import { AnnouncementsFeed, type AnnouncementItem } from "./components/announcements-feed";
 
 export const metadata: Metadata = {
   title: "Pengumuman Resmi",

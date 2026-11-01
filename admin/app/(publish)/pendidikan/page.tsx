@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { EducationHero, EducationNavigation, EducationHelp } from "./_components/education-shell";
+import { EducationHero, EducationNavigation, EducationHelp } from "./components/education-shell";
 
 export const metadata: Metadata = {
   title: "Jenjang & Satuan Pendidikan",

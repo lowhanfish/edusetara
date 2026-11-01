@@ -1,6 +1,4 @@
-import { SiteFooter } from "../_components/home/site-footer";
-import { SiteHeader } from "../_components/home/site-header";
-
+import { SiteHeader, SiteFooter } from "../_components";
 export const metadata = {
   title: "Warta & Berita Pendidikan dan Kebudayaan - Kab. Konawe Selatan",
   description:

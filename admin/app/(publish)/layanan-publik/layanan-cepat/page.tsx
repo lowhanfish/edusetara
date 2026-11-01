@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ServiceHero, ServiceNavigation, ServiceHelp } from "../_components/service-shell";
+import { ServiceHero, ServiceNavigation, ServiceHelp } from "../components/service-shell";
 
 export const metadata: Metadata = {
   title: "Layanan Cepat",

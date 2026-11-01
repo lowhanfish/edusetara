@@ -3,8 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { NewsHero, NewsHelp } from "../_components/news-shell";
-import { ShareButton } from "../_components/share-button";
+import { NewsHero, NewsHelp } from "../components/news-shell";
+import { ShareButton } from "@/app/(publish)/_components";
 import { getNewsBySlug, getRelatedNews, newsArticles } from "../_data/news-data";
 
 interface PageProps {

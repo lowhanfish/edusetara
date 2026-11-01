@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ServiceHero, ServiceNavigation, ServiceHelp } from "../_components/service-shell";
-import { SchoolDirectory } from "./_components/school-directory";
+import { ServiceHero, ServiceNavigation, ServiceHelp } from "../components/service-shell";
+import { SchoolDirectory } from "./components/school-directory";
 import schoolsData from "./schools.json";
 
 export const metadata: Metadata = {

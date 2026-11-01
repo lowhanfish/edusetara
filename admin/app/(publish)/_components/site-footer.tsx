@@ -1,11 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-
 import {
   footerQuickLinks,
   footerServices,
   type FooterLink,
-} from "./home-data";
+} from "./site-navigation";
 
 export function SiteFooter() {
   return (
@@ -36,10 +35,10 @@ export function SiteFooter() {
         <div className="social">
           <h4>Ikuti Kami</h4>
           <div>
-            <a href="#">f</a>
-            <a href="#">◎</a>
-            <a href="#">▶</a>
-            <a href="#">♪</a>
+            <a href="#" aria-label="Facebook">f</a>
+            <a href="#" aria-label="Instagram">◎</a>
+            <a href="#" aria-label="YouTube">▶</a>
+            <a href="#" aria-label="TikTok">♪</a>
           </div>
           <strong>
             Konawe Selatan
@@ -53,13 +52,19 @@ export function SiteFooter() {
           © 2026 Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan. All
           rights reserved.
         </span>
-        <span>Kebijakan Privasi　|　Syarat & Ketentuan　|　Peta Situs</span>
+        <span>Kebijakan Privasi　|　Syarat &amp; Ketentuan　|　Peta Situs</span>
       </div>
     </footer>
   );
 }
 
-function FooterLinkGroup({ title, links }: { title: string; links: FooterLink[] }) {
+function FooterLinkGroup({
+  title,
+  links,
+}: {
+  title: string;
+  links: FooterLink[];
+}) {
   return (
     <div>
       <h4>{title}</h4>
