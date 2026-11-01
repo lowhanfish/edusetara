@@ -10,7 +10,7 @@ from app.global_schemas.operational.base_schema import (
 class GtkRegulasiBase(OperationalBase):
     judul: str
     deskripsi: str | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     file: str | None = None
     file_type: str | None = None
 
@@ -24,7 +24,7 @@ class GtkRegulasiUpdate(BaseModel):
     unit_kerja: str | None = None
     judul: str | None = None
     deskripsi: str | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     file: str | None = None
     file_type: str | None = None
 
@@ -32,7 +32,7 @@ class GtkRegulasiUpdate(BaseModel):
 class GtkRegulasiResponse(OperationalResponse):
     judul: str
     deskripsi: str | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     file: str | None = None
     file_type: str | None = None
 

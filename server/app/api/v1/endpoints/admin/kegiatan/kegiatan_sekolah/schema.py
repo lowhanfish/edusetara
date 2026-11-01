@@ -11,7 +11,7 @@ class KegiatanSekolahBase(OperationalBase):
     judul: str
     deskripsi: str | None = None
     tanggal: str | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     file: str | None = None
     link: str | None = None
 
@@ -26,7 +26,7 @@ class KegiatanSekolahUpdate(BaseModel):
     judul: str | None = None
     deskripsi: str | None = None
     tanggal: str | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     file: str | None = None
     link: str | None = None
 
@@ -35,7 +35,7 @@ class KegiatanSekolahResponse(OperationalResponse):
     judul: str
     deskripsi: str | None = None
     tanggal: str | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     file: str | None = None
     link: str | None = None
 

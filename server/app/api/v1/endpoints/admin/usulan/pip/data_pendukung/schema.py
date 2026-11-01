@@ -12,7 +12,7 @@ class PipPendukungBase(OperationalBase):
     uraian: str
     jenjang_id: str | None = None
     nominal: Decimal | float | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     file: str | None = None
 
 
@@ -26,7 +26,7 @@ class PipPendukungUpdate(BaseModel):
     uraian: str | None = None
     jenjang_id: str | None = None
     nominal: Decimal | float | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     file: str | None = None
 
 
@@ -34,7 +34,7 @@ class PipPendukungResponse(OperationalResponse):
     uraian: str
     jenjang_id: str | None = None
     nominal: Decimal | float | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     file: str | None = None
 
 

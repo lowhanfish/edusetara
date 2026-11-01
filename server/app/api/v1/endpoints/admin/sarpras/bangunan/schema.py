@@ -11,7 +11,7 @@ class BangunanBase(OperationalBase):
     nama: str
     luas: str | None = None
     kepemilikan_id: str | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     persentase: int | None = 0
     kondisi_id: str | None = None
     jns_bantuan_id: str | None = None
@@ -26,7 +26,7 @@ class BangunanUpdate(BaseModel):
     nama: str | None = None
     luas: str | None = None
     kepemilikan_id: str | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     persentase: int | None = None
     kondisi_id: str | None = None
     jns_bantuan_id: str | None = None
@@ -37,7 +37,7 @@ class BangunanResponse(OperationalResponse):
     nama: str
     luas: str | None = None
     kepemilikan_id: str | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     persentase: int | None = 0
     kondisi_id: str | None = None
     jns_bantuan_id: str | None = None

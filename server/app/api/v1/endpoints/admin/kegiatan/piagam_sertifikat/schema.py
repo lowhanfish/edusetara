@@ -10,7 +10,7 @@ from app.global_schemas.operational.base_schema import (
 class PiagamSertifikatBase(OperationalBase):
     kegiatan: str
     penyelenggara: str | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     tempat_pelaksana: str | None = None
     sebagai: str | None = None
     file: str | None = None
@@ -25,7 +25,7 @@ class PiagamSertifikatUpdate(BaseModel):
     unit_kerja: str | None = None
     kegiatan: str | None = None
     penyelenggara: str | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     tempat_pelaksana: str | None = None
     sebagai: str | None = None
     file: str | None = None
@@ -34,7 +34,7 @@ class PiagamSertifikatUpdate(BaseModel):
 class PiagamSertifikatResponse(OperationalResponse):
     kegiatan: str
     penyelenggara: str | None = None
-    tahun: str | None = None
+    tahun: int | str | None = None
     tempat_pelaksana: str | None = None
     sebagai: str | None = None
     file: str | None = None
