@@ -106,7 +106,7 @@ export default function FormRegistrasiModal({
           >
             Batal
           </Button>
-          <Button type="submit" variant="primary" disabled={isLoading}>
+          <Button type="submit" variant="gold" disabled={isLoading}>
             {isLoading ? "Menyimpan..." : "Simpan Hak Akses"}
           </Button>
         </div>

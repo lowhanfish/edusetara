@@ -225,7 +225,7 @@ export default function MasterAuthGroupPage() {
       );
       if (res.ok) {
         const json = await res.json();
-        const permList: PermissionRule[] = json?.data?.permissions || [];
+        const permList: PermissionRule[] = (json as any)?.data?.permissions || [];
         const pMap: PermissionMap = {};
         for (const p of permList) {
           pMap[p.menu_id] = {

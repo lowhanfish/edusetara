@@ -1,28 +1,26 @@
-export interface JurnalKepalaSekolahRecord {
-  id: string;
-  sekolah: string;
-  uraian: string;
-  target: string;
-  hasil: string;
-  keterlibatan: string;
-  tgl: string;
-  keterangan: string;
-  file: string;
-  status: "Terealisasi" | "Dalam Proses" | "Evaluasi";
-  created_at?: string;
-  created_by?: string;
+export interface CreateInterface {
+  sekolah: string | null;
+  nama_kegiatan: string | null;
+  sasaran?: string | null;
+  tujuan: string | null;
+  keterlibatan?: string | null;
+  hasil?: string | null;
+  tindak_lanjut?: string | null;
+  status: string | null;
 }
 
-export const KETERLIBATAN_OPTIONS = [
-  "Dewan Guru & Tenaga Kependidikan",
-  "Komite Sekolah & Orang Tua Murid",
-  "Pengawas Pembina Dikbud Konsel",
-  "Dinas Pendidikan & Kebudayaan Konsel",
-  "Masyarakat & Tokoh Adat Setempat",
-];
+export interface ResponseInterface extends CreateInterface {
+  id: string;
+  created_by?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
 
-export const STATUS_KEPSEK_OPTIONS: JurnalKepalaSekolahRecord["status"][] = [
-  "Terealisasi",
-  "Dalam Proses",
-  "Evaluasi",
-];
+export interface ResponseListInterface {
+  skip: number;
+  limit: number;
+  total: number;
+  data: ResponseInterface[];
+}
+
+export type JurnalKepalaSekolahRecord = ResponseInterface;

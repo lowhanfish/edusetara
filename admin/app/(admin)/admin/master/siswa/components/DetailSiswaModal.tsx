@@ -56,7 +56,7 @@ export default function DetailSiswaModal({
               <Badge variant="gold">
                 {record.kelas_uraian || record.kelas_id || "Kelas Terdaftar"}
               </Badge>
-              <Badge variant="outline" className="bg-white">
+              <Badge variant="neutral" className="bg-white">
                 {record.jns_kelamin}
               </Badge>
             </div>

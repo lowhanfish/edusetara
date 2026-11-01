@@ -187,7 +187,7 @@ export default function FormMenuModal({
           >
             Batal
           </Button>
-          <Button type="submit" variant="primary" disabled={isLoading}>
+          <Button type="submit" variant="gold" disabled={isLoading}>
             {isLoading ? "Menyimpan..." : initialData ? "Simpan Perubahan" : "Tambah Menu"}
           </Button>
         </div>

@@ -1,20 +1,414 @@
-import { ContractCrudPage } from "../../../_components/contract-crud-page";
+"use client";
 
-export const metadata = {
-  title: "Tanah Sekolah",
-  description: "Manajemen Tanah Sekolah Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan",
-};
+import React, { useEffect, useMemo, useState } from "react";
+import Swal from "sweetalert2";
+import {
+  Button,
+  Card,
+  Input,
+  PageHeader,
+  Pagination,
+} from "@/app/(admin)/_components/ui";
 
-export default function TanahSekolahPage() {
+import { ResponseInterface, SarprasTanahRecord } from "./types";
+import FormSarprasTanahModal from "./components/FormSarprasTanahModal";
+import DetailSarprasTanahModal from "./components/DetailSarprasTanahModal";
+import {
+  useResponseListMaster,
+  useDeleteMaster,
+  useCreateMaster,
+  useUpdateMaster,
+} from "./hooks/crud";
+import { listindex } from "@/utilities/pagination";
+
+export default function SarprasTanahPage() {
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 400);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  const { List, isLoading, isError, error, refetch } = useResponseListMaster(
+    page,
+    pageSize,
+    debouncedSearch
+  );
+  const deleteMutation = useDeleteMaster();
+  const createMutation = useCreateMaster();
+  const updateMutation = useUpdateMaster();
+
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<SarprasTanahRecord | null>(null);
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
+
+  const initialForm: Partial<ResponseInterface> = {
+    sekolah: "",
+    jenis: "",
+    luas: null,
+    luas_lahan_tersedia: null,
+    kepemilikan: "",
+    bukti_kepemilikan: "",
+    nomor_sertifikat: "",
+    alamat: "",
+  };
+
+  const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
+
+  const emptyForm = () => {
+    setFormData(initialForm);
+  };
+
+  const rawList: SarprasTanahRecord[] = useMemo(() => {
+    if (!List?.data || !Array.isArray(List.data)) return [];
+    return List.data;
+  }, [List]);
+
+  const totalItems = List?.total ?? rawList.length;
+
+  const handleOpenAdd = () => {
+    setFormMode("add");
+    emptyForm();
+    setIsFormOpen(true);
+  };
+
+  const handleOpenEdit = (record: SarprasTanahRecord) => {
+    setFormMode("edit");
+    setFormData({
+      id: record.id,
+      sekolah: (record as any).sekolah ?? "",
+      jenis: (record as any).jenis ?? "",
+      luas: (record as any).luas ?? "",
+      luas_lahan_tersedia: (record as any).luas_lahan_tersedia ?? "",
+      kepemilikan: (record as any).kepemilikan ?? "",
+      bukti_kepemilikan: (record as any).bukti_kepemilikan ?? "",
+      nomor_sertifikat: (record as any).nomor_sertifikat ?? "",
+      alamat: (record as any).alamat ?? "",
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleOpenDetail = (record: SarprasTanahRecord) => {
+    setSelectedRecord(record);
+    setIsDetailOpen(true);
+  };
+
+  const handleDelete = (record: SarprasTanahRecord) => {
+    const displayName =
+      (record as any).judul ||
+      (record as any).title ||
+      (record as any).nama ||
+      (record as any).sekolah ||
+      (record as any).nama_kombel ||
+      (record as any).kegiatan ||
+      (record as any).indikator ||
+      (record as any).isi ||
+      "data ini";
+
+    Swal.fire({
+      title: "Hapus Tanah Sekolah?",
+      text: `Apakah Anda yakin ingin menghapus "${displayName}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#c2410c",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Ya, Hapus Data",
+      cancelButtonText: "Batal",
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteMutation.mutate(record.id);
+      }
+    });
+  };
+
+  const handleSubmitForm = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload: Partial<ResponseInterface> = { ...formData };
+
+    if (formMode === "add") {
+      createMutation.mutate(payload, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          emptyForm();
+        },
+      });
+    } else {
+      if (!formData.id) return;
+      updateMutation.mutate(
+        { body: payload, id: formData.id },
+        {
+          onSuccess: () => {
+            setIsFormOpen(false);
+            emptyForm();
+          },
+        }
+      );
+    }
+  };
+
   return (
-    <ContractCrudPage
-      title="Tanah Sekolah"
-      category="Sarana dan Prasarana"
-      description="Data bidang tanah yang dimiliki atau dikuasai satuan pendidikan beserta luas dan dokumen bukti kepemilikan."
-      fields={[
-        {name:"title",label:"Luas Tanah (m²)",type:"number"},
-        {name:"file",label:"Berkas Bukti Kepemilikan (Sertifikat)",type:"file",accept:".pdf,image/*",placeholder:"Unggah berkas sertifikat/akta hibah"},
-      ]}
-    />
+    <div className="space-y-6">
+      <PageHeader
+        title="Tanah Sekolah"
+        description="Pangkalan data kepemilikan dan legalitas lahan tanah seluruh satuan pendidikan."
+        action={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="hidden sm:inline-flex"
+            >
+              🔄 Refresh
+            </Button>
+            <Button variant="gold" size="sm" onClick={handleOpenAdd}>
+              + Tambah Tanah Sekolah
+            </Button>
+          </div>
+        }
+      />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Total Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{totalItems}</h4>
+              <p className="text-[11px] text-emerald-700 mt-0.5">Operasional Terdaftar</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              🗺️
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
+              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">Sarana dan Prasarana</h4>
+              <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              📁
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Status API</p>
+              <h4 className="text-2xl font-bold text-emerald-700 mt-1">Terhubung</h4>
+              <p className="text-[11px] text-emerald-600 mt-0.5">FastAPI & MySQL</p>
+            </div>
+            <span className="text-3xl p-3 bg-emerald-50 rounded-2xl border border-emerald-200/50">
+              ⚡
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Standar Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Modular</h4>
+              <p className="text-[11px] text-blue-700 mt-0.5">master pattern</p>
+            </div>
+            <span className="text-3xl p-3 bg-blue-50 rounded-2xl border border-blue-200/50">
+              📋
+            </span>
+          </div>
+        </Card>
+      </div>
+
+      <Card className="rounded-2xl border-white/80 bg-white/70 overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-[#e2d9c8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex-1 max-w-sm">
+            <Input
+              type="text"
+              placeholder="Cari data tanah sekolah..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full text-xs"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#7d7152]">Tampilkan:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              aria-label="Jumlah data per halaman"
+              className="text-xs bg-white border border-[#d5cbba] rounded-lg px-2 py-1.5 text-[#2d2410] focus:outline-none focus:ring-1 focus:ring-amber-500"
+            >
+              <option value={5}>5 baris</option>
+              <option value={10}>10 baris</option>
+              <option value={20}>20 baris</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
+                <th className="py-3 px-4 w-12 text-center">No</th>
+                <th className="py-3 px-4">Satuan Pendidikan</th>
+                <th className="py-3 px-4">Jenis Lahan</th>
+                <th className="py-3 px-4">Luas (m²)</th>
+                <th className="py-3 px-4">Status Hak</th>
+                <th className="py-3 px-4">No. Sertifikat</th>
+                <th className="py-3 px-4 w-28 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#ece5d8]">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-[#7d7152]">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                      <span>Memuat data dari server...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : isError ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-rose-700">
+                    <p className="font-semibold">Gagal memuat data tanah sekolah</p>
+                    <p className="text-[11px] mt-1 text-[#7d7152]">
+                      {error?.message || "Terjadi kesalahan koneksi ke server."}
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      onClick={() => refetch()}
+                    >
+                      Coba Lagi
+                    </Button>
+                  </td>
+                </tr>
+              ) : rawList.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-[#7d7152]">
+                    <span className="text-3xl block mb-2">🗺️</span>
+                    <p className="font-semibold text-sm text-[#2d2410]">
+                      Belum ada data Tanah Sekolah
+                    </p>
+                    <p className="text-xs text-[#9c8e6b] mt-0.5">
+                      {debouncedSearch
+                        ? `Tidak ada data yang cocok dengan "${debouncedSearch}"`
+                        : "Klik tombol '+ Tambah Tanah Sekolah' untuk menambahkan data baru."}
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                rawList.map((item, index) => {
+                  const no = listindex(pageSize, page, index);
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-amber-50/40 transition-colors duration-150"
+                    >
+                      <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
+                        {no}
+                      </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).sekolah ?? "-")}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).jenis ?? "-")}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).luas ?? "-")}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).kepemilikan ?? "-")}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).nomor_sertifikat ?? "-")}
+                    </td>
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(item)}
+                            title="Detail Lembar Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-[#7d7152] hover:text-[#2d2410] transition-colors"
+                          >
+                            👁️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(item)}
+                            title="Edit Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-amber-700 hover:text-amber-900 transition-colors"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(item)}
+                            title="Hapus Data"
+                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 transition-colors"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="p-4 border-t border-[#e2d9c8] bg-white/40">
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={totalItems}
+            onPageChange={(p) => setPage(p)}
+            onPageSizeChange={(s) => setPageSize(s)}
+          />
+        </div>
+      </Card>
+
+      <FormSarprasTanahModal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        formMode={formMode}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmitForm}
+        isLoading={createMutation.isPending || updateMutation.isPending}
+      />
+
+      <DetailSarprasTanahModal
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        record={selectedRecord}
+      />
+    </div>
   );
 }

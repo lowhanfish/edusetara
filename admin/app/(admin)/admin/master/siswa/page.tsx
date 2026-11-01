@@ -192,11 +192,6 @@ export default function MasterSiswaPage() {
     <div className="space-y-6">
       <PageHeader
         title="Master Peserta Didik (Siswa)"
-        breadcrumbs={[
-          { label: "Dashboard", href: "/admin" },
-          { label: "Data Master", href: "/admin/master" },
-          { label: "Master Siswa" },
-        ]}
         description="Pangkalan data profil peserta didik dari berbagai satuan pendidikan naungan Dinas Pendidikan dan Kebudayaan Kabupaten Konawe Selatan."
         action={
           <div className="flex items-center gap-2">
@@ -379,7 +374,7 @@ export default function MasterSiswaPage() {
                         <div className="font-medium text-[#2d2410]">
                           {item.unit_kerja || "Satdik Konawe Selatan"}
                         </div>
-                        <Badge variant="outline" className="text-[10px] mt-1 bg-amber-50 border-amber-200">
+                        <Badge variant="neutral" className="text-[10px] mt-1 bg-amber-50 border-amber-200">
                           {item.kelas_uraian || item.kelas_id || "Kelas Terdaftar"}
                         </Badge>
                       </td>
@@ -449,11 +444,7 @@ export default function MasterSiswaPage() {
           </span>
 
           {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={(p) => setPage(p)}
-            />
+            <Pagination page={page} pageSize={pageSize} total={totalItems} onPageChange={(p) => setPage(p)} onPageSizeChange={(s) => setPageSize(s)} />
           )}
         </div>
       </Card>

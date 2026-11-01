@@ -154,7 +154,6 @@ export default function MasterTransportasiPage() {
     <div className="space-y-6">
       <PageHeader
         title="Master Mode Transportasi"
-        breadcrumbs={[{"label": "Dashboard", "href": "/admin"}, {"label": "Data Master", "href": "/admin/master"}, {"label": "Master PPDB", "href": "/admin/master/ppdb"}, {"label": "Mode Transportasi"}]}
         description="Pengelolaan pilihan sarana moda transportasi yang digunakan siswa untuk mobilitas berangkat dan pulang sekolah."
         action={
           <div className="flex items-center gap-2">
@@ -394,11 +393,7 @@ export default function MasterTransportasiPage() {
           </span>
 
           {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={(p) => setPage(p)}
-            />
+            <Pagination page={page} pageSize={pageSize} total={totalItems} onPageChange={(p) => setPage(p)} onPageSizeChange={(s) => setPageSize(s)} />
           )}
         </div>
       </Card>

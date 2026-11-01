@@ -21,7 +21,7 @@ export const useKelasOption = () => {
   if (data && Array.isArray(data)) {
     result = data.map((item) => ({
       id: item.id,
-      value: item.title || item.uraian || item.id,
+      value: item.title || item.uraian || item.id || "",
     }));
   }
 
@@ -42,7 +42,7 @@ export const useAgamaOption = () => {
   if (data && Array.isArray(data)) {
     result = data.map((item) => ({
       id: item.id,
-      value: item.title || item.uraian || item.id,
+      value: item.title || item.uraian || item.id || "",
     }));
   }
 

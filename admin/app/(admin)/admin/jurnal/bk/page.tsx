@@ -1,508 +1,374 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import React, { useEffect, useMemo, useState } from "react";
+import Swal from "sweetalert2";
 import {
-  Badge,
   Button,
   Card,
   Input,
   PageHeader,
   Pagination,
-  Select,
-} from "../../../_components/ui";
+} from "@/app/(admin)/_components/ui";
 
+import { ResponseInterface, JurnalBkRecord } from "./types";
+import FormJurnalBkModal from "./components/FormJurnalBkModal";
+import DetailJurnalBkModal from "./components/DetailJurnalBkModal";
 import {
-  BIDANG_LAYANAN_BK,
-  JurnalBKRecord,
-  KELAS_BK_OPTIONS,
-  MODEL_KEGIATAN_BK,
-  STATUS_BK_OPTIONS,
-} from "./types";
-import { DUMMY_JURNAL_BK } from "./data";
-import FormBKModal from "./components/FormBKModal";
-import DetailBKModal from "./components/DetailBKModal";
-import { fetchData } from "@/lib/api_secure";
-import { useUrlStore } from "@/store/useUrlStore";
-import { showLoadingAlert, swallAlert } from "@/lib/show_swall";
+  useResponseListMaster,
+  useDeleteMaster,
+  useCreateMaster,
+  useUpdateMaster,
+} from "./hooks/crud";
+import { listindex } from "@/utilities/pagination";
 
-export default function JurnalBKPage() {
-  const baseUrl = useUrlStore((state) => state.URL.APP);
-  // State Sumber Data
-  const [data, setData] = useState<JurnalBKRecord[]>(DUMMY_JURNAL_BK);
+export default function JurnalBkPage() {
   const [search, setSearch] = useState("");
-  const [bidangFilter, setBidangFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [isLoading, setIsLoading] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // Load from Backend API
-  const loadJurnal = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetchData<{ total: number; data: any[] }>(
-        `${baseUrl}/api/v1/admin/jurnal/bk/read?limit=100`
-      );
-      if (res && Array.isArray(res.data) && res.data.length > 0) {
-        const mapped: JurnalBKRecord[] = res.data.map((item) => ({
-          id: item.id,
-          nm_siswa: item.nm_siswa,
-          kelas_id: item.kelas_id || KELAS_BK_OPTIONS[0],
-          tgl: item.tgl || (item.created_at ? String(item.created_at).slice(0, 10) : "2026-10-22"),
-          materi_layanan: item.materi_layanan || "",
-          permasalahan: item.permasalahan || "",
-          bidang_layanan: item.bidang_layanan || BIDANG_LAYANAN_BK[0],
-          mdl_kegiatan_id: item.mdl_kegiatan_id || MODEL_KEGIATAN_BK[0],
-          jns_layanan_id: item.jns_layanan_id || "",
-          hasil: item.hasil || "",
-          rnc_tindak_lanjut: item.rnc_tindak_lanjut || "",
-          keterangan: item.keterangan || "",
-          file: item.file || "",
-          status: item.status || STATUS_BK_OPTIONS[0],
-          created_at: item.created_at,
-          created_by: item.created_by || "Nurul Hidayati, S.Pd.",
-        }));
-        setData(mapped);
-      }
-    } catch (e) {
-      console.warn("[JurnalBK] Fallback to local data:", e);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [baseUrl]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    loadJurnal();
-  }, [loadJurnal]);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 400);
 
-  // State Paginasi
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
 
-  // Modal State
+  const { List, isLoading, isError, error, refetch } = useResponseListMaster(
+    page,
+    pageSize,
+    debouncedSearch
+  );
+  const deleteMutation = useDeleteMaster();
+  const createMutation = useCreateMaster();
+  const updateMutation = useUpdateMaster();
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<JurnalBKRecord | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<JurnalBkRecord | null>(null);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
 
-  // Form State
-  const [formData, setFormData] = useState<Partial<JurnalBKRecord>>({
-    nm_siswa: "",
-    kelas_id: KELAS_BK_OPTIONS[0],
-    tgl: new Date().toISOString().split("T")[0],
-    materi_layanan: "",
+  const initialForm: Partial<ResponseInterface> = {
+    sekolah: "",
+    jenis_layanan: "",
+    bidang_bimbingan: "",
+    sasaran_siswa: "",
     permasalahan: "",
-    mdl_kegiatan_id: MODEL_KEGIATAN_BK[0],
-    jns_layanan_id: BIDANG_LAYANAN_BK[0],
-    hasil: "",
-    rnc_tindak_lanjut: "",
-    keterangan: "",
-    file: "",
-    status: STATUS_BK_OPTIONS[0],
-  });
+    layanan_diberikan: "",
+    evaluasi: "",
+    tindak_lanjut: "",
+  };
 
-  // Filter Data
-  const filteredData = useMemo(() => {
-    return data.filter((item) => {
-      const q = search.toLowerCase();
-      const matchSearch =
-        item.nm_siswa.toLowerCase().includes(q) ||
-        item.kelas_id.toLowerCase().includes(q) ||
-        item.materi_layanan.toLowerCase().includes(q) ||
-        item.permasalahan.toLowerCase().includes(q) ||
-        item.jns_layanan_id.toLowerCase().includes(q);
+  const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
 
-      const matchBidang = bidangFilter === "all" || item.jns_layanan_id === bidangFilter;
-      const matchStatus = statusFilter === "all" || item.status === statusFilter;
+  const emptyForm = () => {
+    setFormData(initialForm);
+  };
 
-      return matchSearch && matchBidang && matchStatus;
-    });
-  }, [data, search, bidangFilter, statusFilter]);
+  const rawList: JurnalBkRecord[] = useMemo(() => {
+    if (!List?.data || !Array.isArray(List.data)) return [];
+    return List.data;
+  }, [List]);
 
-  // Paginasi Data
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredData.slice(start, start + pageSize);
-  }, [filteredData, page, pageSize]);
+  const totalItems = List?.total ?? rawList.length;
 
-  // Statistik Metrik
-  const stats = useMemo(() => {
-    const total = data.length;
-    const selesai = data.filter((d) => d.status === "Selesai / Teratasi").length;
-    const pemantauan = data.filter((d) => d.status === "Dalam Pemantauan").length;
-    const alihTangan = data.filter((d) => d.status === "Alih Tangan Kasus").length;
-    return { total, selesai, pemantauan, alihTangan };
-  }, [data]);
-
-  // Handler Modal
-  const openAddModal = () => {
+  const handleOpenAdd = () => {
     setFormMode("add");
+    emptyForm();
+    setIsFormOpen(true);
+  };
+
+  const handleOpenEdit = (record: JurnalBkRecord) => {
+    setFormMode("edit");
     setFormData({
-      nm_siswa: "",
-      kelas_id: KELAS_BK_OPTIONS[0],
-      tgl: new Date().toISOString().split("T")[0],
-      materi_layanan: "",
-      permasalahan: "",
-      mdl_kegiatan_id: MODEL_KEGIATAN_BK[0],
-      jns_layanan_id: BIDANG_LAYANAN_BK[0],
-      hasil: "",
-      rnc_tindak_lanjut: "",
-      keterangan: "",
-      file: "",
-      status: "Selesai / Teratasi",
+      id: record.id,
+      sekolah: (record as any).sekolah ?? "",
+      jenis_layanan: (record as any).jenis_layanan ?? "",
+      bidang_bimbingan: (record as any).bidang_bimbingan ?? "",
+      sasaran_siswa: (record as any).sasaran_siswa ?? "",
+      permasalahan: (record as any).permasalahan ?? "",
+      layanan_diberikan: (record as any).layanan_diberikan ?? "",
+      evaluasi: (record as any).evaluasi ?? "",
+      tindak_lanjut: (record as any).tindak_lanjut ?? "",
     });
     setIsFormOpen(true);
   };
 
-  const openEditModal = (item: JurnalBKRecord) => {
-    setFormMode("edit");
-    setSelectedRecord(item);
-    setFormData({ ...item });
-    setIsFormOpen(true);
-  };
-
-  const openDetailModal = (item: JurnalBKRecord) => {
-    setSelectedRecord(item);
+  const handleOpenDetail = (record: JurnalBkRecord) => {
+    setSelectedRecord(record);
     setIsDetailOpen(true);
   };
 
-  const handleDelete = async (id: string, siswa: string) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus data catatan konseling "${siswa}"?`)) {
-      showLoadingAlert("Menghapus data konseling...");
-      try {
-        await fetchData(`${baseUrl}/api/v1/admin/jurnal/bk/delete/${id}`, {
-          method: "DELETE",
-        });
-        swallAlert("sukses dihapus", "success");
-        await loadJurnal();
-      } catch (err) {
-        setData((prev) => prev.filter((item) => item.id !== id));
-        swallAlert("sukses dihapus", "success");
+  const handleDelete = (record: JurnalBkRecord) => {
+    const displayName =
+      (record as any).judul ||
+      (record as any).title ||
+      (record as any).nama ||
+      (record as any).sekolah ||
+      (record as any).nama_kombel ||
+      (record as any).kegiatan ||
+      (record as any).indikator ||
+      (record as any).isi ||
+      "data ini";
+
+    Swal.fire({
+      title: "Hapus Jurnal BK (Bimbingan Konseling)?",
+      text: `Apakah Anda yakin ingin menghapus "${displayName}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#c2410c",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Ya, Hapus Data",
+      cancelButtonText: "Batal",
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteMutation.mutate(record.id);
       }
-    }
+    });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.nm_siswa || !formData.materi_layanan || !formData.permasalahan) {
-      alert("Silakan lengkapi Nama Siswa, Topik Materi, dan Gejala Masalah!");
-      return;
-    }
 
-    showLoadingAlert(formMode === "add" ? "Menambahkan data konseling..." : "Menyimpan perubahan...");
+    const payload: Partial<ResponseInterface> = { ...formData };
 
-    try {
-      if (formMode === "add") {
-        await fetchData(`${baseUrl}/api/v1/admin/jurnal/bk/create`, {
-          method: "POST",
-          body: JSON.stringify(formData),
-        });
-        swallAlert("sukses ditambahkan", "success");
-      } else if (formMode === "edit" && selectedRecord) {
-        await fetchData(`${baseUrl}/api/v1/admin/jurnal/bk/update/${selectedRecord.id}`, {
-          method: "PUT",
-          body: JSON.stringify(formData),
-        });
-        swallAlert("sukses diperbarui", "success");
-      }
-      setIsFormOpen(false);
-      await loadJurnal();
-    } catch (err) {
-      console.warn("Backend error, updating local state:", err);
-      if (formMode === "add") {
-        const newRecord: JurnalBKRecord = {
-          ...(formData as JurnalBKRecord),
-          id: `JBK-${new Date().getFullYear()}-${String(data.length + 1).padStart(3, "0")}`,
-          created_at: new Date().toISOString(),
-          created_by: "Nurul Hidayati, S.Pd. (Guru BK Konsel)",
-        };
-        setData([newRecord, ...data]);
-      } else if (formMode === "edit" && selectedRecord) {
-        setData((prev) =>
-          prev.map((item) =>
-            item.id === selectedRecord.id ? { ...item, ...(formData as JurnalBKRecord) } : item
-          )
-        );
-      }
-      setIsFormOpen(false);
-      swallAlert("Tersimpan lokal", "info");
+    if (formMode === "add") {
+      createMutation.mutate(payload, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          emptyForm();
+        },
+      });
+    } else {
+      if (!formData.id) return;
+      updateMutation.mutate(
+        { body: payload, id: formData.id },
+        {
+          onSuccess: () => {
+            setIsFormOpen(false);
+            emptyForm();
+          },
+        }
+      );
     }
   };
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* 1. Breadcrumbs Navigasi */}
-      <nav className="flex items-center gap-1.5 text-xs text-[#7d7152] font-medium">
-        <Link href="/admin" className="hover:text-[#2d2410] transition-colors">
-          Dashboard
-        </Link>
-        <span>/</span>
-        <span className="text-[#a89b7b]">Jurnal V2</span>
-        <span>/</span>
-        <span className="text-[#2d2410] font-semibold">Jurnal BK</span>
-      </nav>
-
-      {/* 2. PageHeader Standar Admin */}
+    <div className="space-y-6">
       <PageHeader
-        title="Jurnal Bimbingan Konseling (BK)"
-        description="Dokumentasi layanan bimbingan konseling pribadi, sosial, belajar, dan karir untuk mendukung perkembangan psikologis dan prestasi siswa."
-        badge={<Badge variant="gold">Jurnal V2</Badge>}
+        title="Jurnal BK (Bimbingan Konseling)"
+        description="Dokumentasi konseling individual, bimbingan kelompok, dan layanan konseling sekolah."
         action={
-          <Button variant="gold" onClick={openAddModal}>
-            + Tambah Catatan BK
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="hidden sm:inline-flex"
+            >
+              🔄 Refresh
+            </Button>
+            <Button variant="gold" size="sm" onClick={handleOpenAdd}>
+              + Tambah Jurnal BK (Bimbingan Konseling)
+            </Button>
+          </div>
         }
       />
 
-      {/* 3. 4 Kartu Metrik Ringkasan (Glassmorphism) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
-          <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Total Kasus & Sesi</p>
-            <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{stats.total} Sesi</h4>
-            <span className="text-[11px] text-[#7d7152]">Semester Berjalan</span>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-[#2d2410] flex items-center justify-center text-xl font-bold shadow-2xs">
-            🗣️
-          </div>
-        </Card>
-
-        <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
-          <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Kasus Selesai</p>
-            <h4 className="text-2xl font-bold text-emerald-700 mt-1">{stats.selesai} Kasus</h4>
-            <span className="text-[11px] text-emerald-700 font-semibold">Solusi & Komitmen Damai</span>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-emerald-700 flex items-center justify-center text-xl font-bold shadow-2xs">
-            ✨
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Total Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{totalItems}</h4>
+              <p className="text-[11px] text-emerald-700 mt-0.5">Operasional Terdaftar</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              🧑‍⚕️
+            </span>
           </div>
         </Card>
 
-        <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
-          <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Dalam Pemantauan</p>
-            <h4 className="text-2xl font-bold text-amber-700 mt-1">{stats.pemantauan} Siswa</h4>
-            <span className="text-[11px] text-[#7d7152]">Monitoring berkala</span>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-amber-700 flex items-center justify-center text-xl font-bold shadow-2xs">
-            👁️
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
+              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">Jurnal V2</h4>
+              <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              📁
+            </span>
           </div>
         </Card>
 
-        <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
-          <div>
-            <p className="text-xs font-semibold text-[#7d7152]">Alih Tangan Kasus</p>
-            <h4 className="text-2xl font-bold text-sky-700 mt-1">{stats.alihTangan} Siswa</h4>
-            <span className="text-[11px] text-sky-700 font-medium">Rujukan Medis / Psikolog</span>
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Status API</p>
+              <h4 className="text-2xl font-bold text-emerald-700 mt-1">Terhubung</h4>
+              <p className="text-[11px] text-emerald-600 mt-0.5">FastAPI & MySQL</p>
+            </div>
+            <span className="text-3xl p-3 bg-emerald-50 rounded-2xl border border-emerald-200/50">
+              ⚡
+            </span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 text-sky-700 flex items-center justify-center text-xl font-bold shadow-2xs">
-            🏥
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Standar Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Modular</h4>
+              <p className="text-[11px] text-blue-700 mt-0.5">master pattern</p>
+            </div>
+            <span className="text-3xl p-3 bg-blue-50 rounded-2xl border border-blue-200/50">
+              📋
+            </span>
           </div>
         </Card>
       </div>
 
-      {/* 4. Kontainer Utama Terpadu (Filter & Tabel dalam satu wadah Card Glassmorphism) */}
-      <Card className="border border-white/80 shadow-xs">
-        {/* Toolbar Filter & Pencarian Data */}
-        <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="w-full md:w-80">
+      <Card className="rounded-2xl border-white/80 bg-white/70 overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-[#e2d9c8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex-1 max-w-sm">
             <Input
+              type="text"
+              placeholder="Cari data jurnal bk (bimbingan konseling)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari siswa, topik masalah, atau rombel..."
+              className="w-full text-xs"
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-            <Select
-              value={bidangFilter}
-              onChange={(e) => setBidangFilter(e.target.value)}
-              className="text-xs"
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#7d7152]">Tampilkan:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              aria-label="Jumlah data per halaman"
+              className="text-xs bg-white border border-[#d5cbba] rounded-lg px-2 py-1.5 text-[#2d2410] focus:outline-none focus:ring-1 focus:ring-amber-500"
             >
-              <option value="all">Semua Bidang Layanan</option>
-              {BIDANG_LAYANAN_BK.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </Select>
-
-            <Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="text-xs"
-            >
-              <option value="all">Semua Status Penanganan</option>
-              {STATUS_BK_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </Select>
-
-            {(search || bidangFilter !== "all" || statusFilter !== "all") && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSearch("");
-                  setBidangFilter("all");
-                  setStatusFilter("all");
-                }}
-                className="text-rose-600 hover:text-rose-700"
-              >
-                Reset Filter
-              </Button>
-            )}
+              <option value={5}>5 baris</option>
+              <option value={10}>10 baris</option>
+              <option value={20}>20 baris</option>
+            </select>
           </div>
         </div>
 
-        {/* Tabel Semantik HTML: table, thead, tbody, tr, th, td */}
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
-              <tr>
-                <th className="w-[5%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">
-                  No
-                </th>
-                <th className="w-[12%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
-                  Tanggal
-                </th>
-                <th className="w-[20%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
-                  Nama Siswa Konseli
-                </th>
-                <th className="w-[16%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
-                  Bidang & Model
-                </th>
-                <th className="w-[25%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">
-                  Topik Masalah & Solusi
-                </th>
-                <th className="w-[12%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">
-                  Status
-                </th>
-                <th className="w-[10%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">
-                  Aksi
-                </th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
+                <th className="py-3 px-4 w-12 text-center">No</th>
+                <th className="py-3 px-4">Sekolah</th>
+                <th className="py-3 px-4">Jenis Layanan</th>
+                <th className="py-3 px-4">Bidang</th>
+                <th className="py-3 px-4">Sasaran</th>
+                <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/60 bg-transparent">
-              {filteredData.length === 0 ? (
+            <tbody className="divide-y divide-[#ece5d8]">
+              {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-[#7d7152] text-xs font-medium">
-                    Tidak ada catatan bimbingan konseling ditemukan.
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                      <span>Memuat data dari server...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : isError ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-rose-700">
+                    <p className="font-semibold">Gagal memuat data jurnal bk (bimbingan konseling)</p>
+                    <p className="text-[11px] mt-1 text-[#7d7152]">
+                      {error?.message || "Terjadi kesalahan koneksi ke server."}
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      onClick={() => refetch()}
+                    >
+                      Coba Lagi
+                    </Button>
+                  </td>
+                </tr>
+              ) : rawList.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                    <span className="text-3xl block mb-2">🧑‍⚕️</span>
+                    <p className="font-semibold text-sm text-[#2d2410]">
+                      Belum ada data Jurnal BK (Bimbingan Konseling)
+                    </p>
+                    <p className="text-xs text-[#9c8e6b] mt-0.5">
+                      {debouncedSearch
+                        ? `Tidak ada data yang cocok dengan "${debouncedSearch}"`
+                        : "Klik tombol '+ Tambah Jurnal BK (Bimbingan Konseling)' untuk menambahkan data baru."}
+                    </p>
                   </td>
                 </tr>
               ) : (
-                paginatedData.map((row, idx) => {
-                  const statusVariant =
-                    row.status === "Selesai / Teratasi"
-                      ? "success"
-                      : row.status === "Dalam Pemantauan"
-                      ? "warning"
-                      : "danger";
+                rawList.map((item, index) => {
+                  const no = listindex(pageSize, page, index);
 
                   return (
-                    <tr key={row.id} className="hover:bg-white/50 transition-colors duration-150">
-                      {/* 1. No */}
-                      <td className="px-4 py-3.5 text-xs align-middle text-center font-semibold text-[#a89b7b]">
-                        {(page - 1) * pageSize + idx + 1}
+                    <tr
+                      key={item.id}
+                      className="hover:bg-amber-50/40 transition-colors duration-150"
+                    >
+                      <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
+                        {no}
                       </td>
-
-                      {/* 2. Tanggal Sesi */}
-                      <td className="px-4 py-3.5 text-xs align-middle">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="font-bold text-[#2d2410]">
-                            {new Intl.DateTimeFormat("id-ID", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            }).format(new Date(row.tgl))}
-                          </span>
-                          <span className="text-[11px] text-[#7d7152]">
-                            {new Intl.DateTimeFormat("id-ID", { weekday: "short" }).format(
-                              new Date(row.tgl)
-                            )}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* 3. Nama Siswa & Rombel */}
-                      <td className="px-4 py-3.5 text-xs align-middle">
-                        <div className="space-y-0.5">
-                          <p className="font-bold text-[#2d2410] hover:text-[#a86a00] transition-colors leading-snug">
-                            {row.nm_siswa}
-                          </p>
-                          <span className="inline-block text-[10px] font-bold text-amber-800 bg-amber-400/20 px-1.5 py-0.2 rounded border border-amber-300/30">
-                            {row.kelas_id}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* 4. Bidang & Model Layanan */}
-                      <td className="px-4 py-3.5 text-xs align-middle">
-                        <div className="space-y-1">
-                          <span className="inline-block text-[11px] font-semibold text-amber-900 bg-amber-400/25 px-2 py-0.5 rounded-md border border-amber-300/40">
-                            {row.jns_layanan_id}
-                          </span>
-                          <p className="text-[11px] text-[#7d7152] truncate">{row.mdl_kegiatan_id}</p>
-                        </div>
-                      </td>
-
-                      {/* 5. Topik Masalah & Solusi */}
-                      <td className="px-4 py-3.5 text-xs align-middle">
-                        <div className="space-y-0.5">
-                          <p className="text-xs font-semibold text-[#2d2410] line-clamp-1">
-                            {row.materi_layanan}
-                          </p>
-                          <p className="text-xs text-[#7d7152] line-clamp-1">
-                            {row.permasalahan}
-                          </p>
-                        </div>
-                      </td>
-
-                      {/* 6. Status Kasus */}
-                      <td className="px-4 py-3.5 text-xs align-middle text-center">
-                        <Badge variant={statusVariant} size="sm">
-                          {row.status}
-                        </Badge>
-                      </td>
-
-                      {/* 7. Tombol Aksi */}
-                      <td className="px-4 py-3.5 text-xs align-middle text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => openDetailModal(row)}
-                            title="Lihat Lembar Konseling"
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).sekolah ?? "-")}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).jenis_layanan ?? "-")}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).bidang_bimbingan ?? "-")}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).sasaran_siswa ?? "-")}
+                    </td>
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(item)}
+                            title="Detail Lembar Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-[#7d7152] hover:text-[#2d2410] transition-colors"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                          </Button>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => openEditModal(row)}
-                            title="Edit Catatan BK"
+                            👁️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(item)}
+                            title="Edit Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-amber-700 hover:text-amber-900 transition-colors"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </Button>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="hover:text-red-600 hover:bg-red-50/80"
-                            onClick={() => handleDelete(row.id, row.nm_siswa)}
-                            title="Hapus Catatan BK"
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(item)}
+                            title="Hapus Data"
+                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 transition-colors"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </Button>
+                            🗑️
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -513,31 +379,28 @@ export default function JurnalBKPage() {
           </table>
         </div>
 
-        {/* Footer Paginasi Tabel Terstandar */}
-        <div className="px-6 py-4 bg-white/20 border-t border-white/60">
+        <div className="p-4 border-t border-[#e2d9c8] bg-white/40">
           <Pagination
             page={page}
-            onPageChange={setPage}
             pageSize={pageSize}
-            onPageSizeChange={setPageSize}
-            total={filteredData.length}
-            pageSizeOptions={[3, 5, 10, 20]}
+            total={totalItems}
+            onPageChange={(p) => setPage(p)}
+            onPageSizeChange={(s) => setPageSize(s)}
           />
         </div>
       </Card>
 
-      {/* 5. Modal Formulir Tambah/Edit */}
-      <FormBKModal
+      <FormJurnalBkModal
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         formMode={formMode}
         formData={formData}
         setFormData={setFormData}
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmitForm}
+        isLoading={createMutation.isPending || updateMutation.isPending}
       />
 
-      {/* 6. Modal Detail / Pratinjau Cetak */}
-      <DetailBKModal
+      <DetailJurnalBkModal
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
         record={selectedRecord}

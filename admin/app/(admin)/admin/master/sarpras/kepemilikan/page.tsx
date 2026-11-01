@@ -154,7 +154,6 @@ export default function MasterKepemilikanSarprasPage() {
     <div className="space-y-6">
       <PageHeader
         title="Master Kepemilikan Sarpras"
-        breadcrumbs={[{"label": "Dashboard", "href": "/admin"}, {"label": "Data Master", "href": "/admin/master"}, {"label": "Master Sarpras", "href": "/admin/master/sarpras"}, {"label": "Kepemilikan Sarpras"}]}
         description="Pengelolaan status legalitas hak penguasaan atas tanah, gedung, atau fasilitas fisik yang digunakan satuan pendidikan."
         action={
           <div className="flex items-center gap-2">
@@ -394,11 +393,7 @@ export default function MasterKepemilikanSarprasPage() {
           </span>
 
           {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={(p) => setPage(p)}
-            />
+            <Pagination page={page} pageSize={pageSize} total={totalItems} onPageChange={(p) => setPage(p)} onPageSizeChange={(s) => setPageSize(s)} />
           )}
         </div>
       </Card>

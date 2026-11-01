@@ -1,418 +1,410 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
-import { fetchData } from "@/lib/api_secure";
 import {
-  Badge,
   Button,
   Card,
   Input,
-  Modal,
   PageHeader,
   Pagination,
-  Select,
-} from "../../_components/ui";
+} from "@/app/(admin)/_components/ui";
 
-interface StatRecord {
-  id: string;
-  indicator: string;
-  category: "Pendidikan" | "Kepuasan Masyarakat (IKM)" | "Ketenagaan" | "Sarpras";
-  value: string;
-  unit: string;
-  period: string;
-  trend: string;
-}
+import { ResponseInterface, PublishStatistikRecord } from "./types";
+import FormPublishStatistikModal from "./components/FormPublishStatistikModal";
+import DetailPublishStatistikModal from "./components/DetailPublishStatistikModal";
+import {
+  useResponseListMaster,
+  useDeleteMaster,
+  useCreateMaster,
+  useUpdateMaster,
+} from "./hooks/crud";
+import { listindex } from "@/utilities/pagination";
 
-export default function StatistikAdminPage() {
-  const [stats, setStats] = useState<StatRecord[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-
-  const [formData, setFormData] = useState({
-    indicator: "",
-    category: "Pendidikan" as StatRecord["category"],
-    value: "",
-    unit: "",
-    period: "2026",
-    trend: "",
-  });
-
+export default function PublishStatistikPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const handler = setTimeout(() => {
       setDebouncedSearch(search);
       setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
+    }, 400);
+
+    return () => {
+      clearTimeout(handler);
+    };
   }, [search]);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const skip = (page - 1) * pageSize;
-      const q = debouncedSearch.trim() ? `&search=${encodeURIComponent(debouncedSearch.trim())}` : "";
-      const res = await fetchData<{ total: number; data: any[] }>(
-        `/api/v1/admin/statistik/read?page=${page}&per_page=${pageSize}&skip=${skip}&limit=${pageSize}${q}`
-      );
+  const { List, isLoading, isError, error, refetch } = useResponseListMaster(
+    page,
+    pageSize,
+    debouncedSearch
+  );
+  const deleteMutation = useDeleteMaster();
+  const createMutation = useCreateMaster();
+  const updateMutation = useUpdateMaster();
 
-      if (res && Array.isArray(res.data)) {
-        const mapped: StatRecord[] = res.data.map((row: any) => ({
-          id: row.id,
-          indicator: row.indicator || "",
-          category: (row.category || "Pendidikan") as StatRecord["category"],
-          value: row.value || "0",
-          unit: row.unit || "Satuan",
-          period: row.period || "2026",
-          trend: row.trend || "-",
-        }));
-        setStats(mapped);
-        setTotalCount(res.total ?? mapped.length);
-      }
-    } catch (err: any) {
-      console.error("Gagal memuat statistik:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize, debouncedSearch]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<PublishStatistikRecord | null>(null);
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const initialForm: Partial<ResponseInterface> = {
+    indikator: "",
+    nilai: "",
+    satuan: "",
+    tahun: null,
+    kategori: "",
+    keterangan: "",
+  };
 
-  const handleOpenCreate = () => {
-    setEditingId(null);
+  const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
+
+  const emptyForm = () => {
+    setFormData(initialForm);
+  };
+
+  const rawList: PublishStatistikRecord[] = useMemo(() => {
+    if (!List?.data || !Array.isArray(List.data)) return [];
+    return List.data;
+  }, [List]);
+
+  const totalItems = List?.total ?? rawList.length;
+
+  const handleOpenAdd = () => {
+    setFormMode("add");
+    emptyForm();
+    setIsFormOpen(true);
+  };
+
+  const handleOpenEdit = (record: PublishStatistikRecord) => {
+    setFormMode("edit");
     setFormData({
-      indicator: "",
-      category: "Pendidikan",
-      value: "",
-      unit: "",
-      period: "2026",
-      trend: "",
+      id: record.id,
+      indikator: (record as any).indikator ?? "",
+      nilai: (record as any).nilai ?? "",
+      satuan: (record as any).satuan ?? "",
+      tahun: (record as any).tahun ?? "",
+      kategori: (record as any).kategori ?? "",
+      keterangan: (record as any).keterangan ?? "",
     });
-    setIsModalOpen(true);
+    setIsFormOpen(true);
   };
 
-  const handleOpenEdit = (item: StatRecord) => {
-    setEditingId(item.id);
-    setFormData({
-      indicator: item.indicator,
-      category: item.category,
-      value: item.value,
-      unit: item.unit,
-      period: item.period,
-      trend: item.trend,
-    });
-    setIsModalOpen(true);
+  const handleOpenDetail = (record: PublishStatistikRecord) => {
+    setSelectedRecord(record);
+    setIsDetailOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.indicator || !formData.value) return;
+  const handleDelete = (record: PublishStatistikRecord) => {
+    const displayName =
+      (record as any).judul ||
+      (record as any).title ||
+      (record as any).nama ||
+      (record as any).sekolah ||
+      (record as any).nama_kombel ||
+      (record as any).kegiatan ||
+      (record as any).indikator ||
+      (record as any).isi ||
+      "data ini";
 
-    const payload = {
-      indicator: formData.indicator,
-      category: formData.category,
-      value: formData.value,
-      unit: formData.unit || "Satuan",
-      period: formData.period,
-      trend: formData.trend || "-",
-    };
-
-    try {
-      if (editingId) {
-        await fetchData(`/api/v1/admin/statistik/update/${editingId}`, {
-          method: "PUT",
-          body: payload,
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil Diperbarui",
-          text: "Indikator statistik berhasil diperbarui.",
-          timer: 1800,
-          showConfirmButton: false,
-        });
-      } else {
-        await fetchData(`/api/v1/admin/statistik/create`, {
-          method: "POST",
-          body: payload,
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil Ditambahkan",
-          text: "Indikator baru telah disimpan.",
-          timer: 1800,
-          showConfirmButton: false,
-        });
-      }
-      setIsModalOpen(false);
-      loadData();
-    } catch (err: any) {
-      Swal.fire({
-        icon: "error",
-        title: "Gagal Menyimpan",
-        text: err?.message || "Terjadi kesalahan saat menyimpan data.",
-      });
-    }
-  };
-
-  const handleDelete = async (id: string, indicator: string) => {
-    const result = await Swal.fire({
-      title: "Hapus Indikator Statistik?",
-      text: `Indikator "${indicator}" akan dihapus permanen.`,
+    Swal.fire({
+      title: "Hapus Data & Indikator Statistik?",
+      text: `Apakah Anda yakin ingin menghapus "${displayName}"?`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus!",
+      confirmButtonColor: "#c2410c",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Ya, Hapus Data",
       cancelButtonText: "Batal",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await fetchData(`/api/v1/admin/statistik/delete/${id}`, {
-          method: "DELETE",
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Terhapus",
-          text: "Indikator berhasil dihapus.",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-        loadData();
-      } catch (err: any) {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal Menghapus",
-          text: err?.message || "Terjadi kesalahan sistem saat menghapus data.",
-        });
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteMutation.mutate(record.id);
       }
+    });
+  };
+
+  const handleSubmitForm = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload: Partial<ResponseInterface> = { ...formData };
+
+    if (formMode === "add") {
+      createMutation.mutate(payload, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          emptyForm();
+        },
+      });
+    } else {
+      if (!formData.id) return;
+      updateMutation.mutate(
+        { body: payload, id: formData.id },
+        {
+          onSuccess: () => {
+            setIsFormOpen(false);
+            emptyForm();
+          },
+        }
+      );
     }
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6">
       <PageHeader
-        title="Manajemen Data & Statistik"
-        description="Kelola indikator capaian mutu pendidikan, indeks kepuasan masyarakat (IKM), dan statistik agregat wilayah."
-        badge={<Badge variant="gold">{totalCount} Indikator</Badge>}
+        title="Data & Indikator Statistik"
+        description="Indikator angka partisipasi murni, rasio murid-guru, dan statistik pendidikan daerah."
         action={
-          <Button variant="gold" icon="📈" onClick={handleOpenCreate}>
-            Tambah Indikator Statistik
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="hidden sm:inline-flex"
+            >
+              🔄 Refresh
+            </Button>
+            <Button variant="gold" size="sm" onClick={handleOpenAdd}>
+              + Tambah Data & Indikator Statistik
+            </Button>
+          </div>
         }
       />
 
-      {/* Grid of Key Figures */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.slice(0, 4).map((item) => (
-          <div
-            key={item.id}
-            className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between gap-3"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <span className="text-[11px] font-bold text-[#7d7152] uppercase tracking-wider">
-                {item.category}
-              </span>
-              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                {item.trend}
-              </span>
-            </div>
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
             <div>
-              <span className="text-3xl font-black text-[#2d2410] tracking-tight">
-                {item.value}
-              </span>
-              <span className="text-xs text-[#7d7152] ml-1.5 font-medium">
-                {item.unit}
-              </span>
+              <p className="text-xs text-[#7d7152] font-medium">Total Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{totalItems}</h4>
+              <p className="text-[11px] text-emerald-700 mt-0.5">Operasional Terdaftar</p>
             </div>
-            <div className="border-t border-slate-100 pt-2 text-xs font-medium text-slate-700 line-clamp-2">
-              {item.indicator}
-            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              📈
+            </span>
           </div>
-        ))}
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
+              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">Publish</h4>
+              <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              📁
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Status API</p>
+              <h4 className="text-2xl font-bold text-emerald-700 mt-1">Terhubung</h4>
+              <p className="text-[11px] text-emerald-600 mt-0.5">FastAPI & MySQL</p>
+            </div>
+            <span className="text-3xl p-3 bg-emerald-50 rounded-2xl border border-emerald-200/50">
+              ⚡
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Standar Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Modular</h4>
+              <p className="text-[11px] text-blue-700 mt-0.5">master pattern</p>
+            </div>
+            <span className="text-3xl p-3 bg-blue-50 rounded-2xl border border-blue-200/50">
+              📋
+            </span>
+          </div>
+        </Card>
       </div>
 
-      <Card className="border border-white/80 shadow-xs">
-        {/* Toolbar Pencarian Data di dalam Card */}
-        <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex items-center justify-between">
-          <div className="w-full sm:w-80">
+      <Card className="rounded-2xl border-white/80 bg-white/70 overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-[#e2d9c8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex-1 max-w-sm">
             <Input
-              placeholder="Cari indikator atau kategori..."
+              type="text"
+              placeholder="Cari data data & indikator statistik..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              className="w-full text-xs"
             />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#7d7152]">Tampilkan:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              aria-label="Jumlah data per halaman"
+              className="text-xs bg-white border border-[#d5cbba] rounded-lg px-2 py-1.5 text-[#2d2410] focus:outline-none focus:ring-1 focus:ring-amber-500"
+            >
+              <option value={5}>5 baris</option>
+              <option value={10}>10 baris</option>
+              <option value={20}>20 baris</option>
+            </select>
           </div>
         </div>
 
-        {/* Tabel Semantik Native HTML */}
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
-              <tr>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Nama Indikator</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Kategori</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Nilai Data</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Periode</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Tren / Capaian</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">Aksi</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
+                <th className="py-3 px-4 w-12 text-center">No</th>
+                <th className="py-3 px-4">Indikator</th>
+                <th className="py-3 px-4">Nilai</th>
+                <th className="py-3 px-4">Satuan</th>
+                <th className="py-3 px-4">Tahun</th>
+                <th className="py-3 px-4">Kategori</th>
+                <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/60 bg-transparent">
-              {loading ? (
+            <tbody className="divide-y divide-[#ece5d8]">
+              {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-                      Memuat indikator statistik...
+                  <td colSpan={7} className="py-12 text-center text-[#7d7152]">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                      <span>Memuat data dari server...</span>
                     </div>
                   </td>
                 </tr>
-              ) : stats.length === 0 ? (
+              ) : isError ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
-                    Tidak ada indikator statistik ditemukan.
+                  <td colSpan={7} className="py-12 text-center text-rose-700">
+                    <p className="font-semibold">Gagal memuat data data & indikator statistik</p>
+                    <p className="text-[11px] mt-1 text-[#7d7152]">
+                      {error?.message || "Terjadi kesalahan koneksi ke server."}
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      onClick={() => refetch()}
+                    >
+                      Coba Lagi
+                    </Button>
+                  </td>
+                </tr>
+              ) : rawList.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-[#7d7152]">
+                    <span className="text-3xl block mb-2">📈</span>
+                    <p className="font-semibold text-sm text-[#2d2410]">
+                      Belum ada data Data & Indikator Statistik
+                    </p>
+                    <p className="text-xs text-[#9c8e6b] mt-0.5">
+                      {debouncedSearch
+                        ? `Tidak ada data yang cocok dengan "${debouncedSearch}"`
+                        : "Klik tombol '+ Tambah Data & Indikator Statistik' untuk menambahkan data baru."}
+                    </p>
                   </td>
                 </tr>
               ) : (
-                stats.map((item) => (
-                  <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
-                    <td className="px-4 py-3.5 text-xs align-middle font-bold text-[#2d2410]">
-                      {item.indicator}
+                rawList.map((item, index) => {
+                  const no = listindex(pageSize, page, index);
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-amber-50/40 transition-colors duration-150"
+                    >
+                      <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
+                        {no}
+                      </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).indikator ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
-                      <Badge variant="neutral">{item.category}</Badge>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).nilai ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle font-bold text-[#a86a00] whitespace-nowrap">
-                      {item.value} <span className="text-xs font-normal text-slate-500">{item.unit}</span>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).satuan ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-[#7d7152]">
-                      {item.period}
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).tahun ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-emerald-700 font-semibold">
-                      {item.trend}
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).kategori ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleOpenEdit(item)}
-                        >
-                          ✏️
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDelete(item.id, item.indicator)}
-                        >
-                          🗑️
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(item)}
+                            title="Detail Lembar Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-[#7d7152] hover:text-[#2d2410] transition-colors"
+                          >
+                            👁️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(item)}
+                            title="Edit Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-amber-700 hover:text-amber-900 transition-colors"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(item)}
+                            title="Hapus Data"
+                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 transition-colors"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Footer Paginasi Terstandar */}
-        <div className="px-6 py-4 bg-white/20 border-t border-white/60">
+        <div className="p-4 border-t border-[#e2d9c8] bg-white/40">
           <Pagination
             page={page}
-            onPageChange={setPage}
             pageSize={pageSize}
-            onPageSizeChange={setPageSize}
-            total={totalCount}
-            pageSizeOptions={[5, 10, 20]}
+            total={totalItems}
+            onPageChange={(p) => setPage(p)}
+            onPageSizeChange={(s) => setPageSize(s)}
           />
         </div>
       </Card>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingId ? "Edit Indikator Statistik" : "Tambah Indikator Statistik"}
-        description="Masukkan angka indikator capaian pendidikan atau survei kepuasan layanan publik."
-        maxWidth="md"
-        footer={
-          <>
-            <Button variant="outline" type="button" onClick={() => setIsModalOpen(false)}>
-              Batal
-            </Button>
-            <Button variant="gold" type="submit" form="form-stat">
-              {editingId ? "Simpan Perubahan" : "Simpan Indikator"}
-            </Button>
-          </>
-        }
-      >
-        <form id="form-stat" onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Nama Indikator"
-            placeholder="Contoh: Rata-Rata Nilai Literasi Rapor Pendidikan"
-            required
-            value={formData.indicator}
-            onChange={(e) => setFormData({ ...formData, indicator: e.target.value })}
-          />
+      <FormPublishStatistikModal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        formMode={formMode}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmitForm}
+        isLoading={createMutation.isPending || updateMutation.isPending}
+      />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Select
-              label="Kategori"
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  category: e.target.value as StatRecord["category"],
-                })
-              }
-              options={[
-                { value: "Pendidikan", label: "Pendidikan & Akademik" },
-                { value: "Kepuasan Masyarakat (IKM)", label: "Kepuasan Masyarakat (IKM)" },
-                { value: "Ketenagaan", label: "Guru & Ketenagaan" },
-                { value: "Sarpras", label: "Sarana & Prasarana" },
-              ]}
-            />
-            <Input
-              label="Periode / Tahun"
-              placeholder="Contoh: 2026 Ganjil"
-              value={formData.period}
-              onChange={(e) => setFormData({ ...formData, period: e.target.value })}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Nilai Angka"
-              placeholder="Contoh: 85.5"
-              required
-              value={formData.value}
-              onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-            />
-            <Input
-              label="Satuan Nilai"
-              placeholder="Contoh: Skor / Siswa / %"
-              value={formData.unit}
-              onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-            />
-          </div>
-
-          <Input
-            label="Keterangan Tren"
-            placeholder="Contoh: +2.5% Peningkatan"
-            value={formData.trend}
-            onChange={(e) => setFormData({ ...formData, trend: e.target.value })}
-          />
-        </form>
-      </Modal>
+      <DetailPublishStatistikModal
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        record={selectedRecord}
+      />
     </div>
   );
 }

@@ -1,488 +1,406 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
-import { fetchData } from "@/lib/api_secure";
 import {
-  Badge,
   Button,
   Card,
-  FileInput,
   Input,
-  Modal,
   PageHeader,
   Pagination,
-  Select,
-  Textarea,
-} from "../../_components/ui";
+} from "@/app/(admin)/_components/ui";
 
-interface Announcement {
-  id: string;
-  number: string;
-  title: string;
-  category: "Akademik & ANBK" | "Kepegawaian / PPPK" | "Pendataan & Dapodik" | "Kebudayaan & Event";
-  summary: string;
-  targetAudience: string;
-  deadline: string;
-  attachmentName: string;
-  important: boolean;
-  status: "Aktif" | "Draft" | "Selesai";
-}
+import { ResponseInterface, PengumumanRecord } from "./types";
+import FormPengumumanModal from "./components/FormPengumumanModal";
+import DetailPengumumanModal from "./components/DetailPengumumanModal";
+import {
+  useResponseListMaster,
+  useDeleteMaster,
+  useCreateMaster,
+  useUpdateMaster,
+} from "./hooks/crud";
+import { listindex } from "@/utilities/pagination";
 
-export default function PengumumanAdminPage() {
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+export default function PengumumanPage() {
+  const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
 
-  // Pagination State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
 
-  const [formData, setFormData] = useState({
-    number: "",
-    title: "",
-    category: "Akademik & ANBK" as Announcement["category"],
-    summary: "",
-    targetAudience: "Semua Satuan Pendidikan",
-    deadline: "",
-    attachmentName: "",
-    important: false,
-    status: "Aktif" as Announcement["status"],
-  });
-
-  // Debounce search
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
       setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+    }, 400);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const skip = (page - 1) * pageSize;
-      const q = debouncedSearch.trim() ? `&search=${encodeURIComponent(debouncedSearch.trim())}` : "";
-      const res = await fetchData<{ total: number; data: any[] }>(
-        `/api/v1/admin/pengumuman/read?page=${page}&per_page=${pageSize}&skip=${skip}&limit=${pageSize}${q}`
-      );
-
-      if (res && Array.isArray(res.data)) {
-        const mapped: Announcement[] = res.data.map((row: any) => ({
-          id: row.id,
-          number: row.nomor || row.number || "",
-          title: row.judul || row.title || "",
-          category: (row.kategori || row.category || "Akademik & ANBK") as Announcement["category"],
-          summary: row.ringkasan || row.summary || "",
-          targetAudience: row.target_audience || row.sasaran || row.targetAudience || "",
-          deadline: row.deadline || row.tenggat_waktu || "",
-          attachmentName: row.lampiran || row.lampiran_url || row.attachmentName || "",
-          important: Boolean(row.is_important ?? row.penting ?? row.important),
-          status: (row.status || "Aktif") as Announcement["status"],
-        }));
-        setAnnouncements(mapped);
-        setTotalCount(res.total ?? mapped.length);
-      }
-    } catch (err: any) {
-      console.error("Gagal memuat data pengumuman:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize, debouncedSearch]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const handleOpenCreate = () => {
-    setEditingId(null);
-    setFormData({
-      number: "",
-      title: "",
-      category: "Akademik & ANBK",
-      summary: "",
-      targetAudience: "Semua Satuan Pendidikan",
-      deadline: "",
-      attachmentName: "",
-      important: false,
-      status: "Aktif",
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEdit = (item: Announcement) => {
-    setEditingId(item.id);
-    setFormData({
-      number: item.number,
-      title: item.title,
-      category: item.category,
-      summary: item.summary,
-      targetAudience: item.targetAudience,
-      deadline: item.deadline,
-      attachmentName: item.attachmentName,
-      important: item.important,
-      status: item.status,
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.title) return;
-
-    const payload = {
-      nomor: formData.number || `421/DKB/${Date.now()}`,
-      judul: formData.title,
-      kategori: formData.category,
-      ringkasan: formData.summary || formData.title,
-      target_audience: formData.targetAudience,
-      deadline: formData.deadline || "Sesuai Edaran",
-      lampiran: formData.attachmentName || "Surat_Edaran_Resmi.pdf",
-      is_important: formData.important,
-      status: formData.status,
+    return () => {
+      clearTimeout(handler);
     };
+  }, [search]);
 
-    try {
-      if (editingId) {
-        await fetchData(`/api/v1/admin/pengumuman/update/${editingId}`, {
-          method: "PUT",
-          body: payload,
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil Diperbarui",
-          text: "Data pengumuman berhasil diperbarui.",
-          timer: 1800,
-          showConfirmButton: false,
-        });
-      } else {
-        await fetchData(`/api/v1/admin/pengumuman/create`, {
-          method: "POST",
-          body: payload,
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil Diterbitkan",
-          text: "Pengumuman baru telah disimpan ke sistem.",
-          timer: 1800,
-          showConfirmButton: false,
-        });
-      }
-      setIsModalOpen(false);
-      loadData();
-    } catch (err: any) {
-      Swal.fire({
-        icon: "error",
-        title: "Gagal Menyimpan",
-        text: err?.message || "Terjadi kesalahan saat menyimpan data.",
-      });
-    }
+  const { List, isLoading, isError, error, refetch } = useResponseListMaster(
+    page,
+    pageSize,
+    debouncedSearch
+  );
+  const deleteMutation = useDeleteMaster();
+  const createMutation = useCreateMaster();
+  const updateMutation = useUpdateMaster();
+
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<PengumumanRecord | null>(null);
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
+
+  const initialForm: Partial<ResponseInterface> = {
+    judul: "",
+    slug: "",
+    isi: "",
+    tanggal: "",
+    status: "",
+    file: "",
   };
 
-  const handleDelete = async (id: string, title: string) => {
-    const result = await Swal.fire({
-      title: "Hapus Pengumuman?",
-      text: `Pengumuman "${title}" akan dihapus permanen.`,
+  const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
+
+  const emptyForm = () => {
+    setFormData(initialForm);
+  };
+
+  const rawList: PengumumanRecord[] = useMemo(() => {
+    if (!List?.data || !Array.isArray(List.data)) return [];
+    return List.data;
+  }, [List]);
+
+  const totalItems = List?.total ?? rawList.length;
+
+  const handleOpenAdd = () => {
+    setFormMode("add");
+    emptyForm();
+    setIsFormOpen(true);
+  };
+
+  const handleOpenEdit = (record: PengumumanRecord) => {
+    setFormMode("edit");
+    setFormData({
+      id: record.id,
+      judul: (record as any).judul ?? "",
+      slug: (record as any).slug ?? "",
+      isi: (record as any).isi ?? "",
+      tanggal: (record as any).tanggal ?? "",
+      status: (record as any).status ?? "",
+      file: (record as any).file ?? "",
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleOpenDetail = (record: PengumumanRecord) => {
+    setSelectedRecord(record);
+    setIsDetailOpen(true);
+  };
+
+  const handleDelete = (record: PengumumanRecord) => {
+    const displayName =
+      (record as any).judul ||
+      (record as any).title ||
+      (record as any).nama ||
+      (record as any).sekolah ||
+      (record as any).nama_kombel ||
+      (record as any).kegiatan ||
+      (record as any).indikator ||
+      (record as any).isi ||
+      "data ini";
+
+    Swal.fire({
+      title: "Hapus Manajemen Pengumuman?",
+      text: `Apakah Anda yakin ingin menghapus "${displayName}"?`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus!",
+      confirmButtonColor: "#c2410c",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Ya, Hapus Data",
       cancelButtonText: "Batal",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await fetchData(`/api/v1/admin/pengumuman/delete/${id}`, {
-          method: "DELETE",
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Terhapus",
-          text: "Pengumuman berhasil dihapus.",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-        loadData();
-      } catch (err: any) {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal Menghapus",
-          text: err?.message || "Terjadi kesalahan saat menghapus data.",
-        });
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteMutation.mutate(record.id);
       }
+    });
+  };
+
+  const handleSubmitForm = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload: Partial<ResponseInterface> = { ...formData };
+
+    if (formMode === "add") {
+      createMutation.mutate(payload, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          emptyForm();
+        },
+      });
+    } else {
+      if (!formData.id) return;
+      updateMutation.mutate(
+        { body: payload, id: formData.id },
+        {
+          onSuccess: () => {
+            setIsFormOpen(false);
+            emptyForm();
+          },
+        }
+      );
     }
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6">
       <PageHeader
-        title="Manajemen Pengumuman & Surat Edaran"
-        description="Publikasi edaran kedinasan resmi, jadwal ujian, juknis asesmen, dan pemberitahuan penting."
-        badge={<Badge variant="gold">{totalCount} Edaran</Badge>}
+        title="Manajemen Pengumuman"
+        description="Publikasi pengumuman dinas kepada guru, kepala sekolah, siswa, dan wali murid."
         action={
-          <Button
-            variant="gold"
-            icon="📢"
-            onClick={handleOpenCreate}
-          >
-            Buat Pengumuman
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="hidden sm:inline-flex"
+            >
+              🔄 Refresh
+            </Button>
+            <Button variant="gold" size="sm" onClick={handleOpenAdd}>
+              + Tambah Manajemen Pengumuman
+            </Button>
+          </div>
         }
       />
 
-      <Card className="border border-white/80 shadow-xs">
-        {/* Toolbar Filter Pencarian di dalam Card */}
-        <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex items-center justify-between">
-          <div className="w-full sm:w-80">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Total Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{totalItems}</h4>
+              <p className="text-[11px] text-emerald-700 mt-0.5">Operasional Terdaftar</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              📢
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
+              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">Publish</h4>
+              <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              📁
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Status API</p>
+              <h4 className="text-2xl font-bold text-emerald-700 mt-1">Terhubung</h4>
+              <p className="text-[11px] text-emerald-600 mt-0.5">FastAPI & MySQL</p>
+            </div>
+            <span className="text-3xl p-3 bg-emerald-50 rounded-2xl border border-emerald-200/50">
+              ⚡
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Standar Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Modular</h4>
+              <p className="text-[11px] text-blue-700 mt-0.5">master pattern</p>
+            </div>
+            <span className="text-3xl p-3 bg-blue-50 rounded-2xl border border-blue-200/50">
+              📋
+            </span>
+          </div>
+        </Card>
+      </div>
+
+      <Card className="rounded-2xl border-white/80 bg-white/70 overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-[#e2d9c8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex-1 max-w-sm">
             <Input
-              placeholder="Cari nomor edaran atau judul..."
-              leftIcon="🔍"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              type="text"
+              placeholder="Cari data manajemen pengumuman..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full text-xs"
             />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#7d7152]">Tampilkan:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              aria-label="Jumlah data per halaman"
+              className="text-xs bg-white border border-[#d5cbba] rounded-lg px-2 py-1.5 text-[#2d2410] focus:outline-none focus:ring-1 focus:ring-amber-500"
+            >
+              <option value={5}>5 baris</option>
+              <option value={10}>10 baris</option>
+              <option value={20}>20 baris</option>
+            </select>
           </div>
         </div>
 
-        {/* Tabel Semantik Native HTML */}
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
-              <tr>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">No. Surat & Judul</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Kategori</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Sasaran Penerima</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Batas Waktu</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Status</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">Aksi</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
+                <th className="py-3 px-4 w-12 text-center">No</th>
+                <th className="py-3 px-4">Judul Pengumuman</th>
+                <th className="py-3 px-4">Tanggal</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Berkas</th>
+                <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/60 bg-transparent">
-              {loading ? (
+            <tbody className="divide-y divide-[#ece5d8]">
+              {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-                      Memuat data pengumuman...
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                      <span>Memuat data dari server...</span>
                     </div>
                   </td>
                 </tr>
-              ) : announcements.length === 0 ? (
+              ) : isError ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
-                    Tidak ada pengumuman ditemukan.
+                  <td colSpan={6} className="py-12 text-center text-rose-700">
+                    <p className="font-semibold">Gagal memuat data manajemen pengumuman</p>
+                    <p className="text-[11px] mt-1 text-[#7d7152]">
+                      {error?.message || "Terjadi kesalahan koneksi ke server."}
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      onClick={() => refetch()}
+                    >
+                      Coba Lagi
+                    </Button>
+                  </td>
+                </tr>
+              ) : rawList.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                    <span className="text-3xl block mb-2">📢</span>
+                    <p className="font-semibold text-sm text-[#2d2410]">
+                      Belum ada data Manajemen Pengumuman
+                    </p>
+                    <p className="text-xs text-[#9c8e6b] mt-0.5">
+                      {debouncedSearch
+                        ? `Tidak ada data yang cocok dengan "${debouncedSearch}"`
+                        : "Klik tombol '+ Tambah Manajemen Pengumuman' untuk menambahkan data baru."}
+                    </p>
                   </td>
                 </tr>
               ) : (
-                announcements.map((item) => (
-                  <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
-                    <td className="px-4 py-3.5 text-xs align-middle max-w-md">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-xs font-mono font-semibold text-[#a86a00]">
-                          {item.number}
-                        </span>
-                        <span className="font-bold text-[#2d2410] line-clamp-2">
-                          {item.title}
-                        </span>
-                        {item.important && (
-                          <span className="inline-block text-[10px] text-red-600 font-bold">
-                            ⚡ PENTING / SEGERA
-                          </span>
-                        )}
-                      </div>
+                rawList.map((item, index) => {
+                  const no = listindex(pageSize, page, index);
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-amber-50/40 transition-colors duration-150"
+                    >
+                      <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
+                        {no}
+                      </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).judul ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
-                      <Badge variant="neutral">{item.category}</Badge>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).tanggal ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle text-[#5e5133]">
-                      {item.targetAudience}
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).status ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-[#7d7152]">
-                      {item.deadline}
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).file ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
-                      <Badge
-                        variant={
-                          item.status === "Aktif"
-                            ? "success"
-                            : item.status === "Draft"
-                            ? "warning"
-                            : "neutral"
-                        }
-                      >
-                        {item.status}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleOpenEdit(item)}
-                        >
-                          ✏️
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDelete(item.id, item.title)}
-                        >
-                          🗑️
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(item)}
+                            title="Detail Lembar Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-[#7d7152] hover:text-[#2d2410] transition-colors"
+                          >
+                            👁️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(item)}
+                            title="Edit Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-amber-700 hover:text-amber-900 transition-colors"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(item)}
+                            title="Hapus Data"
+                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 transition-colors"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Footer Paginasi Terstandar */}
-        <div className="px-6 py-4 bg-white/20 border-t border-white/60">
+        <div className="p-4 border-t border-[#e2d9c8] bg-white/40">
           <Pagination
             page={page}
-            onPageChange={setPage}
             pageSize={pageSize}
-            onPageSizeChange={setPageSize}
-            total={totalCount}
-            pageSizeOptions={[5, 10, 20]}
+            total={totalItems}
+            onPageChange={(p) => setPage(p)}
+            onPageSizeChange={(s) => setPageSize(s)}
           />
         </div>
       </Card>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingId ? "Edit Pengumuman / Surat Edaran" : "Buat Pengumuman / Surat Edaran"}
-        description="Masukkan nomor surat, isi ringkasan, dan dokumen PDF lampiran untuk pengumuman kedinasan."
-        maxWidth="2xl"
-        footer={
-          <>
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-            >
-              Batal
-            </Button>
-            <Button
-              variant="gold"
-              type="submit"
-              form="form-pengumuman"
-            >
-              {editingId ? "Simpan Perubahan" : "Terbitkan Pengumuman"}
-            </Button>
-          </>
-        }
-      >
-        <form id="form-pengumuman" onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Nomor Surat Resmi"
-              placeholder="Contoh: 421.2/342/Dikbud/IX/2026"
-              required
-              value={formData.number}
-              onChange={(e) => setFormData({ ...formData, number: e.target.value })}
-            />
-            <Select
-              label="Kategori Pengumuman"
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  category: e.target.value as Announcement["category"],
-                })
-              }
-              options={[
-                { value: "Akademik & ANBK", label: "Akademik & ANBK" },
-                { value: "Kepegawaian / PPPK", label: "Kepegawaian / PPPK" },
-                { value: "Pendataan & Dapodik", label: "Pendataan & Dapodik" },
-                { value: "Kebudayaan & Event", label: "Kebudayaan & Event" },
-              ]}
-            />
-          </div>
+      <FormPengumumanModal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        formMode={formMode}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmitForm}
+        isLoading={createMutation.isPending || updateMutation.isPending}
+      />
 
-          <Input
-            label="Perihal / Judul Pengumuman"
-            placeholder="Masukkan judul atau perihal surat edaran..."
-            required
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Sasaran Penerima"
-              placeholder="Contoh: Kepala Satuan Pendidikan SD/SMP"
-              value={formData.targetAudience}
-              onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value })}
-            />
-            <Input
-              label="Batas Waktu / Deadline"
-              placeholder="Contoh: 28 September 2026"
-              value={formData.deadline}
-              onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-            />
-          </div>
-
-          <Textarea
-            label="Ringkasan Isi Pemberitahuan"
-            placeholder="Jelaskan pokok-pokok penting surat edaran..."
-            rows={3}
-            value={formData.summary}
-            onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-          />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FileInput
-              label="Dokumen PDF Lampiran"
-              accept=".pdf"
-              value={formData.attachmentName}
-              placeholder="Unggah berkas PDF surat edaran..."
-              onChange={(fileName) => setFormData({ ...formData, attachmentName: fileName })}
-              helperText="Format dokumen resmi PDF maksimal 10 MB"
-            />
-            <Select
-              label="Status"
-              value={formData.status}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  status: e.target.value as Announcement["status"],
-                })
-              }
-              options={[
-                { value: "Aktif", label: "Aktif & Tampil di Publik" },
-                { value: "Draft", label: "Draft Sementara" },
-                { value: "Selesai", label: "Arsip / Sudah Selesai" },
-              ]}
-            />
-          </div>
-
-          <div className="flex items-center gap-2 pt-1">
-            <input
-              type="checkbox"
-              id="ann-important"
-              checked={formData.important}
-              onChange={(e) => setFormData({ ...formData, important: e.target.checked })}
-              className="w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-400 cursor-pointer"
-            />
-            <label
-              htmlFor="ann-important"
-              className="text-xs font-semibold text-[#2d2410] cursor-pointer"
-            >
-              Tandai sebagai Pengumuman Mendesak / Penting (Badge Merah)
-            </label>
-          </div>
-        </form>
-      </Modal>
+      <DetailPengumumanModal
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        record={selectedRecord}
+      />
     </div>
   );
 }

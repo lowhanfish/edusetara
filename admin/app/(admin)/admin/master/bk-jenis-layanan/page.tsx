@@ -154,7 +154,6 @@ export default function MasterBkJenisLayananPage() {
     <div className="space-y-6">
       <PageHeader
         title="Master BK Jenis Layanan"
-        breadcrumbs={[{"label": "Dashboard", "href": "/admin"}, {"label": "Data Master", "href": "/admin/master"}, {"label": "Master BK", "href": "/admin/master"}, {"label": "BK Jenis Layanan"}]}
         description="Pengelolaan klasifikasi bidang bimbingan konseling (pribadi, sosial, belajar, karir) yang dicatat guru BK."
         action={
           <div className="flex items-center gap-2">
@@ -394,11 +393,7 @@ export default function MasterBkJenisLayananPage() {
           </span>
 
           {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={(p) => setPage(p)}
-            />
+            <Pagination page={page} pageSize={pageSize} total={totalItems} onPageChange={(p) => setPage(p)} onPageSizeChange={(s) => setPageSize(s)} />
           )}
         </div>
       </Card>

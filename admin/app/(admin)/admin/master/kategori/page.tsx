@@ -154,7 +154,6 @@ export default function MasterKategoriBospPage() {
     <div className="space-y-6">
       <PageHeader
         title="Master Kategori Dokumen SPJ BOSP"
-        breadcrumbs={[{"label": "Dashboard", "href": "/admin"}, {"label": "Data Master", "href": "/admin/master"}, {"label": "Master Keuangan BOSP", "href": "/admin/master"}, {"label": "Kategori Dokumen SPJ BOSP"}]}
         description="Pengelolaan rujukan 26 klasifikasi berkas pertanggungjawaban (SPJ) dana BOSP saat unggah usulan rekonsiliasi."
         action={
           <div className="flex items-center gap-2">
@@ -394,11 +393,7 @@ export default function MasterKategoriBospPage() {
           </span>
 
           {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={(p) => setPage(p)}
-            />
+            <Pagination page={page} pageSize={pageSize} total={totalItems} onPageChange={(p) => setPage(p)} onPageSizeChange={(s) => setPageSize(s)} />
           )}
         </div>
       </Card>

@@ -1,41 +1,27 @@
-export interface JurnalGuruKelasRecord {
-  id: string;
-  sekolah: string;
-  tema: string;
-  materi_pokok: string;
-  pertemuan_ke: number;
-  tgl: string;
-  model_pembelajaran: string;
-  metode_pembelajaran: string;
-  kegiatan: string;
-  penilaian: "Penilaian Sikap" | "Penilaian Pengetahuan" | "Penilaian Keterampilan";
-  siswa_hadir: number;
-  siswa_izin: number;
-  siswa_sakit: number;
-  siswa_alpa: number;
-  persentase: number;
-  keterangan: string;
-  file: string;
-  created_at?: string;
-  created_by?: string;
+export interface CreateInterface {
+  sekolah: string | null;
+  tema: string | null;
+  materi_pokok: string | null;
+  pertemuan_ke: number | null;
+  model_pembelajaran?: string | null;
+  metode_pembelajaran?: string | null;
+  teknik_penilaian?: string | null;
+  kendala?: string | null;
+  solusi?: string | null;
 }
 
-export const MODEL_OPTIONS = [
-  "Problem Based Learning",
-  "Project Based Learning",
-  "Discovery Learning",
-  "Inkuiri Terbimbing",
-];
+export interface ResponseInterface extends CreateInterface {
+  id: string;
+  created_by?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
 
-export const METODE_OPTIONS = [
-  "Ceramah & Tanya Jawab",
-  "Diskusi & Penugasan",
-  "Demonstrasi & Praktik",
-  "Observasi Lingkungan & Diskusi",
-];
+export interface ResponseListInterface {
+  skip: number;
+  limit: number;
+  total: number;
+  data: ResponseInterface[];
+}
 
-export const PENILAIAN_OPTIONS: JurnalGuruKelasRecord["penilaian"][] = [
-  "Penilaian Sikap",
-  "Penilaian Pengetahuan",
-  "Penilaian Keterampilan",
-];
+export type JurnalGuruKelasRecord = ResponseInterface;

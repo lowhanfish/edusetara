@@ -91,7 +91,7 @@ export default function PermissionMatrixModal({
               {group.title}
             </span>
           </div>
-          <Badge variant={group.level === 1 ? "primary" : "neutral"}>
+          <Badge variant={group.level === 1 ? "gold" : "neutral"}>
             {group.level === 1 ? "Level 1 (Dinas/Semua)" : "Level 2 (Satuan Pendidikan)"}
           </Badge>
           <div className="w-full sm:w-64">
@@ -236,7 +236,7 @@ export default function PermissionMatrixModal({
             </Button>
             <Button
               type="button"
-              variant="primary"
+              variant="gold"
               onClick={handleSave}
               disabled={updatePermissionsMutation.isPending}
             >

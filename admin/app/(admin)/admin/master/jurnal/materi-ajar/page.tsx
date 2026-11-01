@@ -154,7 +154,6 @@ export default function MasterMateriAjarPage() {
     <div className="space-y-6">
       <PageHeader
         title="Master Materi Ajar"
-        breadcrumbs={[{"label": "Dashboard", "href": "/admin"}, {"label": "Data Master", "href": "/admin/master"}, {"label": "Master Jurnal", "href": "/admin/master/jurnal"}, {"label": "Materi Ajar"}]}
         description="Pengelolaan media dan moda pelaksanaan sesi pembelajaran (luring/daring) yang dipilih guru saat mengisi jurnal mengajar."
         action={
           <div className="flex items-center gap-2">
@@ -394,11 +393,7 @@ export default function MasterMateriAjarPage() {
           </span>
 
           {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={(p) => setPage(p)}
-            />
+            <Pagination page={page} pageSize={pageSize} total={totalItems} onPageChange={(p) => setPage(p)} onPageSizeChange={(s) => setPageSize(s)} />
           )}
         </div>
       </Card>

@@ -1,509 +1,406 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
-import { fetchData } from "@/lib/api_secure";
 import {
-  Badge,
   Button,
   Card,
   Input,
-  Modal,
   PageHeader,
   Pagination,
-  Select,
-  Textarea,
-} from "../../_components/ui";
+} from "@/app/(admin)/_components/ui";
 
-interface ContactMessage {
-  id: string;
-  senderName: string;
-  email: string;
-  phone: string;
-  subject: string;
-  category: "Pengaduan" | "Permohonan Informasi" | "Aspirasi / Saran" | "Umum";
-  message: string;
-  date: string;
-  status: "Belum Dibalas" | "Diproses" | "Selesai";
-}
+import { ResponseInterface, PublishKontakRecord } from "./types";
+import FormPublishKontakModal from "./components/FormPublishKontakModal";
+import DetailPublishKontakModal from "./components/DetailPublishKontakModal";
+import {
+  useResponseListMaster,
+  useDeleteMaster,
+  useCreateMaster,
+  useUpdateMaster,
+} from "./hooks/crud";
+import { listindex } from "@/utilities/pagination";
 
-export default function KontakAdminPage() {
-  const [messages, setMessages] = useState<ContactMessage[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
-  const [replyText, setReplyText] = useState("");
-  const [statusFilter, setStatusFilter] = useState("Semua");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
+export default function PublishKontakPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
 
-  // Form tambah pengaduan / pesan manual
-  const [formData, setFormData] = useState({
-    senderName: "",
-    email: "",
-    phone: "",
-    subject: "",
-    category: "Aspirasi / Saran" as ContactMessage["category"],
-    message: "",
-  });
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const handler = setTimeout(() => {
       setDebouncedSearch(search);
       setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
+    }, 400);
+
+    return () => {
+      clearTimeout(handler);
+    };
   }, [search]);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const skip = (page - 1) * pageSize;
-      const q = debouncedSearch.trim() ? `&search=${encodeURIComponent(debouncedSearch.trim())}` : "";
-      const res = await fetchData<{ total: number; data: any[] }>(
-        `/api/v1/admin/kontak/read?page=${page}&per_page=${pageSize}&skip=${skip}&limit=${pageSize}${q}`
-      );
+  const { List, isLoading, isError, error, refetch } = useResponseListMaster(
+    page,
+    pageSize,
+    debouncedSearch
+  );
+  const deleteMutation = useDeleteMaster();
+  const createMutation = useCreateMaster();
+  const updateMutation = useUpdateMaster();
 
-      if (res && Array.isArray(res.data)) {
-        const mapped: ContactMessage[] = res.data.map((row: any) => ({
-          id: row.id,
-          senderName: row.nama || row.senderName || "",
-          email: row.email || "-",
-          phone: row.phone || "-",
-          subject: row.subjek || row.subject || "Pesan Langsung",
-          category: (row.kategori || row.category || "Aspirasi / Saran") as ContactMessage["category"],
-          message: row.pesan || row.message || "",
-          date: row.created_at ? new Date(row.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "Hari ini",
-          status: (row.status || "Belum Dibalas") as ContactMessage["status"],
-        }));
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<PublishKontakRecord | null>(null);
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
 
-        const filteredByStatus = statusFilter === "Semua" ? mapped : mapped.filter(m => m.status === statusFilter);
-        setMessages(filteredByStatus);
-        setTotalCount(res.total ?? mapped.length);
-      }
-    } catch (err: any) {
-      console.error("Gagal memuat pesan masuk:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize, debouncedSearch, statusFilter]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.senderName || !formData.message) return;
-
-    const payload = {
-      nama: formData.senderName,
-      email: formData.email || "-",
-      phone: formData.phone || "-",
-      subjek: formData.subject || "Pesan Langsung / Pengaduan",
-      kategori: formData.category,
-      pesan: formData.message,
-      status: "Belum Dibalas",
-    };
-
-    try {
-      await fetchData(`/api/v1/admin/kontak/create`, {
-        method: "POST",
-        body: payload,
-      });
-
-      Swal.fire({
-        icon: "success",
-        title: "Pesan Disimpan",
-        text: "Pesan masuk baru telah dicatat ke sistem.",
-        timer: 1800,
-        showConfirmButton: false,
-      });
-
-      setIsModalOpen(false);
-      setFormData({
-        senderName: "",
-        email: "",
-        phone: "",
-        subject: "",
-        category: "Aspirasi / Saran",
-        message: "",
-      });
-      loadData();
-    } catch (err: any) {
-      Swal.fire({
-        icon: "error",
-        title: "Gagal Menyimpan",
-        text: err?.message || "Terjadi kesalahan saat menyimpan data.",
-      });
-    }
+  const initialForm: Partial<ResponseInterface> = {
+    nama: "",
+    email: "",
+    telepon: "",
+    subjek: "",
+    pesan: "",
+    status: "",
   };
 
-  const handleReplySubmit = async () => {
-    if (!selectedMessage || !replyText.trim()) return;
+  const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
 
-    try {
-      await fetchData(`/api/v1/admin/kontak/update/${selectedMessage.id}`, {
-        method: "PUT",
-        body: {
-          tanggapan: replyText,
-          status: "Selesai",
-        },
-      });
-
-      Swal.fire({
-        icon: "success",
-        title: "Tanggapan Terkirim",
-        text: `Tanggapan resmi telah disimpan untuk ${selectedMessage.senderName}.`,
-        timer: 2000,
-        showConfirmButton: false,
-      });
-
-      setSelectedMessage(null);
-      setReplyText("");
-      loadData();
-    } catch (err: any) {
-      Swal.fire({
-        icon: "error",
-        title: "Gagal Mengirim Tanggapan",
-        text: err?.message || "Terjadi kesalahan sistem.",
-      });
-    }
+  const emptyForm = () => {
+    setFormData(initialForm);
   };
 
-  const handleDelete = async (id: string, senderName: string) => {
-    const result = await Swal.fire({
-      title: "Hapus Pesan Masuk?",
-      text: `Pesan dari "${senderName}" akan dihapus permanen.`,
+  const rawList: PublishKontakRecord[] = useMemo(() => {
+    if (!List?.data || !Array.isArray(List.data)) return [];
+    return List.data;
+  }, [List]);
+
+  const totalItems = List?.total ?? rawList.length;
+
+  const handleOpenAdd = () => {
+    setFormMode("add");
+    emptyForm();
+    setIsFormOpen(true);
+  };
+
+  const handleOpenEdit = (record: PublishKontakRecord) => {
+    setFormMode("edit");
+    setFormData({
+      id: record.id,
+      nama: (record as any).nama ?? "",
+      email: (record as any).email ?? "",
+      telepon: (record as any).telepon ?? "",
+      subjek: (record as any).subjek ?? "",
+      pesan: (record as any).pesan ?? "",
+      status: (record as any).status ?? "",
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleOpenDetail = (record: PublishKontakRecord) => {
+    setSelectedRecord(record);
+    setIsDetailOpen(true);
+  };
+
+  const handleDelete = (record: PublishKontakRecord) => {
+    const displayName =
+      (record as any).judul ||
+      (record as any).title ||
+      (record as any).nama ||
+      (record as any).sekolah ||
+      (record as any).nama_kombel ||
+      (record as any).kegiatan ||
+      (record as any).indikator ||
+      (record as any).isi ||
+      "data ini";
+
+    Swal.fire({
+      title: "Hapus Pesan & Kontak Masuk?",
+      text: `Apakah Anda yakin ingin menghapus "${displayName}"?`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus!",
+      confirmButtonColor: "#c2410c",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Ya, Hapus Data",
       cancelButtonText: "Batal",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await fetchData(`/api/v1/admin/kontak/delete/${id}`, {
-          method: "DELETE",
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Terhapus",
-          text: "Pesan berhasil dihapus.",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-        loadData();
-      } catch (err: any) {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal Menghapus",
-          text: err?.message || "Terjadi kesalahan saat menghapus pesan.",
-        });
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteMutation.mutate(record.id);
       }
+    });
+  };
+
+  const handleSubmitForm = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload: Partial<ResponseInterface> = { ...formData };
+
+    if (formMode === "add") {
+      createMutation.mutate(payload, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          emptyForm();
+        },
+      });
+    } else {
+      if (!formData.id) return;
+      updateMutation.mutate(
+        { body: payload, id: formData.id },
+        {
+          onSuccess: () => {
+            setIsFormOpen(false);
+            emptyForm();
+          },
+        }
+      );
     }
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6">
       <PageHeader
-        title="Kotak Pesan & Pengaduan Masuk"
-        description="Kelola pesan masuk masyarakat, pertanyaan layanan, serta aspirasi publik yang masuk melalui portal Dikbud Konawe Selatan."
-        badge={<Badge variant="gold">{totalCount} Pesan Masuk</Badge>}
+        title="Pesan & Kontak Masuk"
+        description="Pengelolaan aspirasi masyarakat, saran publik, dan pengaduan layanan terpadu."
         action={
-          <Button variant="gold" icon="✉️" onClick={() => setIsModalOpen(true)}>
-            Catat Pesan / Aspirasi Baru
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="hidden sm:inline-flex"
+            >
+              🔄 Refresh
+            </Button>
+            <Button variant="gold" size="sm" onClick={handleOpenAdd}>
+              + Tambah Pesan & Kontak Masuk
+            </Button>
+          </div>
         }
       />
 
-      <Card className="border border-white/80 shadow-xs">
-        {/* Toolbar Pencarian & Filter Status di dalam Card */}
-        <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="w-full sm:w-80">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Total Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{totalItems}</h4>
+              <p className="text-[11px] text-emerald-700 mt-0.5">Operasional Terdaftar</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              💬
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
+              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">Publish</h4>
+              <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              📁
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Status API</p>
+              <h4 className="text-2xl font-bold text-emerald-700 mt-1">Terhubung</h4>
+              <p className="text-[11px] text-emerald-600 mt-0.5">FastAPI & MySQL</p>
+            </div>
+            <span className="text-3xl p-3 bg-emerald-50 rounded-2xl border border-emerald-200/50">
+              ⚡
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Standar Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Modular</h4>
+              <p className="text-[11px] text-blue-700 mt-0.5">master pattern</p>
+            </div>
+            <span className="text-3xl p-3 bg-blue-50 rounded-2xl border border-blue-200/50">
+              📋
+            </span>
+          </div>
+        </Card>
+      </div>
+
+      <Card className="rounded-2xl border-white/80 bg-white/70 overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-[#e2d9c8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex-1 max-w-sm">
             <Input
-              placeholder="Cari pengirim, email, subjek..."
+              type="text"
+              placeholder="Cari data pesan & kontak masuk..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              className="w-full text-xs"
             />
           </div>
 
-          <div className="flex gap-2 overflow-x-auto w-full sm:w-auto pb-1">
-            {["Semua", "Belum Dibalas", "Diproses", "Selesai"].map((status) => (
-              <button
-                key={status}
-                type="button"
-                onClick={() => {
-                  setStatusFilter(status);
-                  setPage(1);
-                }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                  statusFilter === status
-                    ? "bg-[#2d2410] text-white shadow-2xs"
-                    : "bg-white/60 text-slate-600 border border-white/80 hover:bg-white"
-                }`}
-              >
-                {status}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#7d7152]">Tampilkan:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              aria-label="Jumlah data per halaman"
+              className="text-xs bg-white border border-[#d5cbba] rounded-lg px-2 py-1.5 text-[#2d2410] focus:outline-none focus:ring-1 focus:ring-amber-500"
+            >
+              <option value={5}>5 baris</option>
+              <option value={10}>10 baris</option>
+              <option value={20}>20 baris</option>
+            </select>
           </div>
         </div>
 
-        {/* Tabel Semantik Native HTML */}
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
-              <tr>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Pengirim & Kontak</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Kategori</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Perihal / Subjek</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Waktu Masuk</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Status</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">Aksi</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
+                <th className="py-3 px-4 w-12 text-center">No</th>
+                <th className="py-3 px-4">Pengirim</th>
+                <th className="py-3 px-4">Email</th>
+                <th className="py-3 px-4">Subjek</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/60 bg-transparent">
-              {loading ? (
+            <tbody className="divide-y divide-[#ece5d8]">
+              {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-                      Memuat pesan masuk...
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                      <span>Memuat data dari server...</span>
                     </div>
                   </td>
                 </tr>
-              ) : messages.length === 0 ? (
+              ) : isError ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
-                    Tidak ada pesan ditemukan.
+                  <td colSpan={6} className="py-12 text-center text-rose-700">
+                    <p className="font-semibold">Gagal memuat data pesan & kontak masuk</p>
+                    <p className="text-[11px] mt-1 text-[#7d7152]">
+                      {error?.message || "Terjadi kesalahan koneksi ke server."}
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      onClick={() => refetch()}
+                    >
+                      Coba Lagi
+                    </Button>
+                  </td>
+                </tr>
+              ) : rawList.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                    <span className="text-3xl block mb-2">💬</span>
+                    <p className="font-semibold text-sm text-[#2d2410]">
+                      Belum ada data Pesan & Kontak Masuk
+                    </p>
+                    <p className="text-xs text-[#9c8e6b] mt-0.5">
+                      {debouncedSearch
+                        ? `Tidak ada data yang cocok dengan "${debouncedSearch}"`
+                        : "Klik tombol '+ Tambah Pesan & Kontak Masuk' untuk menambahkan data baru."}
+                    </p>
                   </td>
                 </tr>
               ) : (
-                messages.map((item) => (
-                  <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
-                    <td className="px-4 py-3.5 text-xs align-middle">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-[#2d2410]">
-                          {item.senderName}
-                        </span>
-                        <span className="text-xs text-[#7d7152]">
-                          {item.email} • {item.phone}
-                        </span>
-                      </div>
+                rawList.map((item, index) => {
+                  const no = listindex(pageSize, page, index);
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-amber-50/40 transition-colors duration-150"
+                    >
+                      <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
+                        {no}
+                      </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).nama ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
-                      <Badge variant="neutral">{item.category}</Badge>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).email ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle max-w-xs">
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-slate-800 line-clamp-1">
-                          {item.subject}
-                        </span>
-                        <span className="text-xs text-[#7d7152] line-clamp-1">
-                          {item.message}
-                        </span>
-                      </div>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).subjek ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-[#7d7152]">
-                      {item.date}
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).status ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
-                      <Badge
-                        variant={
-                          item.status === "Selesai"
-                            ? "success"
-                            : item.status === "Diproses"
-                            ? "info"
-                            : "warning"
-                        }
-                      >
-                        {item.status}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedMessage(item)}
-                        >
-                          Buka & Balas
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDelete(item.id, item.senderName)}
-                        >
-                          🗑️
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(item)}
+                            title="Detail Lembar Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-[#7d7152] hover:text-[#2d2410] transition-colors"
+                          >
+                            👁️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(item)}
+                            title="Edit Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-amber-700 hover:text-amber-900 transition-colors"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(item)}
+                            title="Hapus Data"
+                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 transition-colors"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Footer Paginasi Terstandar */}
-        <div className="px-6 py-4 bg-white/20 border-t border-white/60">
+        <div className="p-4 border-t border-[#e2d9c8] bg-white/40">
           <Pagination
             page={page}
-            onPageChange={setPage}
             pageSize={pageSize}
-            onPageSizeChange={setPageSize}
-            total={totalCount}
-            pageSizeOptions={[5, 10, 20]}
+            total={totalItems}
+            onPageChange={(p) => setPage(p)}
+            onPageSizeChange={(s) => setPageSize(s)}
           />
         </div>
       </Card>
 
-      {/* Modal Balas Pesan */}
-      {selectedMessage && (
-        <Modal
-          isOpen={Boolean(selectedMessage)}
-          onClose={() => setSelectedMessage(null)}
-          title="Detail & Tanggapan Pesan"
-          description={`Pengirim: ${selectedMessage.senderName} (${selectedMessage.email})`}
-          maxWidth="lg"
-          footer={
-            <>
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => setSelectedMessage(null)}
-              >
-                Tutup
-              </Button>
-              <Button
-                variant="gold"
-                type="button"
-                onClick={handleReplySubmit}
-              >
-                Kirimkan Balasan
-              </Button>
-            </>
-          }
-        >
-          <div className="space-y-4">
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-sm text-[#2d2410]">
-                  {selectedMessage.subject}
-                </span>
-                <Badge variant="neutral">{selectedMessage.category}</Badge>
-              </div>
-              <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-line">
-                {selectedMessage.message}
-              </p>
-            </div>
+      <FormPublishKontakModal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        formMode={formMode}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmitForm}
+        isLoading={createMutation.isPending || updateMutation.isPending}
+      />
 
-            <Textarea
-              label="Tanggapan / Jawaban Resmi Dinas"
-              placeholder="Tuliskan jawaban atau disposisi untuk pemohon..."
-              rows={4}
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-            />
-          </div>
-        </Modal>
-      )}
-
-      {/* Modal Catat Pesan Baru */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Catat Pesan / Aspirasi Baru"
-        description="Dokumentasikan pesan masuk dari loket, telepon, atau kanal offline."
-        maxWidth="lg"
-        footer={
-          <>
-            <Button variant="outline" type="button" onClick={() => setIsModalOpen(false)}>
-              Batal
-            </Button>
-            <Button variant="gold" type="submit" form="form-kontak">
-              Simpan Pesan
-            </Button>
-          </>
-        }
-      >
-        <form id="form-kontak" onSubmit={handleCreate} className="space-y-4">
-          <Input
-            label="Nama Pengirim"
-            placeholder="Nama lengkap pemohon atau instansi..."
-            required
-            value={formData.senderName}
-            onChange={(e) =>
-              setFormData({ ...formData, senderName: e.target.value })
-            }
-          />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Email"
-              type="email"
-              placeholder="email@domain.com"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-            />
-            <Input
-              label="No. Telepon / WhatsApp"
-              placeholder="08xx-xxxx-xxxx"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Perihal / Subjek"
-              placeholder="Contoh: Permohonan Konsultasi BOS"
-              value={formData.subject}
-              onChange={(e) =>
-                setFormData({ ...formData, subject: e.target.value })
-              }
-            />
-            <Select
-              label="Kategori"
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  category: e.target.value as ContactMessage["category"],
-                })
-              }
-              options={[
-                { value: "Aspirasi / Saran", label: "Aspirasi / Saran" },
-                { value: "Permohonan Informasi", label: "Permohonan Informasi" },
-                { value: "Pengaduan", label: "Pengaduan Layanan" },
-                { value: "Umum", label: "Umum" },
-              ]}
-            />
-          </div>
-
-          <Textarea
-            label="Isi Pesan"
-            placeholder="Tuliskan isi pesan atau pokok pengaduan..."
-            rows={4}
-            required
-            value={formData.message}
-            onChange={(e) =>
-              setFormData({ ...formData, message: e.target.value })
-            }
-          />
-        </form>
-      </Modal>
+      <DetailPublishKontakModal
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        record={selectedRecord}
+      />
     </div>
   );
 }

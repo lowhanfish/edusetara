@@ -154,7 +154,6 @@ export default function MasterPekerjaanPage() {
     <div className="space-y-6">
       <PageHeader
         title="Master Pekerjaan Orang Tua"
-        breadcrumbs={[{"label": "Dashboard", "href": "/admin"}, {"label": "Data Master", "href": "/admin/master"}, {"label": "Master PPDB", "href": "/admin/master/ppdb"}, {"label": "Pekerjaan Orang Tua"}]}
         description="Pengelolaan klasifikasi mata pencaharian atau sektor profesi orang tua/wali murid."
         action={
           <div className="flex items-center gap-2">
@@ -394,11 +393,7 @@ export default function MasterPekerjaanPage() {
           </span>
 
           {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={(p) => setPage(p)}
-            />
+            <Pagination page={page} pageSize={pageSize} total={totalItems} onPageChange={(p) => setPage(p)} onPageSizeChange={(s) => setPageSize(s)} />
           )}
         </div>
       </Card>

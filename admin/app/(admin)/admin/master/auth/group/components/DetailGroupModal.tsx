@@ -29,7 +29,7 @@ export default function DetailGroupModal({
           </div>
           <div>
             <span className="text-xs text-slate-400 block mb-1">Level Akses</span>
-            <Badge variant={record.level === 1 ? "primary" : "neutral"}>
+            <Badge variant={record.level === 1 ? "gold" : "neutral"}>
               {record.level === 1 ? "Level 1 (Dinas/Semua)" : "Level 2 (Satuan Pendidikan)"}
             </Badge>
           </div>

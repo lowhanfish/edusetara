@@ -1,378 +1,410 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
-import { fetchData } from "@/lib/api_secure";
 import {
-  Badge,
   Button,
   Card,
-  FileInput,
   Input,
-  Modal,
   PageHeader,
-  Select,
-  Textarea,
-} from "../../_components/ui";
+  Pagination,
+} from "@/app/(admin)/_components/ui";
 
-interface BannerSlide {
-  id: string;
-  title: string;
-  subtitle: string;
-  badgeText: string;
-  primaryButtonLabel: string;
-  primaryButtonLink: string;
-  image: string;
-  order: number;
-  status: "Aktif" | "Nonaktif";
-}
+import { ResponseInterface, PublishBannerRecord } from "./types";
+import FormPublishBannerModal from "./components/FormPublishBannerModal";
+import DetailPublishBannerModal from "./components/DetailPublishBannerModal";
+import {
+  useResponseListMaster,
+  useDeleteMaster,
+  useCreateMaster,
+  useUpdateMaster,
+} from "./hooks/crud";
+import { listindex } from "@/utilities/pagination";
 
-export default function BannerAdminPage() {
-  const [banners, setBanners] = useState<BannerSlide[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+export default function PublishBannerPage() {
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const [formData, setFormData] = useState({
-    title: "",
-    subtitle: "",
-    badgeText: "Portal Resmi Dikbud Konsel",
-    primaryButtonLabel: "Lihat Layanan",
-    primaryButtonLink: "/layanan-publik",
-    image: "/img/hero-konsel.png",
-    order: 1,
-    status: "Aktif" as BannerSlide["status"],
-  });
-
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetchData<{ total: number; data: any[] }>(
-        `/api/v1/admin/banner/read?limit=50`
-      );
-
-      if (res && Array.isArray(res.data)) {
-        const mapped: BannerSlide[] = res.data.map((row: any) => ({
-          id: row.id,
-          title: row.title || "",
-          subtitle: row.subtitle || "",
-          badgeText: row.badge_text || row.badgeText || "Portal Resmi Dikbud Konsel",
-          primaryButtonLabel: row.primary_button_label || row.primaryButtonLabel || "Jelajahi Layanan",
-          primaryButtonLink: row.primary_button_link || row.primaryButtonLink || "/layanan-publik",
-          image: row.image || "/img/hero-konsel.png",
-          order: Number(row.order_num || row.order || 1),
-          status: (row.status || "Aktif") as BannerSlide["status"],
-        }));
-        setBanners(mapped);
-      }
-    } catch (err: any) {
-      console.error("Gagal memuat banner:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 400);
 
-  const handleOpenCreate = () => {
-    setEditingId(null);
-    setFormData({
-      title: "",
-      subtitle: "",
-      badgeText: "Portal Resmi Dikbud Konsel",
-      primaryButtonLabel: "Lihat Layanan",
-      primaryButtonLink: "/layanan-publik",
-      image: "/img/hero-konsel.png",
-      order: banners.length + 1,
-      status: "Aktif",
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEdit = (item: BannerSlide) => {
-    setEditingId(item.id);
-    setFormData({
-      title: item.title,
-      subtitle: item.subtitle,
-      badgeText: item.badgeText,
-      primaryButtonLabel: item.primaryButtonLabel,
-      primaryButtonLink: item.primaryButtonLink,
-      image: item.image,
-      order: item.order,
-      status: item.status,
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.title) return;
-
-    const payload = {
-      title: formData.title,
-      subtitle: formData.subtitle,
-      badge_text: formData.badgeText,
-      primary_button_label: formData.primaryButtonLabel,
-      primary_button_link: formData.primaryButtonLink,
-      image: formData.image,
-      order_num: String(formData.order),
-      status: formData.status,
+    return () => {
+      clearTimeout(handler);
     };
+  }, [search]);
 
-    try {
-      if (editingId) {
-        await fetchData(`/api/v1/admin/banner/update/${editingId}`, {
-          method: "PUT",
-          body: payload,
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil Diperbarui",
-          text: "Slider banner berhasil diperbarui.",
-          timer: 1800,
-          showConfirmButton: false,
-        });
-      } else {
-        await fetchData(`/api/v1/admin/banner/create`, {
-          method: "POST",
-          body: payload,
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil Ditambahkan",
-          text: "Slider banner baru telah disimpan.",
-          timer: 1800,
-          showConfirmButton: false,
-        });
-      }
-      setIsModalOpen(false);
-      loadData();
-    } catch (err: any) {
-      Swal.fire({
-        icon: "error",
-        title: "Gagal Menyimpan",
-        text: err?.message || "Terjadi kesalahan sistem saat menyimpan.",
-      });
-    }
+  const { List, isLoading, isError, error, refetch } = useResponseListMaster(
+    page,
+    pageSize,
+    debouncedSearch
+  );
+  const deleteMutation = useDeleteMaster();
+  const createMutation = useCreateMaster();
+  const updateMutation = useUpdateMaster();
+
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<PublishBannerRecord | null>(null);
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
+
+  const initialForm: Partial<ResponseInterface> = {
+    title: "",
+    subtitle: "",
+    badge_text: "",
+    primary_button_label: "",
+    primary_button_link: "",
+    image: "",
+    order: null,
+    status: "",
   };
 
-  const handleDelete = async (id: string, title: string) => {
-    const result = await Swal.fire({
-      title: "Hapus Slider Banner?",
-      text: `Banner "${title}" akan dihapus permanen.`,
+  const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
+
+  const emptyForm = () => {
+    setFormData(initialForm);
+  };
+
+  const rawList: PublishBannerRecord[] = useMemo(() => {
+    if (!List?.data || !Array.isArray(List.data)) return [];
+    return List.data;
+  }, [List]);
+
+  const totalItems = List?.total ?? rawList.length;
+
+  const handleOpenAdd = () => {
+    setFormMode("add");
+    emptyForm();
+    setIsFormOpen(true);
+  };
+
+  const handleOpenEdit = (record: PublishBannerRecord) => {
+    setFormMode("edit");
+    setFormData({
+      id: record.id,
+      title: (record as any).title ?? "",
+      subtitle: (record as any).subtitle ?? "",
+      badge_text: (record as any).badge_text ?? "",
+      primary_button_label: (record as any).primary_button_label ?? "",
+      primary_button_link: (record as any).primary_button_link ?? "",
+      image: (record as any).image ?? "",
+      order: (record as any).order ?? "",
+      status: (record as any).status ?? "",
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleOpenDetail = (record: PublishBannerRecord) => {
+    setSelectedRecord(record);
+    setIsDetailOpen(true);
+  };
+
+  const handleDelete = (record: PublishBannerRecord) => {
+    const displayName =
+      (record as any).judul ||
+      (record as any).title ||
+      (record as any).nama ||
+      (record as any).sekolah ||
+      (record as any).nama_kombel ||
+      (record as any).kegiatan ||
+      (record as any).indikator ||
+      (record as any).isi ||
+      "data ini";
+
+    Swal.fire({
+      title: "Hapus Banner & Slider Beranda?",
+      text: `Apakah Anda yakin ingin menghapus "${displayName}"?`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus!",
+      confirmButtonColor: "#c2410c",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Ya, Hapus Data",
       cancelButtonText: "Batal",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await fetchData(`/api/v1/admin/banner/delete/${id}`, {
-          method: "DELETE",
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Terhapus",
-          text: "Banner berhasil dihapus.",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-        loadData();
-      } catch (err: any) {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal Menghapus",
-          text: err?.message || "Terjadi kesalahan sistem.",
-        });
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteMutation.mutate(record.id);
       }
+    });
+  };
+
+  const handleSubmitForm = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload: Partial<ResponseInterface> = { ...formData };
+
+    if (formMode === "add") {
+      createMutation.mutate(payload, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          emptyForm();
+        },
+      });
+    } else {
+      if (!formData.id) return;
+      updateMutation.mutate(
+        { body: payload, id: formData.id },
+        {
+          onSuccess: () => {
+            setIsFormOpen(false);
+            emptyForm();
+          },
+        }
+      );
     }
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6">
       <PageHeader
         title="Banner & Slider Beranda"
-        description="Atur tayangan slider utama (hero banner) di halaman muka website publik, foto latar belakang, dan tombol aksi."
-        badge={<Badge variant="gold">{banners.length} Slider</Badge>}
+        description="Pengaturan slide spanduk utama, tajuk sorotan, dan tautan aksi beranda website."
         action={
-          <Button variant="gold" icon="🖼️" onClick={handleOpenCreate}>
-            Tambah Slider Banner
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="hidden sm:inline-flex"
+            >
+              🔄 Refresh
+            </Button>
+            <Button variant="gold" size="sm" onClick={handleOpenAdd}>
+              + Tambah Banner & Slider Beranda
+            </Button>
+          </div>
         }
       />
 
-      {loading ? (
-        <Card className="p-12 text-center text-xs text-[#7d7152]">
-          <div className="flex items-center justify-center gap-2">
-            <span className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-            Memuat daftar banner...
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Total Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{totalItems}</h4>
+              <p className="text-[11px] text-emerald-700 mt-0.5">Operasional Terdaftar</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              🖼️
+            </span>
           </div>
         </Card>
-      ) : banners.length === 0 ? (
-        <Card className="p-12 text-center text-xs text-[#7d7152]">
-          Belum ada slider banner. Klik &quot;Tambah Slider Banner&quot; di atas untuk membuat banner baru.
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {banners.map((item) => (
-            <Card key={item.id} className="flex flex-col justify-between overflow-hidden border border-white/80 shadow-xs">
-              <div className="p-6 bg-gradient-to-br from-[#fff6dc] to-[#fff0c4] border-b border-amber-200/50 flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#2d2410] bg-white/70 px-2.5 py-1 rounded-md">
-                    Urutan #{item.order}
-                  </span>
-                  <Badge variant={item.status === "Aktif" ? "success" : "neutral"}>
-                    {item.status}
-                  </Badge>
-                </div>
-                <span className="text-xs text-[#a86a00] font-bold">
-                  {item.badgeText}
-                </span>
-                <h3 className="text-lg font-extrabold text-[#2d2410]">
-                  {item.title}
-                </h3>
-                <p className="text-xs text-slate-700 line-clamp-2">
-                  {item.subtitle}
-                </p>
-              </div>
 
-              <div className="p-5 flex items-center justify-between bg-white text-xs text-slate-600">
-                <div className="flex flex-col">
-                  <span className="font-semibold text-[#2d2410]">
-                    Tombol: {item.primaryButtonLabel}
-                  </span>
-                  <span className="text-slate-400 font-mono text-[11px]">
-                    {item.primaryButtonLink}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleOpenEdit(item)}
-                  >
-                    ✏️ Edit
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hover:text-red-600 hover:bg-red-50"
-                    onClick={() => handleDelete(item.id, item.title)}
-                  >
-                    🗑️ Hapus
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
+              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">Publish</h4>
+              <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              📁
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Status API</p>
+              <h4 className="text-2xl font-bold text-emerald-700 mt-1">Terhubung</h4>
+              <p className="text-[11px] text-emerald-600 mt-0.5">FastAPI & MySQL</p>
+            </div>
+            <span className="text-3xl p-3 bg-emerald-50 rounded-2xl border border-emerald-200/50">
+              ⚡
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Standar Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Modular</h4>
+              <p className="text-[11px] text-blue-700 mt-0.5">master pattern</p>
+            </div>
+            <span className="text-3xl p-3 bg-blue-50 rounded-2xl border border-blue-200/50">
+              📋
+            </span>
+          </div>
+        </Card>
+      </div>
+
+      <Card className="rounded-2xl border-white/80 bg-white/70 overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-[#e2d9c8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex-1 max-w-sm">
+            <Input
+              type="text"
+              placeholder="Cari data banner & slider beranda..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full text-xs"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#7d7152]">Tampilkan:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              aria-label="Jumlah data per halaman"
+              className="text-xs bg-white border border-[#d5cbba] rounded-lg px-2 py-1.5 text-[#2d2410] focus:outline-none focus:ring-1 focus:ring-amber-500"
+            >
+              <option value={5}>5 baris</option>
+              <option value={10}>10 baris</option>
+              <option value={20}>20 baris</option>
+            </select>
+          </div>
         </div>
-      )}
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingId ? "Edit Slider Hero" : "Tambah Slider Hero Baru"}
-        description="Masukkan judul hero banner, teks penjelas, dan tautan tombol yang akan muncul di beranda."
-        maxWidth="lg"
-        footer={
-          <>
-            <Button variant="outline" type="button" onClick={() => setIsModalOpen(false)}>
-              Batal
-            </Button>
-            <Button variant="gold" type="submit" form="form-banner">
-              {editingId ? "Simpan Perubahan" : "Simpan Slider"}
-            </Button>
-          </>
-        }
-      >
-        <form id="form-banner" onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Judul Utama Slider"
-            placeholder="Contoh: Pendidikan Cerdas, Lestari Budayanya"
-            required
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
+                <th className="py-3 px-4 w-12 text-center">No</th>
+                <th className="py-3 px-4">Judul Banner</th>
+                <th className="py-3 px-4">Badge</th>
+                <th className="py-3 px-4">Urutan</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 w-28 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#ece5d8]">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                      <span>Memuat data dari server...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : isError ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-rose-700">
+                    <p className="font-semibold">Gagal memuat data banner & slider beranda</p>
+                    <p className="text-[11px] mt-1 text-[#7d7152]">
+                      {error?.message || "Terjadi kesalahan koneksi ke server."}
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      onClick={() => refetch()}
+                    >
+                      Coba Lagi
+                    </Button>
+                  </td>
+                </tr>
+              ) : rawList.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                    <span className="text-3xl block mb-2">🖼️</span>
+                    <p className="font-semibold text-sm text-[#2d2410]">
+                      Belum ada data Banner & Slider Beranda
+                    </p>
+                    <p className="text-xs text-[#9c8e6b] mt-0.5">
+                      {debouncedSearch
+                        ? `Tidak ada data yang cocok dengan "${debouncedSearch}"`
+                        : "Klik tombol '+ Tambah Banner & Slider Beranda' untuk menambahkan data baru."}
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                rawList.map((item, index) => {
+                  const no = listindex(pageSize, page, index);
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-amber-50/40 transition-colors duration-150"
+                    >
+                      <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
+                        {no}
+                      </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).title ?? "-")}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).badge_text ?? "-")}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).order ?? "-")}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).status ?? "-")}
+                    </td>
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(item)}
+                            title="Detail Lembar Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-[#7d7152] hover:text-[#2d2410] transition-colors"
+                          >
+                            👁️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(item)}
+                            title="Edit Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-amber-700 hover:text-amber-900 transition-colors"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(item)}
+                            title="Hapus Data"
+                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 transition-colors"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="p-4 border-t border-[#e2d9c8] bg-white/40">
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={totalItems}
+            onPageChange={(p) => setPage(p)}
+            onPageSizeChange={(s) => setPageSize(s)}
           />
+        </div>
+      </Card>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Teks Label / Badge Atas"
-              placeholder="Contoh: Portal Resmi Dikbud Konsel"
-              value={formData.badgeText}
-              onChange={(e) =>
-                setFormData({ ...formData, badgeText: e.target.value })
-              }
-            />
-            <Input
-              label="Urutan Tampil (No. Urut)"
-              type="number"
-              value={formData.order}
-              onChange={(e) =>
-                setFormData({ ...formData, order: Number(e.target.value) })
-              }
-            />
-          </div>
+      <FormPublishBannerModal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        formMode={formMode}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmitForm}
+        isLoading={createMutation.isPending || updateMutation.isPending}
+      />
 
-          <Textarea
-            label="Deskripsi / Subtitle Banner"
-            placeholder="Jelaskan pesan atau arahan singkat untuk banner ini..."
-            rows={3}
-            value={formData.subtitle}
-            onChange={(e) =>
-              setFormData({ ...formData, subtitle: e.target.value })
-            }
-          />
-
-          <FileInput
-            label="Foto / Gambar Latar Belakang Banner"
-            accept="image/*"
-            value={formData.image}
-            onChange={(fileName) =>
-              setFormData({ ...formData, image: fileName })
-            }
-            helperText="Unggah gambar hero slider resolusi tinggi (rekomendasi 1920x800 px)"
-          />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Label Tombol Utama"
-              placeholder="Contoh: Jelajahi Layanan"
-              value={formData.primaryButtonLabel}
-              onChange={(e) =>
-                setFormData({ ...formData, primaryButtonLabel: e.target.value })
-              }
-            />
-            <Input
-              label="Link Tujuan Tombol"
-              placeholder="Contoh: /layanan-publik"
-              value={formData.primaryButtonLink}
-              onChange={(e) =>
-                setFormData({ ...formData, primaryButtonLink: e.target.value })
-              }
-            />
-          </div>
-
-          <Select
-            label="Status Tampil"
-            value={formData.status}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                status: e.target.value as BannerSlide["status"],
-              })
-            }
-            options={[
-              { value: "Aktif", label: "Aktif & Ditampilkan" },
-              { value: "Nonaktif", label: "Nonaktifkan Sementara" },
-            ]}
-          />
-        </form>
-      </Modal>
+      <DetailPublishBannerModal
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        record={selectedRecord}
+      />
     </div>
   );
 }

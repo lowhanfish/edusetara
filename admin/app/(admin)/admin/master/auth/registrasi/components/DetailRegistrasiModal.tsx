@@ -55,7 +55,7 @@ export default function DetailRegistrasiModal({
             <span className="text-xs text-slate-400 block mb-1">Role Group Terpasang</span>
             {record.group_title ? (
               <div className="flex items-center gap-2">
-                <Badge variant={record.group_level === 1 ? "primary" : "neutral"}>
+                <Badge variant={record.group_level === 1 ? "gold" : "neutral"}>
                   {record.group_level === 1 ? "Level 1 (Dinas/Semua)" : "Level 2 (Satuan Pendidikan)"}
                 </Badge>
                 <span className="font-semibold text-slate-900 dark:text-white">

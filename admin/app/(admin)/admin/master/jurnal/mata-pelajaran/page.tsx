@@ -162,12 +162,6 @@ export default function MasterMataPelajaranPage() {
     <div className="space-y-6">
       <PageHeader
         title="Master Mata Pelajaran"
-        breadcrumbs={[
-          {"label": "Dashboard", "href": "/admin"},
-          {"label": "Data Master", "href": "/admin/master"},
-          {"label": "Master Jurnal", "href": "/admin/master/jurnal"},
-          {"label": "Mata Pelajaran"}
-        ]}
         description="Pengelolaan daftar seluruh mata pelajaran struktur kurikulum berdasarkan tingkatan kelas aktif sesuai dokumen Arsitektur Sistem."
         action={
           <div className="flex items-center gap-2">
@@ -348,7 +342,7 @@ export default function MasterMataPelajaranPage() {
                         </div>
                       </td>
                       <td className="py-3 px-4">
-                        <Badge variant="outline" className="text-[11px] font-medium bg-amber-50/80 text-amber-900 border-amber-200">
+                        <Badge variant="neutral" className="text-[11px] font-medium bg-amber-50/80 text-amber-900 border-amber-200">
                           {displayKelas}
                         </Badge>
                       </td>
@@ -414,11 +408,7 @@ export default function MasterMataPelajaranPage() {
           </span>
 
           {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={(p) => setPage(p)}
-            />
+            <Pagination page={page} pageSize={pageSize} total={totalItems} onPageChange={(p) => setPage(p)} onPageSizeChange={(s) => setPageSize(s)} />
           )}
         </div>
       </Card>

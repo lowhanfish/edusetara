@@ -1,423 +1,406 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
-import { fetchData } from "@/lib/api_secure";
 import {
-  Badge,
   Button,
   Card,
   Input,
-  Modal,
   PageHeader,
   Pagination,
-  Select,
-  Textarea,
-} from "../../_components/ui";
+} from "@/app/(admin)/_components/ui";
 
-interface CultureItem {
-  id: string;
-  name: string;
-  type: "Cagar Budaya" | "Warisan Takbenda (WBTb)" | "Sanggar Seni" | "Festival / Agenda";
-  location: string;
-  description: string;
-  status: "Terverifikasi" | "Dalam Kajian" | "Aktif";
-}
+import { ResponseInterface, PublishKebudayaanRecord } from "./types";
+import FormPublishKebudayaanModal from "./components/FormPublishKebudayaanModal";
+import DetailPublishKebudayaanModal from "./components/DetailPublishKebudayaanModal";
+import {
+  useResponseListMaster,
+  useDeleteMaster,
+  useCreateMaster,
+  useUpdateMaster,
+} from "./hooks/crud";
+import { listindex } from "@/utilities/pagination";
 
-export default function KebudayaanAdminPage() {
-  const [items, setItems] = useState<CultureItem[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [filterType, setFilterType] = useState("Semua");
-
-  const [formData, setFormData] = useState({
-    name: "",
-    type: "Cagar Budaya" as CultureItem["type"],
-    location: "",
-    description: "",
-    status: "Terverifikasi" as CultureItem["status"],
-  });
-
+export default function PublishKebudayaanPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const handler = setTimeout(() => {
       setDebouncedSearch(search);
       setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
+    }, 400);
+
+    return () => {
+      clearTimeout(handler);
+    };
   }, [search]);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const skip = (page - 1) * pageSize;
-      const q = debouncedSearch.trim() ? `&search=${encodeURIComponent(debouncedSearch.trim())}` : "";
-      const res = await fetchData<{ total: number; data: any[] }>(
-        `/api/v1/admin/kebudayaan/read?page=${page}&per_page=${pageSize}&skip=${skip}&limit=${pageSize}${q}`
-      );
+  const { List, isLoading, isError, error, refetch } = useResponseListMaster(
+    page,
+    pageSize,
+    debouncedSearch
+  );
+  const deleteMutation = useDeleteMaster();
+  const createMutation = useCreateMaster();
+  const updateMutation = useUpdateMaster();
 
-      if (res && Array.isArray(res.data)) {
-        const mapped: CultureItem[] = res.data.map((row: any) => ({
-          id: row.id,
-          name: row.name || "",
-          type: (row.type || "Cagar Budaya") as CultureItem["type"],
-          location: row.location || "Kab. Konawe Selatan",
-          description: row.description || "-",
-          status: (row.status || "Terverifikasi") as CultureItem["status"],
-        }));
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<PublishKebudayaanRecord | null>(null);
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
 
-        const filtered = filterType === "Semua" ? mapped : mapped.filter(item => item.type === filterType);
-        setItems(filtered);
-        setTotalCount(res.total ?? mapped.length);
-      }
-    } catch (err: any) {
-      console.error("Gagal memuat data kebudayaan:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize, debouncedSearch, filterType]);
+  const initialForm: Partial<ResponseInterface> = {
+    nama: "",
+    kategori: "",
+    lokasi: "",
+    deskripsi: "",
+    foto: "",
+    status: "",
+  };
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
 
-  const handleOpenCreate = () => {
-    setEditingId(null);
+  const emptyForm = () => {
+    setFormData(initialForm);
+  };
+
+  const rawList: PublishKebudayaanRecord[] = useMemo(() => {
+    if (!List?.data || !Array.isArray(List.data)) return [];
+    return List.data;
+  }, [List]);
+
+  const totalItems = List?.total ?? rawList.length;
+
+  const handleOpenAdd = () => {
+    setFormMode("add");
+    emptyForm();
+    setIsFormOpen(true);
+  };
+
+  const handleOpenEdit = (record: PublishKebudayaanRecord) => {
+    setFormMode("edit");
     setFormData({
-      name: "",
-      type: "Cagar Budaya",
-      location: "",
-      description: "",
-      status: "Terverifikasi",
+      id: record.id,
+      nama: (record as any).nama ?? "",
+      kategori: (record as any).kategori ?? "",
+      lokasi: (record as any).lokasi ?? "",
+      deskripsi: (record as any).deskripsi ?? "",
+      foto: (record as any).foto ?? "",
+      status: (record as any).status ?? "",
     });
-    setIsModalOpen(true);
+    setIsFormOpen(true);
   };
 
-  const handleOpenEdit = (item: CultureItem) => {
-    setEditingId(item.id);
-    setFormData({
-      name: item.name,
-      type: item.type,
-      location: item.location,
-      description: item.description,
-      status: item.status,
-    });
-    setIsModalOpen(true);
+  const handleOpenDetail = (record: PublishKebudayaanRecord) => {
+    setSelectedRecord(record);
+    setIsDetailOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name) return;
+  const handleDelete = (record: PublishKebudayaanRecord) => {
+    const displayName =
+      (record as any).judul ||
+      (record as any).title ||
+      (record as any).nama ||
+      (record as any).sekolah ||
+      (record as any).nama_kombel ||
+      (record as any).kegiatan ||
+      (record as any).indikator ||
+      (record as any).isi ||
+      "data ini";
 
-    const payload = {
-      name: formData.name,
-      type: formData.type,
-      location: formData.location || "Kab. Konawe Selatan",
-      description: formData.description || "-",
-      status: formData.status,
-    };
-
-    try {
-      if (editingId) {
-        await fetchData(`/api/v1/admin/kebudayaan/update/${editingId}`, {
-          method: "PUT",
-          body: payload,
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil Diperbarui",
-          text: "Data kebudayaan berhasil diperbarui.",
-          timer: 1800,
-          showConfirmButton: false,
-        });
-      } else {
-        await fetchData(`/api/v1/admin/kebudayaan/create`, {
-          method: "POST",
-          body: payload,
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Berhasil Ditambahkan",
-          text: "Data kebudayaan baru telah disimpan.",
-          timer: 1800,
-          showConfirmButton: false,
-        });
-      }
-      setIsModalOpen(false);
-      loadData();
-    } catch (err: any) {
-      Swal.fire({
-        icon: "error",
-        title: "Gagal Menyimpan",
-        text: err?.message || "Terjadi kesalahan saat menyimpan data.",
-      });
-    }
-  };
-
-  const handleDelete = async (id: string, name: string) => {
-    const result = await Swal.fire({
-      title: "Hapus Data Kebudayaan?",
-      text: `Objek "${name}" akan dihapus permanen.`,
+    Swal.fire({
+      title: "Hapus Warisan & Seni Kebudayaan?",
+      text: `Apakah Anda yakin ingin menghapus "${displayName}"?`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus!",
+      confirmButtonColor: "#c2410c",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Ya, Hapus Data",
       cancelButtonText: "Batal",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await fetchData(`/api/v1/admin/kebudayaan/delete/${id}`, {
-          method: "DELETE",
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Terhapus",
-          text: "Data berhasil dihapus.",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-        loadData();
-      } catch (err: any) {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal Menghapus",
-          text: err?.message || "Terjadi kesalahan saat menghapus data.",
-        });
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteMutation.mutate(record.id);
       }
+    });
+  };
+
+  const handleSubmitForm = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload: Partial<ResponseInterface> = { ...formData };
+
+    if (formMode === "add") {
+      createMutation.mutate(payload, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          emptyForm();
+        },
+      });
+    } else {
+      if (!formData.id) return;
+      updateMutation.mutate(
+        { body: payload, id: formData.id },
+        {
+          onSuccess: () => {
+            setIsFormOpen(false);
+            emptyForm();
+          },
+        }
+      );
     }
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6">
       <PageHeader
-        title="Manajemen Kebudayaan Daerah"
-        description="Inventarisasi warisan budaya takbenda, cagar budaya bersejarah, sanggar seni, serta kalender festival kebudayaan."
-        badge={<Badge variant="gold">{totalCount} Data Budaya</Badge>}
+        title="Warisan & Seni Kebudayaan"
+        description="Data cagar budaya, warisan takbenda, sanggar seni, dan kalender agenda budaya daerah."
         action={
-          <Button variant="gold" icon="🎭" onClick={handleOpenCreate}>
-            Tambah Data Budaya
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="hidden sm:inline-flex"
+            >
+              🔄 Refresh
+            </Button>
+            <Button variant="gold" size="sm" onClick={handleOpenAdd}>
+              + Tambah Warisan & Seni Kebudayaan
+            </Button>
+          </div>
         }
       />
 
-      <Card className="border border-white/80 shadow-xs">
-        {/* Toolbar Pencarian & Filter Tabs di dalam Card */}
-        <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex flex-col md:flex-row gap-3 items-center justify-between">
-          <div className="w-full md:w-80">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Total Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{totalItems}</h4>
+              <p className="text-[11px] text-emerald-700 mt-0.5">Operasional Terdaftar</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              🎭
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
+              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">Publish</h4>
+              <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              📁
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Status API</p>
+              <h4 className="text-2xl font-bold text-emerald-700 mt-1">Terhubung</h4>
+              <p className="text-[11px] text-emerald-600 mt-0.5">FastAPI & MySQL</p>
+            </div>
+            <span className="text-3xl p-3 bg-emerald-50 rounded-2xl border border-emerald-200/50">
+              ⚡
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Standar Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Modular</h4>
+              <p className="text-[11px] text-blue-700 mt-0.5">master pattern</p>
+            </div>
+            <span className="text-3xl p-3 bg-blue-50 rounded-2xl border border-blue-200/50">
+              📋
+            </span>
+          </div>
+        </Card>
+      </div>
+
+      <Card className="rounded-2xl border-white/80 bg-white/70 overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-[#e2d9c8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex-1 max-w-sm">
             <Input
-              placeholder="Cari objek budaya, sanggar, lokasi..."
+              type="text"
+              placeholder="Cari data warisan & seni kebudayaan..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              className="w-full text-xs"
             />
           </div>
 
-          <div className="flex gap-1.5 overflow-x-auto w-full md:w-auto pb-1">
-            {[
-              "Semua",
-              "Warisan Takbenda (WBTb)",
-              "Cagar Budaya",
-              "Sanggar Seni",
-              "Festival / Agenda",
-            ].map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => {
-                  setFilterType(type);
-                  setPage(1);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-                  filterType === type
-                    ? "bg-[#2d2410] text-white shadow-2xs"
-                    : "bg-white/60 text-slate-600 border border-white/80 hover:bg-white"
-                }`}
-              >
-                {type}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#7d7152]">Tampilkan:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              aria-label="Jumlah data per halaman"
+              className="text-xs bg-white border border-[#d5cbba] rounded-lg px-2 py-1.5 text-[#2d2410] focus:outline-none focus:ring-1 focus:ring-amber-500"
+            >
+              <option value={5}>5 baris</option>
+              <option value={10}>10 baris</option>
+              <option value={20}>20 baris</option>
+            </select>
           </div>
         </div>
 
-        {/* Tabel Semantik Native HTML */}
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
-              <tr>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Nama Objek / Sanggar</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Jenis Kebudayaan</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Lokasi / Kecamatan</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Deskripsi</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Status</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">Aksi</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
+                <th className="py-3 px-4 w-12 text-center">No</th>
+                <th className="py-3 px-4">Nama Objek Budaya</th>
+                <th className="py-3 px-4">Klasifikasi</th>
+                <th className="py-3 px-4">Lokasi</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/60 bg-transparent">
-              {loading ? (
+            <tbody className="divide-y divide-[#ece5d8]">
+              {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-                      Memuat data kebudayaan...
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                      <span>Memuat data dari server...</span>
                     </div>
                   </td>
                 </tr>
-              ) : items.length === 0 ? (
+              ) : isError ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
-                    Tidak ada data kebudayaan ditemukan.
+                  <td colSpan={6} className="py-12 text-center text-rose-700">
+                    <p className="font-semibold">Gagal memuat data warisan & seni kebudayaan</p>
+                    <p className="text-[11px] mt-1 text-[#7d7152]">
+                      {error?.message || "Terjadi kesalahan koneksi ke server."}
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      onClick={() => refetch()}
+                    >
+                      Coba Lagi
+                    </Button>
+                  </td>
+                </tr>
+              ) : rawList.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                    <span className="text-3xl block mb-2">🎭</span>
+                    <p className="font-semibold text-sm text-[#2d2410]">
+                      Belum ada data Warisan & Seni Kebudayaan
+                    </p>
+                    <p className="text-xs text-[#9c8e6b] mt-0.5">
+                      {debouncedSearch
+                        ? `Tidak ada data yang cocok dengan "${debouncedSearch}"`
+                        : "Klik tombol '+ Tambah Warisan & Seni Kebudayaan' untuk menambahkan data baru."}
+                    </p>
                   </td>
                 </tr>
               ) : (
-                items.map((item) => (
-                  <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
-                    <td className="px-4 py-3.5 text-xs align-middle font-bold text-[#2d2410]">
-                      {item.name}
+                rawList.map((item, index) => {
+                  const no = listindex(pageSize, page, index);
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-amber-50/40 transition-colors duration-150"
+                    >
+                      <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
+                        {no}
+                      </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).nama ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
-                      <Badge variant="neutral">{item.type}</Badge>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).kategori ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle text-[#5e5133]">
-                      {item.location}
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).lokasi ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle text-[#7d7152] max-w-xs truncate">
-                      {item.description}
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).status ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
-                      <Badge
-                        variant={
-                          item.status === "Terverifikasi" || item.status === "Aktif"
-                            ? "success"
-                            : "warning"
-                        }
-                      >
-                        {item.status}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleOpenEdit(item)}
-                        >
-                          ✏️
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDelete(item.id, item.name)}
-                        >
-                          🗑️
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(item)}
+                            title="Detail Lembar Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-[#7d7152] hover:text-[#2d2410] transition-colors"
+                          >
+                            👁️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(item)}
+                            title="Edit Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-amber-700 hover:text-amber-900 transition-colors"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(item)}
+                            title="Hapus Data"
+                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 transition-colors"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Footer Paginasi Terstandar */}
-        <div className="px-6 py-4 bg-white/20 border-t border-white/60">
+        <div className="p-4 border-t border-[#e2d9c8] bg-white/40">
           <Pagination
             page={page}
-            onPageChange={setPage}
             pageSize={pageSize}
-            onPageSizeChange={setPageSize}
-            total={totalCount}
-            pageSizeOptions={[5, 10, 20]}
+            total={totalItems}
+            onPageChange={(p) => setPage(p)}
+            onPageSizeChange={(s) => setPageSize(s)}
           />
         </div>
       </Card>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingId ? "Edit Data Kebudayaan" : "Tambah Data Kebudayaan"}
-        description="Daftarkan cagar budaya, warisan takbenda, sanggar komunitas seni, atau agenda festival."
-        maxWidth="lg"
-        footer={
-          <>
-            <Button variant="outline" type="button" onClick={() => setIsModalOpen(false)}>
-              Batal
-            </Button>
-            <Button variant="gold" type="submit" form="form-culture">
-              {editingId ? "Simpan Perubahan" : "Simpan Data"}
-            </Button>
-          </>
-        }
-      >
-        <form id="form-culture" onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Nama Objek / Sanggar / Festival"
-            placeholder="Contoh: Tarian Lulo Massal Konsel"
-            required
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          />
+      <FormPublishKebudayaanModal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        formMode={formMode}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmitForm}
+        isLoading={createMutation.isPending || updateMutation.isPending}
+      />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Select
-              label="Jenis Kebudayaan"
-              value={formData.type}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  type: e.target.value as CultureItem["type"],
-                })
-              }
-              options={[
-                { value: "Cagar Budaya", label: "Cagar Budaya (Benda / Situs)" },
-                { value: "Warisan Takbenda (WBTb)", label: "Warisan Takbenda (WBTb)" },
-                { value: "Sanggar Seni", label: "Sanggar & Komunitas Seni" },
-                { value: "Festival / Agenda", label: "Festival / Agenda Kegiatan" },
-              ]}
-            />
-            <Select
-              label="Status Verifikasi"
-              value={formData.status}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  status: e.target.value as CultureItem["status"],
-                })
-              }
-              options={[
-                { value: "Terverifikasi", label: "Terverifikasi / Resmi" },
-                { value: "Dalam Kajian", label: "Dalam Kajian Tim Ahli" },
-                { value: "Aktif", label: "Aktif Beroperasi" },
-              ]}
-            />
-          </div>
-
-          <Input
-            label="Lokasi / Kecamatan"
-            placeholder="Contoh: Kecamatan Andoolo"
-            value={formData.location}
-            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-          />
-
-          <Textarea
-            label="Deskripsi & Sejarah Singkat"
-            placeholder="Jelaskan asal-usul, nilai sejarah, atau keunikan..."
-            rows={3}
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-          />
-        </form>
-      </Modal>
+      <DetailPublishKebudayaanModal
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        record={selectedRecord}
+      />
     </div>
   );
 }

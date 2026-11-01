@@ -1,775 +1,412 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import React, { useEffect, useMemo, useState } from "react";
+import Swal from "sweetalert2";
 import {
-  Badge,
   Button,
   Card,
-  FileInput,
   Input,
-  Modal,
   PageHeader,
   Pagination,
-  RichTextEditor,
-  Select,
-  Textarea,
-} from "../../_components/ui";
-import { Icon } from "../../_components/admin-icons";
-import { fetchData } from "@/lib/api_secure";
-import { useUrlStore } from "@/store/useUrlStore";
-import { showLoadingAlert, swallAlert } from "@/lib/show_swall";
+} from "@/app/(admin)/_components/ui";
 
-interface NewsItem {
-  id: string;
-  title: string;
-  slug: string;
-  category: "Pendidikan" | "Kebudayaan" | "GTK & Guru" | "Sarana Prasarana" | "Prestasi Siswa";
-  excerpt: string;
-  author: string;
-  date: string;
-  status: "Terbit" | "Draft";
-  image: string;
-  content: string;
-  featured: boolean;
-}
+import { ResponseInterface, BeritaRecord } from "./types";
+import FormBeritaModal from "./components/FormBeritaModal";
+import DetailBeritaModal from "./components/DetailBeritaModal";
+import {
+  useResponseListMaster,
+  useDeleteMaster,
+  useCreateMaster,
+  useUpdateMaster,
+} from "./hooks/crud";
+import { listindex } from "@/utilities/pagination";
 
-const initialNews: NewsItem[] = [
-  {
-    id: "news-1",
-    title: "Dikbud Konsel Dorong Pemanfaatan Teknologi & Perangkat Digital dalam Pembelajaran di Sekolah",
-    slug: "teknologi-pembelajaran-sekolah",
-    category: "Pendidikan",
-    excerpt: "Pemerintah Kabupaten Konawe Selatan melalui Dinas Pendidikan mempercepat digitalisasi ruang kelas dan pemanfaatan Chromebook.",
-    author: "Tim Publikasi & Media",
-    date: "05 Sep 2026",
-    status: "Terbit",
-    image: "/img/pendidikan-jenjang.jpg",
-    content: `
-      <p>Pemerintah Kabupaten Konawe Selatan melalui Dinas Pendidikan dan Kebudayaan terus mendorong integrasi teknologi informasi dan komunikasi ke dalam aktivitas belajar mengajar di seluruh satuan pendidikan jenjang SD dan SMP.</p>
-      <h2>Pemanfaatan Perangkat Digital dan Platform Merdeka Mengajar</h2>
-      <p>Melalui pengadaan perangkat Chromebook dan penguatan jaringan internet sekolah, para pendidik didorong mengadopsi pembelajaran berbasis multimedia interaktif.</p>
-      <ul>
-        <li>Pemberdayaan laboratorium komputer untuk asesmen formatif adaptif.</li>
-        <li>Pelatihan pemanfaatan akun belajar.id bagi guru kelas dan mata pelajaran.</li>
-        <li>Integrasi materi ajar kontekstual berbasis kearifan lokal Konawe Selatan.</li>
-      </ul>
-      <blockquote>"Digitalisasi pendidikan bukan sekadar menyediakan gawai pintar, melainkan mengubah paradigma pembelajaran menjadi lebih menyenangkan, interaktif, dan berpusat pada murid," tegas Kepala Dinas.</blockquote>
-      <p>Langkah ini diharapkan dapat mempercepat pemerataan mutu pendidikan hingga ke sekolah-sekolah di wilayah terpencil.</p>
-    `,
-    featured: true,
-  },
-  {
-    id: "news-2",
-    title: "Pelestarian Seni Musik Tradisional Tolaki Melalui Pembinaan Ekstrakurikuler Sekolah",
-    slug: "pelestarian-seni-musik-tolaki",
-    category: "Kebudayaan",
-    excerpt: "Gamelan bambu dan tarian lulo khas Tolaki kini masuk sebagai muatan lokal unggulan sekolah dasar di Konawe Selatan.",
-    author: "Bidang Kebudayaan",
-    date: "28 Agu 2026",
-    status: "Terbit",
-    image: "/img/kebudayaan-sanggar.jpg",
-    content: `
-      <p>Dinas Pendidikan dan Kebudayaan Konawe Selatan meluncurkan program pembinaan seni tradisi suku Tolaki di lingkungan satuan pendidikan dasar.</p>
-      <h2>Pengenalan Nilai Luhur Budaya Sejak Usia Dini</h2>
-      <p>Kegiatan ini mencakup pelatihan memainkan alat musik tradisional gamelan bambu dan tarian lulo persahabatan yang menjadi ciri khas kebersamaan masyarakat Tolaki.</p>
-      <blockquote>"Generasi muda Konawe Selatan harus bangga akan akar budayanya sendiri di tengah arus globalisasi," ujar Kepala Bidang Kebudayaan.</blockquote>
-    `,
-    featured: false,
-  },
-  {
-    id: "news-3",
-    title: "Diseminasi Praktik Baik Pembelajaran Berdiferensiasi Jenjang SMP se-Konawe Selatan",
-    slug: "diseminasi-pembelajaran-berdiferensiasi",
-    category: "GTK & Guru",
-    excerpt: "Ratusan guru mata pelajaran berkumpul di Andoolo untuk berbagi strategi asesmen formatif adaptif Kurikulum Merdeka.",
-    author: "Kelompok Kerja Guru (KKG)",
-    date: "14 Agu 2026",
-    status: "Draft",
-    image: "/img/pendidikan-gtk.jpg",
-    content: `
-      <p>Forum KKG dan MGMP tingkat Kabupaten Konawe Selatan mengadakan diseminasi praktik baik untuk mendalami metode pembelajaran berdiferensiasi.</p>
-      <p>Fokus utama adalah mengenali kebutuhan minat, bakat, dan kesiapan belajar masing-masing siswa di dalam kelas.</p>
-    `,
-    featured: false,
-  },
-  {
-    id: "news-4",
-    title: "Revitalisasi Ruang Kelas & Laboratorium IPA 15 SMP Negeri Tuntas Sebelum Tahun Ajaran Baru",
-    slug: "revitalisasi-lab-smp",
-    category: "Sarana Prasarana",
-    excerpt: "Peningkatan mutu fisik sarana pendidikan Konawe Selatan berlanjut di semester ganjil tahun ini melalui alokasi DAK Fisik.",
-    author: "Bidang Sarpras Dikbud",
-    date: "02 Agu 2026",
-    status: "Terbit",
-    image: "/img/pendidikan-jenjang.jpg",
-    content: `
-      <p>Sebanyak 15 laboratorium IPA dan ruang kelas baru di sejumlah SMP Negeri telah selesai direvitalisasi dan siap digunakan pada tahun ajaran baru.</p>
-      <p>Pekerjaan mencakup perbaikan atap, instalasi listrik laboratorium, dan penyediaan meja praktikum standar nasional.</p>
-    `,
-    featured: false,
-  },
-];
+export default function BeritaPage() {
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-const emptyFormData = {
-  title: "",
-  slug: "",
-  category: "Pendidikan" as NewsItem["category"],
-  author: "Humas Dikbud Konsel",
-  excerpt: "",
-  content: "",
-  image: "/img/pendidikan-jenjang.jpg",
-  status: "Terbit" as NewsItem["status"],
-  featured: false,
-};
-
-export default function BeritaAdminPage() {
-  const baseUrl = useUrlStore((state) => state.URL.APP);
-  const [newsList, setNewsList] = useState<NewsItem[]>(initialNews);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("Semua");
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Modal Create / Edit State
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState(emptyFormData);
-
-  // Modal Preview State
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [previewItem, setPreviewItem] = useState<NewsItem | null>(null);
-
-  // Load News from Backend
-  const loadNews = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetchData<{ total: number; data: any[] }>(
-        `${baseUrl}/api/v1/admin/berita/read?limit=50`
-      );
-      if (res && Array.isArray(res.data) && res.data.length > 0) {
-        const mapped: NewsItem[] = res.data.map((b) => ({
-          id: b.id,
-          title: b.judul || b.title,
-          slug: b.slug || "berita",
-          category: (b.kategori as NewsItem["category"]) || "Pendidikan",
-          excerpt: b.deskripsi || b.judul,
-          author: b.author || b.created_by || "Humas Dikbud",
-          date: b.created_at ? String(b.created_at).slice(0, 10) : "01 Nov 2026",
-          status: (b.status as NewsItem["status"]) || "Terbit",
-          image: b.foto || "/img/pendidikan-jenjang.jpg",
-          content: b.isi || b.deskripsi || "<p>Belum ada isi...</p>",
-          featured: Boolean(b.featured),
-        }));
-        setNewsList(mapped);
-      }
-    } catch (e) {
-      console.warn("[BeritaAdminPage] Fallback to initialNews:", e);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [baseUrl]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    loadNews();
-  }, [loadNews]);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 400);
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    const generatedSlug = val
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .trim()
-      .replace(/\s+/g, "-");
-    setFormData((prev) => ({
-      ...prev,
-      title: val,
-      slug: editingId ? prev.slug : generatedSlug,
-    }));
-  };
-
-  const handleOpenCreate = () => {
-    setEditingId(null);
-    setFormData(emptyFormData);
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEdit = (item: NewsItem) => {
-    setEditingId(item.id);
-    setFormData({
-      title: item.title,
-      slug: item.slug,
-      category: item.category,
-      author: item.author,
-      excerpt: item.excerpt,
-      content: item.content || item.excerpt,
-      image: item.image,
-      status: item.status,
-      featured: item.featured,
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleOpenPreview = (item: NewsItem) => {
-    setPreviewItem(item);
-    setIsPreviewOpen(true);
-  };
-
-  const handlePreviewCurrentForm = () => {
-    const draftItem: NewsItem = {
-      id: editingId || `preview-${Date.now()}`,
-      title: formData.title || "Judul Pratinjau Berita",
-      slug: formData.slug || "pratinjau-berita",
-      category: formData.category,
-      author: formData.author || "Penulis",
-      date: new Date().toLocaleDateString("id-ID", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }),
-      status: formData.status,
-      excerpt: formData.excerpt || formData.title,
-      content: formData.content || "<p>Belum ada isi konten berita...</p>",
-      image: formData.image || "/img/pendidikan-jenjang.jpg",
-      featured: formData.featured,
+    return () => {
+      clearTimeout(handler);
     };
-    setPreviewItem(draftItem);
-    setIsPreviewOpen(true);
-  };
+  }, [search]);
 
-  const handleSaveNews = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.title) return;
-
-    showLoadingAlert(editingId ? "Menyimpan berita..." : "Menerbitkan berita...");
-
-    const payload = {
-      judul: formData.title,
-      slug: formData.slug || `berita-${Date.now()}`,
-      kategori: formData.category,
-      author: formData.author,
-      deskripsi: formData.excerpt || formData.title,
-      isi: formData.content,
-      foto: formData.image,
-      status: formData.status,
-      featured: formData.featured,
-    };
-
-    try {
-      if (editingId) {
-        await fetchData(`${baseUrl}/api/v1/admin/berita/update/${editingId}`, {
-          method: "PUT",
-          body: JSON.stringify(payload),
-        });
-        swallAlert("sukses diperbarui", "success");
-      } else {
-        await fetchData(`${baseUrl}/api/v1/admin/berita/create`, {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
-        swallAlert("sukses diterbitkan", "success");
-      }
-      setIsModalOpen(false);
-      setFormData(emptyFormData);
-      setEditingId(null);
-      await loadNews();
-    } catch (err) {
-      console.warn("Backend berita save error, updating local state:", err);
-      if (editingId) {
-        setNewsList((prev) =>
-          prev.map((item) =>
-            item.id === editingId
-              ? {
-                  ...item,
-                  ...formData,
-                }
-              : item
-          )
-        );
-      } else {
-        const newItem: NewsItem = {
-          id: `news-${Date.now()}`,
-          ...formData,
-          date: new Date().toLocaleDateString("id-ID", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          }),
-        };
-        setNewsList([newItem, ...newsList]);
-      }
-      setIsModalOpen(false);
-      setFormData(emptyFormData);
-      setEditingId(null);
-      swallAlert("Tersimpan lokal", "info");
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus artikel berita ini?")) {
-      showLoadingAlert("Menghapus berita...");
-      try {
-        await fetchData(`${baseUrl}/api/v1/admin/berita/delete/${id}`, {
-          method: "DELETE",
-        });
-        swallAlert("sukses dihapus", "success");
-        await loadNews();
-      } catch (e) {
-        setNewsList((prev) => prev.filter((item) => item.id !== id));
-        swallAlert("sukses dihapus", "success");
-      }
-      if (previewItem?.id === id) {
-        setIsPreviewOpen(false);
-        setPreviewItem(null);
-      }
-    }
-  };
-
-  // Pagination State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
-
-  const filteredNews = newsList.filter((item) => {
-    const matchSearch =
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.author.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchCategory =
-      categoryFilter === "Semua" || item.category === categoryFilter;
-    return matchSearch && matchCategory;
-  });
-
-  const paginatedNews = filteredNews.slice(
-    (page - 1) * pageSize,
-    (page - 1) * pageSize + pageSize
+  const { List, isLoading, isError, error, refetch } = useResponseListMaster(
+    page,
+    pageSize,
+    debouncedSearch
   );
+  const deleteMutation = useDeleteMaster();
+  const createMutation = useCreateMaster();
+  const updateMutation = useUpdateMaster();
+
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<BeritaRecord | null>(null);
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
+
+  const initialForm: Partial<ResponseInterface> = {
+    judul: "",
+    slug: "",
+    kategori: "",
+    author: "",
+    deskripsi: "",
+    isi: "",
+    foto: "",
+    status: "",
+    featured: "",
+  };
+
+  const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
+
+  const emptyForm = () => {
+    setFormData(initialForm);
+  };
+
+  const rawList: BeritaRecord[] = useMemo(() => {
+    if (!List?.data || !Array.isArray(List.data)) return [];
+    return List.data;
+  }, [List]);
+
+  const totalItems = List?.total ?? rawList.length;
+
+  const handleOpenAdd = () => {
+    setFormMode("add");
+    emptyForm();
+    setIsFormOpen(true);
+  };
+
+  const handleOpenEdit = (record: BeritaRecord) => {
+    setFormMode("edit");
+    setFormData({
+      id: record.id,
+      judul: (record as any).judul ?? "",
+      slug: (record as any).slug ?? "",
+      kategori: (record as any).kategori ?? "",
+      author: (record as any).author ?? "",
+      deskripsi: (record as any).deskripsi ?? "",
+      isi: (record as any).isi ?? "",
+      foto: (record as any).foto ?? "",
+      status: (record as any).status ?? "",
+      featured: (record as any).featured ?? "",
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleOpenDetail = (record: BeritaRecord) => {
+    setSelectedRecord(record);
+    setIsDetailOpen(true);
+  };
+
+  const handleDelete = (record: BeritaRecord) => {
+    const displayName =
+      (record as any).judul ||
+      (record as any).title ||
+      (record as any).nama ||
+      (record as any).sekolah ||
+      (record as any).nama_kombel ||
+      (record as any).kegiatan ||
+      (record as any).indikator ||
+      (record as any).isi ||
+      "data ini";
+
+    Swal.fire({
+      title: "Hapus Manajemen Berita?",
+      text: `Apakah Anda yakin ingin menghapus "${displayName}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#c2410c",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Ya, Hapus Data",
+      cancelButtonText: "Batal",
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteMutation.mutate(record.id);
+      }
+    });
+  };
+
+  const handleSubmitForm = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload: Partial<ResponseInterface> = { ...formData };
+
+    if (formMode === "add") {
+      createMutation.mutate(payload, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          emptyForm();
+        },
+      });
+    } else {
+      if (!formData.id) return;
+      updateMutation.mutate(
+        { body: payload, id: formData.id },
+        {
+          onSuccess: () => {
+            setIsFormOpen(false);
+            emptyForm();
+          },
+        }
+      );
+    }
+  };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6">
       <PageHeader
         title="Manajemen Berita"
-        description="Kelola publikasi warta, liputan kegiatan, dan dokumentasi pendidikan & kebudayaan Kabupaten Konawe Selatan."
-        badge={<Badge variant="gold">{newsList.length} Artikel</Badge>}
+        description="Kelola publikasi warta, liputan kegiatan, dan dokumentasi pendidikan & kebudayaan."
         action={
-          <Button
-            variant="gold"
-            icon={<Icon name="plus" size={16} />}
-            onClick={handleOpenCreate}
-          >
-            Tambah Berita
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="hidden sm:inline-flex"
+            >
+              🔄 Refresh
+            </Button>
+            <Button variant="gold" size="sm" onClick={handleOpenAdd}>
+              + Tambah Manajemen Berita
+            </Button>
+          </div>
         }
       />
 
-      <Card className="border border-white/80 shadow-xs">
-        {/* Filter & Search Bar di dalam Card */}
-        <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="w-full sm:w-80">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Total Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{totalItems}</h4>
+              <p className="text-[11px] text-emerald-700 mt-0.5">Operasional Terdaftar</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              📰
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
+              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">Publish</h4>
+              <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
+            </div>
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              📁
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Status API</p>
+              <h4 className="text-2xl font-bold text-emerald-700 mt-1">Terhubung</h4>
+              <p className="text-[11px] text-emerald-600 mt-0.5">FastAPI & MySQL</p>
+            </div>
+            <span className="text-3xl p-3 bg-emerald-50 rounded-2xl border border-emerald-200/50">
+              ⚡
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-[#7d7152] font-medium">Standar Data</p>
+              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Modular</h4>
+              <p className="text-[11px] text-blue-700 mt-0.5">master pattern</p>
+            </div>
+            <span className="text-3xl p-3 bg-blue-50 rounded-2xl border border-blue-200/50">
+              📋
+            </span>
+          </div>
+        </Card>
+      </div>
+
+      <Card className="rounded-2xl border-white/80 bg-white/70 overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-[#e2d9c8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex-1 max-w-sm">
             <Input
-              placeholder="Cari judul berita atau penulis..."
-              leftIcon={<Icon name="search" size={16} />}
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
+              type="text"
+              placeholder="Cari data manajemen berita..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full text-xs"
             />
           </div>
-          <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1">
-            {[
-              "Semua",
-              "Pendidikan",
-              "Kebudayaan",
-              "GTK & Guru",
-              "Sarana Prasarana",
-            ].map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => {
-                  setCategoryFilter(cat);
-                  setPage(1);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-                  categoryFilter === cat
-                    ? "bg-[#2d2410] text-white shadow-2xs"
-                    : "bg-white/60 text-slate-600 border border-white/80 hover:bg-white"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#7d7152]">Tampilkan:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1);
+              }}
+              aria-label="Jumlah data per halaman"
+              className="text-xs bg-white border border-[#d5cbba] rounded-lg px-2 py-1.5 text-[#2d2410] focus:outline-none focus:ring-1 focus:ring-amber-500"
+            >
+              <option value={5}>5 baris</option>
+              <option value={10}>10 baris</option>
+              <option value={20}>20 baris</option>
+            </select>
           </div>
         </div>
 
-        {/* Tabel Semantik Native HTML */}
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
-              <tr>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Judul & Ringkasan</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Kategori</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Penulis</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152]">Tanggal</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-center">Status</th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7d7152] text-right">Aksi</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
+                <th className="py-3 px-4 w-12 text-center">No</th>
+                <th className="py-3 px-4">Judul Berita</th>
+                <th className="py-3 px-4">Kategori</th>
+                <th className="py-3 px-4">Penulis</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/60 bg-transparent">
-              {filteredNews.length === 0 ? (
+            <tbody className="divide-y divide-[#ece5d8]">
+              {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
-                    Tidak ada artikel yang sesuai dengan pencarian.
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                      <span>Memuat data dari server...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : isError ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-rose-700">
+                    <p className="font-semibold">Gagal memuat data manajemen berita</p>
+                    <p className="text-[11px] mt-1 text-[#7d7152]">
+                      {error?.message || "Terjadi kesalahan koneksi ke server."}
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      onClick={() => refetch()}
+                    >
+                      Coba Lagi
+                    </Button>
+                  </td>
+                </tr>
+              ) : rawList.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                    <span className="text-3xl block mb-2">📰</span>
+                    <p className="font-semibold text-sm text-[#2d2410]">
+                      Belum ada data Manajemen Berita
+                    </p>
+                    <p className="text-xs text-[#9c8e6b] mt-0.5">
+                      {debouncedSearch
+                        ? `Tidak ada data yang cocok dengan "${debouncedSearch}"`
+                        : "Klik tombol '+ Tambah Manajemen Berita' untuk menambahkan data baru."}
+                    </p>
                   </td>
                 </tr>
               ) : (
-                paginatedNews.map((item) => (
-                  <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
-                    <td className="px-4 py-3.5 text-xs align-middle max-w-md">
-                      <div className="flex flex-col gap-1">
-                        <span className="font-bold text-[#2d2410] line-clamp-1">
-                          {item.title}
-                        </span>
-                        <span className="text-xs text-[#7d7152] line-clamp-1">
-                          {item.excerpt}
-                        </span>
-                        {item.featured && (
-                          <span className="inline-block text-[10px] text-amber-700 font-bold">
-                            ★ Berita Utama (Featured)
-                          </span>
-                        )}
-                      </div>
+                rawList.map((item, index) => {
+                  const no = listindex(pageSize, page, index);
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-amber-50/40 transition-colors duration-150"
+                    >
+                      <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
+                        {no}
+                      </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).judul ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
-                      <Badge variant="neutral">{item.category}</Badge>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).kategori ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-[#5e5133]">
-                      {item.author}
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).author ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-[#7d7152]">
-                      {item.date}
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).status ?? "-")}
                     </td>
-                    <td className="px-4 py-3.5 text-xs align-middle text-center whitespace-nowrap">
-                      <Badge
-                        variant={item.status === "Terbit" ? "success" : "warning"}
-                      >
-                        {item.status}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          title="Pratinjau / Preview Berita"
-                          className="text-amber-700 hover:text-amber-900 hover:bg-amber-100/60"
-                          onClick={() => handleOpenPreview(item)}
-                        >
-                          <Icon name="eye" size={15} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          title="Edit Berita"
-                          className="text-slate-600 hover:text-[#2d2410] hover:bg-slate-100"
-                          onClick={() => handleOpenEdit(item)}
-                        >
-                          <Icon name="edit" size={15} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          title="Hapus Berita"
-                          className="text-slate-400 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDelete(item.id)}
-                        >
-                          <Icon name="trash" size={15} />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(item)}
+                            title="Detail Lembar Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-[#7d7152] hover:text-[#2d2410] transition-colors"
+                          >
+                            👁️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(item)}
+                            title="Edit Data"
+                            className="p-1 rounded-lg hover:bg-amber-100 text-amber-700 hover:text-amber-900 transition-colors"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(item)}
+                            title="Hapus Data"
+                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 transition-colors"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Footer Paginasi Terstandar */}
-        <div className="px-6 py-4 bg-white/20 border-t border-white/60">
+        <div className="p-4 border-t border-[#e2d9c8] bg-white/40">
           <Pagination
             page={page}
-            onPageChange={setPage}
             pageSize={pageSize}
-            onPageSizeChange={setPageSize}
-            total={filteredNews.length}
-            pageSizeOptions={[5, 10, 20]}
+            total={totalItems}
+            onPageChange={(p) => setPage(p)}
+            onPageSizeChange={(s) => setPageSize(s)}
           />
         </div>
       </Card>
 
-      {/* ── Modal Tambah / Ubah Berita ── */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingId ? "Edit Artikel Berita" : "Tambah Berita Baru"}
-        description="Lengkapi formulir di bawah ini untuk menerbitkan artikel warta ke portal website publik."
-        maxWidth="3xl"
-        footer={
-          <div className="flex items-center justify-between w-full">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={handlePreviewCurrentForm}
-              className="text-amber-900 border-amber-300 hover:bg-amber-100/50"
-            >
-              <Icon name="eye" size={14} className="mr-1.5" />
-              Pratinjau Draf
-            </Button>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-              >
-                Batal
-              </Button>
-              <Button variant="gold" type="submit" form="form-berita">
-                {editingId ? "Simpan Perubahan" : "Terbitkan Artikel"}
-              </Button>
-            </div>
-          </div>
-        }
-      >
-        <form id="form-berita" onSubmit={handleSaveNews} className="space-y-4">
-          <Input
-            label="Judul Berita"
-            placeholder="Masukkan judul berita yang menarik..."
-            value={formData.title}
-            onChange={handleTitleChange}
-            required
-          />
+      <FormBeritaModal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        formMode={formMode}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmitForm}
+        isLoading={createMutation.isPending || updateMutation.isPending}
+      />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Slug URL"
-              placeholder="judul-berita-anda"
-              value={formData.slug}
-              onChange={(e) =>
-                setFormData({ ...formData, slug: e.target.value })
-              }
-              helperText="URL publik: /berita/[slug]"
-            />
-            <Select
-              label="Kategori Berita"
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  category: e.target.value as NewsItem["category"],
-                })
-              }
-              options={[
-                { value: "Pendidikan", label: "Pendidikan" },
-                { value: "Kebudayaan", label: "Kebudayaan" },
-                { value: "GTK & Guru", label: "GTK & Guru" },
-                { value: "Sarana Prasarana", label: "Sarana Prasarana" },
-                { value: "Prestasi Siswa", label: "Prestasi Siswa" },
-              ]}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Nama Penulis / Redaksi"
-              placeholder="Contoh: Tim Humas Dikbud"
-              value={formData.author}
-              onChange={(e) =>
-                setFormData({ ...formData, author: e.target.value })
-              }
-            />
-            <Select
-              label="Status Publikasi"
-              value={formData.status}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  status: e.target.value as NewsItem["status"],
-                })
-              }
-              options={[
-                { value: "Terbit", label: "Langsung Terbit (Published)" },
-                { value: "Draft", label: "Simpan sebagai Draft" },
-              ]}
-            />
-          </div>
-
-          <Textarea
-            label="Ringkasan / Kutipan Pembuka (Excerpt)"
-            placeholder="Ringkasan singkat 1-2 kalimat yang tampil pada kartu beranda..."
-            rows={2}
-            value={formData.excerpt}
-            onChange={(e) =>
-              setFormData({ ...formData, excerpt: e.target.value })
-            }
-          />
-
-          <FileInput
-            label="Foto Sampul Utama Berita"
-            accept="image/*"
-            value={formData.image}
-            onChange={(fileName) =>
-              setFormData({ ...formData, image: fileName })
-            }
-            helperText="Unggah berkas foto dokumentasi atau banner berita (JPG, PNG, WebP)"
-          />
-
-          <RichTextEditor
-            label="Isi Berita Lengkap"
-            placeholder="Tuliskan berita lengkap dengan format paragraf, subjudul (H2/H3), daftar poin, dan gambar..."
-            minHeight={260}
-            value={formData.content}
-            onChange={(html) =>
-              setFormData({ ...formData, content: html })
-            }
-            helperText="Gunakan toolbar di atas untuk memformat teks, menambahkan subjudul, kutipan, tautan, atau menyisipkan foto di dalam naskah"
-          />
-
-          <div className="flex items-center gap-2 pt-2">
-            <input
-              type="checkbox"
-              id="featured-check"
-              checked={formData.featured}
-              onChange={(e) =>
-                setFormData({ ...formData, featured: e.target.checked })
-              }
-              className="w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-400 cursor-pointer"
-            />
-            <label
-              htmlFor="featured-check"
-              className="text-xs font-semibold text-[#2d2410] cursor-pointer"
-            >
-              Jadikan Berita Utama (Featured) di Banner Slider Beranda
-            </label>
-          </div>
-        </form>
-      </Modal>
-
-      {/* ── Modal Pratinjau / Preview Berita (Full Size) ── */}
-      <Modal
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-        title="Pratinjau Tampilan Berita (Layar Penuh)"
-        description="Simulasi tampilan artikel persis seperti yang akan dibaca masyarakat di portal website publik."
-        maxWidth="full"
-        footer={
-          <div className="flex flex-wrap items-center justify-between gap-3 w-full">
-            <div className="flex items-center gap-2 text-xs text-[#7d7152]">
-              <span className="font-semibold text-[#2d2410]">Tautan Publik:</span>
-              <span className="font-mono bg-amber-100/60 text-amber-900 px-2.5 py-1 rounded-lg text-[11px] font-bold">
-                /berita/{previewItem?.slug || "..."}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => setIsPreviewOpen(false)}
-              >
-                Tutup Pratinjau
-              </Button>
-              {previewItem && (
-                <>
-                  <Button
-                    variant="ghost"
-                    type="button"
-                    className="text-amber-800 hover:bg-amber-100"
-                    onClick={() => {
-                      setIsPreviewOpen(false);
-                      handleOpenEdit(previewItem);
-                    }}
-                  >
-                    <Icon name="edit" size={14} className="mr-1.5" />
-                    Edit Artikel Ini
-                  </Button>
-                  <Link
-                    href={`/berita/${previewItem.slug}`}
-                    target="_blank"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#f5b82e] hover:bg-[#e0a41d] text-[#241e12] shadow-xs transition-colors"
-                  >
-                    <span>Buka Halaman Publik</span>
-                    <Icon name="external" size={13} />
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        }
-      >
-        {previewItem && (
-          <div className="max-w-5xl mx-auto space-y-6 py-2 px-1 sm:px-4">
-            {/* Meta Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-amber-200/60">
-              <div className="flex items-center gap-2">
-                <Badge variant="gold">{previewItem.category}</Badge>
-                <Badge
-                  variant={
-                    previewItem.status === "Terbit" ? "success" : "warning"
-                  }
-                >
-                  {previewItem.status}
-                </Badge>
-                {previewItem.featured && (
-                  <span className="text-[11px] font-bold text-amber-700 bg-amber-400/20 px-2.5 py-0.5 rounded-md">
-                    ★ Berita Utama
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-3 text-xs text-[#7d7152]">
-                <span className="flex items-center gap-1">
-                  <Icon name="calendar" size={13} className="text-amber-600" />
-                  {previewItem.date}
-                </span>
-                <span>•</span>
-                <span className="flex items-center gap-1 font-semibold text-[#2d2410]">
-                  ✎ {previewItem.author}
-                </span>
-              </div>
-            </div>
-
-            {/* Headline Title */}
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#2d2410] tracking-tight leading-snug">
-              {previewItem.title}
-            </h1>
-
-            {/* Featured Hero Image */}
-            {previewItem.image && (
-              <div className="relative rounded-2xl overflow-hidden border border-amber-200/80 bg-black/5 aspect-[16/9] max-h-[460px] w-full shadow-sm">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={previewItem.image}
-                  alt={previewItem.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-
-            {/* Lead Excerpt */}
-            {previewItem.excerpt && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/80 border-l-4 border-amber-500 shadow-xs">
-                <p className="text-sm sm:text-base font-semibold text-amber-950 italic leading-relaxed">
-                  {previewItem.excerpt}
-                </p>
-              </div>
-            )}
-
-            {/* Full Rich Text Article Body */}
-            <div
-              className="prose prose-sm sm:prose-base lg:prose-lg max-w-none text-[#2d2410] leading-relaxed pt-2"
-              dangerouslySetInnerHTML={{
-                __html: previewItem.content || `<p>${previewItem.excerpt}</p>`,
-              }}
-            />
-          </div>
-        )}
-      </Modal>
+      <DetailBeritaModal
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        record={selectedRecord}
+      />
     </div>
   );
 }

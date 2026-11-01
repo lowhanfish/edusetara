@@ -154,7 +154,6 @@ export default function MasterTempatTinggalPage() {
     <div className="space-y-6">
       <PageHeader
         title="Master Tempat Tinggal"
-        breadcrumbs={[{"label": "Dashboard", "href": "/admin"}, {"label": "Data Master", "href": "/admin/master"}, {"label": "Master PPDB", "href": "/admin/master/ppdb"}, {"label": "Tempat Tinggal"}]}
         description="Pengelolaan pilihan status kepemilikan atau kondisi hunian tempat tinggal calon peserta didik."
         action={
           <div className="flex items-center gap-2">
@@ -394,11 +393,7 @@ export default function MasterTempatTinggalPage() {
           </span>
 
           {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={(p) => setPage(p)}
-            />
+            <Pagination page={page} pageSize={pageSize} total={totalItems} onPageChange={(p) => setPage(p)} onPageSizeChange={(s) => setPageSize(s)} />
           )}
         </div>
       </Card>

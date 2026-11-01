@@ -29,7 +29,7 @@ export default function DetailMenuModal({
           </div>
           <div>
             <span className="text-xs text-slate-400 block mb-1">Status Menu</span>
-            <Badge variant={record.is_active ? "primary" : "neutral"}>
+            <Badge variant={record.is_active ? "gold" : "neutral"}>
               {record.is_active ? "Aktif" : "Nonaktif"}
             </Badge>
           </div>

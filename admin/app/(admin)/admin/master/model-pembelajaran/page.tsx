@@ -154,7 +154,6 @@ export default function MasterModelPembelajaranPage() {
     <div className="space-y-6">
       <PageHeader
         title="Master Model Pembelajaran"
-        breadcrumbs={[{"label": "Dashboard", "href": "/admin"}, {"label": "Data Master", "href": "/admin/master"}, {"label": "Master Pedagogi", "href": "/admin/master"}, {"label": "Model Pembelajaran"}]}
         description="Pengelolaan sintaks kerangka strategi pembelajaran terstruktur (Problem Based Learning, Project Based, dll.) rujukan jurnal guru."
         action={
           <div className="flex items-center gap-2">
@@ -394,11 +393,7 @@ export default function MasterModelPembelajaranPage() {
           </span>
 
           {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={(p) => setPage(p)}
-            />
+            <Pagination page={page} pageSize={pageSize} total={totalItems} onPageChange={(p) => setPage(p)} onPageSizeChange={(s) => setPageSize(s)} />
           )}
         </div>
       </Card>
