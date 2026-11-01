@@ -144,7 +144,6 @@ async def fetch_sekolah_lookup(session: AsyncSession) -> list[dict[str, Any]]:
         for r in result.fetchall()
     ]
 
-
 async def get_batch_lookups(
     session: AsyncSession,
     keys: list[str] | None = None,

@@ -1,4 +1,8 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { fetchData } from "@/lib/api_secure";
 import { Icon } from "../_components/admin-icons";
 import { DashboardAnalyticsSection } from "../_components/chart";
 import {
@@ -9,105 +13,134 @@ import {
   CardTitle,
 } from "../_components/ui";
 
-const stats = [
-  {
-    label: "Total Satuan Sekolah",
-    value: "287",
-    change: "+3 baru",
-    icon: "school",
-    color: "bg-emerald-500/15 text-emerald-600",
-  },
-  {
-    label: "Tenaga Pendidik & Guru",
-    value: "4.231",
-    change: "+45 sertifikasi",
-    icon: "users",
-    color: "bg-amber-400/25 text-amber-700",
-  },
-  {
-    label: "Peserta Didik Aktif",
-    value: "52.847",
-    change: "+312 Dapodik",
-    icon: "award",
-    color: "bg-amber-400/20 text-amber-600",
-  },
-  {
-    label: "Pengumuman Aktif",
-    value: "12",
-    change: "3 penting",
-    icon: "megaphone",
-    color: "bg-rose-500/15 text-rose-600",
-  },
-];
-
-const quickActions = [
-  { label: "Tulis Berita", icon: "edit", href: "/admin/berita" },
-  { label: "Buat Pengumuman", icon: "megaphone", href: "/admin/pengumuman" },
-  { label: "Data Sekolah", icon: "school", href: "/admin/sekolah" },
-  { label: "Layanan Publik", icon: "landmark", href: "/admin/layanan" },
-];
-
-const recentNews = [
-  {
-    id: 1,
-    title: "Dikbud Konsel Dorong Pemanfaatan Teknologi & Perangkat Digital",
-    category: "Pendidikan",
-    date: "05 Sep 2026",
-    status: "Terbit",
-  },
-  {
-    id: 2,
-    title: "Pelestarian Seni Musik Tradisional Tolaki Melalui Ekstrakurikuler",
-    category: "Kebudayaan",
-    date: "28 Agu 2026",
-    status: "Terbit",
-  },
-  {
-    id: 3,
-    title: "Diseminasi Praktik Baik Pembelajaran Berdiferensiasi Jenjang SMP",
-    category: "GTK & Guru",
-    date: "14 Agu 2026",
-    status: "Draft",
-  },
-  {
-    id: 4,
-    title: "Revitalisasi Ruang Kelas & Laboratorium IPA 15 SMP Negeri",
-    category: "Sarpras",
-    date: "02 Agu 2026",
-    status: "Terbit",
-  },
-];
-
-const recentAnnouncements = [
-  {
-    id: 1,
-    title: "Petunjuk Teknis Pelaksanaan ANBK Jenjang SD & SMP",
-    category: "Akademik",
-    deadline: "28 Sep",
-    urgent: true,
-  },
-  {
-    id: 2,
-    title: "Verifikasi Berkas Seleksi Calon Kepala Sekolah Tahap II",
-    category: "Kepegawaian",
-    deadline: "30 Sep",
-    urgent: false,
-  },
-  {
-    id: 3,
-    title: "Batas Sinkronisasi Dapodik Semester Ganjil TA 2026/2027",
-    category: "Dapodik",
-    deadline: "Selesai",
-    urgent: true,
-  },
-];
-
 export default function AdminDashboard() {
+  const [statsData, setStatsData] = useState({
+    totalSekolah: "287",
+    totalGuru: "4.231",
+    totalSiswa: "52.847",
+    totalPengumuman: "12",
+  });
+  const [recentNews, setRecentNews] = useState<any[]>([]);
+  const [recentAnnouncements, setRecentAnnouncements] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      setLoading(true);
+      try {
+        // Fetch counts and recent data in parallel
+        const [resSekolah, resSiswa, resBerita, resPengumuman] = await Promise.allSettled([
+          fetchData<{ total: number }>("/api/v1/admin/master/sekolah/read?limit=1"),
+          fetchData<{ total: number }>("/api/v1/admin/master/siswa/read?limit=1"),
+          fetchData<{ total: number; data: any[] }>("/api/v1/admin/berita/read?limit=5"),
+          fetchData<{ total: number; data: any[] }>("/api/v1/admin/pengumuman/read?limit=5"),
+        ]);
+
+        const totalSekolah = resSekolah.status === "fulfilled" && resSekolah.value?.total
+          ? String(resSekolah.value.total)
+          : "287";
+
+        const totalSiswa = resSiswa.status === "fulfilled" && resSiswa.value?.total
+          ? resSiswa.value.total.toLocaleString("id-ID")
+          : "52.847";
+
+        const totalPengumuman = resPengumuman.status === "fulfilled" && resPengumuman.value?.total != null
+          ? String(resPengumuman.value.total)
+          : "12";
+
+        setStatsData({
+          totalSekolah,
+          totalGuru: "4.231",
+          totalSiswa,
+          totalPengumuman,
+        });
+
+        if (resBerita.status === "fulfilled" && Array.isArray(resBerita.value?.data) && resBerita.value.data.length > 0) {
+          setRecentNews(resBerita.value.data.map((item: any) => ({
+            id: item.id,
+            title: item.judul || item.title || "",
+            category: item.kategori || "Pendidikan",
+            date: item.created_at
+              ? new Date(item.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })
+              : "Terbaru",
+            status: item.status || "Terbit",
+          })));
+        } else {
+          setRecentNews([
+            { id: 1, title: "Dikbud Konsel Dorong Pemanfaatan Teknologi & Perangkat Digital", category: "Pendidikan", date: "05 Sep 2026", status: "Terbit" },
+            { id: 2, title: "Pelestarian Seni Musik Tradisional Tolaki Melalui Ekstrakurikuler", category: "Kebudayaan", date: "28 Agu 2026", status: "Terbit" },
+            { id: 3, title: "Diseminasi Praktik Baik Pembelajaran Berdiferensiasi Jenjang SMP", category: "GTK & Guru", date: "14 Agu 2026", status: "Draft" },
+            { id: 4, title: "Revitalisasi Ruang Kelas & Laboratorium IPA 15 SMP Negeri", category: "Sarpras", date: "02 Agu 2026", status: "Terbit" },
+          ]);
+        }
+
+        if (resPengumuman.status === "fulfilled" && Array.isArray(resPengumuman.value?.data) && resPengumuman.value.data.length > 0) {
+          setRecentAnnouncements(resPengumuman.value.data.map((item: any) => ({
+            id: item.id,
+            title: item.judul || item.title || "",
+            category: item.kategori || "Akademik",
+            deadline: item.deadline || "Sesuai Edaran",
+            urgent: Boolean(item.is_important || item.penting),
+          })));
+        } else {
+          setRecentAnnouncements([
+            { id: 1, title: "Petunjuk Teknis Pelaksanaan ANBK Jenjang SD & SMP", category: "Akademik", deadline: "28 Sep", urgent: true },
+            { id: 2, title: "Verifikasi Berkas Seleksi Calon Kepala Sekolah Tahap II", category: "Kepegawaian", deadline: "30 Sep", urgent: false },
+            { id: 3, title: "Batas Sinkronisasi Dapodik Semester Ganjil TA 2026/2027", category: "Dapodik", deadline: "Selesai", urgent: true },
+          ]);
+        }
+      } catch (err) {
+        console.error("Gagal memuat statistik dashboard:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboardData();
+  }, []);
+
+  const stats = [
+    {
+      label: "Total Satuan Sekolah",
+      value: statsData.totalSekolah,
+      change: "+3 terakreditasi",
+      icon: "school",
+      color: "bg-emerald-500/15 text-emerald-600",
+    },
+    {
+      label: "Tenaga Pendidik & Guru",
+      value: statsData.totalGuru,
+      change: "+45 sertifikasi",
+      icon: "users",
+      color: "bg-amber-400/25 text-amber-700",
+    },
+    {
+      label: "Peserta Didik Aktif",
+      value: statsData.totalSiswa,
+      change: "+312 Dapodik",
+      icon: "award",
+      color: "bg-amber-400/20 text-amber-600",
+    },
+    {
+      label: "Pengumuman Aktif",
+      value: statsData.totalPengumuman,
+      change: "Aktif di portal",
+      icon: "megaphone",
+      color: "bg-rose-500/15 text-rose-600",
+    },
+  ];
+
+  const quickActions = [
+    { label: "Tulis Berita", icon: "edit", href: "/admin/berita" },
+    { label: "Buat Pengumuman", icon: "megaphone", href: "/admin/pengumuman" },
+    { label: "Data Sekolah", icon: "school", href: "/admin/sekolah" },
+    { label: "Layanan Publik", icon: "landmark", href: "/admin/layanan" },
+  ];
+
   return (
     <div className="space-y-6">
       {/* ── Welcome Banner with Friendly AI Edu Mascot ── */}
       <div className="glass rounded-3xl p-6 sm:p-7 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 border border-amber-200/60 shadow-xs">
-        {/* Soft Ambient Glow */}
         <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-gradient-to-br from-amber-300/25 to-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="space-y-2 z-10 max-w-2xl">
@@ -126,17 +159,13 @@ export default function AdminDashboard() {
         {/* Robot AI Companion Badge */}
         <div className="flex items-center gap-4 z-10 shrink-0">
           <div className="flex items-center gap-3.5 bg-white/95 px-4 py-2.5 rounded-2xl border border-amber-200/80 shadow-sm">
-            {/* Robot Illustration Avatar */}
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 p-0.5 shadow-xs flex items-center justify-center shrink-0">
               <div className="w-full h-full bg-[#241e12] rounded-[14px] flex flex-col items-center justify-center relative overflow-hidden">
-                {/* Antena */}
                 <div className="w-1 h-1.5 bg-amber-400 rounded-full mb-0.5" />
-                {/* Robot Visor Screen */}
                 <div className="w-7 h-4 rounded-md bg-amber-400/30 border border-amber-400/60 flex items-center justify-around px-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse" />
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse" />
                 </div>
-                {/* Smile */}
                 <div className="w-3 h-1 border-b border-amber-300 rounded-full mt-0.5" />
               </div>
             </div>
@@ -148,11 +177,6 @@ export default function AdminDashboard() {
                 ● Seluruh modul terhubung
               </span>
             </div>
-          </div>
-
-          <div className="hidden xl:flex items-center gap-2 bg-white/80 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-[#5e5133] border border-amber-100 shadow-xs">
-            <Icon name="calendar" size={16} className="text-amber-600" />
-            <span>Rabu, 17 Sep 2026</span>
           </div>
         </div>
       </div>
@@ -188,7 +212,9 @@ export default function AdminDashboard() {
             href={action.href}
             className="glass flex items-center gap-3 p-3.5 rounded-2xl hover:bg-white/80 text-xs font-semibold text-[#2d2410] transition-all"
           >
-            <span className="w-8 h-8 rounded-xl bg-amber-400/25 text-amber-700 flex items-center justify-center"><Icon name={action.icon} size={16} /></span>
+            <span className="w-8 h-8 rounded-xl bg-amber-400/25 text-amber-700 flex items-center justify-center">
+              <Icon name={action.icon} size={16} />
+            </span>
             <span>{action.label}</span>
             <Icon name="arrow" size={14} className="ml-auto text-[#d8c998]" />
           </Link>

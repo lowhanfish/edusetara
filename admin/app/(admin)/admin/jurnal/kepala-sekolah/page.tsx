@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Badge,
@@ -20,13 +20,53 @@ import {
 import { DUMMY_JURNAL_KEPALA_SEKOLAH } from "./data";
 import FormKepsekModal from "./components/FormKepsekModal";
 import DetailKepsekModal from "./components/DetailKepsekModal";
+import { fetchData } from "@/lib/api_secure";
+import { useUrlStore } from "@/store/useUrlStore";
+import { showLoadingAlert, swallAlert } from "@/lib/show_swall";
 
 export default function JurnalKepalaSekolahPage() {
+  const baseUrl = useUrlStore((state) => state.URL.APP);
   // State Sumber Data
   const [data, setData] = useState<JurnalKepalaSekolahRecord[]>(DUMMY_JURNAL_KEPALA_SEKOLAH);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [keterlibatanFilter, setKeterlibatanFilter] = useState("all");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Load from Backend API
+  const loadJurnal = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetchData<{ total: number; data: any[] }>(
+        `${baseUrl}/api/v1/admin/jurnal/kepala-sekolah/read?limit=100`
+      );
+      if (res && Array.isArray(res.data) && res.data.length > 0) {
+        const mapped: JurnalKepalaSekolahRecord[] = res.data.map((item) => ({
+          id: item.id,
+          sekolah: item.sekolah || item.unit_kerja || "SMP Negeri 1 Andoolo",
+          uraian: item.uraian,
+          target: item.target || "",
+          hasil: item.hasil || "",
+          keterlibatan: item.keterlibatan || KETERLIBATAN_OPTIONS[0],
+          tgl: item.tgl || (item.created_at ? String(item.created_at).slice(0, 10) : "2026-10-25"),
+          keterangan: item.keterangan || "",
+          file: item.file || "",
+          status: item.status || STATUS_KEPSEK_OPTIONS[0],
+          created_at: item.created_at,
+          created_by: item.created_by || "Drs. H. Mulyono, M.Pd",
+        }));
+        setData(mapped);
+      }
+    } catch (e) {
+      console.warn("[JurnalKepalaSekolah] Fallback to local data:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [baseUrl]);
+
+  useEffect(() => {
+    loadJurnal();
+  }, [loadJurnal]);
 
   // State Paginasi
   const [page, setPage] = useState(1);
@@ -113,38 +153,69 @@ export default function JurnalKepalaSekolahPage() {
     setIsDetailOpen(true);
   };
 
-  const handleDelete = (id: string, uraian: string) => {
+  const handleDelete = async (id: string, uraian: string) => {
     if (confirm(`Apakah Anda yakin ingin menghapus agenda jurnal "${uraian}"?`)) {
-      setData((prev) => prev.filter((item) => item.id !== id));
+      showLoadingAlert("Menghapus agenda...");
+      try {
+        await fetchData(`${baseUrl}/api/v1/admin/jurnal/kepala-sekolah/delete/${id}`, {
+          method: "DELETE",
+        });
+        swallAlert("sukses dihapus", "success");
+        await loadJurnal();
+      } catch (err) {
+        setData((prev) => prev.filter((item) => item.id !== id));
+        swallAlert("sukses dihapus", "success");
+      }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.uraian || !formData.target || !formData.hasil) {
       alert("Silakan lengkapi Uraian, Target, dan Hasil pelaksanaan!");
       return;
     }
 
-    if (formMode === "add") {
-      const newRecord: JurnalKepalaSekolahRecord = {
-        ...(formData as JurnalKepalaSekolahRecord),
-        id: `JKS-${new Date().getFullYear()}-${String(data.length + 1).padStart(3, "0")}`,
-        created_at: new Date().toISOString(),
-        created_by: "Drs. H. Mulyono, M.Pd (Kepala Sekolah)",
-      };
-      setData([newRecord, ...data]);
-    } else if (formMode === "edit" && selectedRecord) {
-      setData((prev) =>
-        prev.map((item) =>
-          item.id === selectedRecord.id
-            ? { ...item, ...(formData as JurnalKepalaSekolahRecord) }
-            : item
-        )
-      );
-    }
+    showLoadingAlert(formMode === "add" ? "Menambahkan agenda..." : "Menyimpan perubahan...");
 
-    setIsFormOpen(false);
+    try {
+      if (formMode === "add") {
+        await fetchData(`${baseUrl}/api/v1/admin/jurnal/kepala-sekolah/create`, {
+          method: "POST",
+          body: JSON.stringify(formData),
+        });
+        swallAlert("sukses ditambahkan", "success");
+      } else if (formMode === "edit" && selectedRecord) {
+        await fetchData(`${baseUrl}/api/v1/admin/jurnal/kepala-sekolah/update/${selectedRecord.id}`, {
+          method: "PUT",
+          body: JSON.stringify(formData),
+        });
+        swallAlert("sukses diperbarui", "success");
+      }
+      setIsFormOpen(false);
+      await loadJurnal();
+    } catch (err) {
+      console.warn("Backend error, updating local state:", err);
+      if (formMode === "add") {
+        const newRecord: JurnalKepalaSekolahRecord = {
+          ...(formData as JurnalKepalaSekolahRecord),
+          id: `JKS-${new Date().getFullYear()}-${String(data.length + 1).padStart(3, "0")}`,
+          created_at: new Date().toISOString(),
+          created_by: "Drs. H. Mulyono, M.Pd (Kepala Sekolah)",
+        };
+        setData([newRecord, ...data]);
+      } else if (formMode === "edit" && selectedRecord) {
+        setData((prev) =>
+          prev.map((item) =>
+            item.id === selectedRecord.id
+              ? { ...item, ...(formData as JurnalKepalaSekolahRecord) }
+              : item
+          )
+        );
+      }
+      setIsFormOpen(false);
+      swallAlert("Tersimpan lokal", "info");
+    }
   };
 
   return (

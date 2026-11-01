@@ -1,0 +1,59 @@
+"""Operational models for Usulan Sekolah."""
+
+from sqlalchemy import Column, Integer, Numeric, String, Text
+from app.db.base import Base
+from app.models.operational.base import OperationalBaseMixin
+
+
+class UsulanTunjanganGuru(Base, OperationalBaseMixin):
+    """Usulan tunjangan guru (TPG, TKG, Tamsil)."""
+    __tablename__ = "usulan_tunjangan_guru"
+
+    triwulan_id = Column(String(50), nullable=True, index=True)
+    jenis_id = Column(String(50), nullable=True, index=True)
+    kelas_id = Column(String(50), nullable=True, index=True)
+    jml_guru = Column(Integer, nullable=True, default=1)
+    nominal = Column(Numeric(15, 2), nullable=True)
+    file = Column(String(255), nullable=True)
+    file_type = Column(String(50), nullable=True)
+
+
+class UsulanPipPendukung(Base, OperationalBaseMixin):
+    """Dokumen data pendukung bantuan PIP."""
+    __tablename__ = "usulan_pip_pendukung"
+
+    uraian = Column(String(255), nullable=False)
+    jenjang_id = Column(String(50), nullable=True, index=True)
+    nominal = Column(Numeric(15, 2), nullable=True)
+    tahun = Column(String(20), nullable=True)
+    file = Column(String(255), nullable=True)
+
+
+class UsulanPipPenerima(Base, OperationalBaseMixin):
+    """Data siswa penerima bantuan PIP."""
+    __tablename__ = "usulan_pip_penerima"
+
+    pendukung_id = Column(String(50), nullable=True, index=True)
+    siswa_id = Column(String(50), nullable=True, index=True)
+
+
+class UsulanAssessment(Base, OperationalBaseMixin):
+    """Usulan data asesmen/ANBK sekolah."""
+    __tablename__ = "usulan_assessment"
+
+    status_sekolah_id = Column(String(50), nullable=True, index=True)
+    jml_siswa = Column(Integer, nullable=True, default=0)
+    jml_laki = Column(Integer, nullable=True, default=0)
+    jml_perempuan = Column(Integer, nullable=True, default=0)
+    kurikulum_k13 = Column(String(50), nullable=True)
+    kurikulum_kurmer = Column(String(50), nullable=True)
+    file = Column(String(255), nullable=True)
+
+
+class UsulanRekonsiliasiBosp(Base, OperationalBaseMixin):
+    """Usulan rekonsiliasi SPJ dana BOSP."""
+    __tablename__ = "usulan_rekonsiliasi_bosp"
+
+    tahun = Column(String(20), nullable=True)
+    semester_id = Column(String(50), nullable=True, index=True)
+    file = Column(String(255), nullable=True)

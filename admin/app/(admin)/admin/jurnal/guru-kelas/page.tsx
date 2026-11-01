@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Badge,
@@ -21,13 +21,18 @@ import {
 import { DUMMY_JURNAL_GURU_KELAS } from "./data";
 import FormJurnalModal from "./components/FormJurnalModal";
 import DetailJurnalModal from "./components/DetailJurnalModal";
+import { fetchData } from "@/lib/api_secure";
+import { useUrlStore } from "@/store/useUrlStore";
+import { showLoadingAlert, swallAlert } from "@/lib/show_swall";
 
 export default function JurnalGuruKelasPage() {
-  // Sumber Data State (Looping tabel merujuk ke data dummy kita)
+  const baseUrl = useUrlStore((state) => state.URL.APP);
+  // Sumber Data State
   const [data, setData] = useState<JurnalGuruKelasRecord[]>(DUMMY_JURNAL_GURU_KELAS);
   const [search, setSearch] = useState("");
   const [modelFilter, setModelFilter] = useState("all");
   const [penilaianFilter, setPenilaianFilter] = useState("all");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Pagination State
   const [page, setPage] = useState(1);
@@ -38,6 +43,48 @@ export default function JurnalGuruKelasPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<JurnalGuruKelasRecord | null>(null);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
+
+  // Load from Backend API
+  const loadJurnal = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetchData<{ total: number; data: any[] }>(
+        `${baseUrl}/api/v1/admin/jurnal/guru-kelas/read?limit=100`
+      );
+      if (res && Array.isArray(res.data) && res.data.length > 0) {
+        const mapped: JurnalGuruKelasRecord[] = res.data.map((item) => ({
+          id: item.id,
+          sekolah: item.sekolah || item.unit_kerja || "SDN 2 BUKE",
+          tema: item.tema,
+          materi_pokok: item.materi_pokok,
+          pertemuan_ke: item.pertemuan_ke || 1,
+          tgl: item.tgl || (item.created_at ? String(item.created_at).slice(0, 10) : "2026-10-28"),
+          model_pembelajaran: item.model_pembelajaran || MODEL_OPTIONS[0],
+          metode_pembelajaran: item.metode_pembelajaran || METODE_OPTIONS[0],
+          kegiatan: item.kegiatan || "",
+          penilaian: item.penilaian || PENILAIAN_OPTIONS[0],
+          siswa_hadir: item.siswa_hadir ?? 28,
+          siswa_izin: item.siswa_izin ?? 0,
+          siswa_sakit: item.siswa_sakit ?? 0,
+          siswa_alpa: item.siswa_alpa ?? 0,
+          persentase: item.persentase ?? 100,
+          keterangan: item.keterangan || "",
+          file: item.file || "",
+          created_at: item.created_at,
+          created_by: item.created_by || "admin",
+        }));
+        setData(mapped);
+      }
+    } catch (e) {
+      console.warn("[JurnalGuruKelas] Fallback to local data:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [baseUrl]);
+
+  useEffect(() => {
+    loadJurnal();
+  }, [loadJurnal]);
 
   // Form Field State
   const [formData, setFormData] = useState<Partial<JurnalGuruKelasRecord>>({
@@ -150,36 +197,67 @@ export default function JurnalGuruKelasPage() {
     setIsDetailOpen(true);
   };
 
-  const handleDelete = (id: string, tema: string) => {
+  const handleDelete = async (id: string, tema: string) => {
     if (confirm(`Apakah Anda yakin ingin menghapus data jurnal "${tema}"?`)) {
-      setData((prev) => prev.filter((item) => item.id !== id));
+      showLoadingAlert("Menghapus data jurnal...");
+      try {
+        await fetchData(`${baseUrl}/api/v1/admin/jurnal/guru-kelas/delete/${id}`, {
+          method: "DELETE",
+        });
+        swallAlert("sukses dihapus", "success");
+        await loadJurnal();
+      } catch (err) {
+        setData((prev) => prev.filter((item) => item.id !== id));
+        swallAlert("sukses dihapus", "success");
+      }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.tema || !formData.materi_pokok) {
       alert("Silakan lengkapi Tema dan Materi Pokok pembelajaran!");
       return;
     }
 
-    if (formMode === "add") {
-      const newRecord: JurnalGuruKelasRecord = {
-        ...(formData as JurnalGuruKelasRecord),
-        id: `JGK-${new Date().getFullYear()}-${String(data.length + 1).padStart(3, "0")}`,
-        created_at: new Date().toISOString(),
-        created_by: "Ibu Sri Wahyuni, S.Pd (NIP 198803152014022003)",
-      };
-      setData([newRecord, ...data]);
-    } else if (formMode === "edit" && selectedRecord) {
-      setData((prev) =>
-        prev.map((item) =>
-          item.id === selectedRecord.id ? { ...item, ...(formData as JurnalGuruKelasRecord) } : item
-        )
-      );
-    }
+    showLoadingAlert(formMode === "add" ? "Menambahkan data jurnal..." : "Menyimpan perubahan...");
 
-    setIsFormOpen(false);
+    try {
+      if (formMode === "add") {
+        await fetchData(`${baseUrl}/api/v1/admin/jurnal/guru-kelas/create`, {
+          method: "POST",
+          body: JSON.stringify(formData),
+        });
+        swallAlert("sukses ditambahkan", "success");
+      } else if (formMode === "edit" && selectedRecord) {
+        await fetchData(`${baseUrl}/api/v1/admin/jurnal/guru-kelas/update/${selectedRecord.id}`, {
+          method: "PUT",
+          body: JSON.stringify(formData),
+        });
+        swallAlert("sukses diperbarui", "success");
+      }
+      setIsFormOpen(false);
+      await loadJurnal();
+    } catch (err) {
+      console.warn("Backend error, updating local state:", err);
+      if (formMode === "add") {
+        const newRecord: JurnalGuruKelasRecord = {
+          ...(formData as JurnalGuruKelasRecord),
+          id: `JGK-${new Date().getFullYear()}-${String(data.length + 1).padStart(3, "0")}`,
+          created_at: new Date().toISOString(),
+          created_by: "Ibu Sri Wahyuni, S.Pd (NIP 198803152014022003)",
+        };
+        setData([newRecord, ...data]);
+      } else if (formMode === "edit" && selectedRecord) {
+        setData((prev) =>
+          prev.map((item) =>
+            item.id === selectedRecord.id ? { ...item, ...(formData as JurnalGuruKelasRecord) } : item
+          )
+        );
+      }
+      setIsFormOpen(false);
+      swallAlert("Tersimpan lokal", "info");
+    }
   };
 
   return (

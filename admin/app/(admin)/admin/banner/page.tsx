@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import Swal from "sweetalert2";
+import { fetchData } from "@/lib/api_secure";
 import {
   Badge,
   Button,
@@ -25,34 +27,11 @@ interface BannerSlide {
   status: "Aktif" | "Nonaktif";
 }
 
-const initialBanners: BannerSlide[] = [
-  {
-    id: "ban-1",
-    title: "Pendidikan Maju, Budaya Lestari",
-    subtitle: "Mewujudkan generasi emas Konawe Selatan yang cerdas, berkarakter, dan berdaya saing global melalui layanan terpadu dan inklusif.",
-    badgeText: "Portal Resmi Dinas Pendidikan & Kebudayaan",
-    primaryButtonLabel: "Jelajahi Layanan",
-    primaryButtonLink: "/layanan-publik",
-    image: "/img/hero-konsel.png",
-    order: 1,
-    status: "Aktif",
-  },
-  {
-    id: "ban-2",
-    title: "Digitalisasi Ruang Kelas Merata",
-    subtitle: "Pemberdayaan laboratorium komputer dan Chromebook di seluruh pelosok satuan pendidikan SD & SMP se-Kabupaten Konawe Selatan.",
-    badgeText: "Inovasi Pembelajaran Digital",
-    primaryButtonLabel: "Cari Sekolah",
-    primaryButtonLink: "/layanan-publik/cari-sekolah",
-    image: "/img/pendidikan-jenjang.jpg",
-    order: 2,
-    status: "Aktif",
-  },
-];
-
 export default function BannerAdminPage() {
-  const [banners, setBanners] = useState<BannerSlide[]>(initialBanners);
+  const [banners, setBanners] = useState<BannerSlide[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -65,24 +44,40 @@ export default function BannerAdminPage() {
     status: "Aktif" as BannerSlide["status"],
   });
 
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.title) return;
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetchData<{ total: number; data: any[] }>(
+        `/api/v1/admin/banner/read?limit=50`
+      );
 
-    const newItem: BannerSlide = {
-      id: `ban-${Date.now()}`,
-      title: formData.title,
-      subtitle: formData.subtitle,
-      badgeText: formData.badgeText,
-      primaryButtonLabel: formData.primaryButtonLabel,
-      primaryButtonLink: formData.primaryButtonLink,
-      image: formData.image,
-      order: Number(formData.order) || banners.length + 1,
-      status: formData.status,
-    };
+      if (res && Array.isArray(res.data)) {
+        const mapped: BannerSlide[] = res.data.map((row: any) => ({
+          id: row.id,
+          title: row.title || "",
+          subtitle: row.subtitle || "",
+          badgeText: row.badge_text || row.badgeText || "Portal Resmi Dikbud Konsel",
+          primaryButtonLabel: row.primary_button_label || row.primaryButtonLabel || "Jelajahi Layanan",
+          primaryButtonLink: row.primary_button_link || row.primaryButtonLink || "/layanan-publik",
+          image: row.image || "/img/hero-konsel.png",
+          order: Number(row.order_num || row.order || 1),
+          status: (row.status || "Aktif") as BannerSlide["status"],
+        }));
+        setBanners(mapped);
+      }
+    } catch (err: any) {
+      console.error("Gagal memuat banner:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    setBanners([...banners, newItem]);
-    setIsModalOpen(false);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleOpenCreate = () => {
+    setEditingId(null);
     setFormData({
       title: "",
       subtitle: "",
@@ -90,77 +85,198 @@ export default function BannerAdminPage() {
       primaryButtonLabel: "Lihat Layanan",
       primaryButtonLink: "/layanan-publik",
       image: "/img/hero-konsel.png",
-      order: banners.length + 2,
+      order: banners.length + 1,
       status: "Aktif",
     });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (item: BannerSlide) => {
+    setEditingId(item.id);
+    setFormData({
+      title: item.title,
+      subtitle: item.subtitle,
+      badgeText: item.badgeText,
+      primaryButtonLabel: item.primaryButtonLabel,
+      primaryButtonLink: item.primaryButtonLink,
+      image: item.image,
+      order: item.order,
+      status: item.status,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title) return;
+
+    const payload = {
+      title: formData.title,
+      subtitle: formData.subtitle,
+      badge_text: formData.badgeText,
+      primary_button_label: formData.primaryButtonLabel,
+      primary_button_link: formData.primaryButtonLink,
+      image: formData.image,
+      order_num: String(formData.order),
+      status: formData.status,
+    };
+
+    try {
+      if (editingId) {
+        await fetchData(`/api/v1/admin/banner/update/${editingId}`, {
+          method: "PUT",
+          body: payload,
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil Diperbarui",
+          text: "Slider banner berhasil diperbarui.",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      } else {
+        await fetchData(`/api/v1/admin/banner/create`, {
+          method: "POST",
+          body: payload,
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil Ditambahkan",
+          text: "Slider banner baru telah disimpan.",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      }
+      setIsModalOpen(false);
+      loadData();
+    } catch (err: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Menyimpan",
+        text: err?.message || "Terjadi kesalahan sistem saat menyimpan.",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string, title: string) => {
+    const result = await Swal.fire({
+      title: "Hapus Slider Banner?",
+      text: `Banner "${title}" akan dihapus permanen.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await fetchData(`/api/v1/admin/banner/delete/${id}`, {
+          method: "DELETE",
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Terhapus",
+          text: "Banner berhasil dihapus.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        loadData();
+      } catch (err: any) {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal Menghapus",
+          text: err?.message || "Terjadi kesalahan sistem.",
+        });
+      }
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       <PageHeader
         title="Banner & Slider Beranda"
         description="Atur tayangan slider utama (hero banner) di halaman muka website publik, foto latar belakang, dan tombol aksi."
         badge={<Badge variant="gold">{banners.length} Slider</Badge>}
         action={
-          <Button variant="gold" icon="🖼️" onClick={() => setIsModalOpen(true)}>
+          <Button variant="gold" icon="🖼️" onClick={handleOpenCreate}>
             Tambah Slider Banner
           </Button>
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {banners.map((item) => (
-          <Card key={item.id} className="flex flex-col justify-between">
-            <div className="p-6 bg-gradient-to-br from-[#fff6dc] to-[#fff0c4] border-b border-amber-200/50 flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#2d2410] bg-white/70 px-2.5 py-1 rounded-md">
-                  Urutan #{item.order}
+      {loading ? (
+        <Card className="p-12 text-center text-xs text-[#7d7152]">
+          <div className="flex items-center justify-center gap-2">
+            <span className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+            Memuat daftar banner...
+          </div>
+        </Card>
+      ) : banners.length === 0 ? (
+        <Card className="p-12 text-center text-xs text-[#7d7152]">
+          Belum ada slider banner. Klik &quot;Tambah Slider Banner&quot; di atas untuk membuat banner baru.
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {banners.map((item) => (
+            <Card key={item.id} className="flex flex-col justify-between overflow-hidden border border-white/80 shadow-xs">
+              <div className="p-6 bg-gradient-to-br from-[#fff6dc] to-[#fff0c4] border-b border-amber-200/50 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#2d2410] bg-white/70 px-2.5 py-1 rounded-md">
+                    Urutan #{item.order}
+                  </span>
+                  <Badge variant={item.status === "Aktif" ? "success" : "neutral"}>
+                    {item.status}
+                  </Badge>
+                </div>
+                <span className="text-xs text-[#a86a00] font-bold">
+                  {item.badgeText}
                 </span>
-                <Badge variant={item.status === "Aktif" ? "success" : "neutral"}>
-                  {item.status}
-                </Badge>
+                <h3 className="text-lg font-extrabold text-[#2d2410]">
+                  {item.title}
+                </h3>
+                <p className="text-xs text-slate-700 line-clamp-2">
+                  {item.subtitle}
+                </p>
               </div>
-              <span className="text-xs text-[#a86a00] font-bold">
-                {item.badgeText}
-              </span>
-              <h3 className="text-lg font-extrabold text-[#2d2410]">
-                {item.title}
-              </h3>
-              <p className="text-xs text-slate-700 line-clamp-2">
-                {item.subtitle}
-              </p>
-            </div>
 
-            <div className="p-5 flex items-center justify-between bg-white text-xs text-slate-600">
-              <div className="flex flex-col">
-                <span className="font-semibold text-[#2d2410]">
-                  Tombol: {item.primaryButtonLabel}
-                </span>
-                <span className="text-slate-400 font-mono text-[11px]">
-                  {item.primaryButtonLink}
-                </span>
+              <div className="p-5 flex items-center justify-between bg-white text-xs text-slate-600">
+                <div className="flex flex-col">
+                  <span className="font-semibold text-[#2d2410]">
+                    Tombol: {item.primaryButtonLabel}
+                  </span>
+                  <span className="text-slate-400 font-mono text-[11px]">
+                    {item.primaryButtonLink}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleOpenEdit(item)}
+                  >
+                    ✏️ Edit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hover:text-red-600 hover:bg-red-50"
+                    onClick={() => handleDelete(item.id, item.title)}
+                  >
+                    🗑️ Hapus
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="hover:text-red-600 hover:bg-red-50"
-                  onClick={() =>
-                    setBanners(banners.filter((b) => b.id !== item.id))
-                  }
-                >
-                  🗑️ Hapus
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Tambah Slider Hero Baru"
+        title={editingId ? "Edit Slider Hero" : "Tambah Slider Hero Baru"}
         description="Masukkan judul hero banner, teks penjelas, dan tautan tombol yang akan muncul di beranda."
         maxWidth="lg"
         footer={
@@ -169,12 +285,12 @@ export default function BannerAdminPage() {
               Batal
             </Button>
             <Button variant="gold" type="submit" form="form-banner">
-              Simpan Slider
+              {editingId ? "Simpan Perubahan" : "Simpan Slider"}
             </Button>
           </>
         }
       >
-        <form id="form-banner" onSubmit={handleCreate} className="space-y-4">
+        <form id="form-banner" onSubmit={handleSubmit} className="space-y-4">
           <Input
             label="Judul Utama Slider"
             placeholder="Contoh: Pendidikan Cerdas, Lestari Budayanya"

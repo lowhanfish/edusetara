@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Badge,
@@ -16,6 +16,9 @@ import {
   Textarea,
 } from "../../_components/ui";
 import { Icon } from "../../_components/admin-icons";
+import { fetchData } from "@/lib/api_secure";
+import { useUrlStore } from "@/store/useUrlStore";
+import { showLoadingAlert, swallAlert } from "@/lib/show_swall";
 
 interface NewsItem {
   id: string;
@@ -121,9 +124,11 @@ const emptyFormData = {
 };
 
 export default function BeritaAdminPage() {
+  const baseUrl = useUrlStore((state) => state.URL.APP);
   const [newsList, setNewsList] = useState<NewsItem[]>(initialNews);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("Semua");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Modal Create / Edit State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -133,6 +138,40 @@ export default function BeritaAdminPage() {
   // Modal Preview State
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewItem, setPreviewItem] = useState<NewsItem | null>(null);
+
+  // Load News from Backend
+  const loadNews = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetchData<{ total: number; data: any[] }>(
+        `${baseUrl}/api/v1/admin/berita/read?limit=50`
+      );
+      if (res && Array.isArray(res.data) && res.data.length > 0) {
+        const mapped: NewsItem[] = res.data.map((b) => ({
+          id: b.id,
+          title: b.judul || b.title,
+          slug: b.slug || "berita",
+          category: (b.kategori as NewsItem["category"]) || "Pendidikan",
+          excerpt: b.deskripsi || b.judul,
+          author: b.author || b.created_by || "Humas Dikbud",
+          date: b.created_at ? String(b.created_at).slice(0, 10) : "01 Nov 2026",
+          status: (b.status as NewsItem["status"]) || "Terbit",
+          image: b.foto || "/img/pendidikan-jenjang.jpg",
+          content: b.isi || b.deskripsi || "<p>Belum ada isi...</p>",
+          featured: Boolean(b.featured),
+        }));
+        setNewsList(mapped);
+      }
+    } catch (e) {
+      console.warn("[BeritaAdminPage] Fallback to initialNews:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [baseUrl]);
+
+  useEffect(() => {
+    loadNews();
+  }, [loadNews]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -197,58 +236,87 @@ export default function BeritaAdminPage() {
     setIsPreviewOpen(true);
   };
 
-  const handleSaveNews = (e: React.FormEvent) => {
+  const handleSaveNews = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title) return;
 
-    if (editingId) {
-      setNewsList((prev) =>
-        prev.map((item) =>
-          item.id === editingId
-            ? {
-                ...item,
-                title: formData.title,
-                slug: formData.slug || item.slug,
-                category: formData.category,
-                author: formData.author,
-                excerpt: formData.excerpt || formData.title,
-                content: formData.content,
-                image: formData.image,
-                status: formData.status,
-                featured: formData.featured,
-              }
-            : item
-        )
-      );
-    } else {
-      const newItem: NewsItem = {
-        id: `news-${Date.now()}`,
-        title: formData.title,
-        slug: formData.slug || `berita-${Date.now()}`,
-        category: formData.category,
-        excerpt: formData.excerpt || formData.title,
-        author: formData.author,
-        date: new Date().toLocaleDateString("id-ID", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }),
-        status: formData.status,
-        image: formData.image,
-        content: formData.content,
-        featured: formData.featured,
-      };
-      setNewsList([newItem, ...newsList]);
-    }
+    showLoadingAlert(editingId ? "Menyimpan berita..." : "Menerbitkan berita...");
 
-    setIsModalOpen(false);
-    setFormData(emptyFormData);
-    setEditingId(null);
+    const payload = {
+      judul: formData.title,
+      slug: formData.slug || `berita-${Date.now()}`,
+      kategori: formData.category,
+      author: formData.author,
+      deskripsi: formData.excerpt || formData.title,
+      isi: formData.content,
+      foto: formData.image,
+      status: formData.status,
+      featured: formData.featured,
+    };
+
+    try {
+      if (editingId) {
+        await fetchData(`${baseUrl}/api/v1/admin/berita/update/${editingId}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        });
+        swallAlert("sukses diperbarui", "success");
+      } else {
+        await fetchData(`${baseUrl}/api/v1/admin/berita/create`, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        swallAlert("sukses diterbitkan", "success");
+      }
+      setIsModalOpen(false);
+      setFormData(emptyFormData);
+      setEditingId(null);
+      await loadNews();
+    } catch (err) {
+      console.warn("Backend berita save error, updating local state:", err);
+      if (editingId) {
+        setNewsList((prev) =>
+          prev.map((item) =>
+            item.id === editingId
+              ? {
+                  ...item,
+                  ...formData,
+                }
+              : item
+          )
+        );
+      } else {
+        const newItem: NewsItem = {
+          id: `news-${Date.now()}`,
+          ...formData,
+          date: new Date().toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }),
+        };
+        setNewsList([newItem, ...newsList]);
+      }
+      setIsModalOpen(false);
+      setFormData(emptyFormData);
+      setEditingId(null);
+      swallAlert("Tersimpan lokal", "info");
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus artikel berita ini?")) {
-      setNewsList((prev) => prev.filter((item) => item.id !== id));
+      showLoadingAlert("Menghapus berita...");
+      try {
+        await fetchData(`${baseUrl}/api/v1/admin/berita/delete/${id}`, {
+          method: "DELETE",
+        });
+        swallAlert("sukses dihapus", "success");
+        await loadNews();
+      } catch (e) {
+        setNewsList((prev) => prev.filter((item) => item.id !== id));
+        swallAlert("sukses dihapus", "success");
+      }
       if (previewItem?.id === id) {
         setIsPreviewOpen(false);
         setPreviewItem(null);

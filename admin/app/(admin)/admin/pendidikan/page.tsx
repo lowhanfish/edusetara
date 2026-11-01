@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Swal from "sweetalert2";
+import { fetchData } from "@/lib/api_secure";
 import {
   Badge,
   Button,
@@ -23,69 +25,17 @@ interface EducationProgram {
   status: "Aktif" | "Dalam Proses" | "Evaluasi";
 }
 
-const initialPrograms: EducationProgram[] = [
-  {
-    id: "edu-1",
-    category: "Jenjang",
-    name: "Satuan Sekolah Menengah Pertama (SMP)",
-    scope: "25 Kecamatan se-Konsel",
-    totalUnits: "84 Sekolah (7.420 Siswa)",
-    curriculum: "Kurikulum Merdeka Mandiri Berbagi",
-    status: "Aktif",
-  },
-  {
-    id: "edu-2",
-    category: "Jenjang",
-    name: "Satuan Sekolah Dasar (SD)",
-    scope: "25 Kecamatan se-Konsel",
-    totalUnits: "196 Sekolah (18.340 Siswa)",
-    curriculum: "Kurikulum Merdeka Mandiri Berubah",
-    status: "Aktif",
-  },
-  {
-    id: "edu-3",
-    category: "Kurikulum",
-    name: "Modul Projek Penguatan Profil Pelajar Pancasila (P5)",
-    scope: "Kearifan Lokal Konsel",
-    totalUnits: "14 Tema Budaya Tolaki",
-    curriculum: "Fase A s/d Fase D",
-    status: "Aktif",
-  },
-  {
-    id: "edu-4",
-    category: "GTK",
-    name: "Pendidikan Profesi Guru (PPG) Daljab & Guru Penggerak",
-    scope: "Tenaga Pendidik ASN & P3K",
-    totalUnits: "1.240 Guru Bersertifikat",
-    curriculum: "Platform Merdeka Mengajar (PMM)",
-    status: "Dalam Proses",
-  },
-  {
-    id: "edu-5",
-    category: "Kurikulum",
-    name: "Penguatan Literasi & Numerasi Berbasis Rapor Pendidikan",
-    scope: "SD dan SMP Pelaksana IKM",
-    totalUnits: "280 Satuan Pendidikan",
-    curriculum: "Asesmen Nasional & Sulingjar",
-    status: "Aktif",
-  },
-  {
-    id: "edu-6",
-    category: "GTK",
-    name: "Komunitas Belajar (Kombel) Guru Gugus & MGMP Mapel",
-    scope: "Tingkat Kecamatan",
-    totalUnits: "42 Kelompok Kerja Aktif",
-    curriculum: "Pengembangan Berkelanjutan",
-    status: "Evaluasi",
-  },
-];
-
 export default function PendidikanAdminPage() {
-  const [items, setItems] = useState<EducationProgram[]>(initialPrograms);
+  const [items, setItems] = useState<EducationProgram[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"Semua" | "Jenjang" | "Kurikulum" | "GTK">("Semua");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
 
@@ -98,51 +48,66 @@ export default function PendidikanAdminPage() {
     status: "Aktif" as EducationProgram["status"],
   });
 
-  const filtered = useMemo(() => {
-    return items.filter((item) => {
-      const q = search.toLowerCase();
-      const matchSearch =
-        item.name.toLowerCase().includes(q) ||
-        item.scope.toLowerCase().includes(q) ||
-        item.curriculum.toLowerCase().includes(q);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-      const matchTab = activeTab === "Semua" || item.category === activeTab;
-      const matchStatus = statusFilter === "all" || item.status === statusFilter;
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const skip = (page - 1) * pageSize;
+      const q = debouncedSearch.trim() ? `&search=${encodeURIComponent(debouncedSearch.trim())}` : "";
+      const res = await fetchData<{ total: number; data: any[] }>(
+        `/api/v1/admin/pendidikan/read?page=${page}&per_page=${pageSize}&skip=${skip}&limit=${pageSize}${q}`
+      );
 
-      return matchSearch && matchTab && matchStatus;
-    });
-  }, [items, search, activeTab, statusFilter]);
+      if (res && Array.isArray(res.data)) {
+        const mapped: EducationProgram[] = res.data.map((row: any) => ({
+          id: row.id,
+          category: (row.category || "Jenjang") as EducationProgram["category"],
+          name: row.name || "",
+          scope: row.scope || "Kabupaten Konawe Selatan",
+          totalUnits: row.total_units || row.totalUnits || "-",
+          curriculum: row.curriculum || "Kurikulum Merdeka",
+          status: (row.status || "Aktif") as EducationProgram["status"],
+        }));
 
-  const paginated = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filtered.slice(start, start + pageSize);
-  }, [filtered, page, pageSize]);
+        let filtered = mapped;
+        if (activeTab !== "Semua") {
+          filtered = filtered.filter(i => i.category === activeTab);
+        }
+        if (statusFilter !== "all") {
+          filtered = filtered.filter(i => i.status === statusFilter);
+        }
+
+        setItems(filtered);
+        setTotalCount(res.total ?? mapped.length);
+      }
+    } catch (err: any) {
+      console.error("Gagal memuat data program pendidikan:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, pageSize, debouncedSearch, activeTab, statusFilter]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   // Statistik Ringkasan
-  const stats = useMemo(() => {
-    const total = items.length;
-    const jenjangCount = items.filter((i) => i.category === "Jenjang").length;
-    const kurikulumCount = items.filter((i) => i.category === "Kurikulum").length;
-    const gtkCount = items.filter((i) => i.category === "GTK").length;
-    return { total, jenjangCount, kurikulumCount, gtkCount };
-  }, [items]);
+  const stats = {
+    total: totalCount,
+    jenjangCount: items.filter((i) => i.category === "Jenjang").length,
+    kurikulumCount: items.filter((i) => i.category === "Kurikulum").length,
+    gtkCount: items.filter((i) => i.category === "GTK").length,
+  };
 
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name) return;
-
-    const newItem: EducationProgram = {
-      id: `edu-${Date.now()}`,
-      category: formData.category,
-      name: formData.name,
-      scope: formData.scope || "Kabupaten Konawe Selatan",
-      totalUnits: formData.totalUnits || "-",
-      curriculum: formData.curriculum,
-      status: formData.status,
-    };
-
-    setItems([newItem, ...items]);
-    setIsModalOpen(false);
+  const handleOpenCreate = () => {
+    setEditingId(null);
     setFormData({
       category: "Jenjang",
       name: "",
@@ -151,6 +116,105 @@ export default function PendidikanAdminPage() {
       curriculum: "Kurikulum Merdeka",
       status: "Aktif",
     });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (item: EducationProgram) => {
+    setEditingId(item.id);
+    setFormData({
+      category: item.category,
+      name: item.name,
+      scope: item.scope,
+      totalUnits: item.totalUnits,
+      curriculum: item.curriculum,
+      status: item.status,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name) return;
+
+    const payload = {
+      name: formData.name,
+      category: formData.category,
+      scope: formData.scope || "Kabupaten Konawe Selatan",
+      total_units: formData.totalUnits || "-",
+      curriculum: formData.curriculum,
+      status: formData.status,
+    };
+
+    try {
+      if (editingId) {
+        await fetchData(`/api/v1/admin/pendidikan/update/${editingId}`, {
+          method: "PUT",
+          body: payload,
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil Diperbarui",
+          text: "Program pendidikan berhasil diperbarui.",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      } else {
+        await fetchData(`/api/v1/admin/pendidikan/create`, {
+          method: "POST",
+          body: payload,
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil Ditambahkan",
+          text: "Program pendidikan baru telah disimpan.",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      }
+      setIsModalOpen(false);
+      loadData();
+    } catch (err: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Menyimpan",
+        text: err?.message || "Terjadi kesalahan sistem saat menyimpan.",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    const result = await Swal.fire({
+      title: "Hapus Program Pendidikan?",
+      text: `Program "${name}" akan dihapus permanen.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await fetchData(`/api/v1/admin/pendidikan/delete/${id}`, {
+          method: "DELETE",
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Terhapus",
+          text: "Program berhasil dihapus.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        loadData();
+      } catch (err: any) {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal Menghapus",
+          text: err?.message || "Terjadi kesalahan sistem.",
+        });
+      }
+    }
   };
 
   return (
@@ -170,15 +234,15 @@ export default function PendidikanAdminPage() {
       <PageHeader
         title="Manajemen Pendidikan & Kurikulum"
         description="Kelola informasi jenjang satuan pendidikan (PAUD, SD, SMP), implementasi kurikulum, dan data guru tenaga kependidikan."
-        badge={<Badge variant="gold">{items.length} Data Program</Badge>}
+        badge={<Badge variant="gold">{totalCount} Data Program</Badge>}
         action={
-          <Button variant="gold" icon="🎓" onClick={() => setIsModalOpen(true)}>
+          <Button variant="gold" icon="🎓" onClick={handleOpenCreate}>
             + Tambah Data Pendidikan
           </Button>
         }
       />
 
-      {/* 3. 4 Kartu Metrik Ringkasan (Glassmorphism) */}
+      {/* 3. Kartu Metrik Ringkasan */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-5 flex items-center justify-between border border-white/70 shadow-xs">
           <div>
@@ -225,9 +289,8 @@ export default function PendidikanAdminPage() {
         </Card>
       </div>
 
-      {/* 4. Kontainer Utama Terpadu (Toolbar Filter & Tabel Semantik di dalam wadah Card Glassmorphism) */}
+      {/* 4. Toolbar Filter & Tabel */}
       <Card className="border border-white/80 shadow-xs">
-        {/* Toolbar Filter & Pencarian Data di dalam Card */}
         <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="w-full md:w-80">
             <Input
@@ -238,7 +301,6 @@ export default function PendidikanAdminPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-            {/* Tab Kategori */}
             <div className="flex gap-1 bg-white/50 p-1 rounded-xl border border-white/80">
               {(["Semua", "Jenjang", "Kurikulum", "GTK"] as const).map((tab) => (
                 <button
@@ -287,7 +349,7 @@ export default function PendidikanAdminPage() {
           </div>
         </div>
 
-        {/* Tabel HTML Murni Semantik: table, thead, tbody, tr, th, td */}
+        {/* Tabel HTML */}
         <div className="w-full overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead className="border-b border-[#2d2410]/10 bg-white/35 text-xs font-semibold text-[#7d7152]">
@@ -316,14 +378,23 @@ export default function PendidikanAdminPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/60 bg-transparent">
-              {filtered.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-12 text-[#7d7152] text-xs font-medium">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                      Memuat program pendidikan...
+                    </div>
+                  </td>
+                </tr>
+              ) : items.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center py-12 text-[#7d7152] text-xs font-medium">
                     Tidak ada data program pendidikan ditemukan.
                   </td>
                 </tr>
               ) : (
-                paginated.map((item) => {
+                items.map((item) => {
                   const statusVariant =
                     item.status === "Aktif"
                       ? "success"
@@ -333,14 +404,11 @@ export default function PendidikanAdminPage() {
 
                   return (
                     <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
-                      {/* 1. Nama Program */}
                       <td className="px-4 py-3.5 text-xs align-middle">
                         <p className="font-bold text-[#2d2410] hover:text-[#a86a00] transition-colors leading-snug">
                           {item.name}
                         </p>
                       </td>
-
-                      {/* 2. Kategori */}
                       <td className="px-4 py-3.5 text-xs align-middle text-center">
                         <Badge
                           variant={
@@ -355,56 +423,38 @@ export default function PendidikanAdminPage() {
                           {item.category}
                         </Badge>
                       </td>
-
-                      {/* 3. Wilayah */}
                       <td className="px-4 py-3.5 text-xs align-middle text-[#5e5133]">
                         {item.scope}
                       </td>
-
-                      {/* 4. Kapasitas */}
                       <td className="px-4 py-3.5 text-xs align-middle text-[#7d7152] font-medium">
                         {item.totalUnits}
                       </td>
-
-                      {/* 5. Kurikulum */}
                       <td className="px-4 py-3.5 text-xs align-middle text-[#7d7152]">
                         {item.curriculum}
                       </td>
-
-                      {/* 6. Status */}
                       <td className="px-4 py-3.5 text-xs align-middle text-center">
                         <Badge variant={statusVariant} size="sm">
                           {item.status}
                         </Badge>
                       </td>
-
-                      {/* 7. Aksi */}
                       <td className="px-4 py-3.5 text-xs align-middle text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => alert(`Edit program: ${item.name}`)}
+                            onClick={() => handleOpenEdit(item)}
                             title="Edit Program"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
+                            ✏️
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             className="hover:text-red-600 hover:bg-red-50/80"
-                            onClick={() => {
-                              if (confirm(`Hapus program ${item.name}?`)) {
-                                setItems(items.filter((x) => x.id !== item.id));
-                              }
-                            }}
+                            onClick={() => handleDelete(item.id, item.name)}
                             title="Hapus Program"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                            🗑️
                           </Button>
                         </div>
                       </td>
@@ -416,24 +466,24 @@ export default function PendidikanAdminPage() {
           </table>
         </div>
 
-        {/* Footer Paginasi Tabel Terstandar */}
+        {/* Footer Paginasi */}
         <div className="px-6 py-4 bg-white/20 border-t border-white/60">
           <Pagination
             page={page}
             onPageChange={setPage}
             pageSize={pageSize}
             onPageSizeChange={setPageSize}
-            total={filtered.length}
+            total={totalCount}
             pageSizeOptions={[5, 10, 20]}
           />
         </div>
       </Card>
 
-      {/* Modal Form Tambah Data Pendidikan */}
+      {/* Modal Form Tambah / Edit */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Tambah Program / Satuan Pendidikan"
+        title={editingId ? "Edit Program Pendidikan" : "Tambah Program / Satuan Pendidikan"}
         description="Lengkapi informasi program jenjang, kurikulum ajar, atau pemberdayaan tenaga pendidik."
         maxWidth="lg"
         footer={
@@ -442,12 +492,12 @@ export default function PendidikanAdminPage() {
               Batal
             </Button>
             <Button variant="gold" type="submit" form="form-edu">
-              Simpan Data
+              {editingId ? "Simpan Perubahan" : "Simpan Data"}
             </Button>
           </>
         }
       >
-        <form id="form-edu" onSubmit={handleCreate} className="space-y-4">
+        <form id="form-edu" onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#2d2410] mb-1.5">

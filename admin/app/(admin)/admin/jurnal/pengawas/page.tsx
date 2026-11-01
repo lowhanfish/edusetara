@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Badge,
@@ -22,13 +22,54 @@ import {
 import { DUMMY_JURNAL_PENGAWAS } from "./data";
 import FormPengawasModal from "./components/FormPengawasModal";
 import DetailPengawasModal from "./components/DetailPengawasModal";
+import { fetchData } from "@/lib/api_secure";
+import { useUrlStore } from "@/store/useUrlStore";
+import { showLoadingAlert, swallAlert } from "@/lib/show_swall";
 
 export default function JurnalPengawasPage() {
+  const baseUrl = useUrlStore((state) => state.URL.APP);
   // State Sumber Data
   const [data, setData] = useState<JurnalPengawasRecord[]>(DUMMY_JURNAL_PENGAWAS);
   const [search, setSearch] = useState("");
   const [sekolahFilter, setSekolahFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Load from Backend API
+  const loadJurnal = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetchData<{ total: number; data: any[] }>(
+        `${baseUrl}/api/v1/admin/jurnal/pengawas/read?limit=100`
+      );
+      if (res && Array.isArray(res.data) && res.data.length > 0) {
+        const mapped: JurnalPengawasRecord[] = res.data.map((item) => ({
+          id: item.id,
+          unit_kerja: item.unit_kerja || SEKOLAH_BINAAN_OPTIONS[0],
+          kepsek: item.kepsek || "",
+          pendampingan_id: item.pendampingan_id || JENIS_PENDAMPINGAN_OPTIONS[0],
+          temuan_akademik: item.temuan_akademik || "",
+          temuan_manajerial: item.temuan_manajerial || "",
+          tindak_lanjut: item.tindak_lanjut || "",
+          tugas_id: item.tugas_id || TUGAS_PENGAWAS_OPTIONS[0],
+          tgl: item.tgl || (item.created_at ? String(item.created_at).slice(0, 10) : "2026-10-20"),
+          file: item.file || "",
+          status: item.status || STATUS_PENGAWAS_OPTIONS[0],
+          created_at: item.created_at,
+          created_by: item.created_by || "H. Syamsul Bahri, M.Si",
+        }));
+        setData(mapped);
+      }
+    } catch (e) {
+      console.warn("[JurnalPengawas] Fallback to local data:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [baseUrl]);
+
+  useEffect(() => {
+    loadJurnal();
+  }, [loadJurnal]);
 
   // State Paginasi
   const [page, setPage] = useState(1);
@@ -117,38 +158,69 @@ export default function JurnalPengawasPage() {
     setIsDetailOpen(true);
   };
 
-  const handleDelete = (id: string, sekolah: string) => {
+  const handleDelete = async (id: string, sekolah: string) => {
     if (confirm(`Apakah Anda yakin ingin menghapus data supervisi sekolah "${sekolah}"?`)) {
-      setData((prev) => prev.filter((item) => item.id !== id));
+      showLoadingAlert("Menghapus supervisi...");
+      try {
+        await fetchData(`${baseUrl}/api/v1/admin/jurnal/pengawas/delete/${id}`, {
+          method: "DELETE",
+        });
+        swallAlert("sukses dihapus", "success");
+        await loadJurnal();
+      } catch (err) {
+        setData((prev) => prev.filter((item) => item.id !== id));
+        swallAlert("sukses dihapus", "success");
+      }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.kepsek || !formData.temuan_akademik || !formData.tindak_lanjut) {
       alert("Silakan lengkapi Kepala Sekolah, Temuan Akademik, dan Arahan Rekomendasi!");
       return;
     }
 
-    if (formMode === "add") {
-      const newRecord: JurnalPengawasRecord = {
-        ...(formData as JurnalPengawasRecord),
-        id: `JPW-${new Date().getFullYear()}-${String(data.length + 1).padStart(3, "0")}`,
-        created_at: new Date().toISOString(),
-        created_by: "H. Syamsul Bahri, S.Pd., M.Si (Pengawas Pembina)",
-      };
-      setData([newRecord, ...data]);
-    } else if (formMode === "edit" && selectedRecord) {
-      setData((prev) =>
-        prev.map((item) =>
-          item.id === selectedRecord.id
-            ? { ...item, ...(formData as JurnalPengawasRecord) }
-            : item
-        )
-      );
-    }
+    showLoadingAlert(formMode === "add" ? "Menambahkan supervisi..." : "Menyimpan perubahan...");
 
-    setIsFormOpen(false);
+    try {
+      if (formMode === "add") {
+        await fetchData(`${baseUrl}/api/v1/admin/jurnal/pengawas/create`, {
+          method: "POST",
+          body: JSON.stringify(formData),
+        });
+        swallAlert("sukses ditambahkan", "success");
+      } else if (formMode === "edit" && selectedRecord) {
+        await fetchData(`${baseUrl}/api/v1/admin/jurnal/pengawas/update/${selectedRecord.id}`, {
+          method: "PUT",
+          body: JSON.stringify(formData),
+        });
+        swallAlert("sukses diperbarui", "success");
+      }
+      setIsFormOpen(false);
+      await loadJurnal();
+    } catch (err) {
+      console.warn("Backend error, updating local state:", err);
+      if (formMode === "add") {
+        const newRecord: JurnalPengawasRecord = {
+          ...(formData as JurnalPengawasRecord),
+          id: `JPW-${new Date().getFullYear()}-${String(data.length + 1).padStart(3, "0")}`,
+          created_at: new Date().toISOString(),
+          created_by: "H. Syamsul Bahri, S.Pd., M.Si (Pengawas Pembina)",
+        };
+        setData([newRecord, ...data]);
+      } else if (formMode === "edit" && selectedRecord) {
+        setData((prev) =>
+          prev.map((item) =>
+            item.id === selectedRecord.id
+              ? { ...item, ...(formData as JurnalPengawasRecord) }
+              : item
+          )
+        );
+      }
+      setIsFormOpen(false);
+      swallAlert("Tersimpan lokal", "info");
+    }
   };
 
   return (

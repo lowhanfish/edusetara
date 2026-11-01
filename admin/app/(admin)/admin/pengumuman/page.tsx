@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import Swal from "sweetalert2";
+import { fetchData } from "@/lib/api_secure";
 import {
   Badge,
   Button,
@@ -27,49 +29,18 @@ interface Announcement {
   status: "Aktif" | "Draft" | "Selesai";
 }
 
-const initialAnnouncements: Announcement[] = [
-  {
-    id: "ann-1",
-    number: "421.2/342/Dikbud/IX/2026",
-    title: "Pemberitahuan Jadwal dan Petunjuk Teknis Pelaksanaan ANBK Jenjang SD & SMP Tahun 2026",
-    category: "Akademik & ANBK",
-    summary: "Timeline gladi bersih, sinkronisasi server, dan jadwal utama asesmen nasional.",
-    targetAudience: "Kepala Sekolah & Proktor SD/SMP",
-    deadline: "28 Sep 2026",
-    attachmentName: "Juknis_ANBK_2026.pdf",
-    important: true,
-    status: "Aktif",
-  },
-  {
-    id: "ann-2",
-    number: "800/198/Dikbud/IX/2026",
-    title: "Verifikasi Berkas Administrasi Seleksi Calon Kepala Sekolah & Pengawas Periode II",
-    category: "Kepegawaian / PPPK",
-    summary: "Hasil verifikasi berkas tahap pertama dan jadwal asesmen wawancara bagi guru penggerak.",
-    targetAudience: "Guru Madya & Guru Penggerak",
-    deadline: "30 Sep 2026",
-    attachmentName: "Hasil_Verifikasi_CKS_2026.pdf",
-    important: false,
-    status: "Aktif",
-  },
-  {
-    id: "ann-3",
-    number: "420/087/Dikbud/VIII/2026",
-    title: "Batas Waktu Sinkronisasi Data Pokok Pendidikan (Dapodik) Semester Ganjil TA 2026/2027",
-    category: "Pendataan & Dapodik",
-    summary: "Instruksi penuntasan input rombel, sarpras, dan data siswa penerima PIP/BOS.",
-    targetAudience: "Operator Satuan Pendidikan se-Konsel",
-    deadline: "31 Agu 2026",
-    attachmentName: "Edaran_Dapodik_Ganjil_2026.pdf",
-    important: true,
-    status: "Selesai",
-  },
-];
-
 export default function PengumumanAdminPage() {
-  const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   const [formData, setFormData] = useState({
     number: "",
@@ -83,25 +54,53 @@ export default function PengumumanAdminPage() {
     status: "Aktif" as Announcement["status"],
   });
 
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.title) return;
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-    const newItem: Announcement = {
-      id: `ann-${Date.now()}`,
-      number: formData.number || `421/DKB/${Date.now()}`,
-      title: formData.title,
-      category: formData.category,
-      summary: formData.summary || formData.title,
-      targetAudience: formData.targetAudience,
-      deadline: formData.deadline || "Sesuai Edaran",
-      attachmentName: formData.attachmentName || "Surat_Edaran_Resmi.pdf",
-      important: formData.important,
-      status: formData.status,
-    };
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const skip = (page - 1) * pageSize;
+      const q = debouncedSearch.trim() ? `&search=${encodeURIComponent(debouncedSearch.trim())}` : "";
+      const res = await fetchData<{ total: number; data: any[] }>(
+        `/api/v1/admin/pengumuman/read?page=${page}&per_page=${pageSize}&skip=${skip}&limit=${pageSize}${q}`
+      );
 
-    setAnnouncements([newItem, ...announcements]);
-    setIsModalOpen(false);
+      if (res && Array.isArray(res.data)) {
+        const mapped: Announcement[] = res.data.map((row: any) => ({
+          id: row.id,
+          number: row.nomor || row.number || "",
+          title: row.judul || row.title || "",
+          category: (row.kategori || row.category || "Akademik & ANBK") as Announcement["category"],
+          summary: row.ringkasan || row.summary || "",
+          targetAudience: row.target_audience || row.sasaran || row.targetAudience || "",
+          deadline: row.deadline || row.tenggat_waktu || "",
+          attachmentName: row.lampiran || row.lampiran_url || row.attachmentName || "",
+          important: Boolean(row.is_important ?? row.penting ?? row.important),
+          status: (row.status || "Aktif") as Announcement["status"],
+        }));
+        setAnnouncements(mapped);
+        setTotalCount(res.total ?? mapped.length);
+      }
+    } catch (err: any) {
+      console.error("Gagal memuat data pengumuman:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, pageSize, debouncedSearch]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleOpenCreate = () => {
+    setEditingId(null);
     setFormData({
       number: "",
       title: "",
@@ -113,40 +112,124 @@ export default function PengumumanAdminPage() {
       important: false,
       status: "Aktif",
     });
+    setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Hapus pengumuman ini?")) {
-      setAnnouncements(announcements.filter((a) => a.id !== id));
+  const handleOpenEdit = (item: Announcement) => {
+    setEditingId(item.id);
+    setFormData({
+      number: item.number,
+      title: item.title,
+      category: item.category,
+      summary: item.summary,
+      targetAudience: item.targetAudience,
+      deadline: item.deadline,
+      attachmentName: item.attachmentName,
+      important: item.important,
+      status: item.status,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title) return;
+
+    const payload = {
+      nomor: formData.number || `421/DKB/${Date.now()}`,
+      judul: formData.title,
+      kategori: formData.category,
+      ringkasan: formData.summary || formData.title,
+      target_audience: formData.targetAudience,
+      deadline: formData.deadline || "Sesuai Edaran",
+      lampiran: formData.attachmentName || "Surat_Edaran_Resmi.pdf",
+      is_important: formData.important,
+      status: formData.status,
+    };
+
+    try {
+      if (editingId) {
+        await fetchData(`/api/v1/admin/pengumuman/update/${editingId}`, {
+          method: "PUT",
+          body: payload,
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil Diperbarui",
+          text: "Data pengumuman berhasil diperbarui.",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      } else {
+        await fetchData(`/api/v1/admin/pengumuman/create`, {
+          method: "POST",
+          body: payload,
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil Diterbitkan",
+          text: "Pengumuman baru telah disimpan ke sistem.",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      }
+      setIsModalOpen(false);
+      loadData();
+    } catch (err: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Menyimpan",
+        text: err?.message || "Terjadi kesalahan saat menyimpan data.",
+      });
     }
   };
 
-  // Pagination State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const handleDelete = async (id: string, title: string) => {
+    const result = await Swal.fire({
+      title: "Hapus Pengumuman?",
+      text: `Pengumuman "${title}" akan dihapus permanen.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
 
-  const filtered = announcements.filter(
-    (a) =>
-      a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.number.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const paginated = filtered.slice(
-    (page - 1) * pageSize,
-    (page - 1) * pageSize + pageSize
-  );
+    if (result.isConfirmed) {
+      try {
+        await fetchData(`/api/v1/admin/pengumuman/delete/${id}`, {
+          method: "DELETE",
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Terhapus",
+          text: "Pengumuman berhasil dihapus.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        loadData();
+      } catch (err: any) {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal Menghapus",
+          text: err?.message || "Terjadi kesalahan saat menghapus data.",
+        });
+      }
+    }
+  };
 
   return (
     <div className="space-y-6 pb-12">
       <PageHeader
         title="Manajemen Pengumuman & Surat Edaran"
         description="Publikasi edaran kedinasan resmi, jadwal ujian, juknis asesmen, dan pemberitahuan penting."
-        badge={<Badge variant="gold">{announcements.length} Edaran</Badge>}
+        badge={<Badge variant="gold">{totalCount} Edaran</Badge>}
         action={
           <Button
             variant="gold"
             icon="📢"
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleOpenCreate}
           >
             Buat Pengumuman
           </Button>
@@ -161,10 +244,7 @@ export default function PengumumanAdminPage() {
               placeholder="Cari nomor edaran atau judul..."
               leftIcon="🔍"
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
@@ -183,14 +263,23 @@ export default function PengumumanAdminPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/60 bg-transparent">
-              {filtered.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                      Memuat data pengumuman...
+                    </div>
+                  </td>
+                </tr>
+              ) : announcements.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
                     Tidak ada pengumuman ditemukan.
                   </td>
                 </tr>
               ) : (
-                paginated.map((item) => (
+                announcements.map((item) => (
                   <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
                     <td className="px-4 py-3.5 text-xs align-middle max-w-md">
                       <div className="flex flex-col gap-1">
@@ -234,7 +323,7 @@ export default function PengumumanAdminPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => alert(`Edit edaran: ${item.number}`)}
+                          onClick={() => handleOpenEdit(item)}
                         >
                           ✏️
                         </Button>
@@ -242,7 +331,7 @@ export default function PengumumanAdminPage() {
                           variant="ghost"
                           size="sm"
                           className="hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDelete(item.id)}
+                          onClick={() => handleDelete(item.id, item.title)}
                         >
                           🗑️
                         </Button>
@@ -262,7 +351,7 @@ export default function PengumumanAdminPage() {
             onPageChange={setPage}
             pageSize={pageSize}
             onPageSizeChange={setPageSize}
-            total={filtered.length}
+            total={totalCount}
             pageSizeOptions={[5, 10, 20]}
           />
         </div>
@@ -271,7 +360,7 @@ export default function PengumumanAdminPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Buat Pengumuman / Surat Edaran"
+        title={editingId ? "Edit Pengumuman / Surat Edaran" : "Buat Pengumuman / Surat Edaran"}
         description="Masukkan nomor surat, isi ringkasan, dan dokumen PDF lampiran untuk pengumuman kedinasan."
         maxWidth="2xl"
         footer={
@@ -288,12 +377,12 @@ export default function PengumumanAdminPage() {
               type="submit"
               form="form-pengumuman"
             >
-              Terbitkan Pengumuman
+              {editingId ? "Simpan Perubahan" : "Terbitkan Pengumuman"}
             </Button>
           </>
         }
       >
-        <form id="form-pengumuman" onSubmit={handleCreate} className="space-y-4">
+        <form id="form-pengumuman" onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Nomor Surat Resmi"

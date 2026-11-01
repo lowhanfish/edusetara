@@ -8,9 +8,13 @@ function getCookie(name: string): string | null {
 
 let refreshPromise: Promise<void> | null = null;
 
+export interface FetchOption extends Omit<RequestInit, "body"> {
+  body?: any;
+}
+
 export const fetchData = async <T>(
   url: string,
-  option: RequestInit = {},
+  option: FetchOption = {},
   shouldRetry = true
 ): Promise<T> => {
   const { method, headers, ...otherOption } = option;
@@ -30,12 +34,20 @@ export const fetchData = async <T>(
     }
   }
 
+  const rawBody = otherOption.body;
+  const processedBody =
+    isFormData || typeof rawBody === "string" || rawBody == null
+      ? rawBody
+      : JSON.stringify(rawBody);
+
   const res = await fetch(url, {
     ...otherOption,
+    body: processedBody,
     method: httpMethod,
     credentials: "include",
     headers: headerObj,
   });
+
 
   if (res.status === 401 && shouldRetry) {
     // Jangan jalankan refreshData jika request berasal dari halaman publik atau /login

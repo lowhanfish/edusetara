@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import Swal from "sweetalert2";
+import { fetchData } from "@/lib/api_secure";
 import {
   Badge,
   Button,
@@ -22,48 +24,12 @@ interface StatRecord {
   trend: string;
 }
 
-const initialStats: StatRecord[] = [
-  {
-    id: "stat-1",
-    indicator: "Total Satuan Pendidikan Terakreditasi (SD/SMP)",
-    category: "Pendidikan",
-    value: "287",
-    unit: "Sekolah",
-    period: "2026 Ganjil",
-    trend: "+3 Sekolah",
-  },
-  {
-    id: "stat-2",
-    indicator: "Indeks Kepuasan Masyarakat (IKM) Pelayanan Dikbud",
-    category: "Kepuasan Masyarakat (IKM)",
-    value: "88.42",
-    unit: "Skor Mutu A (Sangat Baik)",
-    period: "Semester I 2026",
-    trend: "+1.2% YoY",
-  },
-  {
-    id: "stat-3",
-    indicator: "Rasio Guru Bersertifikat Pendidik (Sertifikasi)",
-    category: "Ketenagaan",
-    value: "78.6",
-    unit: "% Tenaga Pendidik",
-    period: "2026",
-    trend: "+4.5% Capaian",
-  },
-  {
-    id: "stat-4",
-    indicator: "Tingkat Partisipasi Sekolah (Angka Partisipasi Murni)",
-    category: "Pendidikan",
-    value: "98.2",
-    unit: "% Usia Sekolah",
-    period: "2026",
-    trend: "+0.8% Naik",
-  },
-];
-
 export default function StatistikAdminPage() {
-  const [stats, setStats] = useState<StatRecord[]>(initialStats);
+  const [stats, setStats] = useState<StatRecord[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     indicator: "",
@@ -74,22 +40,54 @@ export default function StatistikAdminPage() {
     trend: "",
   });
 
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.indicator || !formData.value) return;
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
-    const newItem: StatRecord = {
-      id: `stat-${Date.now()}`,
-      indicator: formData.indicator,
-      category: formData.category,
-      value: formData.value,
-      unit: formData.unit || "Satuan",
-      period: formData.period,
-      trend: formData.trend || "-",
-    };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-    setStats([newItem, ...stats]);
-    setIsModalOpen(false);
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const skip = (page - 1) * pageSize;
+      const q = debouncedSearch.trim() ? `&search=${encodeURIComponent(debouncedSearch.trim())}` : "";
+      const res = await fetchData<{ total: number; data: any[] }>(
+        `/api/v1/admin/statistik/read?page=${page}&per_page=${pageSize}&skip=${skip}&limit=${pageSize}${q}`
+      );
+
+      if (res && Array.isArray(res.data)) {
+        const mapped: StatRecord[] = res.data.map((row: any) => ({
+          id: row.id,
+          indicator: row.indicator || "",
+          category: (row.category || "Pendidikan") as StatRecord["category"],
+          value: row.value || "0",
+          unit: row.unit || "Satuan",
+          period: row.period || "2026",
+          trend: row.trend || "-",
+        }));
+        setStats(mapped);
+        setTotalCount(res.total ?? mapped.length);
+      }
+    } catch (err: any) {
+      console.error("Gagal memuat statistik:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, pageSize, debouncedSearch]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleOpenCreate = () => {
+    setEditingId(null);
     setFormData({
       indicator: "",
       category: "Pendidikan",
@@ -98,31 +96,115 @@ export default function StatistikAdminPage() {
       period: "2026",
       trend: "",
     });
+    setIsModalOpen(true);
   };
 
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const handleOpenEdit = (item: StatRecord) => {
+    setEditingId(item.id);
+    setFormData({
+      indicator: item.indicator,
+      category: item.category,
+      value: item.value,
+      unit: item.unit,
+      period: item.period,
+      trend: item.trend,
+    });
+    setIsModalOpen(true);
+  };
 
-  const filtered = stats.filter(
-    (item) =>
-      item.indicator.toLowerCase().includes(search.toLowerCase()) ||
-      item.category.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.indicator || !formData.value) return;
 
-  const paginated = filtered.slice(
-    (page - 1) * pageSize,
-    (page - 1) * pageSize + pageSize
-  );
+    const payload = {
+      indicator: formData.indicator,
+      category: formData.category,
+      value: formData.value,
+      unit: formData.unit || "Satuan",
+      period: formData.period,
+      trend: formData.trend || "-",
+    };
+
+    try {
+      if (editingId) {
+        await fetchData(`/api/v1/admin/statistik/update/${editingId}`, {
+          method: "PUT",
+          body: payload,
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil Diperbarui",
+          text: "Indikator statistik berhasil diperbarui.",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      } else {
+        await fetchData(`/api/v1/admin/statistik/create`, {
+          method: "POST",
+          body: payload,
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil Ditambahkan",
+          text: "Indikator baru telah disimpan.",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      }
+      setIsModalOpen(false);
+      loadData();
+    } catch (err: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Menyimpan",
+        text: err?.message || "Terjadi kesalahan saat menyimpan data.",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string, indicator: string) => {
+    const result = await Swal.fire({
+      title: "Hapus Indikator Statistik?",
+      text: `Indikator "${indicator}" akan dihapus permanen.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await fetchData(`/api/v1/admin/statistik/delete/${id}`, {
+          method: "DELETE",
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Terhapus",
+          text: "Indikator berhasil dihapus.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        loadData();
+      } catch (err: any) {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal Menghapus",
+          text: err?.message || "Terjadi kesalahan sistem saat menghapus data.",
+        });
+      }
+    }
+  };
 
   return (
     <div className="space-y-6 pb-12">
       <PageHeader
         title="Manajemen Data & Statistik"
         description="Kelola indikator capaian mutu pendidikan, indeks kepuasan masyarakat (IKM), dan statistik agregat wilayah."
-        badge={<Badge variant="gold">{stats.length} Indikator</Badge>}
+        badge={<Badge variant="gold">{totalCount} Indikator</Badge>}
         action={
-          <Button variant="gold" icon="📈" onClick={() => setIsModalOpen(true)}>
+          <Button variant="gold" icon="📈" onClick={handleOpenCreate}>
             Tambah Indikator Statistik
           </Button>
         }
@@ -165,10 +247,7 @@ export default function StatistikAdminPage() {
             <Input
               placeholder="Cari indikator atau kategori..."
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
         </div>
@@ -187,14 +266,23 @@ export default function StatistikAdminPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/60 bg-transparent">
-              {filtered.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                      Memuat indikator statistik...
+                    </div>
+                  </td>
+                </tr>
+              ) : stats.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
                     Tidak ada indikator statistik ditemukan.
                   </td>
                 </tr>
               ) : (
-                paginated.map((item) => (
+                stats.map((item) => (
                   <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
                     <td className="px-4 py-3.5 text-xs align-middle font-bold text-[#2d2410]">
                       {item.indicator}
@@ -212,16 +300,23 @@ export default function StatistikAdminPage() {
                       {item.trend}
                     </td>
                     <td className="px-4 py-3.5 text-xs align-middle whitespace-nowrap text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="hover:text-red-600 hover:bg-red-50"
-                        onClick={() =>
-                          setStats(stats.filter((s) => s.id !== item.id))
-                        }
-                      >
-                        🗑️
-                      </Button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleOpenEdit(item)}
+                        >
+                          ✏️
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="hover:text-red-600 hover:bg-red-50"
+                          onClick={() => handleDelete(item.id, item.indicator)}
+                        >
+                          🗑️
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -237,7 +332,7 @@ export default function StatistikAdminPage() {
             onPageChange={setPage}
             pageSize={pageSize}
             onPageSizeChange={setPageSize}
-            total={filtered.length}
+            total={totalCount}
             pageSizeOptions={[5, 10, 20]}
           />
         </div>
@@ -246,7 +341,7 @@ export default function StatistikAdminPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Tambah Indikator Statistik"
+        title={editingId ? "Edit Indikator Statistik" : "Tambah Indikator Statistik"}
         description="Masukkan angka indikator capaian pendidikan atau survei kepuasan layanan publik."
         maxWidth="md"
         footer={
@@ -255,12 +350,12 @@ export default function StatistikAdminPage() {
               Batal
             </Button>
             <Button variant="gold" type="submit" form="form-stat">
-              Simpan Indikator
+              {editingId ? "Simpan Perubahan" : "Simpan Indikator"}
             </Button>
           </>
         }
       >
-        <form id="form-stat" onSubmit={handleCreate} className="space-y-4">
+        <form id="form-stat" onSubmit={handleSubmit} className="space-y-4">
           <Input
             label="Nama Indikator"
             placeholder="Contoh: Rata-Rata Nilai Literasi Rapor Pendidikan"

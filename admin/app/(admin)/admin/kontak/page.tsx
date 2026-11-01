@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import Swal from "sweetalert2";
+import { fetchData } from "@/lib/api_secure";
 import {
   Badge,
   Button,
@@ -25,48 +27,19 @@ interface ContactMessage {
   status: "Belum Dibalas" | "Diproses" | "Selesai";
 }
 
-const initialMessages: ContactMessage[] = [
-  {
-    id: "msg-1",
-    senderName: "Baharuddin, S.Pd.",
-    email: "baharuddin.sdn3@gmail.com",
-    phone: "0812-4567-8901",
-    subject: "Klarifikasi Kuota Pendaftaran PPG Guru PAI Daljab 2026",
-    category: "Permohonan Informasi",
-    message: "Mohon informasi apakah kuota penempatan PPG Guru Pendidikan Agama Islam tahun ini diprioritaskan untuk TMT di bawah 2020? Terima kasih.",
-    date: "17 Sep 2026, 08:30 WITA",
-    status: "Belum Dibalas",
-  },
-  {
-    id: "msg-2",
-    senderName: "Rina Marlina (Orang Tua Murid)",
-    email: "rinamarlina.konsel@yahoo.com",
-    phone: "0852-3344-5566",
-    subject: "Konsultasi Berkas Pindah Rayon Siswa SMP Masuk Kendari",
-    category: "Permohonan Informasi",
-    message: "Selamat pagi admin Dikbud, untuk berkas mutasi siswa ke luar daerah apakah tanda tangan Kadis bisa diwakilkan via aplikasi online?",
-    date: "16 Sep 2026, 14:15 WITA",
-    status: "Diproses",
-  },
-  {
-    id: "msg-3",
-    senderName: "Komite Sekolah SDN 12 Andoolo",
-    email: "komite.sdn12andoolo@gmail.com",
-    phone: "0813-9988-7711",
-    subject: "Usulan Rehabilitasi Plafon Ruang Guru Pascamusim Hujan",
-    category: "Pengaduan",
-    message: "Melaporkan kondisi atap dan plafon ruang guru yang mengalami kebocoran. Berita acara foto kerusakan sudah kami upload ke Dapodik Sarpras.",
-    date: "14 Sep 2026, 10:00 WITA",
-    status: "Selesai",
-  },
-];
-
 export default function KontakAdminPage() {
-  const [messages, setMessages] = useState<ContactMessage[]>(initialMessages);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [replyText, setReplyText] = useState("");
   const [statusFilter, setStatusFilter] = useState("Semua");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   // Form tambah pengaduan / pesan manual
   const [formData, setFormData] = useState({
@@ -78,71 +51,171 @@ export default function KontakAdminPage() {
     message: "",
   });
 
-  const handleCreate = (e: React.FormEvent) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const skip = (page - 1) * pageSize;
+      const q = debouncedSearch.trim() ? `&search=${encodeURIComponent(debouncedSearch.trim())}` : "";
+      const res = await fetchData<{ total: number; data: any[] }>(
+        `/api/v1/admin/kontak/read?page=${page}&per_page=${pageSize}&skip=${skip}&limit=${pageSize}${q}`
+      );
+
+      if (res && Array.isArray(res.data)) {
+        const mapped: ContactMessage[] = res.data.map((row: any) => ({
+          id: row.id,
+          senderName: row.nama || row.senderName || "",
+          email: row.email || "-",
+          phone: row.phone || "-",
+          subject: row.subjek || row.subject || "Pesan Langsung",
+          category: (row.kategori || row.category || "Aspirasi / Saran") as ContactMessage["category"],
+          message: row.pesan || row.message || "",
+          date: row.created_at ? new Date(row.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "Hari ini",
+          status: (row.status || "Belum Dibalas") as ContactMessage["status"],
+        }));
+
+        const filteredByStatus = statusFilter === "Semua" ? mapped : mapped.filter(m => m.status === statusFilter);
+        setMessages(filteredByStatus);
+        setTotalCount(res.total ?? mapped.length);
+      }
+    } catch (err: any) {
+      console.error("Gagal memuat pesan masuk:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, pageSize, debouncedSearch, statusFilter]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.senderName || !formData.message) return;
 
-    const newItem: ContactMessage = {
-      id: `msg-${Date.now()}`,
-      senderName: formData.senderName,
+    const payload = {
+      nama: formData.senderName,
       email: formData.email || "-",
       phone: formData.phone || "-",
-      subject: formData.subject || "Pesan Langsung / Pengaduan",
-      category: formData.category,
-      message: formData.message,
-      date: "17 Sep 2026, Hari ini",
+      subjek: formData.subject || "Pesan Langsung / Pengaduan",
+      kategori: formData.category,
+      pesan: formData.message,
       status: "Belum Dibalas",
     };
 
-    setMessages([newItem, ...messages]);
-    setIsModalOpen(false);
-    setFormData({
-      senderName: "",
-      email: "",
-      phone: "",
-      subject: "",
-      category: "Aspirasi / Saran",
-      message: "",
-    });
+    try {
+      await fetchData(`/api/v1/admin/kontak/create`, {
+        method: "POST",
+        body: payload,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Pesan Disimpan",
+        text: "Pesan masuk baru telah dicatat ke sistem.",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+
+      setIsModalOpen(false);
+      setFormData({
+        senderName: "",
+        email: "",
+        phone: "",
+        subject: "",
+        category: "Aspirasi / Saran",
+        message: "",
+      });
+      loadData();
+    } catch (err: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Menyimpan",
+        text: err?.message || "Terjadi kesalahan saat menyimpan data.",
+      });
+    }
   };
 
-  const handleReplySubmit = () => {
+  const handleReplySubmit = async () => {
     if (!selectedMessage || !replyText.trim()) return;
-    alert(`Balasan berhasil dikirimkan ke email: ${selectedMessage.email}`);
-    setMessages(
-      messages.map((m) =>
-        m.id === selectedMessage.id ? { ...m, status: "Selesai" } : m
-      )
-    );
-    setSelectedMessage(null);
-    setReplyText("");
+
+    try {
+      await fetchData(`/api/v1/admin/kontak/update/${selectedMessage.id}`, {
+        method: "PUT",
+        body: {
+          tanggapan: replyText,
+          status: "Selesai",
+        },
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Tanggapan Terkirim",
+        text: `Tanggapan resmi telah disimpan untuk ${selectedMessage.senderName}.`,
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      setSelectedMessage(null);
+      setReplyText("");
+      loadData();
+    } catch (err: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Mengirim Tanggapan",
+        text: err?.message || "Terjadi kesalahan sistem.",
+      });
+    }
   };
 
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const handleDelete = async (id: string, senderName: string) => {
+    const result = await Swal.fire({
+      title: "Hapus Pesan Masuk?",
+      text: `Pesan dari "${senderName}" akan dihapus permanen.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
 
-  const filtered = messages.filter((m) => {
-    const matchSearch =
-      m.senderName.toLowerCase().includes(search.toLowerCase()) ||
-      m.subject.toLowerCase().includes(search.toLowerCase()) ||
-      m.email.toLowerCase().includes(search.toLowerCase()) ||
-      m.message.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "Semua" || m.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
-
-  const paginated = filtered.slice(
-    (page - 1) * pageSize,
-    (page - 1) * pageSize + pageSize
-  );
+    if (result.isConfirmed) {
+      try {
+        await fetchData(`/api/v1/admin/kontak/delete/${id}`, {
+          method: "DELETE",
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Terhapus",
+          text: "Pesan berhasil dihapus.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        loadData();
+      } catch (err: any) {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal Menghapus",
+          text: err?.message || "Terjadi kesalahan saat menghapus pesan.",
+        });
+      }
+    }
+  };
 
   return (
     <div className="space-y-6 pb-12">
       <PageHeader
         title="Kotak Pesan & Pengaduan Masuk"
         description="Kelola pesan masuk masyarakat, pertanyaan layanan, serta aspirasi publik yang masuk melalui portal Dikbud Konawe Selatan."
-        badge={<Badge variant="gold">{messages.length} Pesan Masuk</Badge>}
+        badge={<Badge variant="gold">{totalCount} Pesan Masuk</Badge>}
         action={
           <Button variant="gold" icon="✉️" onClick={() => setIsModalOpen(true)}>
             Catat Pesan / Aspirasi Baru
@@ -157,10 +230,7 @@ export default function KontakAdminPage() {
             <Input
               placeholder="Cari pengirim, email, subjek..."
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
@@ -199,14 +269,23 @@ export default function KontakAdminPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/60 bg-transparent">
-              {filtered.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                      Memuat pesan masuk...
+                    </div>
+                  </td>
+                </tr>
+              ) : messages.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-12 text-[#7d7152] text-xs font-medium">
                     Tidak ada pesan ditemukan.
                   </td>
                 </tr>
               ) : (
-                paginated.map((item) => (
+                messages.map((item) => (
                   <tr key={item.id} className="hover:bg-white/50 transition-colors duration-150">
                     <td className="px-4 py-3.5 text-xs align-middle">
                       <div className="flex flex-col">
@@ -260,9 +339,7 @@ export default function KontakAdminPage() {
                           variant="ghost"
                           size="sm"
                           className="hover:text-red-600 hover:bg-red-50"
-                          onClick={() =>
-                            setMessages(messages.filter((m) => m.id !== item.id))
-                          }
+                          onClick={() => handleDelete(item.id, item.senderName)}
                         >
                           🗑️
                         </Button>
@@ -282,7 +359,7 @@ export default function KontakAdminPage() {
             onPageChange={setPage}
             pageSize={pageSize}
             onPageSizeChange={setPageSize}
-            total={filtered.length}
+            total={totalCount}
             pageSizeOptions={[5, 10, 20]}
           />
         </div>

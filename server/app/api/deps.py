@@ -17,6 +17,7 @@ __all__ = [
     "get_simpeg_db",
     "get_egov_db",
     "get_current_user",
+    "get_current_user_optional",
     "require_roles",
 ]
 
@@ -62,6 +63,40 @@ async def get_current_user(
         raise UnauthorizedException("User account is deactivated.")
 
     return user
+
+
+async def get_current_user_optional(
+    request: Request,
+    session: AsyncSession = Depends(get_db),
+) -> User | None:
+    """
+    Optional user dependency returning the active User if valid token is provided,
+    or None if unauthenticated without raising exceptions.
+    """
+    token = request.cookies.get("access_token")
+    if not token:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ", 1)[1]
+
+    if not token:
+        return None
+
+    try:
+        payload = decode_access_token(token)
+        if payload.get("token_type") != "access":
+            return None
+        user_id = payload.get("sub")
+        if not user_id:
+            return None
+        stmt = select(User).options(selectinload(User.role)).where(User.id == user_id)
+        result = await session.execute(stmt)
+        user = result.scalars().first()
+        if user and user.is_active:
+            return user
+        return None
+    except Exception:
+        return None
 
 
 def require_roles(*allowed_roles: str) -> Callable:

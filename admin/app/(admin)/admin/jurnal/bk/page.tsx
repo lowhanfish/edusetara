@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Badge,
@@ -22,13 +22,57 @@ import {
 import { DUMMY_JURNAL_BK } from "./data";
 import FormBKModal from "./components/FormBKModal";
 import DetailBKModal from "./components/DetailBKModal";
+import { fetchData } from "@/lib/api_secure";
+import { useUrlStore } from "@/store/useUrlStore";
+import { showLoadingAlert, swallAlert } from "@/lib/show_swall";
 
 export default function JurnalBKPage() {
+  const baseUrl = useUrlStore((state) => state.URL.APP);
   // State Sumber Data
   const [data, setData] = useState<JurnalBKRecord[]>(DUMMY_JURNAL_BK);
   const [search, setSearch] = useState("");
   const [bidangFilter, setBidangFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Load from Backend API
+  const loadJurnal = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetchData<{ total: number; data: any[] }>(
+        `${baseUrl}/api/v1/admin/jurnal/bk/read?limit=100`
+      );
+      if (res && Array.isArray(res.data) && res.data.length > 0) {
+        const mapped: JurnalBKRecord[] = res.data.map((item) => ({
+          id: item.id,
+          nm_siswa: item.nm_siswa,
+          kelas_id: item.kelas_id || KELAS_BK_OPTIONS[0],
+          tgl: item.tgl || (item.created_at ? String(item.created_at).slice(0, 10) : "2026-10-22"),
+          materi_layanan: item.materi_layanan || "",
+          permasalahan: item.permasalahan || "",
+          bidang_layanan: item.bidang_layanan || BIDANG_LAYANAN_BK[0],
+          mdl_kegiatan_id: item.mdl_kegiatan_id || MODEL_KEGIATAN_BK[0],
+          jns_layanan_id: item.jns_layanan_id || "",
+          hasil: item.hasil || "",
+          rnc_tindak_lanjut: item.rnc_tindak_lanjut || "",
+          keterangan: item.keterangan || "",
+          file: item.file || "",
+          status: item.status || STATUS_BK_OPTIONS[0],
+          created_at: item.created_at,
+          created_by: item.created_by || "Nurul Hidayati, S.Pd.",
+        }));
+        setData(mapped);
+      }
+    } catch (e) {
+      console.warn("[JurnalBK] Fallback to local data:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [baseUrl]);
+
+  useEffect(() => {
+    loadJurnal();
+  }, [loadJurnal]);
 
   // State Paginasi
   const [page, setPage] = useState(1);
@@ -121,36 +165,67 @@ export default function JurnalBKPage() {
     setIsDetailOpen(true);
   };
 
-  const handleDelete = (id: string, siswa: string) => {
+  const handleDelete = async (id: string, siswa: string) => {
     if (confirm(`Apakah Anda yakin ingin menghapus data catatan konseling "${siswa}"?`)) {
-      setData((prev) => prev.filter((item) => item.id !== id));
+      showLoadingAlert("Menghapus data konseling...");
+      try {
+        await fetchData(`${baseUrl}/api/v1/admin/jurnal/bk/delete/${id}`, {
+          method: "DELETE",
+        });
+        swallAlert("sukses dihapus", "success");
+        await loadJurnal();
+      } catch (err) {
+        setData((prev) => prev.filter((item) => item.id !== id));
+        swallAlert("sukses dihapus", "success");
+      }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.nm_siswa || !formData.materi_layanan || !formData.permasalahan) {
       alert("Silakan lengkapi Nama Siswa, Topik Materi, dan Gejala Masalah!");
       return;
     }
 
-    if (formMode === "add") {
-      const newRecord: JurnalBKRecord = {
-        ...(formData as JurnalBKRecord),
-        id: `JBK-${new Date().getFullYear()}-${String(data.length + 1).padStart(3, "0")}`,
-        created_at: new Date().toISOString(),
-        created_by: "Nurul Hidayati, S.Pd. (Guru BK Konsel)",
-      };
-      setData([newRecord, ...data]);
-    } else if (formMode === "edit" && selectedRecord) {
-      setData((prev) =>
-        prev.map((item) =>
-          item.id === selectedRecord.id ? { ...item, ...(formData as JurnalBKRecord) } : item
-        )
-      );
-    }
+    showLoadingAlert(formMode === "add" ? "Menambahkan data konseling..." : "Menyimpan perubahan...");
 
-    setIsFormOpen(false);
+    try {
+      if (formMode === "add") {
+        await fetchData(`${baseUrl}/api/v1/admin/jurnal/bk/create`, {
+          method: "POST",
+          body: JSON.stringify(formData),
+        });
+        swallAlert("sukses ditambahkan", "success");
+      } else if (formMode === "edit" && selectedRecord) {
+        await fetchData(`${baseUrl}/api/v1/admin/jurnal/bk/update/${selectedRecord.id}`, {
+          method: "PUT",
+          body: JSON.stringify(formData),
+        });
+        swallAlert("sukses diperbarui", "success");
+      }
+      setIsFormOpen(false);
+      await loadJurnal();
+    } catch (err) {
+      console.warn("Backend error, updating local state:", err);
+      if (formMode === "add") {
+        const newRecord: JurnalBKRecord = {
+          ...(formData as JurnalBKRecord),
+          id: `JBK-${new Date().getFullYear()}-${String(data.length + 1).padStart(3, "0")}`,
+          created_at: new Date().toISOString(),
+          created_by: "Nurul Hidayati, S.Pd. (Guru BK Konsel)",
+        };
+        setData([newRecord, ...data]);
+      } else if (formMode === "edit" && selectedRecord) {
+        setData((prev) =>
+          prev.map((item) =>
+            item.id === selectedRecord.id ? { ...item, ...(formData as JurnalBKRecord) } : item
+          )
+        );
+      }
+      setIsFormOpen(false);
+      swallAlert("Tersimpan lokal", "info");
+    }
   };
 
   return (

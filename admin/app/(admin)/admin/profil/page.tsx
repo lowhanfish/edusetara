@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import Swal from "sweetalert2";
+import { fetchData } from "@/lib/api_secure";
 import {
   Badge,
   Button,
@@ -24,36 +26,11 @@ interface ProfileSection {
   status: "Aktif" | "Draft";
 }
 
-const initialSections: ProfileSection[] = [
-  {
-    id: "prof-1",
-    title: "Visi & Misi Dinas Pendidikan dan Kebudayaan",
-    category: "Visi Misi",
-    updatedAt: "10 Jan 2026",
-    content: "Mewujudkan Sumber Daya Manusia Konawe Selatan yang Cerdas, Berkarakter, Unggul, Berdaya Saing, dan Berbudaya Luhur Berlandaskan Kearifan Lokal.",
-    status: "Aktif",
-  },
-  {
-    id: "prof-2",
-    title: "Maklumat Pelayanan Terpadu Satu Pintu (PTSP)",
-    category: "Maklumat Pelayanan",
-    updatedAt: "01 Feb 2026",
-    content: "Dengan ini kami pimpinan beserta seluruh jajaran pegawai Dikbud Konawe Selatan berjanji dan berkomitmen menyelenggarakan pelayanan publik sesuai standar pelayanan yang telah ditetapkan.",
-    status: "Aktif",
-  },
-  {
-    id: "prof-3",
-    title: "Struktur Organisasi & Pejabat Eselon",
-    category: "Struktur Pejabat",
-    updatedAt: "15 Jul 2026",
-    content: "Daftar susunan Kepala Dinas, Sekretaris, Kepala Bidang Pembinaan Dikdas, Bidang GTK, Bidang Kebudayaan, dan Pengawas Sekolah.",
-    status: "Aktif",
-  },
-];
-
 export default function ProfilAdminPage() {
-  const [sections, setSections] = useState<ProfileSection[]>(initialSections);
+  const [sections, setSections] = useState<ProfileSection[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -62,85 +39,211 @@ export default function ProfilAdminPage() {
     status: "Aktif" as ProfileSection["status"],
   });
 
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.title) return;
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetchData<{ total: number; data: any[] }>(
+        `/api/v1/admin/profil/read?limit=50`
+      );
 
-    const newItem: ProfileSection = {
-      id: `prof-${Date.now()}`,
-      title: formData.title,
-      category: formData.category,
-      updatedAt: "17 Sep 2026",
-      content: formData.content,
-      status: formData.status,
-    };
+      if (res && Array.isArray(res.data)) {
+        const mapped: ProfileSection[] = res.data.map((row: any) => ({
+          id: row.id,
+          title: row.title || "",
+          category: (row.category || "Visi Misi") as ProfileSection["category"],
+          updatedAt: row.updated_at
+            ? new Date(row.updated_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })
+            : "Terbaru",
+          content: row.content || "",
+          status: (row.status || "Aktif") as ProfileSection["status"],
+        }));
+        setSections(mapped);
+      }
+    } catch (err: any) {
+      console.error("Gagal memuat profil dinas:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    setSections([newItem, ...sections]);
-    setIsModalOpen(false);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleOpenCreate = () => {
+    setEditingId(null);
     setFormData({
       title: "",
       category: "Visi Misi",
       content: "",
       status: "Aktif",
     });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (item: ProfileSection) => {
+    setEditingId(item.id);
+    setFormData({
+      title: item.title,
+      category: item.category,
+      content: item.content,
+      status: item.status,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title) return;
+
+    const payload = {
+      title: formData.title,
+      category: formData.category,
+      content: formData.content,
+      status: formData.status,
+    };
+
+    try {
+      if (editingId) {
+        await fetchData(`/api/v1/admin/profil/update/${editingId}`, {
+          method: "PUT",
+          body: payload,
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil Diperbarui",
+          text: "Bagian profil dinas berhasil diperbarui.",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      } else {
+        await fetchData(`/api/v1/admin/profil/create`, {
+          method: "POST",
+          body: payload,
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil Ditambahkan",
+          text: "Bagian profil baru telah disimpan.",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      }
+      setIsModalOpen(false);
+      loadData();
+    } catch (err: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Menyimpan",
+        text: err?.message || "Terjadi kesalahan sistem saat menyimpan.",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string, title: string) => {
+    const result = await Swal.fire({
+      title: "Hapus Bagian Profil?",
+      text: `Bagian "${title}" akan dihapus permanen.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await fetchData(`/api/v1/admin/profil/delete/${id}`, {
+          method: "DELETE",
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Terhapus",
+          text: "Bagian profil berhasil dihapus.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        loadData();
+      } catch (err: any) {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal Menghapus",
+          text: err?.message || "Terjadi kesalahan sistem.",
+        });
+      }
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       <PageHeader
         title="Profil & Standar Pelayanan"
         description="Kelola halaman profil dinas, visi misi kepala daerah, maklumat pelayanan, dan standar mutu kedinasan."
         badge={<Badge variant="gold">{sections.length} Bagian</Badge>}
         action={
-          <Button variant="gold" icon="📋" onClick={() => setIsModalOpen(true)}>
+          <Button variant="gold" icon="📋" onClick={handleOpenCreate}>
             Tambah Bagian Profil
           </Button>
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {sections.map((item) => (
-          <Card key={item.id} className="flex flex-col justify-between">
-            <CardHeader className="bg-slate-50/50">
-              <div className="flex items-center gap-2">
-                <Badge variant="neutral">{item.category}</Badge>
-                <Badge variant={item.status === "Aktif" ? "success" : "warning"}>
-                  {item.status}
-                </Badge>
+      {loading ? (
+        <Card className="p-12 text-center text-xs text-[#7d7152]">
+          <div className="flex items-center justify-center gap-2">
+            <span className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+            Memuat profil dinas...
+          </div>
+        </Card>
+      ) : sections.length === 0 ? (
+        <Card className="p-12 text-center text-xs text-[#7d7152]">
+          Belum ada data bagian profil. Klik &quot;Tambah Bagian Profil&quot; di atas untuk menambahkan.
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {sections.map((item) => (
+            <Card key={item.id} className="flex flex-col justify-between border border-white/80 shadow-xs overflow-hidden">
+              <CardHeader className="bg-slate-50/50">
+                <div className="flex items-center gap-2">
+                  <Badge variant="neutral">{item.category}</Badge>
+                  <Badge variant={item.status === "Aktif" ? "success" : "warning"}>
+                    {item.status}
+                  </Badge>
+                </div>
+                <span className="text-xs text-slate-400">Diperbarui: {item.updatedAt}</span>
+              </CardHeader>
+              <CardContent className="space-y-3 flex-1 p-6">
+                <CardTitle>{item.title}</CardTitle>
+                <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">
+                  {item.content}
+                </p>
+              </CardContent>
+              <div className="px-6 py-3 border-t border-slate-100 flex items-center justify-end gap-2 bg-white">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleOpenEdit(item)}
+                >
+                  Edit Konten
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hover:text-red-600 hover:bg-red-50"
+                  onClick={() => handleDelete(item.id, item.title)}
+                >
+                  Hapus
+                </Button>
               </div>
-              <span className="text-xs text-slate-400">Diperbarui: {item.updatedAt}</span>
-            </CardHeader>
-            <CardContent className="space-y-3 flex-1">
-              <CardTitle>{item.title}</CardTitle>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                {item.content}
-              </p>
-            </CardContent>
-            <div className="px-6 py-3 border-t border-slate-100 flex items-center justify-end gap-2 bg-white">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => alert(`Edit bagian: ${item.title}`)}
-              >
-                Edit Konten
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="hover:text-red-600 hover:bg-red-50"
-                onClick={() => setSections(sections.filter((s) => s.id !== item.id))}
-              >
-                Hapus
-              </Button>
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Tambah Bagian Profil / Maklumat"
+        title={editingId ? "Edit Bagian Profil / Maklumat" : "Tambah Bagian Profil / Maklumat"}
         description="Isi judul bagian dan naskah konten resmi yang akan ditampilkan di menu Tentang Kami."
         maxWidth="lg"
         footer={
@@ -149,12 +252,12 @@ export default function ProfilAdminPage() {
               Batal
             </Button>
             <Button variant="gold" type="submit" form="form-profile">
-              Simpan Konten
+              {editingId ? "Simpan Perubahan" : "Simpan Konten"}
             </Button>
           </>
         }
       >
-        <form id="form-profile" onSubmit={handleCreate} className="space-y-4">
+        <form id="form-profile" onSubmit={handleSubmit} className="space-y-4">
           <Input
             label="Judul Bagian / Dokumen"
             placeholder="Contoh: Maklumat Standar Pelayanan Publik 2026"
@@ -165,7 +268,7 @@ export default function ProfilAdminPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
-              label="Kategori"
+              label="Kategori Bagian"
               value={formData.category}
               onChange={(e) =>
                 setFormData({
@@ -174,14 +277,14 @@ export default function ProfilAdminPage() {
                 })
               }
               options={[
-                { value: "Visi Misi", label: "Visi & Misi" },
-                { value: "Maklumat Pelayanan", label: "Maklumat Pelayanan" },
-                { value: "Struktur Pejabat", label: "Struktur Organisasi" },
-                { value: "Regulasi", label: "Regulasi & SK Kedinasan" },
+                { value: "Visi Misi", label: "Visi & Misi Daerah" },
+                { value: "Maklumat Pelayanan", label: "Maklumat & Janji Layanan" },
+                { value: "Struktur Pejabat", label: "Struktur Organisasi / Eselon" },
+                { value: "Regulasi", label: "Dasar Hukum & Regulasi" },
               ]}
             />
             <Select
-              label="Status"
+              label="Status Publikasi"
               value={formData.status}
               onChange={(e) =>
                 setFormData({
@@ -190,19 +293,21 @@ export default function ProfilAdminPage() {
                 })
               }
               options={[
-                { value: "Aktif", label: "Tampil di Website" },
+                { value: "Aktif", label: "Aktif (Tampil Publik)" },
                 { value: "Draft", label: "Draft Sementara" },
               ]}
             />
           </div>
 
           <Textarea
-            label="Naskah / Konten Lengkap"
-            placeholder="Ketikkan isi naskah maklumat atau profil di sini..."
+            label="Uraian Lengkap Naskah"
+            placeholder="Tuliskan naskah atau butir-butir kebijakan..."
             rows={5}
             required
             value={formData.content}
-            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, content: e.target.value })
+            }
           />
         </form>
       </Modal>
