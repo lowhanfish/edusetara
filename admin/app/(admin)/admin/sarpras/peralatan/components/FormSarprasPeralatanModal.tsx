@@ -59,7 +59,12 @@ export default function FormSarprasPeralatanModal({
           </label>
           <Select
             
-            value={(formData as any).ruang_id || ""}
+            value={(() => {
+              const cur = (formData as any).ruang_id;
+              if (!cur) return "";
+              const match = ruangOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -117,7 +122,12 @@ export default function FormSarprasPeralatanModal({
           </label>
           <Select
             
-            value={(formData as any).kondisi_id || ""}
+            value={(() => {
+              const cur = (formData as any).kondisi_id;
+              if (!cur) return "";
+              const match = kondisiOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -158,7 +168,12 @@ export default function FormSarprasPeralatanModal({
           </label>
           <Select
             
-            value={(formData as any).sumber_id || ""}
+            value={(() => {
+              const cur = (formData as any).sumber_id;
+              if (!cur) return "";
+              const match = sumberdanaOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,

@@ -75,7 +75,12 @@ export default function FormRombelSmpModal({
           </label>
           <Select
             
-            value={(formData as any).tgkt_pendidikan || ""}
+            value={(() => {
+              const cur = (formData as any).tgkt_pendidikan;
+              if (!cur) return "";
+              const match = jenjangOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.value || match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -85,7 +90,7 @@ export default function FormRombelSmpModal({
             options={[
               { value: "", label: jenjangLoading ? "Memuat opsi data master..." : "-- Pilih jenjang pendidikan --" },
               ...jenjangOptions.map((opt) => ({
-                value: String(opt.id),
+                value: String(opt.value || opt.id),
                 label: opt.value,
               })),
             ]}
@@ -135,7 +140,12 @@ export default function FormRombelSmpModal({
           </label>
           <Select
             
-            value={(formData as any).ruang_kelas || ""}
+            value={(() => {
+              const cur = (formData as any).ruang_kelas;
+              if (!cur) return "";
+              const match = ruangOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.value || match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -145,7 +155,7 @@ export default function FormRombelSmpModal({
             options={[
               { value: "", label: ruangLoading ? "Memuat opsi data master..." : "-- Pilih ruang belajar --" },
               ...ruangOptions.map((opt) => ({
-                value: String(opt.id),
+                value: String(opt.value || opt.id),
                 label: opt.value,
               })),
             ]}

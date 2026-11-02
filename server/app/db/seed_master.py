@@ -219,7 +219,9 @@ SEED_DEFINITIONS: list[dict[str, Any]] = [
             {"id": "MDL-01", "uraian": "Problem Based Learning (PBL)"},
             {"id": "MDL-02", "uraian": "Project Based Learning (PjBL)"},
             {"id": "MDL-03", "uraian": "Discovery Learning"},
-            {"id": "MDL-04", "uraian": "Diferensiasi"},
+            {"id": "MDL-04", "uraian": "Inquiry Learning"},
+            {"id": "MDL-05", "uraian": "Diferensiasi"},
+            {"id": "MDL-06", "uraian": "Teaching at the Right Level (TaRL)"},
         ],
     },
     {

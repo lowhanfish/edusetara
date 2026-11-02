@@ -46,12 +46,13 @@ function generateHooks(mod) {
 
   const extraOptionHooks = uniqueMasterHooks
     .map((f) => {
+      const sep = f.masterEndpoint.includes("?") ? "&" : "?";
       return `export const use${f.hookName}Option = (search: string = "") => {
   const url = useUrlStore((state) => state.URL.APP);
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        \`\${url}${f.masterEndpoint}\${f.masterEndpoint.includes("?") ? "&" : "?"}search=\${encodeURIComponent(search)}\`
+        \`\${url}${f.masterEndpoint}${sep}search=\${encodeURIComponent(search)}\`
       ),
     queryKey: ["${f.masterQueryKey}", search],
   });
@@ -317,13 +318,19 @@ function generateFormModal(mod) {
         </div>`;
       } else if (f.type === "select") {
         if (f.masterEndpoint) {
+          const isIdField = f.name.endsWith("_id") || f.name === "id";
           return `        <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
             ${f.label}${requiredMark}
           </label>
           <Select
             ${f.required ? "required" : ""}
-            value={(formData as any).${f.name} || ""}
+            value={(() => {
+              const cur = (formData as any).${f.name};
+              if (!cur) return "";
+              const match = ${f.hookName.toLowerCase()}Options.find((o) => o.id === cur || o.value === cur);
+              return match ? String(${isIdField ? "match.id" : "match.value || match.id"}) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -333,7 +340,7 @@ function generateFormModal(mod) {
             options={[
               { value: "", label: ${f.hookName.toLowerCase()}Loading ? "Memuat opsi data master..." : "-- ${f.placeholder || `Pilih ${f.label}`} --" },
               ...${f.hookName.toLowerCase()}Options.map((opt) => ({
-                value: String(opt.id),
+                value: String(${isIdField ? "opt.id" : "opt.value || opt.id"}),
                 label: opt.value,
               })),
             ]}

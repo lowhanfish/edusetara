@@ -58,7 +58,12 @@ export default function FormUsulanPipPenerimaModal({
           </label>
           <Select
             required
-            value={(formData as any).pendukung_id || ""}
+            value={(() => {
+              const cur = (formData as any).pendukung_id;
+              if (!cur) return "";
+              const match = datapendukungOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -81,7 +86,12 @@ export default function FormUsulanPipPenerimaModal({
           </label>
           <Select
             required
-            value={(formData as any).siswa_id || ""}
+            value={(() => {
+              const cur = (formData as any).siswa_id;
+              if (!cur) return "";
+              const match = siswaOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,

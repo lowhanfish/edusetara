@@ -141,7 +141,7 @@ export const useSiswaOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/siswa/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/siswa/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-siswa-option", search],
   });
@@ -177,7 +177,7 @@ export const useKelasOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/jurnal/kelas/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/jurnal/kelas/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-kelas-option", search],
   });
@@ -213,7 +213,7 @@ export const useJenisLayananOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/bk-jenis-layanan/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/bk-jenis-layanan/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-bk-jenis-layanan-option", search],
   });
@@ -249,7 +249,7 @@ export const useKegiatanLayananOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/bk-kegiatan-layanan/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/bk-kegiatan-layanan/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-bk-kegiatan-layanan-option", search],
   });

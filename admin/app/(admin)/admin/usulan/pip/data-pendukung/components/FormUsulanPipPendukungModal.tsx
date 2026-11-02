@@ -74,7 +74,12 @@ export default function FormUsulanPipPendukungModal({
           </label>
           <Select
             required
-            value={(formData as any).jenjang_id || ""}
+            value={(() => {
+              const cur = (formData as any).jenjang_id;
+              if (!cur) return "";
+              const match = jenjangOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,

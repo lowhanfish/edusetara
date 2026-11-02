@@ -141,7 +141,7 @@ export const usePendampinganOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/pendampingan/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/pendampingan/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-pendampingan-option", search],
   });
@@ -177,7 +177,7 @@ export const useTugasOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/tugas/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/tugas/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-tugas-option", search],
   });

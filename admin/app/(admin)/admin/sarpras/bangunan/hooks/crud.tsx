@@ -141,7 +141,7 @@ export const useKepemilikanOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/sarpras/kepemilikan/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/sarpras/kepemilikan/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-sarpras-kepemilikan-option", search],
   });
@@ -177,7 +177,7 @@ export const useKondisiOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/sarpras/kondisi-alat/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/sarpras/kondisi-alat/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-sarpras-kondisi-option", search],
   });
@@ -213,7 +213,7 @@ export const useJenisBantuanOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/sarpras/jenis-bantuan/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/sarpras/jenis-bantuan/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-sarpras-jenis-bantuan-option", search],
   });
@@ -249,7 +249,7 @@ export const useSumberDanaOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/sarpras/sumber-dana/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/sarpras/sumber-dana/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-sarpras-sumber-dana-option", search],
   });

@@ -141,7 +141,7 @@ export const useModelPembelajaranOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/model-pembelajaran/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/model-pembelajaran/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-model-pembelajaran-option", search],
   });

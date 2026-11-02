@@ -74,7 +74,12 @@ export default function FormKuotaPpdbModal({
           </label>
           <Select
             
-            value={(formData as any).jenjang || ""}
+            value={(() => {
+              const cur = (formData as any).jenjang;
+              if (!cur) return "";
+              const match = jenjangOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.value || match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -84,7 +89,7 @@ export default function FormKuotaPpdbModal({
             options={[
               { value: "", label: jenjangLoading ? "Memuat opsi data master..." : "-- Pilih jenjang --" },
               ...jenjangOptions.map((opt) => ({
-                value: String(opt.id),
+                value: String(opt.value || opt.id),
                 label: opt.value,
               })),
             ]}

@@ -129,7 +129,12 @@ export default function FormUsulanRekonsiliasiBospModal({
           </label>
           <Select
             
-            value={(formData as any).kategori_spj || ""}
+            value={(() => {
+              const cur = (formData as any).kategori_spj;
+              if (!cur) return "";
+              const match = kategorispjOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.value || match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -139,7 +144,7 @@ export default function FormUsulanRekonsiliasiBospModal({
             options={[
               { value: "", label: kategorispjLoading ? "Memuat opsi data master..." : "-- Pilih kategori SPJ BOSP --" },
               ...kategorispjOptions.map((opt) => ({
-                value: String(opt.id),
+                value: String(opt.value || opt.id),
                 label: opt.value,
               })),
             ]}

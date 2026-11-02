@@ -94,7 +94,12 @@ export default function FormSarprasBangunanModal({
           </label>
           <Select
             
-            value={(formData as any).kepemilikan_id || ""}
+            value={(() => {
+              const cur = (formData as any).kepemilikan_id;
+              if (!cur) return "";
+              const match = kepemilikanOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -152,7 +157,12 @@ export default function FormSarprasBangunanModal({
           </label>
           <Select
             
-            value={(formData as any).kondisi_id || ""}
+            value={(() => {
+              const cur = (formData as any).kondisi_id;
+              if (!cur) return "";
+              const match = kondisiOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -175,7 +185,12 @@ export default function FormSarprasBangunanModal({
           </label>
           <Select
             
-            value={(formData as any).jns_bantuan_id || ""}
+            value={(() => {
+              const cur = (formData as any).jns_bantuan_id;
+              if (!cur) return "";
+              const match = jenisbantuanOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -198,7 +213,12 @@ export default function FormSarprasBangunanModal({
           </label>
           <Select
             
-            value={(formData as any).sumber_id || ""}
+            value={(() => {
+              const cur = (formData as any).sumber_id;
+              if (!cur) return "";
+              const match = sumberdanaOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,

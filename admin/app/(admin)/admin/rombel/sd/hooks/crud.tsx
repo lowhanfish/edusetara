@@ -141,7 +141,7 @@ export const useJenjangOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/jenjang/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/jenjang/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-jenjang-option", search],
   });
@@ -177,7 +177,7 @@ export const useRuangOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/sarpras/ruang/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/sarpras/ruang/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["sarpras-ruang-option", search],
   });

@@ -141,7 +141,7 @@ export const useBangunanOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/sarpras/bangunan/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/sarpras/bangunan/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["sarpras-bangunan-option", search],
   });
@@ -177,7 +177,7 @@ export const useKelasOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/jurnal/kelas/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/jurnal/kelas/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-kelas-option", search],
   });
@@ -213,7 +213,7 @@ export const useKondisiOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/sarpras/kondisi-alat/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/sarpras/kondisi-alat/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-sarpras-kondisi-option", search],
   });

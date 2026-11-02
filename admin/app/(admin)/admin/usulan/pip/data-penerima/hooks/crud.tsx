@@ -141,7 +141,7 @@ export const useDataPendukungOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/usulan/pip/data-pendukung/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/usulan/pip/data-pendukung/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["usulan-pip-pendukung-option", search],
   });
@@ -177,7 +177,7 @@ export const useSiswaOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/siswa/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/siswa/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-siswa-option", search],
   });

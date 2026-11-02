@@ -77,7 +77,12 @@ export default function FormJurnalBkModal({
           </label>
           <Select
             required
-            value={(formData as any).nm_siswa || ""}
+            value={(() => {
+              const cur = (formData as any).nm_siswa;
+              if (!cur) return "";
+              const match = siswaOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.value || match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -87,7 +92,7 @@ export default function FormJurnalBkModal({
             options={[
               { value: "", label: siswaLoading ? "Memuat opsi data master..." : "-- Pilih siswa konseling --" },
               ...siswaOptions.map((opt) => ({
-                value: String(opt.id),
+                value: String(opt.value || opt.id),
                 label: opt.value,
               })),
             ]}
@@ -100,7 +105,12 @@ export default function FormJurnalBkModal({
           </label>
           <Select
             
-            value={(formData as any).kelas_id || ""}
+            value={(() => {
+              const cur = (formData as any).kelas_id;
+              if (!cur) return "";
+              const match = kelasOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -123,7 +133,12 @@ export default function FormJurnalBkModal({
           </label>
           <Select
             
-            value={(formData as any).jns_layanan_id || ""}
+            value={(() => {
+              const cur = (formData as any).jns_layanan_id;
+              if (!cur) return "";
+              const match = jenislayananOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -146,7 +161,12 @@ export default function FormJurnalBkModal({
           </label>
           <Select
             
-            value={(formData as any).mdl_kegiatan_id || ""}
+            value={(() => {
+              const cur = (formData as any).mdl_kegiatan_id;
+              if (!cur) return "";
+              const match = kegiatanlayananOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,

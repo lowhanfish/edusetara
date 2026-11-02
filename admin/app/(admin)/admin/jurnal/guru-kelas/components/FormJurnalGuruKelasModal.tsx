@@ -126,7 +126,12 @@ export default function FormJurnalGuruKelasModal({
           </label>
           <Select
             
-            value={(formData as any).model_pembelajaran || ""}
+            value={(() => {
+              const cur = (formData as any).model_pembelajaran;
+              if (!cur) return "";
+              const match = modelpembelajaranOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.value || match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -136,7 +141,7 @@ export default function FormJurnalGuruKelasModal({
             options={[
               { value: "", label: modelpembelajaranLoading ? "Memuat opsi data master..." : "-- Pilih model pembelajaran --" },
               ...modelpembelajaranOptions.map((opt) => ({
-                value: String(opt.id),
+                value: String(opt.value || opt.id),
                 label: opt.value,
               })),
             ]}

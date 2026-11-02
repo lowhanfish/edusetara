@@ -141,7 +141,7 @@ export const useKategoriSpjOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/kategori/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/kategori/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-kategori-option", search],
   });

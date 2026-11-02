@@ -76,7 +76,12 @@ export default function FormUsulanTunjanganGuruModal({
           </label>
           <Select
             required
-            value={(formData as any).triwulan_id || ""}
+            value={(() => {
+              const cur = (formData as any).triwulan_id;
+              if (!cur) return "";
+              const match = triwulanOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -99,7 +104,12 @@ export default function FormUsulanTunjanganGuruModal({
           </label>
           <Select
             required
-            value={(formData as any).jenis_id || ""}
+            value={(() => {
+              const cur = (formData as any).jenis_id;
+              if (!cur) return "";
+              const match = jenispenerimaOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -122,7 +132,12 @@ export default function FormUsulanTunjanganGuruModal({
           </label>
           <Select
             required
-            value={(formData as any).kelas_id || ""}
+            value={(() => {
+              const cur = (formData as any).kelas_id;
+              if (!cur) return "";
+              const match = kelaspenerimaOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,

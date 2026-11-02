@@ -92,7 +92,12 @@ export default function FormJurnalPengawasModal({
           </label>
           <Select
             
-            value={(formData as any).pendampingan_id || ""}
+            value={(() => {
+              const cur = (formData as any).pendampingan_id;
+              if (!cur) return "";
+              const match = pendampinganOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -115,7 +120,12 @@ export default function FormJurnalPengawasModal({
           </label>
           <Select
             
-            value={(formData as any).tugas_id || ""}
+            value={(() => {
+              const cur = (formData as any).tugas_id;
+              if (!cur) return "";
+              const match = tugasOptions.find((o) => o.id === cur || o.value === cur);
+              return match ? String(match.id) : String(cur);
+            })()}
             onChange={(e) =>
               setFormData({
                 ...formData,

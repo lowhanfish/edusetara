@@ -141,7 +141,7 @@ export const useTriwulanOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/usulan/triwulan/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/usulan/triwulan/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-usulan-triwulan-option", search],
   });
@@ -177,7 +177,7 @@ export const useJenisPenerimaOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/usulan/jenis-penerima/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/usulan/jenis-penerima/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-usulan-jenis-penerima-option", search],
   });
@@ -213,7 +213,7 @@ export const useKelasPenerimaOption = (search: string = "") => {
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/usulan/kelas-penerima/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/usulan/kelas-penerima/option?search=${encodeURIComponent(search)}`
       ),
     queryKey: ["master-usulan-kelas-penerima-option", search],
   });
