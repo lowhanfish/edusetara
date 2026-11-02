@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Modal } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useSiswaOption, useKelasOption, useJenisLayananOption, useKegiatanLayananOption } from "../hooks/crud";
 
 interface DetailJurnalBkModalProps {
   isOpen: boolean;
@@ -13,6 +14,10 @@ export default function DetailJurnalBkModal({
   onClose,
   record,
 }: DetailJurnalBkModalProps) {
+  const { options: siswaOptions } = useSiswaOption();
+  const { options: kelasOptions } = useKelasOption();
+  const { options: jenislayananOptions } = useJenisLayananOption();
+  const { options: kegiatanlayananOptions } = useKegiatanLayananOption();
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}
@@ -48,25 +53,45 @@ export default function DetailJurnalBkModal({
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Nama Peserta Didik (Master Siswa)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).nm_siswa ?? "-")}
+              {(() => {
+                const val = (record as any).nm_siswa;
+                if (!val) return "-";
+                const match = siswaOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Tingkat / Kelas Siswa (Master Kelas)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).kelas_id ?? "-")}
+              {(() => {
+                const val = (record as any).kelas_id;
+                if (!val) return "-";
+                const match = kelasOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Bidang Layanan BK (Master BK Jenis Layanan)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).jns_layanan_id ?? "-")}
+              {(() => {
+                const val = (record as any).jns_layanan_id;
+                if (!val) return "-";
+                const match = jenislayananOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Format / Kegiatan Layanan (Master BK Kegiatan Layanan)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).mdl_kegiatan_id ?? "-")}
+              {(() => {
+                const val = (record as any).mdl_kegiatan_id;
+                if (!val) return "-";
+                const match = kegiatanlayananOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">

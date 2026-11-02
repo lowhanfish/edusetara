@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Modal } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { usePendampinganOption, useTugasOption } from "../hooks/crud";
 
 interface DetailJurnalPengawasModalProps {
   isOpen: boolean;
@@ -13,6 +14,8 @@ export default function DetailJurnalPengawasModal({
   onClose,
   record,
 }: DetailJurnalPengawasModalProps) {
+  const { options: pendampinganOptions } = usePendampinganOption();
+  const { options: tugasOptions } = useTugasOption();
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}
@@ -54,13 +57,23 @@ export default function DetailJurnalPengawasModal({
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Tahapan Siklus Pendampingan (Master Pendampingan)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).pendampingan_id ?? "-")}
+              {(() => {
+                const val = (record as any).pendampingan_id;
+                if (!val) return "-";
+                const match = pendampinganOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Fungsi Penugasan (Master Tugas)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).tugas_id ?? "-")}
+              {(() => {
+                const val = (record as any).tugas_id;
+                if (!val) return "-";
+                const match = tugasOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">

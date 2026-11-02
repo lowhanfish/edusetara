@@ -18,10 +18,12 @@ import {
   useDeleteMaster,
   useCreateMaster,
   useUpdateMaster,
+  useJenjangOption,
 } from "./hooks/crud";
 import { listindex } from "@/utilities/pagination";
 
 export default function KuotaPpdbPage() {
+  const { options: jenjangOptions } = useJenjangOption();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -289,10 +291,10 @@ export default function KuotaPpdbPage() {
               <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
                 <th className="py-3 px-4 w-12 text-center">No</th>
                 <th className="py-3 px-4">Sekolah</th>
+                <th className="py-3 px-4">Jenjang</th>
                 <th className="py-3 px-4">Total Kuota</th>
                 <th className="py-3 px-4">Zonasi</th>
                 <th className="py-3 px-4">Afirmasi</th>
-                <th className="py-3 px-4">Prestasi</th>
                 <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
             </thead>
@@ -350,6 +352,14 @@ export default function KuotaPpdbPage() {
                       {String((item as any).sekolah ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {(() => {
+                        const val = (item as any).jenjang;
+                        if (!val) return "-";
+                        const match = jenjangOptions.find((o) => o.id === String(val) || o.value === String(val));
+                        return match ? match.value : String(val);
+                      })()}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
                       {String((item as any).total_kuota ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
@@ -357,9 +367,6 @@ export default function KuotaPpdbPage() {
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
                       {String((item as any).jalur_afirmasi ?? "-")}
-                    </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).jalur_prestasi ?? "-")}
                     </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1.5">

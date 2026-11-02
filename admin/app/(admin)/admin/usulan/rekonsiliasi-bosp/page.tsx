@@ -18,10 +18,12 @@ import {
   useDeleteMaster,
   useCreateMaster,
   useUpdateMaster,
+  useKategoriSpjOption,
 } from "./hooks/crud";
 import { listindex } from "@/utilities/pagination";
 
 export default function UsulanRekonsiliasiBospPage() {
+  const { options: kategorispjOptions } = useKategoriSpjOption();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -295,6 +297,8 @@ export default function UsulanRekonsiliasiBospPage() {
                 <th className="py-3 px-4">Satuan Pendidikan</th>
                 <th className="py-3 px-4">Tahun</th>
                 <th className="py-3 px-4">Semester</th>
+                <th className="py-3 px-4">Kategori SPJ</th>
+                <th className="py-3 px-4">Nominal</th>
                 <th className="py-3 px-4">Status Usulan</th>
                 <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
@@ -302,7 +306,7 @@ export default function UsulanRekonsiliasiBospPage() {
             <tbody className="divide-y divide-[#ece5d8]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={8} className="py-12 text-center text-[#7d7152]">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
                       <span>Memuat data dari server...</span>
@@ -311,7 +315,7 @@ export default function UsulanRekonsiliasiBospPage() {
                 </tr>
               ) : isError ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-rose-700">
+                  <td colSpan={8} className="py-12 text-center text-rose-700">
                     <p className="font-semibold">Gagal memuat data Usulan Rekonsiliasi Dana BOSP</p>
                     <p className="text-[11px] mt-1 text-[#7d7152]">
                       {error?.message || "Terjadi kesalahan koneksi ke server."}
@@ -328,7 +332,7 @@ export default function UsulanRekonsiliasiBospPage() {
                 </tr>
               ) : rawList.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={8} className="py-12 text-center text-[#7d7152]">
                     <span className="text-3xl block mb-2">🧾</span>
                     <p className="font-semibold text-sm text-[#2d2410]">
                       Belum ada data Usulan Rekonsiliasi Dana BOSP
@@ -357,6 +361,17 @@ export default function UsulanRekonsiliasiBospPage() {
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
                       {String((item as any).tahap ?? "-")}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {(() => {
+                        const val = (item as any).kategori_spj;
+                        if (!val) return "-";
+                        const match = kategorispjOptions.find((o) => o.id === String(val) || o.value === String(val));
+                        return match ? match.value : String(val);
+                      })()}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).nominal_dana ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
                       {String((item as any).status ?? "-")}

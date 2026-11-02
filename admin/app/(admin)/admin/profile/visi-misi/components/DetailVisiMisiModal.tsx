@@ -13,6 +13,7 @@ export default function DetailVisiMisiModal({
   onClose,
   record,
 }: DetailVisiMisiModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

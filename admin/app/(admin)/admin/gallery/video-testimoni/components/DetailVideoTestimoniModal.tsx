@@ -13,6 +13,7 @@ export default function DetailVideoTestimoniModal({
   onClose,
   record,
 }: DetailVideoTestimoniModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

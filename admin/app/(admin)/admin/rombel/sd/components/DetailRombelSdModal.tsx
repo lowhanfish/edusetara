@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Modal } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useJenjangOption, useRuangOption } from "../hooks/crud";
 
 interface DetailRombelSdModalProps {
   isOpen: boolean;
@@ -13,6 +14,8 @@ export default function DetailRombelSdModal({
   onClose,
   record,
 }: DetailRombelSdModalProps) {
+  const { options: jenjangOptions } = useJenjangOption();
+  const { options: ruangOptions } = useRuangOption();
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}
@@ -48,7 +51,12 @@ export default function DetailRombelSdModal({
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Tingkat Pendidikan / Jenjang</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).tgkt_pendidikan ?? "-")}
+              {(() => {
+                const val = (record as any).tgkt_pendidikan;
+                if (!val) return "-";
+                const match = jenjangOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
@@ -66,7 +74,12 @@ export default function DetailRombelSdModal({
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Ruang Kelas (Sarpras Ruang)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).ruang_kelas ?? "-")}
+              {(() => {
+                const val = (record as any).ruang_kelas;
+                if (!val) return "-";
+                const match = ruangOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">

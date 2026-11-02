@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
-import { useKepemilikanOption, useKondisiOption, useJenisBantuanOption, useSumberDanaOption } from "../hooks/crud";
+import { useKepemilikanOption, useKondisiBangunanOption, useJenisBantuanOption, useSumberDanaOption } from "../hooks/crud";
 
 interface FormSarprasBangunanModalProps {
   isOpen: boolean;
@@ -23,7 +23,7 @@ export default function FormSarprasBangunanModal({
   isLoading = false,
 }: FormSarprasBangunanModalProps) {
   const { options: kepemilikanOptions, isLoading: kepemilikanLoading } = useKepemilikanOption();
-  const { options: kondisiOptions, isLoading: kondisiLoading } = useKondisiOption();
+  const { options: kondisibangunanOptions, isLoading: kondisibangunanLoading } = useKondisiBangunanOption();
   const { options: jenisbantuanOptions, isLoading: jenisbantuanLoading } = useJenisBantuanOption();
   const { options: sumberdanaOptions, isLoading: sumberdanaLoading } = useSumberDanaOption();
 
@@ -160,7 +160,7 @@ export default function FormSarprasBangunanModal({
             value={(() => {
               const cur = (formData as any).kondisi_id;
               if (!cur) return "";
-              const match = kondisiOptions.find((o) => o.id === cur || o.value === cur);
+              const match = kondisibangunanOptions.find((o) => o.id === cur || o.value === cur);
               return match ? String(match.id) : String(cur);
             })()}
             onChange={(e) =>
@@ -170,8 +170,8 @@ export default function FormSarprasBangunanModal({
               })
             }
             options={[
-              { value: "", label: kondisiLoading ? "Memuat opsi data master..." : "-- Pilih kondisi bangunan --" },
-              ...kondisiOptions.map((opt) => ({
+              { value: "", label: kondisibangunanLoading ? "Memuat opsi data master..." : "-- Pilih kondisi bangunan --" },
+              ...kondisibangunanOptions.map((opt) => ({
                 value: String(opt.id),
                 label: opt.value,
               })),

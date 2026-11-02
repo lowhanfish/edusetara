@@ -13,6 +13,7 @@ export default function DetailSarprasTanahModal({
   onClose,
   record,
 }: DetailSarprasTanahModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

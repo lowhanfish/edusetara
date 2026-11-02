@@ -13,6 +13,7 @@ export default function DetailKegiatanPengawasModal({
   onClose,
   record,
 }: DetailKegiatanPengawasModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

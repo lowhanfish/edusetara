@@ -13,6 +13,7 @@ export default function DetailVerifikasiTunjanganGuruModal({
   onClose,
   record,
 }: DetailVerifikasiTunjanganGuruModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

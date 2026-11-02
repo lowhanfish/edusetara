@@ -18,10 +18,14 @@ import {
   useDeleteMaster,
   useCreateMaster,
   useUpdateMaster,
+  useDataPendukungOption,
+  useSiswaOption,
 } from "./hooks/crud";
 import { listindex } from "@/utilities/pagination";
 
 export default function UsulanPipPenerimaPage() {
+  const { options: datapendukungOptions } = useDataPendukungOption();
+  const { options: siswaOptions } = useSiswaOption();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -278,8 +282,8 @@ export default function UsulanPipPenerimaPage() {
             <thead>
               <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
                 <th className="py-3 px-4 w-12 text-center">No</th>
-                <th className="py-3 px-4">ID Pendukung</th>
-                <th className="py-3 px-4">ID Siswa</th>
+                <th className="py-3 px-4">Nama Peserta Didik</th>
+                <th className="py-3 px-4">Rujukan Kuota PIP</th>
                 <th className="py-3 px-4">Satuan Pendidikan</th>
                 <th className="py-3 px-4">Waktu Penetapan</th>
                 <th className="py-3 px-4 w-28 text-center">Aksi</th>
@@ -336,10 +340,20 @@ export default function UsulanPipPenerimaPage() {
                         {no}
                       </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).pendukung_id ?? "-")}
+                      {(() => {
+                        const val = (item as any).siswa_id;
+                        if (!val) return "-";
+                        const match = siswaOptions.find((o) => o.id === String(val) || o.value === String(val));
+                        return match ? match.value : String(val);
+                      })()}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).siswa_id ?? "-")}
+                      {(() => {
+                        const val = (item as any).pendukung_id;
+                        if (!val) return "-";
+                        const match = datapendukungOptions.find((o) => o.id === String(val) || o.value === String(val));
+                        return match ? match.value : String(val);
+                      })()}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
                       {String((item as any).unit_kerja ?? "-")}

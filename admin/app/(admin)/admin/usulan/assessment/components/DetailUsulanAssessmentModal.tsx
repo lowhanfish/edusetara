@@ -13,6 +13,7 @@ export default function DetailUsulanAssessmentModal({
   onClose,
   record,
 }: DetailUsulanAssessmentModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

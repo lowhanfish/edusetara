@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Modal } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useRuangOption, useKondisiOption, useSumberDanaOption } from "../hooks/crud";
 
 interface DetailSarprasPeralatanModalProps {
   isOpen: boolean;
@@ -13,6 +14,9 @@ export default function DetailSarprasPeralatanModal({
   onClose,
   record,
 }: DetailSarprasPeralatanModalProps) {
+  const { options: ruangOptions } = useRuangOption();
+  const { options: kondisiOptions } = useKondisiOption();
+  const { options: sumberdanaOptions } = useSumberDanaOption();
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}
@@ -42,7 +46,12 @@ export default function DetailSarprasPeralatanModal({
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Lokasi Ruangan Penempatan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).ruang_id ?? "-")}
+              {(() => {
+                const val = (record as any).ruang_id;
+                if (!val) return "-";
+                const match = ruangOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
@@ -60,7 +69,12 @@ export default function DetailSarprasPeralatanModal({
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Kondisi Peralatan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).kondisi_id ?? "-")}
+              {(() => {
+                const val = (record as any).kondisi_id;
+                if (!val) return "-";
+                const match = kondisiOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
@@ -72,7 +86,12 @@ export default function DetailSarprasPeralatanModal({
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Sumber Dana</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).sumber_id ?? "-")}
+              {(() => {
+                const val = (record as any).sumber_id;
+                if (!val) return "-";
+                const match = sumberdanaOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           </div>

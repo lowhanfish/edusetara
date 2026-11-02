@@ -18,10 +18,16 @@ import {
   useDeleteMaster,
   useCreateMaster,
   useUpdateMaster,
+  useRuangOption,
+  useKondisiOption,
+  useSumberDanaOption,
 } from "./hooks/crud";
 import { listindex } from "@/utilities/pagination";
 
 export default function SarprasPeralatanPage() {
+  const { options: ruangOptions } = useRuangOption();
+  const { options: kondisiOptions } = useKondisiOption();
+  const { options: sumberdanaOptions } = useSumberDanaOption();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -287,8 +293,10 @@ export default function SarprasPeralatanPage() {
               <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
                 <th className="py-3 px-4 w-12 text-center">No</th>
                 <th className="py-3 px-4">Nama Peralatan</th>
+                <th className="py-3 px-4">Ruang Penempatan</th>
                 <th className="py-3 px-4">Jumlah</th>
-                <th className="py-3 px-4">Tahun</th>
+                <th className="py-3 px-4">Kondisi</th>
+                <th className="py-3 px-4">Sumber Dana</th>
                 <th className="py-3 px-4">Satuan Pendidikan</th>
                 <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
@@ -296,7 +304,7 @@ export default function SarprasPeralatanPage() {
             <tbody className="divide-y divide-[#ece5d8]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={8} className="py-12 text-center text-[#7d7152]">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
                       <span>Memuat data dari server...</span>
@@ -305,7 +313,7 @@ export default function SarprasPeralatanPage() {
                 </tr>
               ) : isError ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-rose-700">
+                  <td colSpan={8} className="py-12 text-center text-rose-700">
                     <p className="font-semibold">Gagal memuat data Peralatan / Aset</p>
                     <p className="text-[11px] mt-1 text-[#7d7152]">
                       {error?.message || "Terjadi kesalahan koneksi ke server."}
@@ -322,7 +330,7 @@ export default function SarprasPeralatanPage() {
                 </tr>
               ) : rawList.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={8} className="py-12 text-center text-[#7d7152]">
                     <span className="text-3xl block mb-2">🖥️</span>
                     <p className="font-semibold text-sm text-[#2d2410]">
                       Belum ada data Peralatan / Aset
@@ -347,10 +355,31 @@ export default function SarprasPeralatanPage() {
                       {String((item as any).nama ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {(() => {
+                        const val = (item as any).ruang_id;
+                        if (!val) return "-";
+                        const match = ruangOptions.find((o) => o.id === String(val) || o.value === String(val));
+                        return match ? match.value : String(val);
+                      })()}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
                       {String((item as any).jml_alat ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).tahun ?? "-")}
+                      {(() => {
+                        const val = (item as any).kondisi_id;
+                        if (!val) return "-";
+                        const match = kondisiOptions.find((o) => o.id === String(val) || o.value === String(val));
+                        return match ? match.value : String(val);
+                      })()}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {(() => {
+                        const val = (item as any).sumber_id;
+                        if (!val) return "-";
+                        const match = sumberdanaOptions.find((o) => o.id === String(val) || o.value === String(val));
+                        return match ? match.value : String(val);
+                      })()}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
                       {String((item as any).unit_kerja ?? "-")}

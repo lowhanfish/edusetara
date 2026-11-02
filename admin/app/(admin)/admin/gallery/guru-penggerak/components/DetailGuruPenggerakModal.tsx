@@ -13,6 +13,7 @@ export default function DetailGuruPenggerakModal({
   onClose,
   record,
 }: DetailGuruPenggerakModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

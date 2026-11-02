@@ -13,6 +13,7 @@ export default function DetailRegulasiGtkPengumumanModal({
   onClose,
   record,
 }: DetailRegulasiGtkPengumumanModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

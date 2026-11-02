@@ -13,6 +13,7 @@ export default function DetailRenstraModal({
   onClose,
   record,
 }: DetailRenstraModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

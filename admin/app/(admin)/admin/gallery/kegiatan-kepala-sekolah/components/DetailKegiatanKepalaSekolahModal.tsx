@@ -13,6 +13,7 @@ export default function DetailKegiatanKepalaSekolahModal({
   onClose,
   record,
 }: DetailKegiatanKepalaSekolahModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

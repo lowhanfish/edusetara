@@ -18,10 +18,12 @@ import {
   useDeleteMaster,
   useCreateMaster,
   useUpdateMaster,
+  useModelPembelajaranOption,
 } from "./hooks/crud";
 import { listindex } from "@/utilities/pagination";
 
 export default function JurnalGuruKelasPage() {
+  const { options: modelpembelajaranOptions } = useModelPembelajaranOption();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -298,6 +300,7 @@ export default function JurnalGuruKelasPage() {
                 <th className="py-3 px-4 w-12 text-center">No</th>
                 <th className="py-3 px-4">Tema / Bahan</th>
                 <th className="py-3 px-4">Materi Pokok</th>
+                <th className="py-3 px-4">Model Pembelajaran</th>
                 <th className="py-3 px-4">Tanggal</th>
                 <th className="py-3 px-4">Hadir</th>
                 <th className="py-3 px-4">Satuan Pendidikan</th>
@@ -307,7 +310,7 @@ export default function JurnalGuruKelasPage() {
             <tbody className="divide-y divide-[#ece5d8]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={8} className="py-12 text-center text-[#7d7152]">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
                       <span>Memuat data dari server...</span>
@@ -316,7 +319,7 @@ export default function JurnalGuruKelasPage() {
                 </tr>
               ) : isError ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-rose-700">
+                  <td colSpan={8} className="py-12 text-center text-rose-700">
                     <p className="font-semibold">Gagal memuat data Jurnal Guru Kelas</p>
                     <p className="text-[11px] mt-1 text-[#7d7152]">
                       {error?.message || "Terjadi kesalahan koneksi ke server."}
@@ -333,7 +336,7 @@ export default function JurnalGuruKelasPage() {
                 </tr>
               ) : rawList.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={8} className="py-12 text-center text-[#7d7152]">
                     <span className="text-3xl block mb-2">📖</span>
                     <p className="font-semibold text-sm text-[#2d2410]">
                       Belum ada data Jurnal Guru Kelas
@@ -359,6 +362,14 @@ export default function JurnalGuruKelasPage() {
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
                       {String((item as any).materi_pokok ?? "-")}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {(() => {
+                        const val = (item as any).model_pembelajaran;
+                        if (!val) return "-";
+                        const match = modelpembelajaranOptions.find((o) => o.id === String(val) || o.value === String(val));
+                        return match ? match.value : String(val);
+                      })()}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
                       {String((item as any).tgl ?? "-")}

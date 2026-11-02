@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Modal } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useKategoriSpjOption } from "../hooks/crud";
 
 interface DetailUsulanRekonsiliasiBospModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export default function DetailUsulanRekonsiliasiBospModal({
   onClose,
   record,
 }: DetailUsulanRekonsiliasiBospModalProps) {
+  const { options: kategorispjOptions } = useKategoriSpjOption();
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}
@@ -66,7 +68,12 @@ export default function DetailUsulanRekonsiliasiBospModal({
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Kategori Dokumen SPJ (Master Kategori)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).kategori_spj ?? "-")}
+              {(() => {
+                const val = (record as any).kategori_spj;
+                if (!val) return "-";
+                const match = kategorispjOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">

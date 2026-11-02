@@ -451,6 +451,17 @@ ${formFields}
 }
 
 function generateDetailModal(mod) {
+  const masterFields = mod.fields.filter((f) => f.type === "select" && f.masterEndpoint);
+  const uniqueMasterHooks = Array.from(new Map(masterFields.map((f) => [f.hookName, f])).values());
+
+  const masterHookImports = uniqueMasterHooks.length > 0
+    ? `import { ${uniqueMasterHooks.map((f) => `use${f.hookName}Option`).join(", ")} } from "../hooks/crud";\n`
+    : "";
+
+  const masterHookCalls = uniqueMasterHooks
+    .map((f) => `  const { options: ${f.hookName.toLowerCase()}Options } = use${f.hookName}Option();`)
+    .join("\n");
+
   const detailRows = mod.fields
     .map((f) => {
       if (f.type === "file") {
@@ -472,6 +483,20 @@ function generateDetailModal(mod) {
             </span>
           </div>`;
       }
+      const masterField = mod.fields.find((field) => field.name === f.name && field.masterEndpoint);
+      if (masterField) {
+        return `          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">${f.label}</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {(() => {
+                const val = (record as any).${f.name};
+                if (!val) return "-";
+                const match = ${masterField.hookName.toLowerCase()}Options.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
+            </span>
+          </div>`;
+      }
       return `          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">${f.label}</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
@@ -484,7 +509,7 @@ function generateDetailModal(mod) {
   return `import React from "react";
 import { Button, Modal } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
-
+${masterHookImports}
 interface Detail${mod.entity}ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -496,6 +521,7 @@ export default function Detail${mod.entity}Modal({
   onClose,
   record,
 }: Detail${mod.entity}ModalProps) {
+${masterHookCalls}
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}
@@ -553,6 +579,17 @@ ${detailRows}
 }
 
 function generatePage(mod) {
+  const masterFields = mod.fields.filter((f) => f.type === "select" && f.masterEndpoint);
+  const uniqueMasterHooks = Array.from(new Map(masterFields.map((f) => [f.hookName, f])).values());
+
+  const masterHookImports = uniqueMasterHooks.length > 0
+    ? uniqueMasterHooks.map((f) => `  use${f.hookName}Option`).join(",\n") + ",\n"
+    : "";
+
+  const masterHookCalls = uniqueMasterHooks
+    .map((f) => `  const { options: ${f.hookName.toLowerCase()}Options } = use${f.hookName}Option();`)
+    .join("\n");
+
   const initialFormEntries = mod.fields
     .map((f) => {
       const defaultVal = f.type === "number" ? "null" : '""';
@@ -575,6 +612,17 @@ function generatePage(mod) {
       if (c.key === "created_at") {
         return `                    <td className="py-3 px-4 text-[#7d7152]">
                       {item.created_at ? String(item.created_at).slice(0, 10) : "-"}
+                    </td>`;
+      }
+      const masterField = mod.fields.find((f) => f.name === c.key && f.masterEndpoint);
+      if (masterField) {
+        return `                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {(() => {
+                        const val = (item as any).${c.key};
+                        if (!val) return "-";
+                        const match = ${masterField.hookName.toLowerCase()}Options.find((o) => o.id === String(val) || o.value === String(val));
+                        return match ? match.value : String(val);
+                      })()}
                     </td>`;
       }
       return `                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
@@ -605,10 +653,11 @@ import {
   useDeleteMaster,
   useCreateMaster,
   useUpdateMaster,
-} from "./hooks/crud";
+${masterHookImports}} from "./hooks/crud";
 import { listindex } from "@/utilities/pagination";
 
 export default function ${mod.entity}Page() {
+${masterHookCalls}
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 

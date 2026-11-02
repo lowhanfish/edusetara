@@ -18,10 +18,12 @@ import {
   useDeleteMaster,
   useCreateMaster,
   useUpdateMaster,
+  useJenjangOption,
 } from "./hooks/crud";
 import { listindex } from "@/utilities/pagination";
 
 export default function UsulanPipPendukungPage() {
+  const { options: jenjangOptions } = useJenjangOption();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -285,16 +287,17 @@ export default function UsulanPipPendukungPage() {
               <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
                 <th className="py-3 px-4 w-12 text-center">No</th>
                 <th className="py-3 px-4">Uraian SK</th>
+                <th className="py-3 px-4">Jenjang</th>
                 <th className="py-3 px-4">Nominal (Rp)</th>
                 <th className="py-3 px-4">Tahun</th>
-                <th className="py-3 px-4">Berkas</th>
+                <th className="py-3 px-4">Satuan Pendidikan</th>
                 <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#ece5d8]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={7} className="py-12 text-center text-[#7d7152]">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
                       <span>Memuat data dari server...</span>
@@ -303,7 +306,7 @@ export default function UsulanPipPendukungPage() {
                 </tr>
               ) : isError ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-rose-700">
+                  <td colSpan={7} className="py-12 text-center text-rose-700">
                     <p className="font-semibold">Gagal memuat data Data Pendukung PIP</p>
                     <p className="text-[11px] mt-1 text-[#7d7152]">
                       {error?.message || "Terjadi kesalahan koneksi ke server."}
@@ -320,7 +323,7 @@ export default function UsulanPipPendukungPage() {
                 </tr>
               ) : rawList.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={7} className="py-12 text-center text-[#7d7152]">
                     <span className="text-3xl block mb-2">📑</span>
                     <p className="font-semibold text-sm text-[#2d2410]">
                       Belum ada data Data Pendukung PIP
@@ -345,13 +348,21 @@ export default function UsulanPipPendukungPage() {
                       {String((item as any).uraian ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {(() => {
+                        const val = (item as any).jenjang_id;
+                        if (!val) return "-";
+                        const match = jenjangOptions.find((o) => o.id === String(val) || o.value === String(val));
+                        return match ? match.value : String(val);
+                      })()}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
                       {String((item as any).nominal ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
                       {String((item as any).tahun ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).file ?? "-")}
+                      {String((item as any).unit_kerja ?? "-")}
                     </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1.5">

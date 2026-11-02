@@ -13,6 +13,7 @@ export default function DetailPpdbSdModal({
   onClose,
   record,
 }: DetailPpdbSdModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

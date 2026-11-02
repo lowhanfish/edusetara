@@ -13,6 +13,7 @@ export default function DetailSekolahPenggerakModal({
   onClose,
   record,
 }: DetailSekolahPenggerakModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

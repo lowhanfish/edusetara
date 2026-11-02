@@ -13,6 +13,7 @@ export default function DetailKomunitasBelajarModal({
   onClose,
   record,
 }: DetailKomunitasBelajarModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

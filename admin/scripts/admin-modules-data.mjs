@@ -99,15 +99,16 @@ export const modules = [
       { name: "kepemilikan_id", label: "Status Kepemilikan", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/sarpras/kepemilikan/option", masterQueryKey: "master-sarpras-kepemilikan-option", hookName: "Kepemilikan", placeholder: "Pilih status kepemilikan" },
       { name: "tahun", label: "Tahun Bangunan", type: "text", required: false, placeholder: "Contoh: 2020" },
       { name: "persentase", label: "Persentase Kerusakan Bangunan (%)", type: "number", required: false, placeholder: "Contoh: 0" },
-      { name: "kondisi_id", label: "Kondisi Bangunan", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/sarpras/kondisi-alat/option", masterQueryKey: "master-sarpras-kondisi-option", hookName: "Kondisi", placeholder: "Pilih kondisi bangunan" },
+      { name: "kondisi_id", label: "Kondisi Bangunan", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/sarpras/bangunan/option", masterQueryKey: "master-sarpras-bangunan-option", hookName: "KondisiBangunan", placeholder: "Pilih kondisi bangunan" },
       { name: "jns_bantuan_id", label: "Jenis Bantuan", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/sarpras/jenis-bantuan/option", masterQueryKey: "master-sarpras-jenis-bantuan-option", hookName: "JenisBantuan", placeholder: "Pilih jenis bantuan" },
       { name: "sumber_id", label: "Sumber Dana", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/sarpras/sumber-dana/option", masterQueryKey: "master-sarpras-sumber-dana-option", hookName: "SumberDana", placeholder: "Pilih sumber dana" }
     ],
     tableCols: [
       { key: "nama", label: "Nama Bangunan" },
       { key: "luas", label: "Luas" },
-      { key: "tahun", label: "Tahun" },
-      { key: "persentase", label: "Kerusakan (%)" },
+      { key: "kepemilikan_id", label: "Status Kepemilikan" },
+      { key: "kondisi_id", label: "Kondisi Bangunan" },
+      { key: "sumber_id", label: "Sumber Dana" },
       { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
@@ -129,9 +130,10 @@ export const modules = [
     ],
     tableCols: [
       { key: "nama", label: "Nama Ruangan" },
-      { key: "luas", label: "Luas" },
-      { key: "unit_kerja", label: "Satuan Pendidikan" },
-      { key: "created_at", label: "Waktu Catat" }
+      { key: "bangunan_id", label: "Unit Bangunan" },
+      { key: "kelas_id", label: "Tingkat / Kelas" },
+      { key: "kondisi_id", label: "Kondisi Ruangan" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
   {
@@ -153,8 +155,10 @@ export const modules = [
     ],
     tableCols: [
       { key: "nama", label: "Nama Peralatan" },
+      { key: "ruang_id", label: "Ruang Penempatan" },
       { key: "jml_alat", label: "Jumlah" },
-      { key: "tahun", label: "Tahun" },
+      { key: "kondisi_id", label: "Kondisi" },
+      { key: "sumber_id", label: "Sumber Dana" },
       { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
@@ -179,8 +183,9 @@ export const modules = [
     ],
     tableCols: [
       { key: "nama", label: "Nama Rombel" },
+      { key: "tgkt_pendidikan", label: "Tingkat Pendidikan" },
+      { key: "ruang_kelas", label: "Ruang Kelas" },
       { key: "wali_kelas", label: "Wali Kelas" },
-      { key: "kurikulum", label: "Kurikulum" },
       { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
@@ -203,8 +208,9 @@ export const modules = [
     ],
     tableCols: [
       { key: "nama", label: "Nama Rombel" },
+      { key: "tgkt_pendidikan", label: "Tingkat Pendidikan" },
+      { key: "ruang_kelas", label: "Ruang Kelas" },
       { key: "wali_kelas", label: "Wali Kelas" },
-      { key: "kurikulum", label: "Kurikulum" },
       { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
@@ -227,8 +233,9 @@ export const modules = [
     ],
     tableCols: [
       { key: "nama", label: "Nama Rombel" },
+      { key: "tgkt_pendidikan", label: "Tingkat Pendidikan" },
+      { key: "ruang_kelas", label: "Ruang Kelas" },
       { key: "wali_kelas", label: "Wali Kelas" },
-      { key: "kurikulum", label: "Kurikulum" },
       { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
@@ -255,9 +262,10 @@ export const modules = [
     ],
     tableCols: [
       { key: "tahun", label: "Tahun" },
-      { key: "jml_guru", label: "Jml Guru" },
-      { key: "nominal", label: "Nominal (Rp)" },
-      { key: "file", label: "Berkas" },
+      { key: "triwulan_id", label: "Triwulan" },
+      { key: "jenis_id", label: "Jenis Penerima" },
+      { key: "kelas_id", label: "Kelas Penerima" },
+      { key: "nominal", label: "Nominal Usulan" },
       { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
@@ -279,9 +287,10 @@ export const modules = [
     ],
     tableCols: [
       { key: "uraian", label: "Uraian SK" },
+      { key: "jenjang_id", label: "Jenjang" },
       { key: "nominal", label: "Nominal (Rp)" },
       { key: "tahun", label: "Tahun" },
-      { key: "file", label: "Berkas" }
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
   {
@@ -298,8 +307,8 @@ export const modules = [
       { name: "siswa_id", label: "Peserta Didik (Master Siswa)", type: "select", required: true, masterEndpoint: "/api/v1/admin/master/siswa/option", masterQueryKey: "master-siswa-option", hookName: "Siswa", placeholder: "Pilih siswa penerima PIP" }
     ],
     tableCols: [
-      { key: "pendukung_id", label: "ID Pendukung" },
-      { key: "siswa_id", label: "ID Siswa" },
+      { key: "siswa_id", label: "Nama Peserta Didik" },
+      { key: "pendukung_id", label: "Rujukan Kuota PIP" },
       { key: "unit_kerja", label: "Satuan Pendidikan" },
       { key: "created_at", label: "Waktu Penetapan" }
     ]
@@ -353,6 +362,8 @@ export const modules = [
       { key: "sekolah", label: "Satuan Pendidikan" },
       { key: "tahun", label: "Tahun" },
       { key: "tahap", label: "Semester" },
+      { key: "kategori_spj", label: "Kategori SPJ" },
+      { key: "nominal_dana", label: "Nominal" },
       { key: "status", label: "Status Usulan" }
     ]
   },
@@ -865,10 +876,10 @@ export const modules = [
     ],
     tableCols: [
       { key: "sekolah", label: "Sekolah" },
+      { key: "jenjang", label: "Jenjang" },
       { key: "total_kuota", label: "Total Kuota" },
       { key: "jalur_zonasi", label: "Zonasi" },
-      { key: "jalur_afirmasi", label: "Afirmasi" },
-      { key: "jalur_prestasi", label: "Prestasi" }
+      { key: "jalur_afirmasi", label: "Afirmasi" }
     ]
   },
 
@@ -898,6 +909,7 @@ export const modules = [
     tableCols: [
       { key: "tema", label: "Tema / Bahan" },
       { key: "materi_pokok", label: "Materi Pokok" },
+      { key: "model_pembelajaran", label: "Model Pembelajaran" },
       { key: "tgl", label: "Tanggal" },
       { key: "siswa_hadir", label: "Hadir" },
       { key: "unit_kerja", label: "Satuan Pendidikan" }
@@ -949,8 +961,9 @@ export const modules = [
     ],
     tableCols: [
       { key: "kepsek", label: "Kepala Sekolah" },
+      { key: "pendampingan_id", label: "Tahapan Pendampingan" },
+      { key: "tugas_id", label: "Fungsi Tugas" },
       { key: "tgl", label: "Tanggal" },
-      { key: "tindak_lanjut", label: "Tindak Lanjut" },
       { key: "unit_kerja", label: "Sekolah Binaan" }
     ]
   },
@@ -977,8 +990,10 @@ export const modules = [
     ],
     tableCols: [
       { key: "nm_siswa", label: "Nama Siswa" },
+      { key: "kelas_id", label: "Kelas" },
+      { key: "jns_layanan_id", label: "Bidang Layanan" },
+      { key: "mdl_kegiatan_id", label: "Format Kegiatan" },
       { key: "tgl", label: "Tanggal" },
-      { key: "materi_layanan", label: "Topik Layanan" },
       { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },

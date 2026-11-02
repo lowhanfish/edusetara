@@ -13,6 +13,7 @@ export default function DetailVerifikasiRekonsiliasiBospModal({
   onClose,
   record,
 }: DetailVerifikasiRekonsiliasiBospModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

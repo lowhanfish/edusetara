@@ -13,6 +13,7 @@ export default function DetailKegiatanTkPaudModal({
   onClose,
   record,
 }: DetailKegiatanTkPaudModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

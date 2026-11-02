@@ -22,6 +22,7 @@ import {
 import { listindex } from "@/utilities/pagination";
 
 export default function TugasFungsiPage() {
+
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 

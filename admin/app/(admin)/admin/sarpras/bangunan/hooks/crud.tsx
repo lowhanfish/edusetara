@@ -172,14 +172,14 @@ export const useKepemilikanOption = (search: string = "") => {
   };
 };
 
-export const useKondisiOption = (search: string = "") => {
+export const useKondisiBangunanOption = (search: string = "") => {
   const url = useUrlStore((state) => state.URL.APP);
   const { data, isLoading, isError, error } = useQuery({
     queryFn: () =>
       fetchData<any[]>(
-        `${url}/api/v1/admin/master/sarpras/kondisi-alat/option?search=${encodeURIComponent(search)}`
+        `${url}/api/v1/admin/master/sarpras/bangunan/option?search=${encodeURIComponent(search)}`
       ),
-    queryKey: ["master-sarpras-kondisi-option", search],
+    queryKey: ["master-sarpras-bangunan-option", search],
   });
 
   let result: ListOptionSchema = [];

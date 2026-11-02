@@ -13,6 +13,7 @@ export default function DetailPiagamSertifikatModal({
   onClose,
   record,
 }: DetailPiagamSertifikatModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

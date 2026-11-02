@@ -13,6 +13,7 @@ export default function DetailTugasFungsiModal({
   onClose,
   record,
 }: DetailTugasFungsiModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

@@ -13,6 +13,7 @@ export default function DetailKegiatanKkgSdModal({
   onClose,
   record,
 }: DetailKegiatanKkgSdModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

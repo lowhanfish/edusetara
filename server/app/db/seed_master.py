@@ -78,10 +78,12 @@ SEED_DEFINITIONS: list[dict[str, Any]] = [
     {
         "model": MasterSarprasJenisBantuan,
         "items": [
-            {"id": "JBT-01", "uraian": "Rehabilitasi Ruang Kelas"},
-            {"id": "JBT-02", "uraian": "Pembangunan RKB"},
-            {"id": "JBT-03", "uraian": "Bantuan TIK"},
-            {"id": "JBT-04", "uraian": "Pengadaan Mobiler"},
+            {"id": "JBT-01", "uraian": "DAK Fisik"},
+            {"id": "JBT-02", "uraian": "DAK Digital"},
+            {"id": "JBT-03", "uraian": "RKB"},
+            {"id": "JBT-04", "uraian": "Reguler"},
+            {"id": "JBT-05", "uraian": "Rehabilitasi Ruang Kelas"},
+            {"id": "JBT-06", "uraian": "Pengadaan Mobiler"},
         ],
     },
     # Usulan

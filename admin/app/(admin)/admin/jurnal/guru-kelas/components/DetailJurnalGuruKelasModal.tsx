@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Modal } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useModelPembelajaranOption } from "../hooks/crud";
 
 interface DetailJurnalGuruKelasModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export default function DetailJurnalGuruKelasModal({
   onClose,
   record,
 }: DetailJurnalGuruKelasModalProps) {
+  const { options: modelpembelajaranOptions } = useModelPembelajaranOption();
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}
@@ -66,7 +68,12 @@ export default function DetailJurnalGuruKelasModal({
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Model Pembelajaran (Master Model)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).model_pembelajaran ?? "-")}
+              {(() => {
+                const val = (record as any).model_pembelajaran;
+                if (!val) return "-";
+                const match = modelpembelajaranOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">

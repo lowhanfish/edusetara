@@ -22,6 +22,7 @@ import {
 import { listindex } from "@/utilities/pagination";
 
 export default function KegiatanSekolahPage() {
+
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 

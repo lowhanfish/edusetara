@@ -13,6 +13,7 @@ export default function DetailKegiatanGuruMgmpModal({
   onClose,
   record,
 }: DetailKegiatanGuruMgmpModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

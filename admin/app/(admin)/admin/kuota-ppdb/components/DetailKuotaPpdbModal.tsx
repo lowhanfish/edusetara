@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Modal } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useJenjangOption } from "../hooks/crud";
 
 interface DetailKuotaPpdbModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export default function DetailKuotaPpdbModal({
   onClose,
   record,
 }: DetailKuotaPpdbModalProps) {
+  const { options: jenjangOptions } = useJenjangOption();
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}
@@ -48,7 +50,12 @@ export default function DetailKuotaPpdbModal({
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Jenjang Pendidikan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).jenjang ?? "-")}
+              {(() => {
+                const val = (record as any).jenjang;
+                if (!val) return "-";
+                const match = jenjangOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">

@@ -13,6 +13,7 @@ export default function DetailJurnalKepalaSekolahModal({
   onClose,
   record,
 }: DetailJurnalKepalaSekolahModalProps) {
+
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}

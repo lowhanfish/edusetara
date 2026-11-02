@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Modal } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useDataPendukungOption, useSiswaOption } from "../hooks/crud";
 
 interface DetailUsulanPipPenerimaModalProps {
   isOpen: boolean;
@@ -13,6 +14,8 @@ export default function DetailUsulanPipPenerimaModal({
   onClose,
   record,
 }: DetailUsulanPipPenerimaModalProps) {
+  const { options: datapendukungOptions } = useDataPendukungOption();
+  const { options: siswaOptions } = useSiswaOption();
   return (
     <Modal
       isOpen={isOpen && Boolean(record)}
@@ -42,13 +45,23 @@ export default function DetailUsulanPipPenerimaModal({
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Data Pendukung PIP</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).pendukung_id ?? "-")}
+              {(() => {
+                const val = (record as any).pendukung_id;
+                if (!val) return "-";
+                const match = datapendukungOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Peserta Didik (Master Siswa)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).siswa_id ?? "-")}
+              {(() => {
+                const val = (record as any).siswa_id;
+                if (!val) return "-";
+                const match = siswaOptions.find((o) => o.id === String(val) || o.value === String(val));
+                return match ? match.value : String(val);
+              })()}
             </span>
           </div>
           </div>
