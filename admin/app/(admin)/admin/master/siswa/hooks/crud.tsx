@@ -49,6 +49,111 @@ export const useAgamaOption = () => {
   return { options: result, isLoading };
 };
 
+export const useTempatTinggalOption = () => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const { data, isLoading } = useQuery({
+    queryFn: () =>
+      fetchData<any[]>(
+        `${url}/api/v1/admin/master/ppdb/tempat-tinggal/option`
+      ),
+    queryKey: ["master-siswa-tempat-tinggal-option"],
+  });
+
+  let result: ListOptionSchema = [];
+  if (data && Array.isArray(data)) {
+    result = data.map((item) => ({
+      id: item.id,
+      value: item.title || item.uraian || item.id || "",
+    }));
+  }
+
+  return { options: result, isLoading };
+};
+
+export const useTransportasiOption = () => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const { data, isLoading } = useQuery({
+    queryFn: () =>
+      fetchData<any[]>(
+        `${url}/api/v1/admin/master/ppdb/transportasi/option`
+      ),
+    queryKey: ["master-siswa-transportasi-option"],
+  });
+
+  let result: ListOptionSchema = [];
+  if (data && Array.isArray(data)) {
+    result = data.map((item) => ({
+      id: item.id,
+      value: item.title || item.uraian || item.id || "",
+    }));
+  }
+
+  return { options: result, isLoading };
+};
+
+export const usePendidikanOption = () => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const { data, isLoading } = useQuery({
+    queryFn: () =>
+      fetchData<any[]>(
+        `${url}/api/v1/admin/master/ppdb/pendidikan/option`
+      ),
+    queryKey: ["master-siswa-pendidikan-option"],
+  });
+
+  let result: ListOptionSchema = [];
+  if (data && Array.isArray(data)) {
+    result = data.map((item) => ({
+      id: item.id,
+      value: item.title || item.uraian || item.id || "",
+    }));
+  }
+
+  return { options: result, isLoading };
+};
+
+export const usePekerjaanOption = () => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const { data, isLoading } = useQuery({
+    queryFn: () =>
+      fetchData<any[]>(
+        `${url}/api/v1/admin/master/ppdb/pekerjaan/option`
+      ),
+    queryKey: ["master-siswa-pekerjaan-option"],
+  });
+
+  let result: ListOptionSchema = [];
+  if (data && Array.isArray(data)) {
+    result = data.map((item) => ({
+      id: item.id,
+      value: item.title || item.uraian || item.id || "",
+    }));
+  }
+
+  return { options: result, isLoading };
+};
+
+export const usePenghasilanOption = () => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const { data, isLoading } = useQuery({
+    queryFn: () =>
+      fetchData<any[]>(
+        `${url}/api/v1/admin/master/ppdb/penghasilan/option`
+      ),
+    queryKey: ["master-siswa-penghasilan-option"],
+  });
+
+  let result: ListOptionSchema = [];
+  if (data && Array.isArray(data)) {
+    result = data.map((item) => ({
+      id: item.id,
+      value: item.title || item.uraian || item.id || "",
+    }));
+  }
+
+  return { options: result, isLoading };
+};
+
 export const useResponseListMaster = (
   skip: number,
   limit: number,

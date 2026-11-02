@@ -18,11 +18,22 @@ import {
   useDeleteMaster,
   useCreateMaster,
   useUpdateMaster,
+  useAgamaOption,
+  useTempatTinggalOption,
+  useTransportasiOption,
+  usePendidikanOption,
+  usePekerjaanOption,
+  usePenghasilanOption,
 } from "./hooks/crud";
 import { listindex } from "@/utilities/pagination";
 
 export default function PpdbSmpPage() {
-
+  const { options: agamaOptions } = useAgamaOption();
+  const { options: tempattinggalOptions } = useTempatTinggalOption();
+  const { options: transportasiOptions } = useTransportasiOption();
+  const { options: pendidikanOptions } = usePendidikanOption();
+  const { options: pekerjaanOptions } = usePekerjaanOption();
+  const { options: penghasilanOptions } = usePenghasilanOption();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -55,14 +66,32 @@ export default function PpdbSmpPage() {
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
 
   const initialForm: Partial<ResponseInterface> = {
-    nama_siswa: "",
-    nik: "",
+    nama: "",
+    nm_panggilan: "",
+    jns_kelamin: "",
     nisn: "",
-    asal_sekolah: "",
-    sekolah_tujuan: "",
-    jalur: "",
-    status: "",
-    file_berkas: "",
+    nik: "",
+    tmp_lahir: "",
+    tgl_lahir: "",
+    agama: "",
+    alamat: "",
+    rt_rw: "",
+    dusun: "",
+    kode_pos: "",
+    tmp_tinggal: "",
+    moda_transportasi: "",
+    nama_ayah: "",
+    nik_ayah: "",
+    pendidikan_ayah: "",
+    pekerjaan_ayah: "",
+    penghasilan_ayah: "",
+    nama_ibu: "",
+    nik_ibu: "",
+    pendidikan_ibu: "",
+    pekerjaan_ibu: "",
+    penghasilan_ibu: "",
+    nama_wali: "",
+    file: "",
   };
 
   const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
@@ -88,14 +117,32 @@ export default function PpdbSmpPage() {
     setFormMode("edit");
     setFormData({
       id: record.id,
-      nama_siswa: (record as any).nama_siswa ?? "",
-      nik: (record as any).nik ?? "",
+      nama: (record as any).nama ?? "",
+      nm_panggilan: (record as any).nm_panggilan ?? "",
+      jns_kelamin: (record as any).jns_kelamin ?? "",
       nisn: (record as any).nisn ?? "",
-      asal_sekolah: (record as any).asal_sekolah ?? "",
-      sekolah_tujuan: (record as any).sekolah_tujuan ?? "",
-      jalur: (record as any).jalur ?? "",
-      status: (record as any).status ?? "",
-      file_berkas: (record as any).file_berkas ?? "",
+      nik: (record as any).nik ?? "",
+      tmp_lahir: (record as any).tmp_lahir ?? "",
+      tgl_lahir: (record as any).tgl_lahir ?? "",
+      agama: (record as any).agama ?? "",
+      alamat: (record as any).alamat ?? "",
+      rt_rw: (record as any).rt_rw ?? "",
+      dusun: (record as any).dusun ?? "",
+      kode_pos: (record as any).kode_pos ?? "",
+      tmp_tinggal: (record as any).tmp_tinggal ?? "",
+      moda_transportasi: (record as any).moda_transportasi ?? "",
+      nama_ayah: (record as any).nama_ayah ?? "",
+      nik_ayah: (record as any).nik_ayah ?? "",
+      pendidikan_ayah: (record as any).pendidikan_ayah ?? "",
+      pekerjaan_ayah: (record as any).pekerjaan_ayah ?? "",
+      penghasilan_ayah: (record as any).penghasilan_ayah ?? "",
+      nama_ibu: (record as any).nama_ibu ?? "",
+      nik_ibu: (record as any).nik_ibu ?? "",
+      pendidikan_ibu: (record as any).pendidikan_ibu ?? "",
+      pekerjaan_ibu: (record as any).pekerjaan_ibu ?? "",
+      penghasilan_ibu: (record as any).penghasilan_ibu ?? "",
+      nama_wali: (record as any).nama_wali ?? "",
+      file: (record as any).file ?? "",
     });
     setIsFormOpen(true);
   };
@@ -292,16 +339,20 @@ export default function PpdbSmpPage() {
               <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
                 <th className="py-3 px-4 w-12 text-center">No</th>
                 <th className="py-3 px-4">Calon Siswa</th>
-                <th className="py-3 px-4">Sekolah Tujuan</th>
-                <th className="py-3 px-4">Jalur</th>
-                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">L/P</th>
+                <th className="py-3 px-4">NISN</th>
+                <th className="py-3 px-4">NIK</th>
+                <th className="py-3 px-4">Agama</th>
+                <th className="py-3 px-4">Tempat Tinggal</th>
+                <th className="py-3 px-4">Transportasi</th>
+                <th className="py-3 px-4">Satuan Pendidikan</th>
                 <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#ece5d8]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={10} className="py-12 text-center text-[#7d7152]">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
                       <span>Memuat data dari server...</span>
@@ -310,7 +361,7 @@ export default function PpdbSmpPage() {
                 </tr>
               ) : isError ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-rose-700">
+                  <td colSpan={10} className="py-12 text-center text-rose-700">
                     <p className="font-semibold">Gagal memuat data PPDB SMP</p>
                     <p className="text-[11px] mt-1 text-[#7d7152]">
                       {error?.message || "Terjadi kesalahan koneksi ke server."}
@@ -327,7 +378,7 @@ export default function PpdbSmpPage() {
                 </tr>
               ) : rawList.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={10} className="py-12 text-center text-[#7d7152]">
                     <span className="text-3xl block mb-2">🏫</span>
                     <p className="font-semibold text-sm text-[#2d2410]">
                       Belum ada data PPDB SMP
@@ -349,16 +400,43 @@ export default function PpdbSmpPage() {
                         {no}
                       </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).nama_siswa ?? "-")}
+                      {String((item as any).nama ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).sekolah_tujuan ?? "-")}
+                      {String((item as any).jns_kelamin ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).jalur ?? "-")}
+                      {String((item as any).nisn ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).status ?? "-")}
+                      {String((item as any).nik ?? "-")}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {(() => {
+                        const val = (item as any).agama;
+                        if (!val) return "-";
+                        const match = agamaOptions.find((o) => o.id === String(val) || o.value === String(val));
+                        return match ? match.value : String(val);
+                      })()}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {(() => {
+                        const val = (item as any).tmp_tinggal;
+                        if (!val) return "-";
+                        const match = tempattinggalOptions.find((o) => o.id === String(val) || o.value === String(val));
+                        return match ? match.value : String(val);
+                      })()}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {(() => {
+                        const val = (item as any).moda_transportasi;
+                        if (!val) return "-";
+                        const match = transportasiOptions.find((o) => o.id === String(val) || o.value === String(val));
+                        return match ? match.value : String(val);
+                      })()}
+                    </td>
+                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
+                      {String((item as any).unit_kerja ?? "-")}
                     </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1.5">
