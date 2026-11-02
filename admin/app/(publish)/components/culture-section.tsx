@@ -1,9 +1,16 @@
-import Image from "next/image";
+"use client";
 
-import { cultureLinks } from "./home-data";
+import Image from "next/image";
+import Link from "next/link";
+
+import { useHomeCulture } from "../hooks/useHomeData";
 import { SectionHeading } from "./shared";
 
 export function CultureSection() {
+  const { data: cultureData } = useHomeCulture();
+
+  const heroCulture = cultureData && cultureData.length > 0 ? cultureData[0] : null;
+
   return (
     <section className="card culture" id="kebudayaan">
       <SectionHeading
@@ -14,23 +21,29 @@ export function CultureSection() {
       <p>Jaga warisan budaya, kuatkan jati diri daerah.</p>
       <div className="culture-body">
         <div>
-          {cultureLinks.map(({ id, icon, label, href }) => (
-            <a href={href} key={id}>
-              <span>{icon}</span>
-              {label}
-            </a>
-          ))}
+          {cultureData && cultureData.length > 0 ? (
+            cultureData.slice(0, 4).map((item) => (
+              <Link href={`/kebudayaan#${item.id}`} key={item.id} className="block py-1 hover:text-blue-600 transition-colors">
+                <span className="mr-2">🏛️</span>
+                {item.nama}
+              </Link>
+            ))
+          ) : (
+            <p>Belum ada data kebudayaan yang dipublikasikan.</p>
+          )}
         </div>
-        <div className="culture-photo">
+        <div className="culture-photo relative overflow-hidden rounded">
           <Image
-            src="/img/hero-konsel.png"
-            alt="Seni budaya Konawe Selatan"
+            src={heroCulture?.foto || "/img/hero-konsel.png"}
+            alt={heroCulture?.nama || "Seni budaya Konawe Selatan"}
             fill
             sizes="300px"
+            className="object-cover"
+            unoptimized={heroCulture?.foto?.startsWith("http")}
           />
-          <a className="culture-button" href="#">
+          <Link className="culture-button" href="/kebudayaan">
             Jelajahi Kebudayaan <b>→</b>
-          </a>
+          </Link>
         </div>
       </div>
     </section>

@@ -1,15 +1,12 @@
 export interface CreateInterface {
-  sekolah: string | null;
-  nama_siswa: string | null;
-  nisn: string | null;
-  tahun: number | null;
-  tahap: string | null;
-  nominal: number | null;
-  status_penyaluran: string | null;
+  pendukung_id: string | null;
+  siswa_id: string | null;
 }
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  unit_kerja?: string | null;
+  nip?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
@@ -22,4 +19,4 @@ export interface ResponseListInterface {
   data: ResponseInterface[];
 }
 
-export type PipDataPenerimaRecord = ResponseInterface;
+export type UsulanPipPenerimaRecord = ResponseInterface;

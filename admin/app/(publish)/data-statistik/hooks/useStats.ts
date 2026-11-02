@@ -12,7 +12,7 @@ export function usePublicStats() {
     queryFn: async () => {
       try {
         const res = await fetchData<{ total: number; data: StatisticIndicator[] }>(
-          `${url}/api/v1/admin/statistik/read?limit=50`
+          `${url}/api/v1/publish/statistik?limit=50`
         );
         if (res && Array.isArray(res.data)) {
           return res.data;

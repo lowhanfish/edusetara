@@ -72,166 +72,161 @@ export function SiteHeader({
             alt="Logo Kabupaten Konawe Selatan"
             priority
           />
-          <div>
+          <span className="brand-copy">
             <strong>
-              Dinas Pendidikan dan Kebudayaan
-              <small>Kabupaten Konawe Selatan</small>
+              Dinas Pendidikan
+              <br />
+              dan Kebudayaan
             </strong>
-            <p>Portal Resmi Layanan &amp; Informasi Pendidikan Terpadu</p>
-          </div>
+            <small>Kabupaten Konawe Selatan</small>
+          </span>
         </Link>
-        <div className="utility">
-          <span>📅 Berakhlak &amp; Berbudaya</span>
-          <Link href="/admin" className="admin-link">
-            Masuk Admin ›
+        <span className="motto">
+          Cerdas Berkarakter
+          <br />
+          Lestari Budayanya
+          <br />
+          Maju Konselnya
+        </span>
+        <div className="top-actions">
+          <a href="#footer">⊙ PPID</a>
+          <a href="#footer">♿ Aksesibilitas</a>
+          <a href="#footer">▣ Peta Situs</a>
+          <label className="search">
+            <input
+              type="search"
+              placeholder="Cari informasi..."
+              aria-label="Cari informasi"
+            />
+            <span>⌕</span>
+          </label>
+          <Link href="/login" className="login">
+            Masuk
           </Link>
+          <button
+            className="mobile-menu-toggle"
+            type="button"
+            aria-label="Buka menu navigasi"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
       </div>
 
-      <nav className="navbar" ref={navRef} aria-label="Navigasi Utama">
-        <div className="container nav-content">
-          <ul className="nav-list">
-            {navItems.map((item) => {
-              const hasDropdown = Boolean(item.children?.length);
-              const isCurrent = activeSection === item.id;
-              const isOpen = openMenu === item.id;
-
-              return (
-                <li
-                  key={item.id}
-                  className={`nav-item ${hasDropdown ? "has-dropdown" : ""}`}
-                >
-                  {hasDropdown ? (
-                    <>
-                      <button
-                        type="button"
-                        className={`nav-link ${isCurrent ? "current" : ""} ${
-                          isOpen ? "open" : ""
-                        }`}
-                        aria-expanded={isOpen}
-                        aria-controls={`menu-${item.id}`}
-                        onClick={() =>
-                          setOpenMenu(isOpen ? null : item.id)
-                        }
-                      >
-                        {item.label}
-                        <span className="arrow" aria-hidden="true">
-                          ▾
-                        </span>
-                      </button>
-
-                      {isOpen && (
-                        <div
-                          id={`menu-${item.id}`}
-                          className="dropdown-menu"
-                          role="menu"
-                        >
-                          {item.children?.map((child) => (
-                            <Link
-                              key={child.id}
-                              href={child.href}
-                              className="dropdown-item"
-                              role="menuitem"
-                              onClick={closeMenu}
-                            >
-                              <span
-                                className="dropdown-icon"
-                                aria-hidden="true"
-                              >
-                                {child.icon}
-                              </span>
-                              <div>
-                                <strong>{child.label}</strong>
-                                <small>{child.description}</small>
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      className={`nav-link ${isCurrent ? "current" : ""}`}
-                      onClick={closeMenu}
-                    >
-                      {item.label}
-                    </Link>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-
-          <div className="mobile-toggle">
-            <button
-              type="button"
-              className="toggle-button"
-              aria-label={mobileMenuOpen ? "Tutup menu" : "Buka menu"}
-              aria-expanded={mobileMenuOpen}
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              <span className="sr-only">Menu</span>
-              <div
-                className={`hamburger-icon ${mobileMenuOpen ? "open" : ""}`}
-                aria-hidden="true"
-              >
-                <span />
-                <span />
-                <span />
-              </div>
-            </button>
+      <nav
+        className={`main-nav${mobileMenuOpen ? " mobile-open" : ""}`}
+        aria-label="Navigasi utama"
+        id="mobile-navigation"
+        ref={navRef}
+      >
+        <div className="mobile-nav-header">
+          <div>
+            <span>Menu Utama</span>
+            <strong>Dikbud Konawe Selatan</strong>
           </div>
+          <button
+            type="button"
+            aria-label="Tutup menu navigasi"
+            onClick={closeMenu}
+          >
+            ×
+          </button>
         </div>
+        <div className="nav-inner container">
+          {navItems.map((item, index) => {
+            const hasChildren = Boolean(item.children?.length);
+            const isOpen = openMenu === item.id;
+            const dropdownId = `menu-${item.id}`;
+            const isSectionActive =
+              item.id === activeSection ||
+              item.id === `nav-${activeSection}` ||
+              (index === 0 && activeSection === "home");
 
-        {mobileMenuOpen && (
-          <div className="mobile-drawer" role="dialog" aria-modal="true">
-            <div className="mobile-drawer-header">
-              <strong>Menu Navigasi</strong>
-              <button
-                type="button"
-                className="close-button"
-                aria-label="Tutup menu navigasi"
-                onClick={closeMenu}
+            return (
+              <div
+                className={`nav-item${isOpen ? " open" : ""}${
+                  isSectionActive ? " section-active" : ""
+                }`}
+                key={item.id}
               >
-                ✕
-              </button>
-            </div>
-            <ul className="mobile-list">
-              {navItems.map((item) => (
-                <li key={item.id} className="mobile-item">
-                  <div className="mobile-item-title">
-                    <Link
-                      href={item.href}
-                      className={activeSection === item.id ? "current" : ""}
-                      onClick={closeMenu}
-                    >
-                      {item.label}
-                    </Link>
-                  </div>
-                  {item.children && (
-                    <ul className="mobile-sublist">
-                      {item.children.map((child) => (
-                        <li key={child.id}>
-                          <Link href={child.href} onClick={closeMenu}>
-                            <span aria-hidden="true">{child.icon}</span>
-                            <span>{child.label}</span>
-                          </Link>
-                        </li>
+                {hasChildren ? (
+                  <button
+                    className="nav-trigger"
+                    type="button"
+                    aria-expanded={isOpen}
+                    aria-controls={dropdownId}
+                    onClick={() =>
+                      setOpenMenu((current) =>
+                        current === item.id ? null : item.id,
+                      )
+                    }
+                  >
+                    {item.label}
+                    <span className="nav-chevron" aria-hidden="true">
+                      ⌄
+                    </span>
+                  </button>
+                ) : (
+                  <Link
+                    className={isSectionActive ? "active" : ""}
+                    href={item.href}
+                    onClick={closeMenu}
+                  >
+                    {index === 0 && <span aria-hidden="true">⌂</span>}
+                    {item.label}
+                  </Link>
+                )}
+
+                {hasChildren && (
+                  <div
+                    className="nav-dropdown"
+                    id={dropdownId}
+                    aria-hidden={!isOpen}
+                  >
+                    <div className="dropdown-heading">
+                      <span>Jelajahi</span>
+                      <strong>{item.label}</strong>
+                    </div>
+                    <div className="dropdown-links">
+                      {item.children?.map((child) => (
+                        <Link
+                          href={child.href}
+                          key={child.id}
+                          onClick={closeMenu}
+                          tabIndex={isOpen ? 0 : -1}
+                        >
+                          <span className="dropdown-icon" aria-hidden="true">
+                            {child.icon}
+                          </span>
+                          <span>
+                            <strong>{child.label}</strong>
+                            <small>{child.description}</small>
+                          </span>
+                          <span className="dropdown-arrow" aria-hidden="true">
+                            →
+                          </span>
+                        </Link>
                       ))}
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ul>
-            <div className="mobile-drawer-footer">
-              <Link href="/admin" className="mobile-admin-link" onClick={closeMenu}>
-                Masuk ke Portal Admin EduSetara ›
-              </Link>
-            </div>
-          </div>
-        )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </nav>
+      <button
+        className={`mobile-nav-backdrop${mobileMenuOpen ? " visible" : ""}`}
+        type="button"
+        aria-label="Tutup menu navigasi"
+        tabIndex={mobileMenuOpen ? 0 : -1}
+        onClick={closeMenu}
+      />
     </header>
   );
 }

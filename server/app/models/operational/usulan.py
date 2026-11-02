@@ -54,6 +54,15 @@ class UsulanRekonsiliasiBosp(Base, OperationalBaseMixin):
     """Usulan rekonsiliasi SPJ dana BOSP."""
     __tablename__ = "usulan_rekonsiliasi_bosp"
 
+    sekolah = Column(String(255), nullable=True, index=True)
+    tahap = Column(String(50), nullable=True)
     tahun = Column(String(20), nullable=True)
+    nominal_dana = Column(Numeric(15, 2), nullable=True)
+    kategori_spj = Column(String(255), nullable=True)
+    file_bku = Column(String(255), nullable=True)
+    file_rekening = Column(String(255), nullable=True)
+    file_sptjm = Column(String(255), nullable=True)
+    status = Column(String(50), nullable=True)
     semester_id = Column(String(50), nullable=True, index=True)
     file = Column(String(255), nullable=True)
+

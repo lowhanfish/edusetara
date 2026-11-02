@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+
 
 interface FormPpdbSmpModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export default function FormPpdbSmpModal({
   onSubmit,
   isLoading = false,
 }: FormPpdbSmpModalProps) {
+
+
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +33,7 @@ export default function FormPpdbSmpModal({
           ? "+ Tambah PPDB SMP"
           : "✎ Edit PPDB SMP"
       }
-      description="Penerimaan peserta didik baru jenjang Sekolah Menengah Pertama (SMP) 4 jalur."
+      description="Pendaftaran peserta didik baru jenjang SMP jalur zonasi, afirmasi, mutasi, dan prestasi."
       maxWidth="lg"
       footer={
         <>
@@ -61,13 +64,13 @@ export default function FormPpdbSmpModal({
                 nama_siswa: e.target.value,
               })
             }
-            placeholder="Contoh: Fadhil Muhammad"
+            placeholder="Nama calon siswa"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            NIK <span className="text-rose-500">*</span>
+            NIK Calon Siswa <span className="text-rose-500">*</span>
           </label>
           <Input
             required
@@ -78,7 +81,7 @@ export default function FormPpdbSmpModal({
                 nik: e.target.value,
               })
             }
-            placeholder="Contoh: 7405..."
+            placeholder="16 digit NIK"
           />
         </div>
 
@@ -95,16 +98,16 @@ export default function FormPpdbSmpModal({
                 nisn: e.target.value,
               })
             }
-            placeholder="Contoh: 0098765432"
+            placeholder="10 digit NISN"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Asal Satuan Pendidikan SD <span className="text-rose-500">*</span>
+            Asal Sekolah Dasar
           </label>
           <Input
-            required
+            
             value={(formData as any).asal_sekolah || ""}
             onChange={(e) =>
               setFormData({
@@ -112,13 +115,13 @@ export default function FormPpdbSmpModal({
                 asal_sekolah: e.target.value,
               })
             }
-            placeholder="Contoh: SDN 2 Buke"
+            placeholder="Nama SD asal"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            SMP Pilihan <span className="text-rose-500">*</span>
+            SMP Negeri Tujuan <span className="text-rose-500">*</span>
           </label>
           <Input
             required
@@ -129,47 +132,53 @@ export default function FormPpdbSmpModal({
                 sekolah_tujuan: e.target.value,
               })
             }
-            placeholder="Contoh: SMPN 1 Ranomeeto"
+            placeholder="Contoh: SMPN 22 Konawe Selatan"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Jalur Pendaftaran <span className="text-rose-500">*</span>
+            Jalur Pendaftaran PPDB <span className="text-rose-500">*</span>
           </label>
-          <Input
+          <Select
             required
-            value={(formData as any).jalur || ""}
+            value={(formData as any).jalur ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
                 jalur: e.target.value,
               })
             }
-            placeholder="Contoh: Zonasi / Prestasi / Afirmasi / Mutasi"
+            options={[
+              { value: "", label: "-- Pilih jalur --" },
+              ...[{"value":"Zonasi","label":"Jalur Zonasi"},{"value":"Afirmasi","label":"Jalur Afirmasi"},{"value":"Prestasi","label":"Jalur Prestasi Akademik/Non-Akademik"},{"value":"Mutasi","label":"Jalur Perpindahan Tugas Orang Tua"}]
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Status Seleksi <span className="text-rose-500">*</span>
+            Status Pendaftaran
           </label>
-          <Input
-            required
-            value={(formData as any).status || ""}
+          <Select
+            
+            value={(formData as any).status ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
                 status: e.target.value,
               })
             }
-            placeholder="Contoh: Diterima / Cadangan"
+            options={[
+              { value: "", label: "-- Pilih status --" },
+              ...[{"value":"Diverifikasi","label":"Diverifikasi"},{"value":"Diterima","label":"Diterima"},{"value":"Menunggu","label":"Menunggu"},{"value":"Ditolak","label":"Ditolak"}]
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Berkas Rapor & Piagam (PDF)
+            Berkas Lampiran Nilai / Sertifikat (PDF)
           </label>
           <FileInput
             value={(formData as any).file_berkas || ""}
@@ -179,7 +188,7 @@ export default function FormPpdbSmpModal({
                 file_berkas: fileName,
               })
             }
-            helperText="Unggah gabungan berkas pendaftaran (PDF)"
+            helperText="Unggah dokumen lampiran"
           />
         </div>
       </form>

@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+
 
 interface FormUsulanAssessmentModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export default function FormUsulanAssessmentModal({
   onSubmit,
   isLoading = false,
 }: FormUsulanAssessmentModalProps) {
+
+
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +33,7 @@ export default function FormUsulanAssessmentModal({
           ? "+ Tambah Usulan Data Assessment"
           : "✎ Edit Usulan Data Assessment"
       }
-      description="Pendataan kesiapan dan usulan Asesmen Nasional Berbasis Komputer (ANBK) satuan pendidikan."
+      description="Status moda pelaksanaan sekolah, jumlah siswa peserta asesmen/ANBK, dan rincian gender."
       maxWidth="lg"
       footer={
         <>
@@ -50,68 +53,36 @@ export default function FormUsulanAssessmentModal({
       <form id="form-usulan-assessment" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nama Satuan Pendidikan <span className="text-rose-500">*</span>
+            Status Pelaksanaan Sekolah <span className="text-rose-500">*</span>
           </label>
-          <Input
+          <Select
             required
-            value={(formData as any).sekolah || ""}
+            value={(formData as any).status_sekolah_id ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                sekolah: e.target.value,
+                status_sekolah_id: e.target.value,
               })
             }
-            placeholder="Contoh: SDN 8 Moramo"
+            options={[
+              { value: "", label: "-- Pilih status moda pelaksanaan --" },
+              ...[{"value":"0","label":"Mandiri / Negeri"},{"value":"1","label":"Menumpang / Swasta"},{"value":"2","label":"Satuan Pendidikan Kerjasama (SPK)"}]
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Tahun Pelaksanaan <span className="text-rose-500">*</span>
+            Total Peserta Siswa <span className="text-rose-500">*</span>
           </label>
           <Input
             type="number"
             required
-            value={(formData as any).tahun ?? ""}
+            value={(formData as any).jml_siswa ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                tahun: e.target.value === "" ? null : Number(e.target.value),
-              })
-            }
-            placeholder="Contoh: 2026"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Moda & Jenis Asesmen <span className="text-rose-500">*</span>
-          </label>
-          <Input
-            required
-            value={(formData as any).jenis_asesmen || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                jenis_asesmen: e.target.value,
-              })
-            }
-            placeholder="Contoh: ANBK Mandiri Online / Menumpang"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Jumlah Peserta Didik <span className="text-rose-500">*</span>
-          </label>
-          <Input
-            type="number"
-            required
-            value={(formData as any).jumlah_peserta ?? ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                jumlah_peserta: e.target.value === "" ? null : Number(e.target.value),
+                jml_siswa: e.target.value === "" ? null : Number(e.target.value),
               })
             }
             placeholder="Contoh: 30"
@@ -120,34 +91,87 @@ export default function FormUsulanAssessmentModal({
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Status Kesiapan
+            Jumlah Peserta Laki-laki
           </label>
           <Input
+            type="number"
             
-            value={(formData as any).status || ""}
+            value={(formData as any).jml_laki ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                status: e.target.value,
+                jml_laki: e.target.value === "" ? null : Number(e.target.value),
               })
             }
-            placeholder="Contoh: Siap Mandiri / Perlu Tambahan Server"
+            placeholder="Contoh: 15"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Berkas SPTJM / Berita Acara
+            Jumlah Peserta Perempuan
+          </label>
+          <Input
+            type="number"
+            
+            value={(formData as any).jml_perempuan ?? ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                jml_perempuan: e.target.value === "" ? null : Number(e.target.value),
+              })
+            }
+            placeholder="Contoh: 15"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Peserta Kurikulum 2013
+          </label>
+          <Input
+            
+            value={(formData as any).kurikulum_k13 || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                kurikulum_k13: e.target.value,
+              })
+            }
+            placeholder="Contoh: 0"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Peserta Kurikulum Merdeka
+          </label>
+          <Input
+            
+            value={(formData as any).kurikulum_kurmer || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                kurikulum_kurmer: e.target.value,
+              })
+            }
+            placeholder="Contoh: 30"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Dokumen Bukti Kesiapan Asesmen (PDF)
           </label>
           <FileInput
-            value={(formData as any).dokumen || ""}
+            value={(formData as any).file || ""}
             onChange={(fileName) =>
               setFormData({
                 ...formData,
-                dokumen: fileName,
+                file: fileName,
               })
             }
-            helperText="Unggah berkas kesiapan (PDF)"
+            helperText="Unggah dokumen pendukung asesmen"
           />
         </div>
       </form>

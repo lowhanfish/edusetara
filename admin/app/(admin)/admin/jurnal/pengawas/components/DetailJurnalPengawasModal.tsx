@@ -17,7 +17,7 @@ export default function DetailJurnalPengawasModal({
     <Modal
       isOpen={isOpen && Boolean(record)}
       onClose={onClose}
-      title="Lembar Data Jurnal Pengawas Satdik"
+      title="Lembar Data Jurnal Pengawas Sekolah"
       description="Sesuai dokumen spesifikasi Arsitektur Sistem EduSetara"
       maxWidth="lg"
       footer={
@@ -40,39 +40,62 @@ export default function DetailJurnalPengawasModal({
         <div className="space-y-4 text-xs text-[#2d2410]">
           <div className="p-4 rounded-2xl bg-white/60 border border-white/80 space-y-1">
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nama Sekolah Binaan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tanggal Kunjungan / Supervisi</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).sekolah_binaan ?? "-")}
+              {String((record as any).tgl ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Fokus Pendampingan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Kepala Sekolah yang Disupervisi</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).fokus_supervisi ?? "-")}
+              {String((record as any).kepsek ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Metode Pendampingan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tahapan Siklus Pendampingan (Master Pendampingan)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).pendekatan ?? "-")}
+              {String((record as any).pendampingan_id ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Uraian Temuan Fakta</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Fungsi Penugasan (Master Tugas)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).temuan ?? "-")}
+              {String((record as any).tugas_id ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Rekomendasi Pembenahan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Temuan Supervisi Akademik</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).rekomendasi ?? "-")}
+              {String((record as any).temuan_akademik ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Status Supervisi</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Temuan Supervisi Manajerial</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).status ?? "-")}
+              {String((record as any).temuan_manajerial ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Rencana Tindak Lanjut / Rekomendasi</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).tindak_lanjut ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Instrumen Supervisi / Laporan (PDF)</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {(record as any).file ? (
+                <a
+                  href={String((record as any).file)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-800 underline hover:text-amber-900 inline-flex items-center gap-1 font-mono text-[11px]"
+                >
+                  📄 Lihat / Unduh Berkas
+                </a>
+              ) : (
+                "-"
+              )}
             </span>
           </div>
           </div>

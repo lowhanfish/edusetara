@@ -1,16 +1,17 @@
 export interface CreateInterface {
-  sekolah: string | null;
-  nama_kegiatan: string | null;
-  sasaran?: string | null;
-  tujuan: string | null;
-  keterlibatan?: string | null;
+  tgl: string | null;
+  uraian: string | null;
+  target?: string | null;
   hasil?: string | null;
-  tindak_lanjut?: string | null;
-  status: string | null;
+  keterlibatan?: string | null;
+  keterangan?: string | null;
+  file?: string | null;
 }
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  unit_kerja?: string | null;
+  nip?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;

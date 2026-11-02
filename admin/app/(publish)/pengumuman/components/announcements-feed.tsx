@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useId, useMemo, useState } from "react";
-import { AnnouncementItem } from "../_data/announcements-data";
+import type { AnnouncementItem } from "../types";
+import { usePublicAnnouncements } from "../hooks/useAnnouncements";
 
 const CATEGORIES = [
   "Semua",
@@ -14,11 +15,9 @@ const CATEGORIES = [
 
 const PAGE_SIZE = 4;
 
-interface AnnouncementsFeedProps {
-  announcements: AnnouncementItem[];
-}
 
-export function AnnouncementsFeed({ announcements }: AnnouncementsFeedProps) {
+export function AnnouncementsFeed() {
+  const { announcements, isLoading, isError } = usePublicAnnouncements();
   const searchId = useId();
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -140,18 +139,30 @@ export function AnnouncementsFeed({ announcements }: AnnouncementsFeedProps) {
         "==========================================================================",
       ].join("\n");
 
-      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = item.attachmentName.replace(".pdf", ".txt");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      if (item.fileUrl) {
+        const link = document.createElement("a");
+        link.href = item.fileUrl;
+        link.download = item.attachmentName;
+        link.target = "_blank";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = item.attachmentName.replace(".pdf", ".txt");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
     }, 500);
   };
 
+  if (isLoading) return <p>Memuat pengumuman…</p>;
+  if (isError) return <p role="alert">Pengumuman belum dapat dimuat.</p>;
   return (
     <div className="announcements-feed-container">
       {/* SECTION: Sorotan Pengumuman Prioritas (Tampil jika filter belum aktif) */}

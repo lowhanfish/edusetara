@@ -3,11 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { NewsArticle } from "../_data/news-data";
+import { usePublicNews } from "../hooks/useNews";
 
-interface NewsFeedProps {
-  initialArticles: NewsArticle[];
-}
 
 const CATEGORIES = [
   "Semua",
@@ -20,7 +17,8 @@ const CATEGORIES = [
 
 const PAGE_SIZE = 4;
 
-export function NewsFeed({ initialArticles }: NewsFeedProps) {
+export function NewsFeed() {
+  const { articles: initialArticles, isLoading, isError } = usePublicNews();
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -79,6 +77,8 @@ export function NewsFeed({ initialArticles }: NewsFeedProps) {
     document.getElementById("news-results-info")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  if (isLoading) return <p>Memuat berita…</p>;
+  if (isError) return <p role="alert">Berita belum dapat dimuat.</p>;
   return (
     <div className="news-feed-container">
       {/* Search & Filter Controls */}

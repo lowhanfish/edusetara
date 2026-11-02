@@ -12,10 +12,15 @@ export function usePublicEducation() {
     queryFn: async () => {
       try {
         const res = await fetchData<{ total: number; data: EducationArticle[] }>(
-          `${url}/api/v1/admin/pendidikan/read?limit=50`
+          `${url}/api/v1/publish/pendidikan?limit=50`
         );
         if (res && Array.isArray(res.data)) {
-          return res.data;
+          return res.data.map((item) => ({
+            ...item,
+            file: item.file?.startsWith("/uploads")
+              ? `${url}${item.file}`
+              : item.file || "/img/pendidikan-jenjang.jpg",
+          }));
         }
       } catch (e) {
         console.warn("[usePublicEducation] Error:", e);

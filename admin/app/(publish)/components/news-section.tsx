@@ -1,16 +1,24 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
-import { latestNews } from "./home-data";
+import { useHomeNews } from "../hooks/useHomeData";
 import { Arrow } from "./shared";
 
-const newsThumbnails = [
+const defaultThumbs = [
   "/img/kebudayaan-warisan.jpg",
   "/img/pendidikan-gtk.jpg",
   "/img/kebudayaan-sanggar.jpg",
 ];
 
 export function NewsSection() {
+  const { data: newsItems } = useHomeNews();
+
+  const items = newsItems ?? [];
+  const leadNews = items[0];
+  const otherNews = items.slice(1, 4);
+
   return (
     <section className="card news home-news-card" id="berita">
       <div className="home-news-header">
@@ -31,66 +39,65 @@ export function NewsSection() {
           Semua berita <span aria-hidden="true">→</span>
         </Link>
       </div>
+
       <div className="news-layout">
-        <article className="lead-news">
-          <Link
-            href="/berita/teknologi-pembelajaran-sekolah"
-            className="lead-news-link"
-            aria-label="Baca selengkapnya: Dikbud Konsel Dorong Pemanfaatan Teknologi dalam Pembelajaran di Sekolah"
-          >
-            <div className="news-photo">
-              <Image
-                src="/img/pendidikan-jenjang.jpg"
-                alt="Kegiatan belajar berbasis teknologi"
-                fill
-                sizes="440px"
-              />
-              <span className="tag">Pendidikan</span>
-            </div>
-            <div className="lead-news-content">
-              <time dateTime="2026-09-05">5 September 2026</time>
-              <h4>
-                Dikbud Konsel Dorong Pemanfaatan Teknologi dalam Pembelajaran di
-                Sekolah
-              </h4>
-              <span className="lead-news-cta">
-                Baca selengkapnya <Arrow />
-              </span>
-            </div>
-          </Link>
-        </article>
+        {leadNews && (
+          <article className="lead-news">
+            <Link
+              href={`/berita/${leadNews.slug || leadNews.id}`}
+              className="lead-news-link"
+              aria-label={`Baca selengkapnya: ${leadNews.title}`}
+            >
+              <div className="news-photo relative h-48 w-full">
+                <Image
+                  src={leadNews.image || "/img/pendidikan-jenjang.jpg"}
+                  alt={leadNews.title}
+                  fill
+                  sizes="440px"
+                  className="object-cover"
+                  unoptimized={leadNews.image?.startsWith("http")}
+                />
+                <span className="tag">{leadNews.category || "Pendidikan"}</span>
+              </div>
+              <div className="lead-news-content">
+                <time>{leadNews.date}</time>
+                <h4>{leadNews.title}</h4>
+                <p className="line-clamp-2 text-sm text-gray-600 mt-1">{leadNews.excerpt}</p>
+                <span className="lead-news-cta">
+                  Baca selengkapnya <Arrow />
+                </span>
+              </div>
+            </Link>
+          </article>
+        )}
+
         <div className="news-list">
-          {latestNews.map(({ id, slug, title, date, category }, index) => {
-            const targetSlug =
-              slug ||
-              (index === 0
-                ? "festival-budaya-daerah-2026"
-                : index === 1
-                  ? "sosialisasi-kurikulum-merdeka-guru"
-                  : "bantuan-sarana-sekolah-pelosok");
-            const thumbSrc = newsThumbnails[index % newsThumbnails.length];
+          {otherNews.map((item, index) => {
+            const thumbSrc = item.image || defaultThumbs[index % defaultThumbs.length];
 
             return (
-              <article key={id}>
+              <article key={item.id}>
                 <Link
-                  href={`/berita/${targetSlug}`}
+                  href={`/berita/${item.slug || item.id}`}
                   className="news-item-link"
-                  aria-label={`Baca: ${title}`}
+                  aria-label={`Baca: ${item.title}`}
                 >
-                  <div className={`thumb thumb-${index}`}>
+                  <div className={`thumb relative w-20 h-20 shrink-0 overflow-hidden rounded`}>
                     <Image
                       src={thumbSrc}
-                      alt=""
+                      alt={item.title}
                       fill
                       sizes="100px"
+                      className="object-cover"
+                      unoptimized={thumbSrc.startsWith("http")}
                     />
                   </div>
                   <div className="news-item-content">
                     <div className="news-item-meta">
-                      <span className="mini-tag">{category}</span>
-                      <time>{date}</time>
+                      <span className="mini-tag">{item.category}</span>
+                      <time>{item.date}</time>
                     </div>
-                    <h5>{title}</h5>
+                    <h5>{item.title}</h5>
                     <span className="news-item-cta" aria-hidden="true">
                       Baca berita <span>→</span>
                     </span>
@@ -101,6 +108,7 @@ export function NewsSection() {
           })}
         </div>
       </div>
+
       <div className="news-footer-action">
         <Link href="/berita" className="view-all-link">
           <span>Lihat semua berita &amp; warta dinas</span>

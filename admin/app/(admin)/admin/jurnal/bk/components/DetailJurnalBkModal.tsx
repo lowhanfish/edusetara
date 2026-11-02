@@ -17,7 +17,7 @@ export default function DetailJurnalBkModal({
     <Modal
       isOpen={isOpen && Boolean(record)}
       onClose={onClose}
-      title="Lembar Data Jurnal BK (Bimbingan Konseling)"
+      title="Lembar Data Jurnal Bimbingan Konseling (BK)"
       description="Sesuai dokumen spesifikasi Arsitektur Sistem EduSetara"
       maxWidth="lg"
       footer={
@@ -40,51 +40,74 @@ export default function DetailJurnalBkModal({
         <div className="space-y-4 text-xs text-[#2d2410]">
           <div className="p-4 rounded-2xl bg-white/60 border border-white/80 space-y-1">
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Satuan Pendidikan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tanggal Pelaksanaan Layanan BK</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).sekolah ?? "-")}
+              {String((record as any).tgl ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jenis Layanan BK</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nama Peserta Didik (Master Siswa)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).jenis_layanan ?? "-")}
+              {String((record as any).nm_siswa ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Bidang Bimbingan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tingkat / Kelas Siswa (Master Kelas)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).bidang_bimbingan ?? "-")}
+              {String((record as any).kelas_id ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nama Siswa / Kelompok Siswa</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Bidang Layanan BK (Master BK Jenis Layanan)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).sasaran_siswa ?? "-")}
+              {String((record as any).jns_layanan_id ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Uraian Kebutuhan / Masalah</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Format / Kegiatan Layanan (Master BK Kegiatan Layanan)</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).mdl_kegiatan_id ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Topik / Materi Layanan</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).materi_layanan ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Gejala / Masalah yang Dihadapi</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).permasalahan ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Layanan yang Diberikan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Hasil Konseling yang Dicapai</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).layanan_diberikan ?? "-")}
+              {String((record as any).hasil ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Evaluasi Capaian</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Rencana Tindak Lanjut Penanganan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).evaluasi ?? "-")}
+              {String((record as any).rnc_tindak_lanjut ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Rencana Tindak Lanjut</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Dokumen Lembar Komitmen / Bukti (PDF/Foto)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).tindak_lanjut ?? "-")}
+              {(record as any).file ? (
+                <a
+                  href={String((record as any).file)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-800 underline hover:text-amber-900 inline-flex items-center gap-1 font-mono text-[11px]"
+                >
+                  📄 Lihat / Unduh Berkas
+                </a>
+              ) : (
+                "-"
+              )}
             </span>
           </div>
           </div>

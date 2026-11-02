@@ -2,7 +2,7 @@
 
 import uuid
 
-from sqlalchemy import Column, Date, DateTime, ForeignKey, String, Text
+from sqlalchemy import JSON, Boolean, Column, Date, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -16,9 +16,9 @@ class MasterSiswa(Base):
 
     id = Column(String(50), primary_key=True, default=lambda: str(uuid.uuid4()))
     nama = Column(String(150), nullable=False)
-    nisn = Column(String(20), unique=True, nullable=False, index=True)
-    nik = Column(String(20), unique=True, nullable=False, index=True)
-    jns_kelamin = Column(String(20), nullable=False)
+    nisn = Column(String(20), unique=True, nullable=True, index=True)
+    nik = Column(String(20), unique=True, nullable=True, index=True)
+    jns_kelamin = Column(String(20), nullable=True)
     kelas_id = Column(
         String(50),
         ForeignKey("master_jurnal_kelas.id", ondelete="SET NULL"),
@@ -26,9 +26,11 @@ class MasterSiswa(Base):
         index=True,
     )
     tmp_lahir = Column(String(100), nullable=True)
-    tgl_lahir = Column(Date, nullable=False)
+    tgl_lahir = Column(Date, nullable=True)
     agama = Column(String(50), nullable=True)
-    alamat = Column(Text, nullable=False)
+    alamat = Column(Text, nullable=True)
+    is_active = Column(Boolean, nullable=True, default=True, server_default="1")
+    source_data = Column(JSON, nullable=True)
     nama_ayah = Column(String(150), nullable=True)
     nama_ibu = Column(String(150), nullable=True)
     nama_wali = Column(String(150), nullable=True)

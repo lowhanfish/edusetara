@@ -8,10 +8,15 @@ from app.global_schemas.operational.base_schema import (
 
 
 class KebudayaanItemBase(OperationalBase):
-    name: str
+    nama: str | None = None
+    name: str | None = None
+    kategori: str | None = None
     type: str | None = None
+    lokasi: str | None = None
     location: str | None = None
+    deskripsi: str | None = None
     description: str | None = None
+    foto: str | None = None
     status: str | None = "Terverifikasi"
 
 
@@ -22,18 +27,28 @@ class KebudayaanItemCreate(KebudayaanItemBase):
 class KebudayaanItemUpdate(BaseModel):
     nip: str | None = None
     unit_kerja: str | None = None
+    nama: str | None = None
     name: str | None = None
+    kategori: str | None = None
     type: str | None = None
+    lokasi: str | None = None
     location: str | None = None
+    deskripsi: str | None = None
     description: str | None = None
+    foto: str | None = None
     status: str | None = None
 
 
 class KebudayaanItemResponse(OperationalResponse):
-    name: str
+    nama: str | None = None
+    name: str | None = None
+    kategori: str | None = None
     type: str | None = None
+    lokasi: str | None = None
     location: str | None = None
+    deskripsi: str | None = None
     description: str | None = None
+    foto: str | None = None
     status: str | None = None
 
 

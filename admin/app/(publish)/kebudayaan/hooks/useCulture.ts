@@ -12,10 +12,15 @@ export function usePublicCulture() {
     queryFn: async () => {
       try {
         const res = await fetchData<{ total: number; data: CultureItem[] }>(
-          `${url}/api/v1/admin/kebudayaan/read?limit=50`
+          `${url}/api/v1/publish/kebudayaan?limit=50`
         );
         if (res && Array.isArray(res.data)) {
-          return res.data;
+          return res.data.map((item) => ({
+            ...item,
+            foto: item.foto?.startsWith("/uploads")
+              ? `${url}${item.foto}`
+              : item.foto || "/img/kebudayaan-sanggar.jpg",
+          }));
         }
       } catch (e) {
         console.warn("[usePublicCulture] Error:", e);

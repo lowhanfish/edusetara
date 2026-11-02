@@ -46,7 +46,7 @@ export default function DetailVerifikasiRekonsiliasiBospModal({
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tahap BOSP</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Semester / Tahap</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).tahap ?? "-")}
             </span>
@@ -58,19 +58,19 @@ export default function DetailVerifikasiRekonsiliasiBospModal({
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nominal Disetujui (Rp)</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nominal Dana Disetujui (Rp)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).nominal_disetujui ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Status Rekonsiliasi</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Status Verifikasi Tim Dinas</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).status_verifikasi ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Catatan Tim Verifikasi BOSP</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Catatan Hasil Koreksi Verifikator</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).catatan_verifikator ?? "-")}
             </span>

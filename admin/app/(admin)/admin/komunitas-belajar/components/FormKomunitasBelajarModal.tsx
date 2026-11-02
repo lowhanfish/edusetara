@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+
 
 interface FormKomunitasBelajarModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export default function FormKomunitasBelajarModal({
   onSubmit,
   isLoading = false,
 }: FormKomunitasBelajarModalProps) {
+
+
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +33,7 @@ export default function FormKomunitasBelajarModal({
           ? "+ Tambah Komunitas Belajar"
           : "✎ Edit Komunitas Belajar"
       }
-      description="Pendataan Komunitas Belajar (Kombel) dalam sekolah maupun antarsekolah di PMM."
+      description="Pengelolaan aktivitas kelompok belajar guru dan tenaga kependidikan intra dan antar satuan pendidikan."
       maxWidth="lg"
       footer={
         <>
@@ -54,100 +57,104 @@ export default function FormKomunitasBelajarModal({
           </label>
           <Input
             required
-            value={(formData as any).nama_kombel || ""}
+            value={(formData as any).nama || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                nama_kombel: e.target.value,
+                nama: e.target.value,
               })
             }
-            placeholder="Contoh: Kombel Berbagi Praktik Baik Konsel"
+            placeholder="Contoh: Kombel Berbagi Praktik Baik"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Ketua / Penggerak Kombel <span className="text-rose-500">*</span>
+            Siklus / Jenis Kegiatan <span className="text-rose-500">*</span>
+          </label>
+          <Select
+            required
+            value={(formData as any).jns_kegiatan ?? ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                jns_kegiatan: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: "-- Pilih siklus kegiatan --" },
+              ...[{"value":"0","label":"Siklus Refleksi Awal"},{"value":"1","label":"Siklus Perencanaan"},{"value":"2","label":"Siklus Implementasi"},{"value":"3","label":"Siklus Evaluasi"}]
+            ]}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Tanggal Pelaksanaan <span className="text-rose-500">*</span>
           </label>
           <Input
+            type="date"
             required
-            value={(formData as any).ketua || ""}
+            value={(formData as any).tgl_kegiatan || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                ketua: e.target.value,
+                tgl_kegiatan: e.target.value,
               })
             }
-            placeholder="Contoh: Drs. Wahyudin, M.Pd"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Jenjang / Lingkup
+            Nama Guru / Penanggung Jawab
           </label>
           <Input
             
-            value={(formData as any).jenjang || ""}
+            value={(formData as any).nama_id || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                jenjang: e.target.value,
+                nama_id: e.target.value,
               })
             }
-            placeholder="Contoh: SD / SMP / Antar Sekolah"
+            placeholder="Nama guru penggerak / penanggung jawab"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Jumlah Anggota Guru <span className="text-rose-500">*</span>
+            Jabatan dalam Kombel
           </label>
-          <Input
-            type="number"
-            required
-            value={(formData as any).jumlah_anggota ?? ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                jumlah_anggota: e.target.value === "" ? null : Number(e.target.value),
-              })
-            }
-            placeholder="Contoh: 35"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Fokus & Kegiatan Utama
-          </label>
-          <Textarea
+          <Select
             
-            rows={3}
-            value={(formData as any).kegiatan_utama || ""}
+            value={(formData as any).jabatan ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                kegiatan_utama: e.target.value,
+                jabatan: e.target.value,
               })
             }
-            placeholder="Uraian topik diskusi dan praktik baik..."
+            options={[
+              { value: "", label: "-- Pilih jabatan --" },
+              ...[{"value":"Ketua","label":"Ketua"},{"value":"Wakil","label":"Wakil"},{"value":"Sekretaris","label":"Sekretaris"},{"value":"Koordinator","label":"Koordinator"},{"value":"Anggota","label":"Anggota"}]
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Berkas SK Komunitas Belajar (PDF)
+            Dokumen Berita Acara / SK Kombel (PDF)
           </label>
           <FileInput
-            value={(formData as any).file_sk || ""}
+            value={(formData as any).file || ""}
             onChange={(fileName) =>
               setFormData({
                 ...formData,
-                file_sk: fileName,
+                file: fileName,
               })
             }
-            helperText="Unggah SK pengesahan kombel"
+            helperText="Unggah dokumen pendukung"
           />
         </div>
       </form>

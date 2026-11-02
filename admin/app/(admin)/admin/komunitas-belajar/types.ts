@@ -1,14 +1,16 @@
 export interface CreateInterface {
-  nama_kombel: string | null;
-  ketua: string | null;
-  jenjang?: string | null;
-  jumlah_anggota: number | null;
-  kegiatan_utama?: string | null;
-  file_sk?: string | null;
+  nama: string | null;
+  jns_kegiatan: string | null;
+  tgl_kegiatan: string | null;
+  nama_id?: string | null;
+  jabatan?: string | null;
+  file?: string | null;
 }
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  unit_kerja?: string | null;
+  nip?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;

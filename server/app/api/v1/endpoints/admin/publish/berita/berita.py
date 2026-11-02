@@ -3,7 +3,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,6 +11,7 @@ from app.api.deps import get_current_user_optional, get_db
 from app.models.auth.user import User
 from app.models.operational.berita import Berita
 from app.services.crud_service import CRUDBase
+from app.services.upload_service import FileUploadService
 
 from .schema import (
     BeritaCreate,
@@ -92,11 +93,24 @@ async def get_berita(
 @router.post("", response_model=BeritaResponse, status_code=status.HTTP_201_CREATED)
 @router.post("/create", response_model=BeritaResponse, status_code=status.HTTP_201_CREATED)
 async def create_berita(
-    payload: BeritaCreate,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     current_user: User | None = Depends(get_current_user_optional),
 ):
-    create_data = payload.model_dump(exclude_unset=True)
+    content_type = request.headers.get("content-type", "")
+    if "multipart/form-data" in content_type:
+        form = await request.form()
+        data = dict(form)
+        file = form.get("foto") or form.get("file")
+        if file and hasattr(file, "filename") and file.filename:
+            service = FileUploadService(module="berita")
+            uploaded = await service.save_file(file)
+            data["foto"] = uploaded["file_url"]
+        create_data = BeritaCreate.model_validate(data).model_dump(exclude_unset=True)
+    else:
+        body = await request.json()
+        create_data = BeritaCreate.model_validate(body).model_dump(exclude_unset=True)
+
     if not create_data.get("id"):
         create_data["id"] = str(uuid.uuid4())
     create_data["created_by"] = getattr(current_user, "username", "admin")
@@ -107,10 +121,24 @@ async def create_berita(
 @router.put("/update/{id}", response_model=BeritaResponse)
 async def update_berita(
     id: str,
-    payload: BeritaUpdate,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    updated = await crud_berita.update(db, id=id, obj_in=payload.model_dump(exclude_unset=True))
+    content_type = request.headers.get("content-type", "")
+    if "multipart/form-data" in content_type:
+        form = await request.form()
+        data = dict(form)
+        file = form.get("foto") or form.get("file")
+        if file and hasattr(file, "filename") and file.filename:
+            service = FileUploadService(module="berita")
+            uploaded = await service.save_file(file)
+            data["foto"] = uploaded["file_url"]
+        update_data = BeritaUpdate.model_validate(data).model_dump(exclude_unset=True)
+    else:
+        body = await request.json()
+        update_data = BeritaUpdate.model_validate(body).model_dump(exclude_unset=True)
+
+    updated = await crud_berita.update(db, id=id, obj_in=update_data)
     if not updated:
         raise HTTPException(status_code=404, detail="Data tidak ditemukan")
     return updated
@@ -122,7 +150,10 @@ async def delete_berita(
     id: str,
     db: AsyncSession = Depends(get_db),
 ):
-    success = await crud_berita.remove(db, id=id)
-    if not success:
+    item = await crud_berita.get(db, id=id)
+    if not item:
         raise HTTPException(status_code=404, detail="Gagal menghapus data")
+    if getattr(item, "foto", None):
+        FileUploadService.delete_file(item.foto)
+    await crud_berita.remove(db, id=id)
     return {"message": "Berhasil menghapus data", "id": id, "data": {"id": id}, "success": True}

@@ -1,17 +1,21 @@
 export interface CreateInterface {
-  sekolah: string | null;
+  tgl: string | null;
   tema: string | null;
   materi_pokok: string | null;
-  pertemuan_ke: number | null;
+  pertemuan_ke?: number | null;
   model_pembelajaran?: string | null;
   metode_pembelajaran?: string | null;
-  teknik_penilaian?: string | null;
-  kendala?: string | null;
-  solusi?: string | null;
+  kegiatan?: string | null;
+  penilaian?: string | null;
+  siswa_hadir?: number | null;
+  persentase?: number | null;
+  file?: string | null;
 }
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  unit_kerja?: string | null;
+  nip?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;

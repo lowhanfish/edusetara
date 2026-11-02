@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+
 
 interface FormRenstraModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export default function FormRenstraModal({
   onSubmit,
   isLoading = false,
 }: FormRenstraModalProps) {
+
+
   return (
     <Modal
       isOpen={isOpen}

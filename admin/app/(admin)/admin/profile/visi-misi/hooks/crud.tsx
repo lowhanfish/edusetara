@@ -89,14 +89,14 @@ export const useCreateMaster = () => {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
-    mutationFn: (body: Partial<ResponseInterface>) =>
-      fetchData(`${url}/api/v1/admin/profile/visi-misi/create`, {
+    mutationFn: (body: any) => {
+      const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+      return fetchData(`${url}/api/v1/admin/profile/visi-misi/create`, {
         method: "POST",
-        body: JSON.stringify(body),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+        body: isFormData ? body : JSON.stringify(body),
+        headers: isFormData ? undefined : { "Content-Type": "application/json" },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["profile-visi-misi"],
@@ -116,14 +116,14 @@ export const useUpdateMaster = () => {
   const queryClient = useQueryClient();
 
   const updateMutation = useMutation({
-    mutationFn: ({ body, id }: { body: Partial<ResponseInterface>; id: string }) =>
-      fetchData(`${url}/api/v1/admin/profile/visi-misi/update/${id}`, {
+    mutationFn: ({ body, id }: { body: any; id: string }) => {
+      const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+      return fetchData(`${url}/api/v1/admin/profile/visi-misi/update/${id}`, {
         method: "PUT",
-        body: JSON.stringify(body),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+        body: isFormData ? body : JSON.stringify(body),
+        headers: isFormData ? undefined : { "Content-Type": "application/json" },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile-visi-misi"] });
       swallAlert("sukses diubah", "success");
@@ -135,3 +135,5 @@ export const useUpdateMaster = () => {
 
   return updateMutation;
 };
+
+

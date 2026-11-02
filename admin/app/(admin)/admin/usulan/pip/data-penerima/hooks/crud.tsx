@@ -14,7 +14,7 @@ export const useResponseOption = (search: string = "") => {
       fetchData<ResponseInterface[]>(
         `${url}/api/v1/admin/usulan/pip/data-penerima/option?search=${encodeURIComponent(search)}`
       ),
-    queryKey: ["usulan-pip-data-penerima-option", search],
+    queryKey: ["usulan-pip-penerima-option", search],
   });
 
   let result: ListOptionSchema = [];
@@ -54,7 +54,7 @@ export const useResponseListMaster = (
       fetchData<ResponseListInterface>(
         `${url}/api/v1/admin/usulan/pip/data-penerima/read?skip=${(skip - 1) * limit}&limit=${limit}&search=${encodeURIComponent(search)}`
       ),
-    queryKey: ["usulan-pip-data-penerima", skip, limit, search],
+    queryKey: ["usulan-pip-penerima", skip, limit, search],
   });
   return { List, isLoading, isError, error, refetch };
 };
@@ -69,7 +69,7 @@ export const useDeleteMaster = () => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["usulan-pip-data-penerima"],
+        queryKey: ["usulan-pip-penerima"],
       });
       swallAlert("sukses dihapus", "success");
     },
@@ -89,17 +89,17 @@ export const useCreateMaster = () => {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
-    mutationFn: (body: Partial<ResponseInterface>) =>
-      fetchData(`${url}/api/v1/admin/usulan/pip/data-penerima/create`, {
+    mutationFn: (body: any) => {
+      const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+      return fetchData(`${url}/api/v1/admin/usulan/pip/data-penerima/create`, {
         method: "POST",
-        body: JSON.stringify(body),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+        body: isFormData ? body : JSON.stringify(body),
+        headers: isFormData ? undefined : { "Content-Type": "application/json" },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["usulan-pip-data-penerima"],
+        queryKey: ["usulan-pip-penerima"],
       });
       swallAlert("sukses ditambahkan", "success");
     },
@@ -116,16 +116,16 @@ export const useUpdateMaster = () => {
   const queryClient = useQueryClient();
 
   const updateMutation = useMutation({
-    mutationFn: ({ body, id }: { body: Partial<ResponseInterface>; id: string }) =>
-      fetchData(`${url}/api/v1/admin/usulan/pip/data-penerima/update/${id}`, {
+    mutationFn: ({ body, id }: { body: any; id: string }) => {
+      const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+      return fetchData(`${url}/api/v1/admin/usulan/pip/data-penerima/update/${id}`, {
         method: "PUT",
-        body: JSON.stringify(body),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+        body: isFormData ? body : JSON.stringify(body),
+        headers: isFormData ? undefined : { "Content-Type": "application/json" },
+      });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["usulan-pip-data-penerima"] });
+      queryClient.invalidateQueries({ queryKey: ["usulan-pip-penerima"] });
       swallAlert("sukses diubah", "success");
     },
     onError: (err: any) => {
@@ -134,4 +134,76 @@ export const useUpdateMaster = () => {
   });
 
   return updateMutation;
+};
+
+export const useDataPendukungOption = (search: string = "") => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const { data, isLoading, isError, error } = useQuery({
+    queryFn: () =>
+      fetchData<any[]>(
+        `${url}/api/v1/admin/usulan/pip/data-pendukung/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+      ),
+    queryKey: ["usulan-pip-pendukung-option", search],
+  });
+
+  let result: ListOptionSchema = [];
+  if (data && Array.isArray(data)) {
+    result = data.map((item: any) => ({
+      id: String(item.id || item.value || ""),
+      value: String(
+        item.title ||
+        item.judul ||
+        item.nama ||
+        item.name ||
+        item.uraian ||
+        item.sekolah ||
+        item.nama_kombel ||
+        item.id ||
+        ""
+      ),
+    }));
+  }
+
+  return {
+    options: result,
+    isLoading,
+    isError,
+    error,
+  };
+};
+
+export const useSiswaOption = (search: string = "") => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const { data, isLoading, isError, error } = useQuery({
+    queryFn: () =>
+      fetchData<any[]>(
+        `${url}/api/v1/admin/master/siswa/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+      ),
+    queryKey: ["master-siswa-option", search],
+  });
+
+  let result: ListOptionSchema = [];
+  if (data && Array.isArray(data)) {
+    result = data.map((item: any) => ({
+      id: String(item.id || item.value || ""),
+      value: String(
+        item.title ||
+        item.judul ||
+        item.nama ||
+        item.name ||
+        item.uraian ||
+        item.sekolah ||
+        item.nama_kombel ||
+        item.id ||
+        ""
+      ),
+    }));
+  }
+
+  return {
+    options: result,
+    isLoading,
+    isError,
+    error,
+  };
 };

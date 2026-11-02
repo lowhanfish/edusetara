@@ -32,8 +32,10 @@ async def option(
     if search:
         query = query.where(
             or_(
+                UsulanRekonsiliasiBosp.sekolah.ilike(f"%{search}%"),
                 UsulanRekonsiliasiBosp.unit_kerja.ilike(f"%{search}%"),
                 UsulanRekonsiliasiBosp.tahun.ilike(f"%{search}%"),
+                UsulanRekonsiliasiBosp.status.ilike(f"%{search}%"),
             )
         )
     query = query.limit(50)
@@ -54,8 +56,10 @@ async def read_rekonsiliasi_bosp(
     if search:
         query = query.where(
             or_(
+                UsulanRekonsiliasiBosp.sekolah.ilike(f"%{search}%"),
                 UsulanRekonsiliasiBosp.unit_kerja.ilike(f"%{search}%"),
                 UsulanRekonsiliasiBosp.tahun.ilike(f"%{search}%"),
+                UsulanRekonsiliasiBosp.status.ilike(f"%{search}%"),
             )
         )
 
@@ -96,6 +100,10 @@ async def create_rekonsiliasi_bosp(
     create_data = payload.model_dump(exclude_unset=True)
     if not create_data.get("id"):
         create_data["id"] = str(uuid.uuid4())
+    if create_data.get("sekolah") and not create_data.get("unit_kerja"):
+        create_data["unit_kerja"] = create_data["sekolah"]
+    if create_data.get("tahap") and not create_data.get("semester_id"):
+        create_data["semester_id"] = create_data["tahap"]
     create_data["created_by"] = getattr(current_user, "username", "admin")
     return await crud_rekonsiliasi_bosp.create(db, obj_in=create_data)
 
@@ -107,7 +115,12 @@ async def update_rekonsiliasi_bosp(
     payload: RekonsiliasiBospUpdate,
     db: AsyncSession = Depends(get_db),
 ):
-    updated = await crud_rekonsiliasi_bosp.update(db, id=id, obj_in=payload.model_dump(exclude_unset=True))
+    update_data = payload.model_dump(exclude_unset=True)
+    if update_data.get("sekolah") and not update_data.get("unit_kerja"):
+        update_data["unit_kerja"] = update_data["sekolah"]
+    if update_data.get("tahap") and not update_data.get("semester_id"):
+        update_data["semester_id"] = update_data["tahap"]
+    updated = await crud_rekonsiliasi_bosp.update(db, id=id, obj_in=update_data)
     if not updated:
         raise HTTPException(status_code=404, detail="Data tidak ditemukan")
     return updated

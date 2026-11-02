@@ -1,4 +1,4 @@
-"""Pydantic schemas for Pendidikan Program."""
+"""Pydantic schemas for Pendidikan Program & Artikel."""
 
 from pydantic import BaseModel
 from app.global_schemas.operational.base_schema import (
@@ -8,12 +8,17 @@ from app.global_schemas.operational.base_schema import (
 
 
 class PendidikanProgramBase(OperationalBase):
-    name: str
+    judul: str | None = None
+    name: str | None = None
+    kategori: str | None = None
     category: str | None = None
+    penulis: str | None = None
+    konten: str | None = None
+    file: str | None = None
     scope: str | None = None
     total_units: str | None = None
     curriculum: str | None = None
-    status: str | None = "Aktif"
+    status: str | None = "Terbit"
 
 
 class PendidikanProgramCreate(PendidikanProgramBase):
@@ -23,8 +28,13 @@ class PendidikanProgramCreate(PendidikanProgramBase):
 class PendidikanProgramUpdate(BaseModel):
     nip: str | None = None
     unit_kerja: str | None = None
+    judul: str | None = None
     name: str | None = None
+    kategori: str | None = None
     category: str | None = None
+    penulis: str | None = None
+    konten: str | None = None
+    file: str | None = None
     scope: str | None = None
     total_units: str | None = None
     curriculum: str | None = None
@@ -32,8 +42,13 @@ class PendidikanProgramUpdate(BaseModel):
 
 
 class PendidikanProgramResponse(OperationalResponse):
-    name: str
+    judul: str | None = None
+    name: str | None = None
+    kategori: str | None = None
     category: str | None = None
+    penulis: str | None = None
+    konten: str | None = None
+    file: str | None = None
     scope: str | None = None
     total_units: str | None = None
     curriculum: str | None = None

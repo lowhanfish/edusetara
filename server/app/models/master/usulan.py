@@ -2,13 +2,26 @@
 
 import uuid
 
-from sqlalchemy import Column, DateTime, String
+from sqlalchemy import Column, DateTime, String, Text
+from sqlalchemy.orm import declared_attr, synonym
 from sqlalchemy.sql import func
 
 from app.db.base import Base
 
 
-class MasterUsulanTriwulan(Base):
+class UsulanDescriptionMixin:
+    keterangan = Column(Text, nullable=True)
+
+    @declared_attr
+    def title(cls):
+        return synonym("uraian")
+
+    @declared_attr
+    def desc(cls):
+        return synonym("keterangan")
+
+
+class MasterUsulanTriwulan(Base, UsulanDescriptionMixin):
     """Master Triwulan (contoh: 'Triwulan I (Januari - Maret)')."""
 
     __tablename__ = "master_usulan_triwulan"
@@ -20,7 +33,7 @@ class MasterUsulanTriwulan(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
 
-class MasterUsulanJenisPenerima(Base):
+class MasterUsulanJenisPenerima(Base, UsulanDescriptionMixin):
     """Master Jenis Penerima Tunjangan (contoh: 'Tunjangan Profesi Guru (TPG) Sertifikasi')."""
 
     __tablename__ = "master_usulan_jenis_penerima"
@@ -32,7 +45,7 @@ class MasterUsulanJenisPenerima(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
 
-class MasterUsulanKelasPenerima(Base):
+class MasterUsulanKelasPenerima(Base, UsulanDescriptionMixin):
     """Master Kelas Penerima (contoh: 'Golongan IV / Pembina (ASN Senior)')."""
 
     __tablename__ = "master_usulan_kelas_penerima"

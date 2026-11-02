@@ -40,51 +40,51 @@ export default function DetailSarprasBangunanModal({
         <div className="space-y-4 text-xs text-[#2d2410]">
           <div className="p-4 rounded-2xl bg-white/60 border border-white/80 space-y-1">
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nama Satuan Pendidikan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nama Unit Gedung / Bangunan Sekolah</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).sekolah ?? "-")}
+              {String((record as any).nama ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nama Gedung / Bangunan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Luas Tapak Bangunan (m²)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).nama_bangunan ?? "-")}
-            </span>
-          </div>
-          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Panjang (m)</span>
-            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).panjang ?? "-")}
-            </span>
-          </div>
-          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Lebar (m)</span>
-            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).lebar ?? "-")}
-            </span>
-          </div>
-          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Luas Tapak (m²)</span>
-            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).luas_tapak ?? "-")}
-            </span>
-          </div>
-          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jumlah Lantai</span>
-            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).jumlah_lantai ?? "-")}
+              {String((record as any).luas ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Status Kepemilikan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).kepemilikan ?? "-")}
+              {String((record as any).kepemilikan_id ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tahun Bangunan</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).tahun ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Persentase Kerusakan Bangunan (%)</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).persentase ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Kondisi Bangunan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).kondisi ?? "-")}
+              {String((record as any).kondisi_id ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jenis Bantuan</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).jns_bantuan_id ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Sumber Dana</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).sumber_id ?? "-")}
             </span>
           </div>
           </div>

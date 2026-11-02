@@ -17,7 +17,7 @@ export default function DetailRombelPaudModal({
     <Modal
       isOpen={isOpen && Boolean(record)}
       onClose={onClose}
-      title="Lembar Data Jenjang PAUD"
+      title="Lembar Data Rombel Jenjang PAUD"
       description="Sesuai dokumen spesifikasi Arsitektur Sistem EduSetara"
       maxWidth="lg"
       footer={
@@ -40,39 +40,39 @@ export default function DetailRombelPaudModal({
         <div className="space-y-4 text-xs text-[#2d2410]">
           <div className="p-4 rounded-2xl bg-white/60 border border-white/80 space-y-1">
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Satuan PAUD / TK</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nama Rombel PAUD</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).sekolah ?? "-")}
+              {String((record as any).nama ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nama Rombongan Belajar</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tingkat Pendidikan / Jenjang</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).nama_rombel ?? "-")}
+              {String((record as any).tgkt_pendidikan ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tingkat / Usia</span>
-            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).tingkat ?? "-")}
-            </span>
-          </div>
-          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Kurikulum Operasional</span>
-            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).kurikulum ?? "-")}
-            </span>
-          </div>
-          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Guru Pendamping / Wali</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Guru Pendamping / Wali Kelas</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).wali_kelas ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jumlah Peserta Didik</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jenis Rombel</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).jumlah_siswa ?? "-")}
+              {String((record as any).jns_rombel ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Ruang Kelas (Sarpras Ruang)</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).ruang_kelas ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Kurikulum</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).kurikulum ?? "-")}
             </span>
           </div>
           </div>

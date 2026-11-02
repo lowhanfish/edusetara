@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+
 
 interface FormVerifikasiTunjanganGuruModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export default function FormVerifikasiTunjanganGuruModal({
   onSubmit,
   isLoading = false,
 }: FormVerifikasiTunjanganGuruModalProps) {
+
+
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +33,7 @@ export default function FormVerifikasiTunjanganGuruModal({
           ? "+ Tambah Verifikasi Tunjangan Guru"
           : "✎ Edit Verifikasi Tunjangan Guru"
       }
-      description="Pemeriksaan berkas kelayakan jam mengajar, keaktifan dapodik, dan SKTP guru."
+      description="Pemeriksaan dan validasi berkas pengajuan tunjangan guru dari satuan pendidikan."
       maxWidth="lg"
       footer={
         <>
@@ -50,10 +53,10 @@ export default function FormVerifikasiTunjanganGuruModal({
       <form id="form-verifikasi-tunjangan-guru" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nama Lengkap Guru <span className="text-rose-500">*</span>
+            Nama Guru Pengusul
           </label>
           <Input
-            required
+            
             value={(formData as any).nama_guru || ""}
             onChange={(e) =>
               setFormData({
@@ -61,16 +64,16 @@ export default function FormVerifikasiTunjanganGuruModal({
                 nama_guru: e.target.value,
               })
             }
-            placeholder="Contoh: Sunardi, S.Pd"
+            placeholder="Nama guru"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            NUPTK <span className="text-rose-500">*</span>
+            NUPTK
           </label>
           <Input
-            required
+            
             value={(formData as any).nuptk || ""}
             onChange={(e) =>
               setFormData({
@@ -78,16 +81,16 @@ export default function FormVerifikasiTunjanganGuruModal({
                 nuptk: e.target.value,
               })
             }
-            placeholder="Contoh: 8765432109876543"
+            placeholder="Nomor NUPTK"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Satuan Pendidikan <span className="text-rose-500">*</span>
+            Satuan Pendidikan
           </label>
           <Input
-            required
+            
             value={(formData as any).sekolah || ""}
             onChange={(e) =>
               setFormData({
@@ -95,16 +98,16 @@ export default function FormVerifikasiTunjanganGuruModal({
                 sekolah: e.target.value,
               })
             }
-            placeholder="Contoh: SMPN 3 Ranomeeto"
+            placeholder="Sekolah"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Jenis Tunjangan <span className="text-rose-500">*</span>
+            Jenis Tunjangan
           </label>
           <Input
-            required
+            
             value={(formData as any).jenis_tunjangan || ""}
             onChange={(e) =>
               setFormData({
@@ -112,30 +115,33 @@ export default function FormVerifikasiTunjanganGuruModal({
                 jenis_tunjangan: e.target.value,
               })
             }
-            placeholder="Contoh: TPG / Tunjangan Daerah Khusus"
+            placeholder="TPG / Tamsil / TKG"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Status Verifikasi <span className="text-rose-500">*</span>
+            Status Verifikasi Tim Dinas <span className="text-rose-500">*</span>
           </label>
-          <Input
+          <Select
             required
-            value={(formData as any).status_verifikasi || ""}
+            value={(formData as any).status_verifikasi ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
                 status_verifikasi: e.target.value,
               })
             }
-            placeholder="Contoh: Disetujui / Perlu Perbaikan Berkas / Ditolak"
+            options={[
+              { value: "", label: "-- Pilih status verifikasi --" },
+              ...[{"value":"Menunggu","label":"Menunggu Verifikasi"},{"value":"Disetujui","label":"Disetujui / Terbit SKTP"},{"value":"Perbaikan","label":"Perlu Perbaikan Berkas"},{"value":"Ditolak","label":"Ditolak"}]
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Catatan Verifikator
+            Catatan Verifikator Dinas
           </label>
           <Textarea
             
@@ -147,7 +153,7 @@ export default function FormVerifikasiTunjanganGuruModal({
                 catatan: e.target.value,
               })
             }
-            placeholder="Catatan hasil verifikasi berkas..."
+            placeholder="Catatan hasil verifikasi..."
           />
         </div>
       </form>

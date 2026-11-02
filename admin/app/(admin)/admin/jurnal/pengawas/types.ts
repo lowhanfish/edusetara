@@ -1,14 +1,18 @@
 export interface CreateInterface {
-  sekolah_binaan: string | null;
-  fokus_supervisi: string | null;
-  pendekatan?: string | null;
-  temuan: string | null;
-  rekomendasi: string | null;
-  status: string | null;
+  tgl: string | null;
+  kepsek?: string | null;
+  pendampingan_id?: string | null;
+  tugas_id?: string | null;
+  temuan_akademik?: string | null;
+  temuan_manajerial?: string | null;
+  tindak_lanjut?: string | null;
+  file?: string | null;
 }
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  unit_kerja?: string | null;
+  nip?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;

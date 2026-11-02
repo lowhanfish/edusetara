@@ -5,21 +5,50 @@ import { notFound } from "next/navigation";
 
 import { NewsHero, NewsHelp } from "../components/news-shell";
 import { ShareButton } from "@/app/(publish)/_components";
-import { getNewsBySlug, getRelatedNews, newsArticles } from "../_data/news-data";
+import type { BackendNewsItem, NewsArticle } from "../types";
 
 interface PageProps {
   params: Promise<{ slug: string }> | { slug: string };
 }
 
-export async function generateStaticParams() {
-  return newsArticles.map((article) => ({
-    slug: article.slug,
-  }));
+async function getArticle(slug: string): Promise<NewsArticle | undefined> {
+  const backendUrl = process.env.NEXT_PUBLIC_APP_URL || "http://127.0.0.1:8000";
+  try {
+    const res = await fetch(`${backendUrl}/api/v1/publish/berita/slug/${slug}`, {
+      cache: "no-store",
+    });
+    if (res.ok) {
+      const item = await res.json() as BackendNewsItem;
+      return {
+        id: item.id,
+        slug: item.slug || item.id,
+        title: item.judul || "Warta Resmi Dikbud",
+        excerpt: item.deskripsi || item.judul || "",
+        content: {
+          lead: item.deskripsi || item.judul || "",
+          paragraphs: item.isi ? [item.isi] : ["Belum ada isi naskah..."],
+        },
+        category: (item.kategori as NewsArticle["category"]) || "Pendidikan",
+        date: item.created_at ? String(item.created_at).slice(0, 10) : "Terbaru",
+        publishedAt: item.created_at ? String(item.created_at).slice(0, 10) : "2026-11-01",
+        author: item.author || "Tim Humas Dikbud",
+        authorRole: "Redaksi Warta Konsel",
+        readTime: "3 menit baca",
+        image: item.foto?.startsWith("/uploads") ? `${backendUrl}${item.foto}` : (item.foto || "/img/pendidikan-jenjang.jpg"),
+        imageCaption: item.judul || "Dokumentasi kegiatan pendidikan",
+        tags: ["Pendidikan", "Konawe Selatan"],
+        featured: Boolean(item.featured),
+      };
+    }
+  } catch (e) {
+    console.warn("[NewsDetailPage] Backend fetch error:", e);
+  }
+  return undefined;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const resolvedParams = await Promise.resolve(params);
-  const article = getNewsBySlug(resolvedParams.slug);
+  const article = await getArticle(resolvedParams.slug);
 
   if (!article) {
     return {
@@ -50,13 +79,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function NewsDetailPage({ params }: PageProps) {
   const resolvedParams = await Promise.resolve(params);
-  const article = getNewsBySlug(resolvedParams.slug);
+  const article = await getArticle(resolvedParams.slug);
 
   if (!article) {
     notFound();
   }
 
-  const relatedArticles = getRelatedNews(article.slug, 3);
+  const backendUrl = process.env.NEXT_PUBLIC_APP_URL || "http://127.0.0.1:8000";
+  let relatedArticles: NewsArticle[] = [];
+  try {
+    const response = await fetch(`${backendUrl}/api/v1/publish/berita?limit=4`, { cache: "no-store" });
+    if (response.ok) {
+      const result = await response.json() as { data: BackendNewsItem[] };
+      const related = await Promise.all(result.data.filter((item) => item.id !== article.id).slice(0, 3).map((item) => getArticle(item.slug || item.id)));
+      relatedArticles = related.filter((item): item is NewsArticle => Boolean(item));
+    }
+  } catch { /* Related news is optional when the service is unavailable. */ }
+
 
   return (
     <div className="news-detail-page">
@@ -126,9 +165,13 @@ export default async function NewsDetailPage({ params }: PageProps) {
 
             {/* Body Paragraphs */}
             <div className="article-body-text">
-              {article.content.paragraphs.map((p, idx) => (
-                <p key={idx}>{p}</p>
-              ))}
+              {article.content.paragraphs.map((p, idx) =>
+                p && p.trim().startsWith("<") ? (
+                  <div key={idx} dangerouslySetInnerHTML={{ __html: p }} />
+                ) : (
+                  <p key={idx}>{p}</p>
+                )
+              )}
             </div>
 
             {/* Quote Box (if available) */}

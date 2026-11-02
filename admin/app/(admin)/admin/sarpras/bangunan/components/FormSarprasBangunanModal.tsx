@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useKepemilikanOption, useKondisiOption, useJenisBantuanOption, useSumberDanaOption } from "../hooks/crud";
 
 interface FormSarprasBangunanModalProps {
   isOpen: boolean;
@@ -21,6 +22,11 @@ export default function FormSarprasBangunanModal({
   onSubmit,
   isLoading = false,
 }: FormSarprasBangunanModalProps) {
+  const { options: kepemilikanOptions, isLoading: kepemilikanLoading } = useKepemilikanOption();
+  const { options: kondisiOptions, isLoading: kondisiLoading } = useKondisiOption();
+  const { options: jenisbantuanOptions, isLoading: jenisbantuanLoading } = useJenisBantuanOption();
+  const { options: sumberdanaOptions, isLoading: sumberdanaLoading } = useSumberDanaOption();
+
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +36,7 @@ export default function FormSarprasBangunanModal({
           ? "+ Tambah Bangunan Sekolah"
           : "✎ Edit Bangunan Sekolah"
       }
-      description="Pendataan gedung, konstruksi fisik, dan kelaikan bangunan satuan pendidikan."
+      description="Pendataan fisik gedung, luasan tapak, kelaikan bangunan, dan status hak kepemilikan."
       maxWidth="lg"
       footer={
         <>
@@ -50,107 +56,35 @@ export default function FormSarprasBangunanModal({
       <form id="form-sarpras-bangunan" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nama Satuan Pendidikan <span className="text-rose-500">*</span>
+            Nama Unit Gedung / Bangunan Sekolah <span className="text-rose-500">*</span>
           </label>
           <Input
             required
-            value={(formData as any).sekolah || ""}
+            value={(formData as any).nama || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                sekolah: e.target.value,
+                nama: e.target.value,
               })
             }
-            placeholder="Contoh: SMPN 2 Konsel"
+            placeholder="Contoh: Gedung Kelas 1 / RKB UNIT 1"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nama Gedung / Bangunan <span className="text-rose-500">*</span>
+            Luas Tapak Bangunan (m²)
           </label>
           <Input
-            required
-            value={(formData as any).nama_bangunan || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                nama_bangunan: e.target.value,
-              })
-            }
-            placeholder="Contoh: Gedung Kelas Utama A"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Panjang (m)
-          </label>
-          <Input
-            type="number"
             
-            value={(formData as any).panjang ?? ""}
+            value={(formData as any).luas || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                panjang: e.target.value === "" ? null : Number(e.target.value),
+                luas: e.target.value,
               })
             }
-            placeholder="Contoh: 30"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Lebar (m)
-          </label>
-          <Input
-            type="number"
-            
-            value={(formData as any).lebar ?? ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                lebar: e.target.value === "" ? null : Number(e.target.value),
-              })
-            }
-            placeholder="Contoh: 9"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Luas Tapak (m²)
-          </label>
-          <Input
-            type="number"
-            
-            value={(formData as any).luas_tapak ?? ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                luas_tapak: e.target.value === "" ? null : Number(e.target.value),
-              })
-            }
-            placeholder="Contoh: 270"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Jumlah Lantai
-          </label>
-          <Input
-            type="number"
-            
-            value={(formData as any).jumlah_lantai ?? ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                jumlah_lantai: e.target.value === "" ? null : Number(e.target.value),
-              })
-            }
-            placeholder="Contoh: 1"
+            placeholder="Contoh: 800 m²"
           />
         </div>
 
@@ -158,33 +92,126 @@ export default function FormSarprasBangunanModal({
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
             Status Kepemilikan
           </label>
-          <Input
+          <Select
             
-            value={(formData as any).kepemilikan || ""}
+            value={(formData as any).kepemilikan_id || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                kepemilikan: e.target.value,
+                kepemilikan_id: e.target.value,
               })
             }
-            placeholder="Contoh: Milik Sendiri"
+            options={[
+              { value: "", label: kepemilikanLoading ? "Memuat opsi data master..." : "-- Pilih status kepemilikan --" },
+              ...kepemilikanOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Kondisi Bangunan <span className="text-rose-500">*</span>
+            Tahun Bangunan
           </label>
           <Input
-            required
-            value={(formData as any).kondisi || ""}
+            
+            value={(formData as any).tahun || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                kondisi: e.target.value,
+                tahun: e.target.value,
               })
             }
-            placeholder="Contoh: Baik / Rusak Sedang / Rusak Berat"
+            placeholder="Contoh: 2020"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Persentase Kerusakan Bangunan (%)
+          </label>
+          <Input
+            type="number"
+            
+            value={(formData as any).persentase ?? ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                persentase: e.target.value === "" ? null : Number(e.target.value),
+              })
+            }
+            placeholder="Contoh: 0"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Kondisi Bangunan
+          </label>
+          <Select
+            
+            value={(formData as any).kondisi_id || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                kondisi_id: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: kondisiLoading ? "Memuat opsi data master..." : "-- Pilih kondisi bangunan --" },
+              ...kondisiOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Jenis Bantuan
+          </label>
+          <Select
+            
+            value={(formData as any).jns_bantuan_id || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                jns_bantuan_id: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: jenisbantuanLoading ? "Memuat opsi data master..." : "-- Pilih jenis bantuan --" },
+              ...jenisbantuanOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Sumber Dana
+          </label>
+          <Select
+            
+            value={(formData as any).sumber_id || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                sumber_id: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: sumberdanaLoading ? "Memuat opsi data master..." : "-- Pilih sumber dana --" },
+              ...sumberdanaOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
           />
         </div>
       </form>

@@ -575,55 +575,55 @@
     "children": [
       {
         "title": "Berita",
-        "path": "/admin/berita",
+        "path": "/admin/publish/berita",
         "icon": "📰",
         "children": null
       },
       {
         "title": "Pengumuman",
-        "path": "/admin/pengumuman",
+        "path": "/admin/publish/pengumuman",
         "icon": "📢",
         "children": null
       },
       {
         "title": "Pendidikan",
-        "path": "/admin/pendidikan",
+        "path": "/admin/publish/pendidikan",
         "icon": "🎓",
         "children": null
       },
       {
         "title": "Kebudayaan",
-        "path": "/admin/kebudayaan",
+        "path": "/admin/publish/kebudayaan",
         "icon": "🎭",
         "children": null
       },
       {
         "title": "Layanan Publik",
-        "path": "/admin/layanan",
+        "path": "/admin/publish/layanan",
         "icon": "🏛️",
         "children": null
       },
       {
         "title": "Data & Statistik",
-        "path": "/admin/statistik",
+        "path": "/admin/publish/statistik",
         "icon": "📈",
         "children": null
       },
       {
         "title": "Profil & Standar Layanan",
-        "path": "/admin/profil",
+        "path": "/admin/publish/profil",
         "icon": "📋",
         "children": null
       },
       {
         "title": "Banner & Slider",
-        "path": "/admin/banner",
+        "path": "/admin/publish/banner",
         "icon": "🖼️",
         "children": null
       },
       {
         "title": "Pesan & Kontak Masuk",
-        "path": "/admin/kontak",
+        "path": "/admin/publish/kontak",
         "icon": "💬",
         "children": null
       }

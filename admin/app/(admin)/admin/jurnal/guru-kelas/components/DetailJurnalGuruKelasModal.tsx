@@ -40,13 +40,13 @@ export default function DetailJurnalGuruKelasModal({
         <div className="space-y-4 text-xs text-[#2d2410]">
           <div className="p-4 rounded-2xl bg-white/60 border border-white/80 space-y-1">
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Satuan Pendidikan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tanggal Pelaksanaan KBM</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).sekolah ?? "-")}
+              {String((record as any).tgl ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tema / Muatan Pelajaran</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tema / Bahan Ajar</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).tema ?? "-")}
             </span>
@@ -64,7 +64,7 @@ export default function DetailJurnalGuruKelasModal({
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Model Pembelajaran</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Model Pembelajaran (Master Model)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).model_pembelajaran ?? "-")}
             </span>
@@ -76,21 +76,44 @@ export default function DetailJurnalGuruKelasModal({
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Teknik Penilaian</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Uraian Ringkas Aktivitas KBM</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).teknik_penilaian ?? "-")}
+              {String((record as any).kegiatan ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Catatan Refleksi / Kendala</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Teknik Penilaian Pembelajaran</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).kendala ?? "-")}
+              {String((record as any).penilaian ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Solusi / Tindak Lanjut</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jumlah Siswa Hadir</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).solusi ?? "-")}
+              {String((record as any).siswa_hadir ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Persentase Kehadiran (%)</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).persentase ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Dokumentasi / Foto KBM</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {(record as any).file ? (
+                <a
+                  href={String((record as any).file)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-800 underline hover:text-amber-900 inline-flex items-center gap-1 font-mono text-[11px]"
+                >
+                  📄 Lihat / Unduh Berkas
+                </a>
+              ) : (
+                "-"
+              )}
             </span>
           </div>
           </div>

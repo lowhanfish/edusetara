@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { NewsHero, NewsHelp } from "./components/news-shell";
 import { NewsFeed } from "./components/news-feed";
-import { getAllNews } from "./_data/news-data";
 
 export const metadata: Metadata = {
   title: "Warta & Berita Resmi",
@@ -70,7 +69,6 @@ const newsHighlights = [
 ];
 
 export default function NewsIndexPage() {
-  const allArticles = getAllNews();
 
   return (
     <div className="news-index-page">
@@ -94,7 +92,7 @@ export default function NewsIndexPage() {
       </section>
 
       <section className="container news-feed-section" aria-label="Daftar Berita dan Warta">
-        <NewsFeed initialArticles={allArticles} />
+        <NewsFeed />
       </section>
 
       <div className="container">

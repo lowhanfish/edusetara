@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useRuangOption, useKondisiOption, useSumberDanaOption } from "../hooks/crud";
 
 interface FormSarprasPeralatanModalProps {
   isOpen: boolean;
@@ -21,6 +22,10 @@ export default function FormSarprasPeralatanModal({
   onSubmit,
   isLoading = false,
 }: FormSarprasPeralatanModalProps) {
+  const { options: ruangOptions, isLoading: ruangLoading } = useRuangOption();
+  const { options: kondisiOptions, isLoading: kondisiLoading } = useKondisiOption();
+  const { options: sumberdanaOptions, isLoading: sumberdanaLoading } = useSumberDanaOption();
+
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +35,7 @@ export default function FormSarprasPeralatanModal({
           ? "+ Tambah Peralatan / Aset"
           : "✎ Edit Peralatan / Aset"
       }
-      description="Inventarisasi peralatan TIK, perabot kelas, laboratorium, dan sarana multimedia."
+      description="Inventarisasi perangkat TIK, alat elektronik, dan furnitur penunjang di masing-masing ruangan."
       maxWidth="lg"
       footer={
         <>
@@ -50,18 +55,24 @@ export default function FormSarprasPeralatanModal({
       <form id="form-sarpras-peralatan" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Satuan Pendidikan <span className="text-rose-500">*</span>
+            Lokasi Ruangan Penempatan
           </label>
-          <Input
-            required
-            value={(formData as any).sekolah || ""}
+          <Select
+            
+            value={(formData as any).ruang_id || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                sekolah: e.target.value,
+                ruang_id: e.target.value,
               })
             }
-            placeholder="Contoh: SMPN 1 Kolono"
+            options={[
+              { value: "", label: ruangLoading ? "Memuat opsi data master..." : "-- Pilih ruangan penempatan --" },
+              ...ruangOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
           />
         </div>
 
@@ -71,83 +82,96 @@ export default function FormSarprasPeralatanModal({
           </label>
           <Input
             required
-            value={(formData as any).nama_alat || ""}
+            value={(formData as any).nama || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                nama_alat: e.target.value,
+                nama: e.target.value,
               })
             }
-            placeholder="Contoh: Chromebook DAK / Proyektor"
+            placeholder="Contoh: Komputer Asus / Printer Epson L300"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Kode Barang / NUP
-          </label>
-          <Input
-            
-            value={(formData as any).kode_alat || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                kode_alat: e.target.value,
-              })
-            }
-            placeholder="Contoh: TIK-2026-001"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Spesifikasi / Merk
-          </label>
-          <Input
-            
-            value={(formData as any).spesifikasi || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                spesifikasi: e.target.value,
-              })
-            }
-            placeholder="Contoh: Core i3 / RAM 8GB / Asus"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Jumlah Unit <span className="text-rose-500">*</span>
+            Jumlah Unit Peralatan <span className="text-rose-500">*</span>
           </label>
           <Input
             type="number"
             required
-            value={(formData as any).jumlah ?? ""}
+            value={(formData as any).jml_alat ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                jumlah: e.target.value === "" ? null : Number(e.target.value),
+                jml_alat: e.target.value === "" ? null : Number(e.target.value),
               })
             }
-            placeholder="Contoh: 15"
+            placeholder="Contoh: 2"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Kondisi <span className="text-rose-500">*</span>
+            Kondisi Peralatan
           </label>
-          <Input
-            required
-            value={(formData as any).kondisi || ""}
+          <Select
+            
+            value={(formData as any).kondisi_id || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                kondisi: e.target.value,
+                kondisi_id: e.target.value,
               })
             }
-            placeholder="Contoh: Baik / Rusak Ringan / Rusak Berat"
+            options={[
+              { value: "", label: kondisiLoading ? "Memuat opsi data master..." : "-- Pilih kondisi peralatan --" },
+              ...kondisiOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Tahun Pengadaan / Perolehan
+          </label>
+          <Input
+            type="number"
+            
+            value={(formData as any).tahun ?? ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                tahun: e.target.value === "" ? null : Number(e.target.value),
+              })
+            }
+            placeholder="Contoh: 2026"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Sumber Dana
+          </label>
+          <Select
+            
+            value={(formData as any).sumber_id || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                sumber_id: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: sumberdanaLoading ? "Memuat opsi data master..." : "-- Pilih sumber dana --" },
+              ...sumberdanaOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
           />
         </div>
       </form>

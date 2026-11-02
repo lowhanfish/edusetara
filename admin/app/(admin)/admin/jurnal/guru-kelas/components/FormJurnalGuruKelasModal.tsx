@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useModelPembelajaranOption } from "../hooks/crud";
 
 interface FormJurnalGuruKelasModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export default function FormJurnalGuruKelasModal({
   onSubmit,
   isLoading = false,
 }: FormJurnalGuruKelasModalProps) {
+  const { options: modelpembelajaranOptions, isLoading: modelpembelajaranLoading } = useModelPembelajaranOption();
+
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +33,7 @@ export default function FormJurnalGuruKelasModal({
           ? "+ Tambah Jurnal Guru Kelas"
           : "✎ Edit Jurnal Guru Kelas"
       }
-      description="Pencatatan harian aktivitas belajar mengajar, capaian materi, dan refleksi pedagogik guru kelas."
+      description="Dokumentasi pelaksanaan KBM guru kelas, tema ajar, model pembelajaran, dan evaluasi harian."
       maxWidth="lg"
       footer={
         <>
@@ -50,24 +53,24 @@ export default function FormJurnalGuruKelasModal({
       <form id="form-jurnal-guru-kelas" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Satuan Pendidikan <span className="text-rose-500">*</span>
+            Tanggal Pelaksanaan KBM <span className="text-rose-500">*</span>
           </label>
           <Input
+            type="date"
             required
-            value={(formData as any).sekolah || ""}
+            value={(formData as any).tgl || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                sekolah: e.target.value,
+                tgl: e.target.value,
               })
             }
-            placeholder="Contoh: SDN 2 Buke"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Tema / Muatan Pelajaran <span className="text-rose-500">*</span>
+            Tema / Bahan Ajar <span className="text-rose-500">*</span>
           </label>
           <Input
             required
@@ -78,7 +81,7 @@ export default function FormJurnalGuruKelasModal({
                 tema: e.target.value,
               })
             }
-            placeholder="Contoh: Siklus Air dan Peristiwa Alam"
+            placeholder="Contoh: Indahnya Kebersamaan"
           />
         </div>
 
@@ -95,17 +98,17 @@ export default function FormJurnalGuruKelasModal({
                 materi_pokok: e.target.value,
               })
             }
-            placeholder="Contoh: Evaporasi, Kondensasi, dan Presipitasi"
+            placeholder="Contoh: Keberagaman Suku Bangsa"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Pertemuan Ke- <span className="text-rose-500">*</span>
+            Pertemuan Ke-
           </label>
           <Input
             type="number"
-            required
+            
             value={(formData as any).pertemuan_ke ?? ""}
             onChange={(e) =>
               setFormData({
@@ -113,15 +116,15 @@ export default function FormJurnalGuruKelasModal({
                 pertemuan_ke: e.target.value === "" ? null : Number(e.target.value),
               })
             }
-            placeholder="Contoh: 4"
+            placeholder="Contoh: 1"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Model Pembelajaran
+            Model Pembelajaran (Master Model)
           </label>
-          <Input
+          <Select
             
             value={(formData as any).model_pembelajaran || ""}
             onChange={(e) =>
@@ -130,7 +133,13 @@ export default function FormJurnalGuruKelasModal({
                 model_pembelajaran: e.target.value,
               })
             }
-            placeholder="Contoh: Problem Based Learning (PBL)"
+            options={[
+              { value: "", label: modelpembelajaranLoading ? "Memuat opsi data master..." : "-- Pilih model pembelajaran --" },
+              ...modelpembelajaranOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
           />
         </div>
 
@@ -147,60 +156,94 @@ export default function FormJurnalGuruKelasModal({
                 metode_pembelajaran: e.target.value,
               })
             }
-            placeholder="Contoh: Eksperimen Sederhana & Diskusi"
+            placeholder="Contoh: Diskusi, Demonstrasi, Tanya Jawab"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Teknik Penilaian
+            Uraian Ringkas Aktivitas KBM
+          </label>
+          <Textarea
+            
+            rows={3}
+            value={(formData as any).kegiatan || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                kegiatan: e.target.value,
+              })
+            }
+            placeholder="Ringkasan kegiatan mengajar..."
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Teknik Penilaian Pembelajaran
           </label>
           <Input
             
-            value={(formData as any).teknik_penilaian || ""}
+            value={(formData as any).penilaian || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                teknik_penilaian: e.target.value,
+                penilaian: e.target.value,
               })
             }
-            placeholder="Contoh: Rubrik Observasi Sikap & Lembar Formatif"
+            placeholder="Contoh: Penilaian Sikap & Kuis Formatif"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Catatan Refleksi / Kendala
+            Jumlah Siswa Hadir
           </label>
-          <Textarea
+          <Input
+            type="number"
             
-            rows={3}
-            value={(formData as any).kendala || ""}
+            value={(formData as any).siswa_hadir ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                kendala: e.target.value,
+                siswa_hadir: e.target.value === "" ? null : Number(e.target.value),
               })
             }
-            placeholder="Kendala pemahaman siswa di kelas..."
+            placeholder="Contoh: 28"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Solusi / Tindak Lanjut
+            Persentase Kehadiran (%)
           </label>
-          <Textarea
+          <Input
+            type="number"
             
-            rows={3}
-            value={(formData as any).solusi || ""}
+            value={(formData as any).persentase ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                solusi: e.target.value,
+                persentase: e.target.value === "" ? null : Number(e.target.value),
               })
             }
-            placeholder="Pendampingan remedial atau media tambahan..."
+            placeholder="Contoh: 100"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Dokumentasi / Foto KBM
+          </label>
+          <FileInput
+            value={(formData as any).file || ""}
+            onChange={(fileName) =>
+              setFormData({
+                ...formData,
+                file: fileName,
+              })
+            }
+            helperText="Unggah foto KBM"
           />
         </div>
       </form>

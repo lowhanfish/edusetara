@@ -8,9 +8,14 @@ from app.global_schemas.operational.base_schema import (
 
 
 class ProfilSectionBase(OperationalBase):
-    title: str
+    judul: str | None = None
+    title: str | None = None
+    kategori: str | None = None
     category: str | None = None
+    konten: str | None = None
     content: str | None = None
+    file: str | None = None
+    urutan: str | int | None = None
     status: str | None = "Aktif"
 
 
@@ -21,16 +26,26 @@ class ProfilSectionCreate(ProfilSectionBase):
 class ProfilSectionUpdate(BaseModel):
     nip: str | None = None
     unit_kerja: str | None = None
+    judul: str | None = None
     title: str | None = None
+    kategori: str | None = None
     category: str | None = None
+    konten: str | None = None
     content: str | None = None
+    file: str | None = None
+    urutan: str | int | None = None
     status: str | None = None
 
 
 class ProfilSectionResponse(OperationalResponse):
-    title: str
+    judul: str | None = None
+    title: str | None = None
+    kategori: str | None = None
     category: str | None = None
+    konten: str | None = None
     content: str | None = None
+    file: str | None = None
+    urutan: str | int | None = None
     status: str | None = None
 
 

@@ -1,7 +1,7 @@
 export interface CreateInterface {
   judul: string | null;
-  nama_guru: string | null;
-  sekolah: string | null;
+  nama_guru?: string | null;
+  sekolah?: string | null;
   angkatan?: string | null;
   deskripsi?: string | null;
   file?: string | null;
@@ -10,6 +10,8 @@ export interface CreateInterface {
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  unit_kerja?: string | null;
+  nip?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
@@ -22,4 +24,4 @@ export interface ResponseListInterface {
   data: ResponseInterface[];
 }
 
-export type GalleryGuruPenggerakRecord = ResponseInterface;
+export type GuruPenggerakRecord = ResponseInterface;

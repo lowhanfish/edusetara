@@ -1,13 +1,16 @@
 export interface CreateInterface {
   judul: string | null;
-  deskripsi: string | null;
-  angkatan?: string | null;
-  file?: string | null;
+  tujuan?: string | null;
+  proses?: string | null;
+  hasil?: string | null;
   link?: string | null;
+  file?: string | null;
 }
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  unit_kerja?: string | null;
+  nip?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
@@ -20,4 +23,4 @@ export interface ResponseListInterface {
   data: ResponseInterface[];
 }
 
-export type GallerySekolahPenggerakRecord = ResponseInterface;
+export type SekolahPenggerakRecord = ResponseInterface;

@@ -1,20 +1,27 @@
-import { educationStats } from "./home-data";
-import { SectionHeading } from "./shared";
+"use client";
+
+import { useHomeStats } from "../hooks/useHomeData";
+import Link from "next/link";
 
 export function StatisticsSection() {
+  const { data: liveStats } = useHomeStats();
+  const items = liveStats ?? [];
+
   return (
     <section className="card stats" id="data-statistik">
-      <SectionHeading
-        icon="▥"
-        title="Statistik Pendidikan"
-        action="Lihat Detail"
-      />
+      <div className="section-heading">
+        <span className="heading-icon" aria-hidden="true">▥</span>
+        <h3>Statistik Pendidikan</h3>
+        <Link href="/data-statistik">
+          Lihat Detail →
+        </Link>
+      </div>
       <div className="stats-grid">
-        {educationStats.map(({ id, icon, value, label, tone }) => (
-          <div className={`stat ${tone}`} key={id}>
-            <span>{icon}</span>
-            <b>{value}</b>
-            <small>{label}</small>
+        {items.map((stat: any) => (
+          <div className={`stat ${stat.tone || "sapphire"}`} key={stat.id}>
+            <span>{stat.icon || "📊"}</span>
+            <b>{stat.value}</b>
+            <small>{stat.label || stat.sub}</small>
           </div>
         ))}
       </div>

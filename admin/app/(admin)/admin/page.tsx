@@ -131,10 +131,10 @@ export default function AdminDashboard() {
   ];
 
   const quickActions = [
-    { label: "Tulis Berita", icon: "edit", href: "/admin/berita" },
-    { label: "Buat Pengumuman", icon: "megaphone", href: "/admin/pengumuman" },
+    { label: "Tulis Berita", icon: "edit", href: "/admin/publish/berita" },
+    { label: "Buat Pengumuman", icon: "megaphone", href: "/admin/publish/pengumuman" },
     { label: "Data Sekolah", icon: "school", href: "/admin/sekolah" },
-    { label: "Layanan Publik", icon: "landmark", href: "/admin/layanan" },
+    { label: "Layanan Publik", icon: "landmark", href: "/admin/publish/layanan" },
   ];
 
   return (
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
                 <CardTitle>Publikasi Berita Terkini</CardTitle>
               </div>
               <Link
-                href="/admin/berita"
+                href="/admin/publish/berita"
                 className="text-xs font-bold text-[#a86a00] hover:text-[#f5b82e] transition-colors"
               >
                 Lihat semua
@@ -287,7 +287,7 @@ export default function AdminDashboard() {
                 <CardTitle>Pengumuman Aktif</CardTitle>
               </div>
               <Link
-                href="/admin/pengumuman"
+                href="/admin/publish/pengumuman"
                 className="text-xs font-bold text-[#a86a00] hover:text-[#f5b82e] transition-colors"
               >
                 Semua

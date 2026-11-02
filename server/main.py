@@ -39,7 +39,15 @@ def create_application() -> FastAPI:
     # 3. Register Feature Routers
     application.include_router(api_v1_router)
 
-    # 4. Root Welcome Route
+    # 4. Static Files Mount for Uploaded Media
+    from fastapi.staticfiles import StaticFiles
+    from pathlib import Path
+
+    uploads_dir = Path(__file__).resolve().parent / "uploads"
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    application.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
+
+    # 5. Root Welcome Route
     @application.get("/", tags=["Root"])
     async def root_index() -> dict:
         return {

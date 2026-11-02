@@ -40,51 +40,62 @@ export default function DetailUsulanTunjanganGuruModal({
         <div className="space-y-4 text-xs text-[#2d2410]">
           <div className="p-4 rounded-2xl bg-white/60 border border-white/80 space-y-1">
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nama Lengkap Guru</span>
-            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).nama_guru ?? "-")}
-            </span>
-          </div>
-          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">NUPTK</span>
-            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).nuptk ?? "-")}
-            </span>
-          </div>
-          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Satuan Pendidikan Induk</span>
-            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).sekolah ?? "-")}
-            </span>
-          </div>
-          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jenis Tunjangan</span>
-            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).jenis_tunjangan ?? "-")}
-            </span>
-          </div>
-          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Tahun Anggaran</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).tahun ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Semester</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Periode Triwulan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).semester ?? "-")}
+              {String((record as any).triwulan_id ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Status Usulan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jenis Tunjangan (Penerima)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).status ?? "-")}
+              {String((record as any).jenis_id ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Berkas Pendukung (PDF)</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Kelas / Kategori Penerima</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).file ?? "-")}
+              {String((record as any).kelas_id ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jumlah Guru Pengusul</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).jml_guru ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nominal Usulan (Rp)</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).nominal ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Berkas Lampiran SKTP (PDF)</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {(record as any).file ? (
+                <a
+                  href={String((record as any).file)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-800 underline hover:text-amber-900 inline-flex items-center gap-1 font-mono text-[11px]"
+                >
+                  📄 Lihat / Unduh Berkas
+                </a>
+              ) : (
+                "-"
+              )}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tipe Berkas (pdf)</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).file_type ?? "-")}
             </span>
           </div>
           </div>

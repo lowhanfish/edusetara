@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+
 
 interface FormPpdbPaudModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export default function FormPpdbPaudModal({
   onSubmit,
   isLoading = false,
 }: FormPpdbPaudModalProps) {
+
+
   return (
     <Modal
       isOpen={isOpen}
@@ -50,7 +53,7 @@ export default function FormPpdbPaudModal({
       <form id="form-ppdb-paud" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nama Calon Murid <span className="text-rose-500">*</span>
+            Nama Lengkap Calon Siswa <span className="text-rose-500">*</span>
           </label>
           <Input
             required
@@ -61,13 +64,13 @@ export default function FormPpdbPaudModal({
                 nama_siswa: e.target.value,
               })
             }
-            placeholder="Contoh: Muhammad Farhan"
+            placeholder="Nama calon siswa"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            NIK Calon Murid <span className="text-rose-500">*</span>
+            NIK Calon Siswa <span className="text-rose-500">*</span>
           </label>
           <Input
             required
@@ -78,13 +81,13 @@ export default function FormPpdbPaudModal({
                 nik: e.target.value,
               })
             }
-            placeholder="Contoh: 740501..."
+            placeholder="16 digit NIK"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Satuan PAUD Pilihan <span className="text-rose-500">*</span>
+            Satuan PAUD / TK Tujuan <span className="text-rose-500">*</span>
           </label>
           <Input
             required
@@ -95,41 +98,47 @@ export default function FormPpdbPaudModal({
                 sekolah_tujuan: e.target.value,
               })
             }
-            placeholder="Contoh: TK Negeri Pembina Konsel"
+            placeholder="Contoh: TK Negeri 1 Palangga"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Jalur Pendaftaran <span className="text-rose-500">*</span>
+            Jalur Pendaftaran
           </label>
-          <Input
-            required
-            value={(formData as any).jalur || ""}
+          <Select
+            
+            value={(formData as any).jalur ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
                 jalur: e.target.value,
               })
             }
-            placeholder="Contoh: Domisili / Afirmasi"
+            options={[
+              { value: "", label: "-- Pilih jalur --" },
+              ...[{"value":"Reguler","label":"Jalur Reguler"},{"value":"Afirmasi","label":"Jalur Afirmasi"}]
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Status Verifikasi <span className="text-rose-500">*</span>
+            Status Pendaftaran
           </label>
-          <Input
-            required
-            value={(formData as any).status || ""}
+          <Select
+            
+            value={(formData as any).status ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
                 status: e.target.value,
               })
             }
-            placeholder="Contoh: Diterima / Diproses"
+            options={[
+              { value: "", label: "-- Pilih status --" },
+              ...[{"value":"Diverifikasi","label":"Diverifikasi"},{"value":"Diterima","label":"Diterima"},{"value":"Menunggu","label":"Menunggu"},{"value":"Ditolak","label":"Ditolak"}]
+            ]}
           />
         </div>
 
@@ -145,7 +154,7 @@ export default function FormPpdbPaudModal({
                 file_berkas: fileName,
               })
             }
-            helperText="Unggah dokumen KK dan akta kelahiran"
+            helperText="Unggah berkas pendaftaran"
           />
         </div>
       </form>

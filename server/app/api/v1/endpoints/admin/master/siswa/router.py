@@ -27,6 +27,7 @@ def _to_response_dict(s: MasterSiswa) -> dict[str, Any]:
     return {
         "id": s.id,
         "nama": s.nama,
+        "is_active": s.is_active,
         "nisn": s.nisn,
         "nik": s.nik,
         "jns_kelamin": s.jns_kelamin,

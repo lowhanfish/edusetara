@@ -15,9 +15,16 @@ export interface AnnouncementItem {
   deadline: string;
   signatory: string;
   keyPoints: string[];
+  fileUrl?: string;
 }
 
 export interface BackendAnnouncementItem {
+  nomor?: string;
+  kategori?: AnnouncementItem["category"];
+  ringkasan?: string;
+  is_important?: boolean;
+  target_audience?: string;
+  deadline?: string;
   id: string;
   judul?: string;
   isi?: string;

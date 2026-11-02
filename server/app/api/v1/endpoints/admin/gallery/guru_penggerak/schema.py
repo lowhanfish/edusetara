@@ -6,14 +6,12 @@ from app.global_schemas.operational.base_schema import (
     OperationalResponse,
 )
 
-
 class GuruPenggerakBase(GalleryCommonBase):
     pass
 
 
 class GuruPenggerakCreate(GuruPenggerakBase):
     id: str | None = None
-
 
 class GuruPenggerakUpdate(BaseModel):
     nip: str | None = None

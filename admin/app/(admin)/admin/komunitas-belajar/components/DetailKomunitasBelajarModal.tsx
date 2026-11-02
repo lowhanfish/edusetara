@@ -42,37 +42,48 @@ export default function DetailKomunitasBelajarModal({
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Nama Komunitas Belajar</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).nama_kombel ?? "-")}
+              {String((record as any).nama ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Ketua / Penggerak Kombel</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Siklus / Jenis Kegiatan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).ketua ?? "-")}
+              {String((record as any).jns_kegiatan ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jenjang / Lingkup</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tanggal Pelaksanaan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).jenjang ?? "-")}
+              {String((record as any).tgl_kegiatan ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jumlah Anggota Guru</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nama Guru / Penanggung Jawab</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).jumlah_anggota ?? "-")}
+              {String((record as any).nama_id ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Fokus & Kegiatan Utama</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jabatan dalam Kombel</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).kegiatan_utama ?? "-")}
+              {String((record as any).jabatan ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Berkas SK Komunitas Belajar (PDF)</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Dokumen Berita Acara / SK Kombel (PDF)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).file_sk ?? "-")}
+              {(record as any).file ? (
+                <a
+                  href={String((record as any).file)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-800 underline hover:text-amber-900 inline-flex items-center gap-1 font-mono text-[11px]"
+                >
+                  📄 Lihat / Unduh Berkas
+                </a>
+              ) : (
+                "-"
+              )}
             </span>
           </div>
           </div>

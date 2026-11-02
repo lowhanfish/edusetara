@@ -53,4 +53,5 @@ htmlcov/
 
 # OS specific
 .DS_Store
+backups/
 Thumbs.db

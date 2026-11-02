@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+
 
 interface FormKegiatanSekolahModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export default function FormKegiatanSekolahModal({
   onSubmit,
   isLoading = false,
 }: FormKegiatanSekolahModalProps) {
+
+
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +33,7 @@ export default function FormKegiatanSekolahModal({
           ? "+ Tambah Kegiatan Sekolah"
           : "✎ Edit Kegiatan Sekolah"
       }
-      description="Agenda, pameran karya, dan aktivitas akademik maupun ekstrakurikuler sekolah."
+      description="Dokumentasi dan pelaporan aktivitas belajar, ekstrakurikuler, workshop, dan hari besar sekolah."
       maxWidth="lg"
       footer={
         <>
@@ -50,24 +53,24 @@ export default function FormKegiatanSekolahModal({
       <form id="form-kegiatan-sekolah" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Judul Kegiatan <span className="text-rose-500">*</span>
+            Nama / Tajuk Kegiatan <span className="text-rose-500">*</span>
           </label>
           <Input
             required
-            value={(formData as any).judul || ""}
+            value={(formData as any).nama_kegiatan || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                judul: e.target.value,
+                nama_kegiatan: e.target.value,
               })
             }
-            placeholder="Contoh: Gelar Karya P5 Kearifan Lokal"
+            placeholder="Contoh: Upacara Hardiknas & Pentas Seni"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Uraian Pelaksanaan <span className="text-rose-500">*</span>
+            Deskripsi Lengkap Kegiatan <span className="text-rose-500">*</span>
           </label>
           <Textarea
             required
@@ -79,22 +82,22 @@ export default function FormKegiatanSekolahModal({
                 deskripsi: e.target.value,
               })
             }
-            placeholder="Deskripsi jalannya aktivitas kegiatan..."
+            placeholder="Uraian jalannya kegiatan..."
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Tanggal Kegiatan <span className="text-rose-500">*</span>
+            Tanggal Pelaksanaan <span className="text-rose-500">*</span>
           </label>
           <Input
             type="date"
             required
-            value={(formData as any).tanggal || ""}
+            value={(formData as any).tgl_kegiatan || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                tanggal: e.target.value,
+                tgl_kegiatan: e.target.value,
               })
             }
           />
@@ -102,52 +105,34 @@ export default function FormKegiatanSekolahModal({
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Tahun
-          </label>
-          <Input
-            type="number"
-            
-            value={(formData as any).tahun ?? ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                tahun: e.target.value === "" ? null : Number(e.target.value),
-              })
-            }
-            placeholder="Contoh: 2026"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Dokumentasi Foto / Laporan
+            Foto Banner / Dokumentasi
           </label>
           <FileInput
-            value={(formData as any).file || ""}
+            value={(formData as any).foto || ""}
             onChange={(fileName) =>
               setFormData({
                 ...formData,
-                file: fileName,
+                foto: fileName,
               })
             }
-            helperText="Unggah berkas foto atau dokumen (PDF)"
+            helperText="Unggah foto kegiatan"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Tautan YouTube / Berita
+            Tautan Video YouTube Kegiatan
           </label>
           <Input
             
-            value={(formData as any).link || ""}
+            value={(formData as any).link_youtube || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                link: e.target.value,
+                link_youtube: e.target.value,
               })
             }
-            placeholder="https://youtube.com/..."
+            placeholder="https://www.youtube.com/watch?v=..."
           />
         </div>
       </form>

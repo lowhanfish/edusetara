@@ -11,11 +11,12 @@ class PesanKontakBase(OperationalBase):
     nama: str
     email: str | None = None
     phone: str | None = None
+    telepon: str | None = None
     subjek: str | None = None
     kategori: str | None = None
     pesan: str
     tanggapan: str | None = None
-    status: str | None = "Belum Dibalas"
+    status: str | None = "Baru"
 
 
 class PesanKontakCreate(PesanKontakBase):
@@ -28,6 +29,7 @@ class PesanKontakUpdate(BaseModel):
     nama: str | None = None
     email: str | None = None
     phone: str | None = None
+    telepon: str | None = None
     subjek: str | None = None
     kategori: str | None = None
     pesan: str | None = None
@@ -39,6 +41,7 @@ class PesanKontakResponse(OperationalResponse):
     nama: str
     email: str | None = None
     phone: str | None = None
+    telepon: str | None = None
     subjek: str | None = None
     kategori: str | None = None
     pesan: str

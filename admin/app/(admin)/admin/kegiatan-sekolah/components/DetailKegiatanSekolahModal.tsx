@@ -40,39 +40,44 @@ export default function DetailKegiatanSekolahModal({
         <div className="space-y-4 text-xs text-[#2d2410]">
           <div className="p-4 rounded-2xl bg-white/60 border border-white/80 space-y-1">
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Judul Kegiatan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nama / Tajuk Kegiatan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).judul ?? "-")}
+              {String((record as any).nama_kegiatan ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Uraian Pelaksanaan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Deskripsi Lengkap Kegiatan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).deskripsi ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tanggal Kegiatan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tanggal Pelaksanaan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).tanggal ?? "-")}
+              {String((record as any).tgl_kegiatan ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tahun</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Foto Banner / Dokumentasi</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).tahun ?? "-")}
+              {(record as any).foto ? (
+                <a
+                  href={String((record as any).foto)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-800 underline hover:text-amber-900 inline-flex items-center gap-1 font-mono text-[11px]"
+                >
+                  📄 Lihat / Unduh Berkas
+                </a>
+              ) : (
+                "-"
+              )}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Dokumentasi Foto / Laporan</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tautan Video YouTube Kegiatan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).file ?? "-")}
-            </span>
-          </div>
-          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tautan YouTube / Berita</span>
-            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).link ?? "-")}
+              {String((record as any).link_youtube ?? "-")}
             </span>
           </div>
           </div>

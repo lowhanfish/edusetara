@@ -54,13 +54,11 @@ export default function SarprasRuangPage() {
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
 
   const initialForm: Partial<ResponseInterface> = {
-    sekolah: "",
-    bangunan: "",
-    kode_ruang: "",
-    nama_ruang: "",
-    panjang: null,
-    lebar: null,
-    kondisi: "",
+    bangunan_id: "",
+    kelas_id: "",
+    nama: "",
+    luas: "",
+    kondisi_id: "",
   };
 
   const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
@@ -86,13 +84,11 @@ export default function SarprasRuangPage() {
     setFormMode("edit");
     setFormData({
       id: record.id,
-      sekolah: (record as any).sekolah ?? "",
-      bangunan: (record as any).bangunan ?? "",
-      kode_ruang: (record as any).kode_ruang ?? "",
-      nama_ruang: (record as any).nama_ruang ?? "",
-      panjang: (record as any).panjang ?? "",
-      lebar: (record as any).lebar ?? "",
-      kondisi: (record as any).kondisi ?? "",
+      bangunan_id: (record as any).bangunan_id ?? "",
+      kelas_id: (record as any).kelas_id ?? "",
+      nama: (record as any).nama ?? "",
+      luas: (record as any).luas ?? "",
+      kondisi_id: (record as any).kondisi_id ?? "",
     });
     setIsFormOpen(true);
   };
@@ -110,7 +106,7 @@ export default function SarprasRuangPage() {
       (record as any).sekolah ||
       (record as any).nama_kombel ||
       (record as any).kegiatan ||
-      (record as any).indikator ||
+      (record as any).uraian ||
       (record as any).isi ||
       "data ini";
 
@@ -134,7 +130,22 @@ export default function SarprasRuangPage() {
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload: Partial<ResponseInterface> = { ...formData };
+    const hasFile = Object.values(formData).some(
+      (v) => typeof File !== "undefined" && v instanceof File
+    );
+
+    let payload: any;
+    if (hasFile) {
+      const fd = new FormData();
+      Object.entries(formData).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== "") {
+          fd.append(k, v instanceof File ? v : String(v));
+        }
+      });
+      payload = fd;
+    } else {
+      payload = { ...formData };
+    }
 
     if (formMode === "add") {
       createMutation.mutate(payload, {
@@ -161,7 +172,7 @@ export default function SarprasRuangPage() {
     <div className="space-y-6">
       <PageHeader
         title="Ruang Sekolah"
-        description="Registrasi ruang belajar, laboratorium, perpustakaan, dan fasilitas penunjang sekolah."
+        description="Pemetaan unit ruangan spesifik yang berada di dalam bangunan sekolah."
         action={
           <div className="flex items-center gap-2">
             <Button
@@ -198,7 +209,7 @@ export default function SarprasRuangPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
-              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">Sarana dan Prasarana</h4>
+              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">{"Sarana dan Prasarana"}</h4>
               <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
             </div>
             <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
@@ -211,10 +222,13 @@ export default function SarprasRuangPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-[#7d7152] font-medium">Status API</p>
-              <h4 className="text-2xl font-bold text-emerald-700 mt-1">Terhubung</h4>
-              <p className="text-[11px] text-emerald-600 mt-0.5">FastAPI & MySQL</p>
+              <h4 className="text-sm font-semibold text-emerald-700 mt-1 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Terhubung
+              </h4>
+              <p className="text-[10px] text-[#7d7152] mt-0.5 font-mono truncate max-w-[140px]">/api/v1/admin/sarpras/ruang</p>
             </div>
-            <span className="text-3xl p-3 bg-emerald-50 rounded-2xl border border-emerald-200/50">
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
               ⚡
             </span>
           </div>
@@ -223,64 +237,64 @@ export default function SarprasRuangPage() {
         <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-[#7d7152] font-medium">Standar Data</p>
-              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Modular</h4>
-              <p className="text-[11px] text-blue-700 mt-0.5">master pattern</p>
+              <p className="text-xs text-[#7d7152] font-medium">Otoritas Akses</p>
+              <h4 className="text-sm font-semibold text-[#2d2410] mt-1">Operator & Admin</h4>
+              <p className="text-[11px] text-[#7d7152] mt-0.5">Role ASN & Dinas</p>
             </div>
-            <span className="text-3xl p-3 bg-blue-50 rounded-2xl border border-blue-200/50">
-              📋
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              🔐
             </span>
           </div>
         </Card>
       </div>
 
-      <Card className="rounded-2xl border-white/80 bg-white/70 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-[#e2d9c8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex-1 max-w-sm">
+      <Card className="p-6 rounded-3xl bg-white/80 border-white/80 space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="relative flex-1 max-w-sm">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7d7152]">
+              🔍
+            </span>
             <Input
               type="text"
-              placeholder="Cari data ruang sekolah..."
+              placeholder="Cari Ruang Sekolah..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full text-xs"
+              className="pl-9"
             />
           </div>
-
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#7d7152]">Tampilkan:</span>
+            <span className="text-xs text-[#7d7152]">Baris per hal:</span>
             <select
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value));
                 setPage(1);
               }}
-              aria-label="Jumlah data per halaman"
-              className="text-xs bg-white border border-[#d5cbba] rounded-lg px-2 py-1.5 text-[#2d2410] focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="text-xs bg-white border border-[#e2d9c8] rounded-xl px-2 py-1.5 text-[#2d2410] outline-none"
             >
-              <option value={5}>5 baris</option>
-              <option value={10}>10 baris</option>
-              <option value={20}>20 baris</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
             </select>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+        <div className="overflow-x-auto rounded-2xl border border-[#e2d9c8]/80">
+          <table className="w-full text-xs text-left">
             <thead>
               <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
                 <th className="py-3 px-4 w-12 text-center">No</th>
-                <th className="py-3 px-4">Sekolah</th>
-                <th className="py-3 px-4">Nama Ruang</th>
-                <th className="py-3 px-4">Gedung</th>
-                <th className="py-3 px-4">Kode</th>
-                <th className="py-3 px-4">Kondisi</th>
+                <th className="py-3 px-4">Nama Ruangan</th>
+                <th className="py-3 px-4">Luas</th>
+                <th className="py-3 px-4">Satuan Pendidikan</th>
+                <th className="py-3 px-4">Waktu Catat</th>
                 <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#ece5d8]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
                       <span>Memuat data dari server...</span>
@@ -289,8 +303,8 @@ export default function SarprasRuangPage() {
                 </tr>
               ) : isError ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-rose-700">
-                    <p className="font-semibold">Gagal memuat data ruang sekolah</p>
+                  <td colSpan={6} className="py-12 text-center text-rose-700">
+                    <p className="font-semibold">Gagal memuat data Ruang Sekolah</p>
                     <p className="text-[11px] mt-1 text-[#7d7152]">
                       {error?.message || "Terjadi kesalahan koneksi ke server."}
                     </p>
@@ -306,70 +320,64 @@ export default function SarprasRuangPage() {
                 </tr>
               ) : rawList.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
                     <span className="text-3xl block mb-2">🚪</span>
                     <p className="font-semibold text-sm text-[#2d2410]">
                       Belum ada data Ruang Sekolah
                     </p>
-                    <p className="text-xs text-[#9c8e6b] mt-0.5">
-                      {debouncedSearch
-                        ? `Tidak ada data yang cocok dengan "${debouncedSearch}"`
-                        : "Klik tombol '+ Tambah Ruang Sekolah' untuk menambahkan data baru."}
+                    <p className="text-[11px] mt-0.5">
+                      Klik tombol "+ Tambah Ruang Sekolah" untuk membuat data pertama.
                     </p>
                   </td>
                 </tr>
               ) : (
                 rawList.map((item, index) => {
                   const no = listindex(pageSize, page, index);
-
                   return (
                     <tr
                       key={item.id}
-                      className="hover:bg-amber-50/40 transition-colors duration-150"
+                      className="hover:bg-amber-50/50 transition-colors duration-150"
                     >
                       <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
                         {no}
                       </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).sekolah ?? "-")}
+                      {String((item as any).nama ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).nama_ruang ?? "-")}
+                      {String((item as any).luas ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).bangunan ?? "-")}
+                      {String((item as any).unit_kerja ?? "-")}
                     </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).kode_ruang ?? "-")}
+                    <td className="py-3 px-4 text-[#7d7152]">
+                      {item.created_at ? String(item.created_at).slice(0, 10) : "-"}
                     </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).kondisi ?? "-")}
-                    </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             type="button"
                             onClick={() => handleOpenDetail(item)}
-                            title="Detail Lembar Data"
-                            className="p-1 rounded-lg hover:bg-amber-100 text-[#7d7152] hover:text-[#2d2410] transition-colors"
+                            title="Detail"
+                            className="p-1.5 rounded-lg border border-[#e2d9c8] hover:bg-amber-100/60 text-[#7d7152] transition-colors"
                           >
                             👁️
                           </button>
                           <button
                             type="button"
                             onClick={() => handleOpenEdit(item)}
-                            title="Edit Data"
-                            className="p-1 rounded-lg hover:bg-amber-100 text-amber-700 hover:text-amber-900 transition-colors"
+                            title="Edit"
+                            className="p-1.5 rounded-lg border border-[#e2d9c8] hover:bg-amber-100/60 text-[#7d7152] transition-colors"
                           >
-                            ✏️
+                            ✎
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            title="Hapus Data"
-                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 transition-colors"
+                            title="Hapus"
+                            className="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 transition-colors"
                           >
-                            🗑️
+                            🗑
                           </button>
                         </div>
                       </td>
@@ -381,13 +389,12 @@ export default function SarprasRuangPage() {
           </table>
         </div>
 
-        <div className="p-4 border-t border-[#e2d9c8] bg-white/40">
+        <div className="pt-2">
           <Pagination
-            page={page}
+            currentPage={page}
+            totalCount={totalItems}
             pageSize={pageSize}
-            total={totalItems}
             onPageChange={(p) => setPage(p)}
-            onPageSizeChange={(s) => setPageSize(s)}
           />
         </div>
       </Card>

@@ -22,6 +22,8 @@ ${fields}
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  unit_kerja?: string | null;
+  nip?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
@@ -39,6 +41,49 @@ export type ${mod.entity}Record = ResponseInterface;
 }
 
 function generateHooks(mod) {
+  const masterFields = mod.fields.filter((f) => f.type === "select" && f.masterEndpoint);
+  const uniqueMasterHooks = Array.from(new Map(masterFields.map((f) => [f.hookName, f])).values());
+
+  const extraOptionHooks = uniqueMasterHooks
+    .map((f) => {
+      return `export const use${f.hookName}Option = (search: string = "") => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const { data, isLoading, isError, error } = useQuery({
+    queryFn: () =>
+      fetchData<any[]>(
+        \`\${url}${f.masterEndpoint}\${f.masterEndpoint.includes("?") ? "&" : "?"}search=\${encodeURIComponent(search)}\`
+      ),
+    queryKey: ["${f.masterQueryKey}", search],
+  });
+
+  let result: ListOptionSchema = [];
+  if (data && Array.isArray(data)) {
+    result = data.map((item: any) => ({
+      id: String(item.id || item.value || ""),
+      value: String(
+        item.title ||
+        item.judul ||
+        item.nama ||
+        item.name ||
+        item.uraian ||
+        item.sekolah ||
+        item.nama_kombel ||
+        item.id ||
+        ""
+      ),
+    }));
+  }
+
+  return {
+    options: result,
+    isLoading,
+    isError,
+    error,
+  };
+};`;
+    })
+    .join("\n\n");
+
   return `"use client";
 
 import { fetchData } from "@/lib/api_secure";
@@ -130,14 +175,14 @@ export const useCreateMaster = () => {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
-    mutationFn: (body: Partial<ResponseInterface>) =>
-      fetchData(\`\${url}${mod.endpoint}/create\`, {
+    mutationFn: (body: any) => {
+      const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+      return fetchData(\`\${url}${mod.endpoint}/create\`, {
         method: "POST",
-        body: JSON.stringify(body),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+        body: isFormData ? body : JSON.stringify(body),
+        headers: isFormData ? undefined : { "Content-Type": "application/json" },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["${mod.queryKey}"],
@@ -157,14 +202,14 @@ export const useUpdateMaster = () => {
   const queryClient = useQueryClient();
 
   const updateMutation = useMutation({
-    mutationFn: ({ body, id }: { body: Partial<ResponseInterface>; id: string }) =>
-      fetchData(\`\${url}${mod.endpoint}/update/\${id}\`, {
+    mutationFn: ({ body, id }: { body: any; id: string }) => {
+      const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+      return fetchData(\`\${url}${mod.endpoint}/update/\${id}\`, {
         method: "PUT",
-        body: JSON.stringify(body),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+        body: isFormData ? body : JSON.stringify(body),
+        headers: isFormData ? undefined : { "Content-Type": "application/json" },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["${mod.queryKey}"] });
       swallAlert("sukses diubah", "success");
@@ -176,13 +221,31 @@ export const useUpdateMaster = () => {
 
   return updateMutation;
 };
+
+${extraOptionHooks}
 `;
 }
 
 function generateFormModal(mod) {
+  const masterFields = mod.fields.filter((f) => f.type === "select" && f.masterEndpoint);
+  const uniqueMasterHooks = Array.from(new Map(masterFields.map((f) => [f.hookName, f])).values());
+
+  const hookImports =
+    uniqueMasterHooks.length > 0
+      ? `import { ${uniqueMasterHooks.map((f) => `use${f.hookName}Option`).join(", ")} } from "../hooks/crud";`
+      : "";
+
+  const hookCalls = uniqueMasterHooks
+    .map(
+      (f) =>
+        `  const { options: ${f.hookName.toLowerCase()}Options, isLoading: ${f.hookName.toLowerCase()}Loading } = use${f.hookName}Option();`
+    )
+    .join("\n");
+
   const formFields = mod.fields
     .map((f) => {
       const requiredMark = f.required ? ` <span className="text-rose-500">*</span>` : "";
+
       if (f.type === "textarea") {
         return `        <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
@@ -252,8 +315,55 @@ function generateFormModal(mod) {
             }
           />
         </div>`;
-      } else {
-        return `        <div>
+      } else if (f.type === "select") {
+        if (f.masterEndpoint) {
+          return `        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            ${f.label}${requiredMark}
+          </label>
+          <Select
+            ${f.required ? "required" : ""}
+            value={(formData as any).${f.name} || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                ${f.name}: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: ${f.hookName.toLowerCase()}Loading ? "Memuat opsi data master..." : "-- ${f.placeholder || `Pilih ${f.label}`} --" },
+              ...${f.hookName.toLowerCase()}Options.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
+          />
+        </div>`;
+        } else if (f.options) {
+          const optStr = JSON.stringify(f.options);
+          return `        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            ${f.label}${requiredMark}
+          </label>
+          <Select
+            ${f.required ? "required" : ""}
+            value={(formData as any).${f.name} ?? ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                ${f.name}: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: "-- ${f.placeholder || `Pilih ${f.label}`} --" },
+              ...${optStr}
+            ]}
+          />
+        </div>`;
+        }
+      }
+
+      return `        <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
             ${f.label}${requiredMark}
           </label>
@@ -269,13 +379,13 @@ function generateFormModal(mod) {
             placeholder="${f.placeholder || ""}"
           />
         </div>`;
-      }
     })
     .join("\n\n");
 
   return `import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+${hookImports}
 
 interface Form${mod.entity}ModalProps {
   isOpen: boolean;
@@ -296,6 +406,8 @@ export default function Form${mod.entity}Modal({
   onSubmit,
   isLoading = false,
 }: Form${mod.entity}ModalProps) {
+${hookCalls}
+
   return (
     <Modal
       isOpen={isOpen}
@@ -334,6 +446,25 @@ ${formFields}
 function generateDetailModal(mod) {
   const detailRows = mod.fields
     .map((f) => {
+      if (f.type === "file") {
+        return `          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">${f.label}</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {(record as any).${f.name} ? (
+                <a
+                  href={String((record as any).${f.name})}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-800 underline hover:text-amber-900 inline-flex items-center gap-1 font-mono text-[11px]"
+                >
+                  📄 Lihat / Unduh Berkas
+                </a>
+              ) : (
+                "-"
+              )}
+            </span>
+          </div>`;
+      }
       return `          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">${f.label}</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
@@ -547,7 +678,7 @@ ${editFormEntries}
       (record as any).sekolah ||
       (record as any).nama_kombel ||
       (record as any).kegiatan ||
-      (record as any).indikator ||
+      (record as any).uraian ||
       (record as any).isi ||
       "data ini";
 
@@ -571,7 +702,22 @@ ${editFormEntries}
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload: Partial<ResponseInterface> = { ...formData };
+    const hasFile = Object.values(formData).some(
+      (v) => typeof File !== "undefined" && v instanceof File
+    );
+
+    let payload: any;
+    if (hasFile) {
+      const fd = new FormData();
+      Object.entries(formData).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== "") {
+          fd.append(k, v instanceof File ? v : String(v));
+        }
+      });
+      payload = fd;
+    } else {
+      payload = { ...formData };
+    }
 
     if (formMode === "add") {
       createMutation.mutate(payload, {
@@ -635,7 +781,7 @@ ${editFormEntries}
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
-              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">${mod.category}</h4>
+              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">{${JSON.stringify(mod.category)}}</h4>
               <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
             </div>
             <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
@@ -648,10 +794,13 @@ ${editFormEntries}
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-[#7d7152] font-medium">Status API</p>
-              <h4 className="text-2xl font-bold text-emerald-700 mt-1">Terhubung</h4>
-              <p className="text-[11px] text-emerald-600 mt-0.5">FastAPI & MySQL</p>
+              <h4 className="text-sm font-semibold text-emerald-700 mt-1 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Terhubung
+              </h4>
+              <p className="text-[10px] text-[#7d7152] mt-0.5 font-mono truncate max-w-[140px]">${mod.endpoint}</p>
             </div>
-            <span className="text-3xl p-3 bg-emerald-50 rounded-2xl border border-emerald-200/50">
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
               ⚡
             </span>
           </div>
@@ -660,49 +809,50 @@ ${editFormEntries}
         <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-[#7d7152] font-medium">Standar Data</p>
-              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Modular</h4>
-              <p className="text-[11px] text-blue-700 mt-0.5">master pattern</p>
+              <p className="text-xs text-[#7d7152] font-medium">Otoritas Akses</p>
+              <h4 className="text-sm font-semibold text-[#2d2410] mt-1">Operator & Admin</h4>
+              <p className="text-[11px] text-[#7d7152] mt-0.5">Role ASN & Dinas</p>
             </div>
-            <span className="text-3xl p-3 bg-blue-50 rounded-2xl border border-blue-200/50">
-              📋
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              🔐
             </span>
           </div>
         </Card>
       </div>
 
-      <Card className="rounded-2xl border-white/80 bg-white/70 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-[#e2d9c8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex-1 max-w-sm">
+      <Card className="p-6 rounded-3xl bg-white/80 border-white/80 space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="relative flex-1 max-w-sm">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7d7152]">
+              🔍
+            </span>
             <Input
               type="text"
-              placeholder="Cari data ${mod.title.toLowerCase()}..."
+              placeholder="Cari ${mod.title}..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full text-xs"
+              className="pl-9"
             />
           </div>
-
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#7d7152]">Tampilkan:</span>
+            <span className="text-xs text-[#7d7152]">Baris per hal:</span>
             <select
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value));
                 setPage(1);
               }}
-              aria-label="Jumlah data per halaman"
-              className="text-xs bg-white border border-[#d5cbba] rounded-lg px-2 py-1.5 text-[#2d2410] focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="text-xs bg-white border border-[#e2d9c8] rounded-xl px-2 py-1.5 text-[#2d2410] outline-none"
             >
-              <option value={5}>5 baris</option>
-              <option value={10}>10 baris</option>
-              <option value={20}>20 baris</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
             </select>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+        <div className="overflow-x-auto rounded-2xl border border-[#e2d9c8]/80">
+          <table className="w-full text-xs text-left">
             <thead>
               <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
                 <th className="py-3 px-4 w-12 text-center">No</th>
@@ -723,7 +873,7 @@ ${tableHeaders}
               ) : isError ? (
                 <tr>
                   <td colSpan={${totalCols}} className="py-12 text-center text-rose-700">
-                    <p className="font-semibold">Gagal memuat data ${mod.title.toLowerCase()}</p>
+                    <p className="font-semibold">Gagal memuat data ${mod.title}</p>
                     <p className="text-[11px] mt-1 text-[#7d7152]">
                       {error?.message || "Terjadi kesalahan koneksi ke server."}
                     </p>
@@ -744,51 +894,48 @@ ${tableHeaders}
                     <p className="font-semibold text-sm text-[#2d2410]">
                       Belum ada data ${mod.title}
                     </p>
-                    <p className="text-xs text-[#9c8e6b] mt-0.5">
-                      {debouncedSearch
-                        ? \`Tidak ada data yang cocok dengan "\${debouncedSearch}"\`
-                        : "Klik tombol '+ Tambah ${mod.title}' untuk menambahkan data baru."}
+                    <p className="text-[11px] mt-0.5">
+                      Klik tombol "+ Tambah ${mod.title}" untuk membuat data pertama.
                     </p>
                   </td>
                 </tr>
               ) : (
                 rawList.map((item, index) => {
                   const no = listindex(pageSize, page, index);
-
                   return (
                     <tr
                       key={item.id}
-                      className="hover:bg-amber-50/40 transition-colors duration-150"
+                      className="hover:bg-amber-50/50 transition-colors duration-150"
                     >
                       <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
                         {no}
                       </td>
 ${tableCells}
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             type="button"
                             onClick={() => handleOpenDetail(item)}
-                            title="Detail Lembar Data"
-                            className="p-1 rounded-lg hover:bg-amber-100 text-[#7d7152] hover:text-[#2d2410] transition-colors"
+                            title="Detail"
+                            className="p-1.5 rounded-lg border border-[#e2d9c8] hover:bg-amber-100/60 text-[#7d7152] transition-colors"
                           >
                             👁️
                           </button>
                           <button
                             type="button"
                             onClick={() => handleOpenEdit(item)}
-                            title="Edit Data"
-                            className="p-1 rounded-lg hover:bg-amber-100 text-amber-700 hover:text-amber-900 transition-colors"
+                            title="Edit"
+                            className="p-1.5 rounded-lg border border-[#e2d9c8] hover:bg-amber-100/60 text-[#7d7152] transition-colors"
                           >
-                            ✏️
+                            ✎
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            title="Hapus Data"
-                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 transition-colors"
+                            title="Hapus"
+                            className="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 transition-colors"
                           >
-                            🗑️
+                            🗑
                           </button>
                         </div>
                       </td>
@@ -800,13 +947,12 @@ ${tableCells}
           </table>
         </div>
 
-        <div className="p-4 border-t border-[#e2d9c8] bg-white/40">
+        <div className="pt-2">
           <Pagination
-            page={page}
+            currentPage={page}
+            totalCount={totalItems}
             pageSize={pageSize}
-            total={totalItems}
             onPageChange={(p) => setPage(p)}
-            onPageSizeChange={(s) => setPageSize(s)}
           />
         </div>
       </Card>
@@ -836,6 +982,11 @@ function processAll() {
   console.log(`Starting refactoring for ${modules.length} operational modules...`);
 
   for (const mod of modules) {
+    if (mod.skipRefactor) {
+      console.log(`⏩ [${mod.category}] ${mod.title} -> Skipped (Preserved Custom Work)`);
+      continue;
+    }
+
     const targetDir = path.join(adminRoot, mod.dir);
     const hooksDir = path.join(targetDir, "hooks");
     const componentsDir = path.join(targetDir, "components");
@@ -866,7 +1017,7 @@ function processAll() {
     console.log(`✅ [${mod.category}] ${mod.title} -> ${mod.dir}`);
   }
 
-  console.log(`🎉 Finished refactoring all ${modules.length} modules!`);
+  console.log(`🎉 Finished refactoring all operational modules!`);
 }
 
 processAll();

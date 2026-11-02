@@ -10,9 +10,9 @@ import {
   Pagination,
 } from "@/app/(admin)/_components/ui";
 
-import { ResponseInterface, GalleryKegiatanTkPaudRecord } from "./types";
-import FormGalleryKegiatanTkPaudModal from "./components/FormGalleryKegiatanTkPaudModal";
-import DetailGalleryKegiatanTkPaudModal from "./components/DetailGalleryKegiatanTkPaudModal";
+import { ResponseInterface, KegiatanTkPaudRecord } from "./types";
+import FormKegiatanTkPaudModal from "./components/FormKegiatanTkPaudModal";
+import DetailKegiatanTkPaudModal from "./components/DetailKegiatanTkPaudModal";
 import {
   useResponseListMaster,
   useDeleteMaster,
@@ -21,7 +21,7 @@ import {
 } from "./hooks/crud";
 import { listindex } from "@/utilities/pagination";
 
-export default function GalleryKegiatanTkPaudPage() {
+export default function KegiatanTkPaudPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -50,7 +50,7 @@ export default function GalleryKegiatanTkPaudPage() {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<GalleryKegiatanTkPaudRecord | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<KegiatanTkPaudRecord | null>(null);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
 
   const initialForm: Partial<ResponseInterface> = {
@@ -67,7 +67,7 @@ export default function GalleryKegiatanTkPaudPage() {
     setFormData(initialForm);
   };
 
-  const rawList: GalleryKegiatanTkPaudRecord[] = useMemo(() => {
+  const rawList: KegiatanTkPaudRecord[] = useMemo(() => {
     if (!List?.data || !Array.isArray(List.data)) return [];
     return List.data;
   }, [List]);
@@ -80,7 +80,7 @@ export default function GalleryKegiatanTkPaudPage() {
     setIsFormOpen(true);
   };
 
-  const handleOpenEdit = (record: GalleryKegiatanTkPaudRecord) => {
+  const handleOpenEdit = (record: KegiatanTkPaudRecord) => {
     setFormMode("edit");
     setFormData({
       id: record.id,
@@ -93,12 +93,12 @@ export default function GalleryKegiatanTkPaudPage() {
     setIsFormOpen(true);
   };
 
-  const handleOpenDetail = (record: GalleryKegiatanTkPaudRecord) => {
+  const handleOpenDetail = (record: KegiatanTkPaudRecord) => {
     setSelectedRecord(record);
     setIsDetailOpen(true);
   };
 
-  const handleDelete = (record: GalleryKegiatanTkPaudRecord) => {
+  const handleDelete = (record: KegiatanTkPaudRecord) => {
     const displayName =
       (record as any).judul ||
       (record as any).title ||
@@ -106,12 +106,12 @@ export default function GalleryKegiatanTkPaudPage() {
       (record as any).sekolah ||
       (record as any).nama_kombel ||
       (record as any).kegiatan ||
-      (record as any).indikator ||
+      (record as any).uraian ||
       (record as any).isi ||
       "data ini";
 
     Swal.fire({
-      title: "Hapus Gallery Kegiatan TK & PAUD?",
+      title: "Hapus Kegiatan TK & PAUD?",
       text: `Apakah Anda yakin ingin menghapus "${displayName}"?`,
       icon: "warning",
       showCancelButton: true,
@@ -130,7 +130,22 @@ export default function GalleryKegiatanTkPaudPage() {
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload: Partial<ResponseInterface> = { ...formData };
+    const hasFile = Object.values(formData).some(
+      (v) => typeof File !== "undefined" && v instanceof File
+    );
+
+    let payload: any;
+    if (hasFile) {
+      const fd = new FormData();
+      Object.entries(formData).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== "") {
+          fd.append(k, v instanceof File ? v : String(v));
+        }
+      });
+      payload = fd;
+    } else {
+      payload = { ...formData };
+    }
 
     if (formMode === "add") {
       createMutation.mutate(payload, {
@@ -156,8 +171,8 @@ export default function GalleryKegiatanTkPaudPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Gallery Kegiatan TK & PAUD"
-        description="Dokumentasi kreativitas, transisi PAUD ke SD menyenangkan, dan parenting."
+        title="Kegiatan TK & PAUD"
+        description="Dokumentasi ragam kegiatan belajar sambil bermain dan penguatan karakter usia dini."
         action={
           <div className="flex items-center gap-2">
             <Button
@@ -170,7 +185,7 @@ export default function GalleryKegiatanTkPaudPage() {
               🔄 Refresh
             </Button>
             <Button variant="gold" size="sm" onClick={handleOpenAdd}>
-              + Tambah Gallery Kegiatan TK & PAUD
+              + Tambah Kegiatan TK & PAUD
             </Button>
           </div>
         }
@@ -185,7 +200,7 @@ export default function GalleryKegiatanTkPaudPage() {
               <p className="text-[11px] text-emerald-700 mt-0.5">Operasional Terdaftar</p>
             </div>
             <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
-              🎈
+              🎨
             </span>
           </div>
         </Card>
@@ -194,7 +209,7 @@ export default function GalleryKegiatanTkPaudPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
-              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">Gallery</h4>
+              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">{"Gallery"}</h4>
               <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
             </div>
             <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
@@ -207,10 +222,13 @@ export default function GalleryKegiatanTkPaudPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-[#7d7152] font-medium">Status API</p>
-              <h4 className="text-2xl font-bold text-emerald-700 mt-1">Terhubung</h4>
-              <p className="text-[11px] text-emerald-600 mt-0.5">FastAPI & MySQL</p>
+              <h4 className="text-sm font-semibold text-emerald-700 mt-1 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Terhubung
+              </h4>
+              <p className="text-[10px] text-[#7d7152] mt-0.5 font-mono truncate max-w-[140px]">/api/v1/admin/gallery/kegiatan-tk-paud</p>
             </div>
-            <span className="text-3xl p-3 bg-emerald-50 rounded-2xl border border-emerald-200/50">
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
               ⚡
             </span>
           </div>
@@ -219,55 +237,56 @@ export default function GalleryKegiatanTkPaudPage() {
         <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-[#7d7152] font-medium">Standar Data</p>
-              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Modular</h4>
-              <p className="text-[11px] text-blue-700 mt-0.5">master pattern</p>
+              <p className="text-xs text-[#7d7152] font-medium">Otoritas Akses</p>
+              <h4 className="text-sm font-semibold text-[#2d2410] mt-1">Operator & Admin</h4>
+              <p className="text-[11px] text-[#7d7152] mt-0.5">Role ASN & Dinas</p>
             </div>
-            <span className="text-3xl p-3 bg-blue-50 rounded-2xl border border-blue-200/50">
-              📋
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              🔐
             </span>
           </div>
         </Card>
       </div>
 
-      <Card className="rounded-2xl border-white/80 bg-white/70 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-[#e2d9c8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex-1 max-w-sm">
+      <Card className="p-6 rounded-3xl bg-white/80 border-white/80 space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="relative flex-1 max-w-sm">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7d7152]">
+              🔍
+            </span>
             <Input
               type="text"
-              placeholder="Cari data gallery kegiatan tk & paud..."
+              placeholder="Cari Kegiatan TK & PAUD..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full text-xs"
+              className="pl-9"
             />
           </div>
-
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#7d7152]">Tampilkan:</span>
+            <span className="text-xs text-[#7d7152]">Baris per hal:</span>
             <select
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value));
                 setPage(1);
               }}
-              aria-label="Jumlah data per halaman"
-              className="text-xs bg-white border border-[#d5cbba] rounded-lg px-2 py-1.5 text-[#2d2410] focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="text-xs bg-white border border-[#e2d9c8] rounded-xl px-2 py-1.5 text-[#2d2410] outline-none"
             >
-              <option value={5}>5 baris</option>
-              <option value={10}>10 baris</option>
-              <option value={20}>20 baris</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
             </select>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+        <div className="overflow-x-auto rounded-2xl border border-[#e2d9c8]/80">
+          <table className="w-full text-xs text-left">
             <thead>
               <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
                 <th className="py-3 px-4 w-12 text-center">No</th>
-                <th className="py-3 px-4">Nama Kegiatan</th>
-                <th className="py-3 px-4">Satuan PAUD</th>
-                <th className="py-3 px-4">Deskripsi</th>
+                <th className="py-3 px-4">Kegiatan</th>
+                <th className="py-3 px-4">Sekolah</th>
+                <th className="py-3 px-4">Foto</th>
                 <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
             </thead>
@@ -284,7 +303,7 @@ export default function GalleryKegiatanTkPaudPage() {
               ) : isError ? (
                 <tr>
                   <td colSpan={5} className="py-12 text-center text-rose-700">
-                    <p className="font-semibold">Gagal memuat data gallery kegiatan tk & paud</p>
+                    <p className="font-semibold">Gagal memuat data Kegiatan TK & PAUD</p>
                     <p className="text-[11px] mt-1 text-[#7d7152]">
                       {error?.message || "Terjadi kesalahan koneksi ke server."}
                     </p>
@@ -301,25 +320,22 @@ export default function GalleryKegiatanTkPaudPage() {
               ) : rawList.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-12 text-center text-[#7d7152]">
-                    <span className="text-3xl block mb-2">🎈</span>
+                    <span className="text-3xl block mb-2">🎨</span>
                     <p className="font-semibold text-sm text-[#2d2410]">
-                      Belum ada data Gallery Kegiatan TK & PAUD
+                      Belum ada data Kegiatan TK & PAUD
                     </p>
-                    <p className="text-xs text-[#9c8e6b] mt-0.5">
-                      {debouncedSearch
-                        ? `Tidak ada data yang cocok dengan "${debouncedSearch}"`
-                        : "Klik tombol '+ Tambah Gallery Kegiatan TK & PAUD' untuk menambahkan data baru."}
+                    <p className="text-[11px] mt-0.5">
+                      Klik tombol "+ Tambah Kegiatan TK & PAUD" untuk membuat data pertama.
                     </p>
                   </td>
                 </tr>
               ) : (
                 rawList.map((item, index) => {
                   const no = listindex(pageSize, page, index);
-
                   return (
                     <tr
                       key={item.id}
-                      className="hover:bg-amber-50/40 transition-colors duration-150"
+                      className="hover:bg-amber-50/50 transition-colors duration-150"
                     >
                       <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
                         {no}
@@ -331,33 +347,33 @@ export default function GalleryKegiatanTkPaudPage() {
                       {String((item as any).sekolah ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).deskripsi ?? "-")}
+                      {String((item as any).file ?? "-")}
                     </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             type="button"
                             onClick={() => handleOpenDetail(item)}
-                            title="Detail Lembar Data"
-                            className="p-1 rounded-lg hover:bg-amber-100 text-[#7d7152] hover:text-[#2d2410] transition-colors"
+                            title="Detail"
+                            className="p-1.5 rounded-lg border border-[#e2d9c8] hover:bg-amber-100/60 text-[#7d7152] transition-colors"
                           >
                             👁️
                           </button>
                           <button
                             type="button"
                             onClick={() => handleOpenEdit(item)}
-                            title="Edit Data"
-                            className="p-1 rounded-lg hover:bg-amber-100 text-amber-700 hover:text-amber-900 transition-colors"
+                            title="Edit"
+                            className="p-1.5 rounded-lg border border-[#e2d9c8] hover:bg-amber-100/60 text-[#7d7152] transition-colors"
                           >
-                            ✏️
+                            ✎
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            title="Hapus Data"
-                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 transition-colors"
+                            title="Hapus"
+                            className="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 transition-colors"
                           >
-                            🗑️
+                            🗑
                           </button>
                         </div>
                       </td>
@@ -369,18 +385,17 @@ export default function GalleryKegiatanTkPaudPage() {
           </table>
         </div>
 
-        <div className="p-4 border-t border-[#e2d9c8] bg-white/40">
+        <div className="pt-2">
           <Pagination
-            page={page}
+            currentPage={page}
+            totalCount={totalItems}
             pageSize={pageSize}
-            total={totalItems}
             onPageChange={(p) => setPage(p)}
-            onPageSizeChange={(s) => setPageSize(s)}
           />
         </div>
       </Card>
 
-      <FormGalleryKegiatanTkPaudModal
+      <FormKegiatanTkPaudModal
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         formMode={formMode}
@@ -390,7 +405,7 @@ export default function GalleryKegiatanTkPaudPage() {
         isLoading={createMutation.isPending || updateMutation.isPending}
       />
 
-      <DetailGalleryKegiatanTkPaudModal
+      <DetailKegiatanTkPaudModal
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
         record={selectedRecord}

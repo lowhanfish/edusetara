@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+
 
 interface FormJurnalKepalaSekolahModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export default function FormJurnalKepalaSekolahModal({
   onSubmit,
   isLoading = false,
 }: FormJurnalKepalaSekolahModalProps) {
+
+
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +33,7 @@ export default function FormJurnalKepalaSekolahModal({
           ? "+ Tambah Jurnal Kepala Sekolah"
           : "✎ Edit Jurnal Kepala Sekolah"
       }
-      description="Agenda supervisi manajerial, pembinaan guru, dan tata kelola satuan pendidikan."
+      description="Pencatatan aktivitas manajerial, supervisi internal guru, dan pembinaan komite sekolah."
       maxWidth="lg"
       footer={
         <>
@@ -50,93 +53,58 @@ export default function FormJurnalKepalaSekolahModal({
       <form id="form-jurnal-kepala-sekolah" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Satuan Pendidikan <span className="text-rose-500">*</span>
+            Tanggal Kegiatan <span className="text-rose-500">*</span>
           </label>
           <Input
+            type="date"
             required
-            value={(formData as any).sekolah || ""}
+            value={(formData as any).tgl || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                sekolah: e.target.value,
+                tgl: e.target.value,
               })
             }
-            placeholder="Contoh: SDN 1 Ranomeeto"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nama Aktivitas / Kegiatan <span className="text-rose-500">*</span>
+            Tajuk / Uraian Kegiatan Kepemimpinan <span className="text-rose-500">*</span>
           </label>
           <Input
             required
-            value={(formData as any).nama_kegiatan || ""}
+            value={(formData as any).uraian || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                nama_kegiatan: e.target.value,
+                uraian: e.target.value,
               })
             }
-            placeholder="Contoh: Supervisi Akademik Guru Kelas 5"
+            placeholder="Contoh: Rapat Evaluasi RKT dan RKAS"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Sasaran Supervisi
+            Target Peningkatan Tata Kelola
           </label>
           <Input
             
-            value={(formData as any).sasaran || ""}
+            value={(formData as any).target || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                sasaran: e.target.value,
+                target: e.target.value,
               })
             }
-            placeholder="Contoh: Guru Kelas 5A dan 5B"
+            placeholder="Contoh: Kepatuhan 100% pelaporan ARKAS"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Tujuan Supervisi <span className="text-rose-500">*</span>
-          </label>
-          <Textarea
-            required
-            rows={3}
-            value={(formData as any).tujuan || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                tujuan: e.target.value,
-              })
-            }
-            placeholder="Tujuan peningkatan kompetensi pedagogik..."
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Keterlibatan Pihak
-          </label>
-          <Input
-            
-            value={(formData as any).keterlibatan || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                keterlibatan: e.target.value,
-              })
-            }
-            placeholder="Contoh: Komite Sekolah, Tim Kurikulum"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Hasil Temuan & Catatan
+            Hasil / Capaian Kegiatan
           </label>
           <Textarea
             
@@ -148,42 +116,58 @@ export default function FormJurnalKepalaSekolahModal({
                 hasil: e.target.value,
               })
             }
-            placeholder="Catatan hasil pemantauan di kelas..."
+            placeholder="Hasil evaluasi..."
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Rencana Tindak Lanjut
+            Pihak yang Terlibat
+          </label>
+          <Input
+            
+            value={(formData as any).keterlibatan || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                keterlibatan: e.target.value,
+              })
+            }
+            placeholder="Contoh: Seluruh Dewan Guru dan Komite"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Catatan Tambahan / Rekomendasi
           </label>
           <Textarea
             
             rows={3}
-            value={(formData as any).tindak_lanjut || ""}
+            value={(formData as any).keterangan || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                tindak_lanjut: e.target.value,
+                keterangan: e.target.value,
               })
             }
-            placeholder="Bimbingan teknis penyusunan modul..."
+            placeholder="Catatan..."
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Status Pelaksanaan <span className="text-rose-500">*</span>
+            Dokumen / Berita Acara (PDF/Gambar)
           </label>
-          <Input
-            required
-            value={(formData as any).status || ""}
-            onChange={(e) =>
+          <FileInput
+            value={(formData as any).file || ""}
+            onChange={(fileName) =>
               setFormData({
                 ...formData,
-                status: e.target.value,
+                file: fileName,
               })
             }
-            placeholder="Selesai / Terjadwal"
+            helperText="Unggah dokumen pendukung"
           />
         </div>
       </form>

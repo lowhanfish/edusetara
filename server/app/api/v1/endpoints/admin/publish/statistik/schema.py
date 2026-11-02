@@ -8,12 +8,18 @@ from app.global_schemas.operational.base_schema import (
 
 
 class StatistikItemBase(OperationalBase):
-    indicator: str
-    value: str
+    indikator: str | None = None
+    indicator: str | None = None
+    kategori: str | None = None
     category: str | None = None
+    nilai: str | None = None
+    value: str | None = None
+    satuan: str | None = None
     unit: str | None = None
+    tahun: str | int | None = None
     period: str | None = None
     trend: str | None = None
+    keterangan: str | None = None
 
 
 class StatistikItemCreate(StatistikItemBase):
@@ -23,21 +29,33 @@ class StatistikItemCreate(StatistikItemBase):
 class StatistikItemUpdate(BaseModel):
     nip: str | None = None
     unit_kerja: str | None = None
+    indikator: str | None = None
     indicator: str | None = None
-    value: str | None = None
+    kategori: str | None = None
     category: str | None = None
+    nilai: str | None = None
+    value: str | None = None
+    satuan: str | None = None
     unit: str | None = None
+    tahun: str | int | None = None
     period: str | None = None
     trend: str | None = None
+    keterangan: str | None = None
 
 
 class StatistikItemResponse(OperationalResponse):
-    indicator: str
-    value: str
+    indikator: str | None = None
+    indicator: str | None = None
+    kategori: str | None = None
     category: str | None = None
+    nilai: str | None = None
+    value: str | None = None
+    satuan: str | None = None
     unit: str | None = None
+    tahun: str | int | None = None
     period: str | None = None
     trend: str | None = None
+    keterangan: str | None = None
 
 
 class StatistikItemResponseList(BaseModel):

@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+
 
 interface FormVerifikasiRekonsiliasiBospModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export default function FormVerifikasiRekonsiliasiBospModal({
   onSubmit,
   isLoading = false,
 }: FormVerifikasiRekonsiliasiBospModalProps) {
+
+
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +33,7 @@ export default function FormVerifikasiRekonsiliasiBospModal({
           ? "+ Tambah Verifikasi Usulan Rekonsiliasi Dana BOSP"
           : "✎ Edit Verifikasi Usulan Rekonsiliasi Dana BOSP"
       }
-      description="Validasi kepatuhan pembukuan, faktur belanja, dan setoran pajak dana BOSP sekolah."
+      description="Verifikasi dokumen pertanggungjawaban (SPJ) dana BOSP satuan pendidikan oleh dinas."
       maxWidth="lg"
       footer={
         <>
@@ -50,10 +53,10 @@ export default function FormVerifikasiRekonsiliasiBospModal({
       <form id="form-verifikasi-rekonsiliasi-bosp" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nama Satuan Pendidikan <span className="text-rose-500">*</span>
+            Nama Satuan Pendidikan
           </label>
           <Input
-            required
+            
             value={(formData as any).sekolah || ""}
             onChange={(e) =>
               setFormData({
@@ -61,16 +64,16 @@ export default function FormVerifikasiRekonsiliasiBospModal({
                 sekolah: e.target.value,
               })
             }
-            placeholder="Contoh: SDN 1 Ranomeeto"
+            placeholder="Sekolah pengusul"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Tahap BOSP <span className="text-rose-500">*</span>
+            Semester / Tahap
           </label>
           <Input
-            required
+            
             value={(formData as any).tahap || ""}
             onChange={(e) =>
               setFormData({
@@ -78,35 +81,34 @@ export default function FormVerifikasiRekonsiliasiBospModal({
                 tahap: e.target.value,
               })
             }
-            placeholder="Contoh: Tahap 1 / Tahap 2"
+            placeholder="Semester I / Semester II"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Tahun Anggaran <span className="text-rose-500">*</span>
+            Tahun Anggaran
           </label>
           <Input
-            type="number"
-            required
-            value={(formData as any).tahun ?? ""}
+            
+            value={(formData as any).tahun || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                tahun: e.target.value === "" ? null : Number(e.target.value),
+                tahun: e.target.value,
               })
             }
-            placeholder="Contoh: 2026"
+            placeholder="2026"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nominal Disetujui (Rp) <span className="text-rose-500">*</span>
+            Nominal Dana Disetujui (Rp)
           </label>
           <Input
             type="number"
-            required
+            
             value={(formData as any).nominal_disetujui ?? ""}
             onChange={(e) =>
               setFormData({
@@ -114,30 +116,33 @@ export default function FormVerifikasiRekonsiliasiBospModal({
                 nominal_disetujui: e.target.value === "" ? null : Number(e.target.value),
               })
             }
-            placeholder="Contoh: 95000000"
+            placeholder="Nominal disetujui"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Status Rekonsiliasi <span className="text-rose-500">*</span>
+            Status Verifikasi Tim Dinas <span className="text-rose-500">*</span>
           </label>
-          <Input
+          <Select
             required
-            value={(formData as any).status_verifikasi || ""}
+            value={(formData as any).status_verifikasi ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
                 status_verifikasi: e.target.value,
               })
             }
-            placeholder="Contoh: Rekonsiliasi Selesai / Siap BA / Belum Lengkap"
+            options={[
+              { value: "", label: "-- Pilih status verifikasi --" },
+              ...[{"value":"Sedang Diproses Verifikasi","label":"Sedang Diproses Verifikasi"},{"value":"Cek Benar","label":"Tahap Cek Benar (Kesesuaian Angka)"},{"value":"Cek Lengkap","label":"Tahap Cek Lengkap (26 Berkas Valid)"},{"value":"Disetujui","label":"Disetujui (Bebas Rekonsiliasi)"},{"value":"Perbaikan","label":"Perlu Koreksi Berkas SPJ"}]
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Catatan Tim Verifikasi BOSP
+            Catatan Hasil Koreksi Verifikator
           </label>
           <Textarea
             
@@ -149,7 +154,7 @@ export default function FormVerifikasiRekonsiliasiBospModal({
                 catatan_verifikator: e.target.value,
               })
             }
-            placeholder="Catatan kesesuaian berkas pajak dan BKU..."
+            placeholder="Catatan koreksi SPJ..."
           />
         </div>
       </form>

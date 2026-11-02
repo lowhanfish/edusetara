@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+
 
 interface FormPiagamSertifikatModalProps {
   isOpen: boolean;
@@ -21,16 +22,18 @@ export default function FormPiagamSertifikatModal({
   onSubmit,
   isLoading = false,
 }: FormPiagamSertifikatModalProps) {
+
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={
         formMode === "add"
-          ? "+ Tambah Piagam Sertifikat"
-          : "✎ Edit Piagam Sertifikat"
+          ? "+ Tambah Piagam & Sertifikat"
+          : "✎ Edit Piagam & Sertifikat"
       }
-      description="Pencatatan dan arsip digital piagam penghargaan, bimtek, pelatihan, dan sertifikat kompetensi."
+      description="Pencatatan prestasi, penghargaan kejuaraan dan piagam sertifikat tingkat Guru, Siswa, dan Sekolah."
       maxWidth="lg"
       footer={
         <>
@@ -41,8 +44,8 @@ export default function FormPiagamSertifikatModal({
             {isLoading
               ? "Menyimpan..."
               : formMode === "add"
-              ? "Simpan Piagam Sertifikat"
-              : "Perbarui Piagam Sertifikat"}
+              ? "Simpan Piagam & Sertifikat"
+              : "Perbarui Piagam & Sertifikat"}
           </Button>
         </>
       }
@@ -50,7 +53,44 @@ export default function FormPiagamSertifikatModal({
       <form id="form-piagam-sertifikat" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nama Pelatihan / Bimtek / Lomba <span className="text-rose-500">*</span>
+            Kategori Penerima Penghargaan <span className="text-rose-500">*</span>
+          </label>
+          <Select
+            required
+            value={(formData as any).kategori ?? ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                kategori: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: "-- Pilih kategori penerima --" },
+              ...[{"value":"Siswa","label":"Peserta Didik (Siswa)"},{"value":"Guru","label":"Pendidik (Guru)"},{"value":"Sekolah","label":"Satuan Pendidikan (Sekolah)"}]
+            ]}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Nama Penerima Penghargaan <span className="text-rose-500">*</span>
+          </label>
+          <Input
+            required
+            value={(formData as any).nama || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                nama: e.target.value,
+              })
+            }
+            placeholder="Nama penerima"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Nama Ajang / Kompetisi <span className="text-rose-500">*</span>
           </label>
           <Input
             required
@@ -61,39 +101,58 @@ export default function FormPiagamSertifikatModal({
                 kegiatan: e.target.value,
               })
             }
-            placeholder="Contoh: Bimtek Kurikulum Merdeka Berkelanjutan"
+            placeholder="Contoh: Olimpiade Sains Nasional"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Lembaga / Instansi Penyelenggara <span className="text-rose-500">*</span>
+            Capaian Juara / Penghargaan
           </label>
           <Input
-            required
-            value={(formData as any).penyelenggara || ""}
+            
+            value={(formData as any).juara || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                penyelenggara: e.target.value,
+                juara: e.target.value,
               })
             }
-            placeholder="Contoh: Balai Guru Penggerak Sultra"
+            placeholder="Contoh: Juara 1 Medali Emas"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Tahun Perolehan <span className="text-rose-500">*</span>
+            Tingkat Kejuaraan
           </label>
-          <Input
-            type="number"
-            required
-            value={(formData as any).tahun ?? ""}
+          <Select
+            
+            value={(formData as any).tingkat ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                tahun: e.target.value === "" ? null : Number(e.target.value),
+                tingkat: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: "-- Pilih tingkat kejuaraan --" },
+              ...[{"value":"Kecamatan","label":"Tingkat Kecamatan"},{"value":"Kabupaten","label":"Tingkat Kabupaten"},{"value":"Provinsi","label":"Tingkat Provinsi"},{"value":"Nasional","label":"Tingkat Nasional"},{"value":"Internasional","label":"Tingkat Internasional"}]
+            ]}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Tahun Prestasi
+          </label>
+          <Input
+            
+            value={(formData as any).tahun || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                tahun: e.target.value,
               })
             }
             placeholder="Contoh: 2026"
@@ -102,41 +161,24 @@ export default function FormPiagamSertifikatModal({
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Lokasi Pelaksanaan
+            Instansi / Lembaga Penyelenggara
           </label>
           <Input
             
-            value={(formData as any).tempat_pelaksana || ""}
+            value={(formData as any).penyelenggara || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                tempat_pelaksana: e.target.value,
+                penyelenggara: e.target.value,
               })
             }
-            placeholder="Contoh: Hotel Claro Kendari"
+            placeholder="Contoh: Balai Pengembangan Talenta Indonesia"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Peran / Predikat <span className="text-rose-500">*</span>
-          </label>
-          <Input
-            required
-            value={(formData as any).sebagai || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                sebagai: e.target.value,
-              })
-            }
-            placeholder="Contoh: Peserta / Narasumber / Juara 1"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Berkas Digital Sertifikat (PDF)
+            Pindaian Piagam / Sertifikat (PDF/Gambar)
           </label>
           <FileInput
             value={(formData as any).file || ""}
@@ -146,7 +188,7 @@ export default function FormPiagamSertifikatModal({
                 file: fileName,
               })
             }
-            helperText="Unggah dokumen PDF sertifikat"
+            helperText="Unggah piagam penghargaan"
           />
         </div>
       </form>

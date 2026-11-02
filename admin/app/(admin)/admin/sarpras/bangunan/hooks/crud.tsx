@@ -89,14 +89,14 @@ export const useCreateMaster = () => {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
-    mutationFn: (body: Partial<ResponseInterface>) =>
-      fetchData(`${url}/api/v1/admin/sarpras/bangunan/create`, {
+    mutationFn: (body: any) => {
+      const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+      return fetchData(`${url}/api/v1/admin/sarpras/bangunan/create`, {
         method: "POST",
-        body: JSON.stringify(body),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+        body: isFormData ? body : JSON.stringify(body),
+        headers: isFormData ? undefined : { "Content-Type": "application/json" },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["sarpras-bangunan"],
@@ -116,14 +116,14 @@ export const useUpdateMaster = () => {
   const queryClient = useQueryClient();
 
   const updateMutation = useMutation({
-    mutationFn: ({ body, id }: { body: Partial<ResponseInterface>; id: string }) =>
-      fetchData(`${url}/api/v1/admin/sarpras/bangunan/update/${id}`, {
+    mutationFn: ({ body, id }: { body: any; id: string }) => {
+      const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+      return fetchData(`${url}/api/v1/admin/sarpras/bangunan/update/${id}`, {
         method: "PUT",
-        body: JSON.stringify(body),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+        body: isFormData ? body : JSON.stringify(body),
+        headers: isFormData ? undefined : { "Content-Type": "application/json" },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sarpras-bangunan"] });
       swallAlert("sukses diubah", "success");
@@ -134,4 +134,148 @@ export const useUpdateMaster = () => {
   });
 
   return updateMutation;
+};
+
+export const useKepemilikanOption = (search: string = "") => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const { data, isLoading, isError, error } = useQuery({
+    queryFn: () =>
+      fetchData<any[]>(
+        `${url}/api/v1/admin/master/sarpras/kepemilikan/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+      ),
+    queryKey: ["master-sarpras-kepemilikan-option", search],
+  });
+
+  let result: ListOptionSchema = [];
+  if (data && Array.isArray(data)) {
+    result = data.map((item: any) => ({
+      id: String(item.id || item.value || ""),
+      value: String(
+        item.title ||
+        item.judul ||
+        item.nama ||
+        item.name ||
+        item.uraian ||
+        item.sekolah ||
+        item.nama_kombel ||
+        item.id ||
+        ""
+      ),
+    }));
+  }
+
+  return {
+    options: result,
+    isLoading,
+    isError,
+    error,
+  };
+};
+
+export const useKondisiOption = (search: string = "") => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const { data, isLoading, isError, error } = useQuery({
+    queryFn: () =>
+      fetchData<any[]>(
+        `${url}/api/v1/admin/master/sarpras/kondisi-alat/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+      ),
+    queryKey: ["master-sarpras-kondisi-option", search],
+  });
+
+  let result: ListOptionSchema = [];
+  if (data && Array.isArray(data)) {
+    result = data.map((item: any) => ({
+      id: String(item.id || item.value || ""),
+      value: String(
+        item.title ||
+        item.judul ||
+        item.nama ||
+        item.name ||
+        item.uraian ||
+        item.sekolah ||
+        item.nama_kombel ||
+        item.id ||
+        ""
+      ),
+    }));
+  }
+
+  return {
+    options: result,
+    isLoading,
+    isError,
+    error,
+  };
+};
+
+export const useJenisBantuanOption = (search: string = "") => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const { data, isLoading, isError, error } = useQuery({
+    queryFn: () =>
+      fetchData<any[]>(
+        `${url}/api/v1/admin/master/sarpras/jenis-bantuan/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+      ),
+    queryKey: ["master-sarpras-jenis-bantuan-option", search],
+  });
+
+  let result: ListOptionSchema = [];
+  if (data && Array.isArray(data)) {
+    result = data.map((item: any) => ({
+      id: String(item.id || item.value || ""),
+      value: String(
+        item.title ||
+        item.judul ||
+        item.nama ||
+        item.name ||
+        item.uraian ||
+        item.sekolah ||
+        item.nama_kombel ||
+        item.id ||
+        ""
+      ),
+    }));
+  }
+
+  return {
+    options: result,
+    isLoading,
+    isError,
+    error,
+  };
+};
+
+export const useSumberDanaOption = (search: string = "") => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const { data, isLoading, isError, error } = useQuery({
+    queryFn: () =>
+      fetchData<any[]>(
+        `${url}/api/v1/admin/master/sarpras/sumber-dana/option${f.masterEndpoint.includes("?") ? "&" : "?"}search=${encodeURIComponent(search)}`
+      ),
+    queryKey: ["master-sarpras-sumber-dana-option", search],
+  });
+
+  let result: ListOptionSchema = [];
+  if (data && Array.isArray(data)) {
+    result = data.map((item: any) => ({
+      id: String(item.id || item.value || ""),
+      value: String(
+        item.title ||
+        item.judul ||
+        item.nama ||
+        item.name ||
+        item.uraian ||
+        item.sekolah ||
+        item.nama_kombel ||
+        item.id ||
+        ""
+      ),
+    }));
+  }
+
+  return {
+    options: result,
+    isLoading,
+    isError,
+    error,
+  };
 };

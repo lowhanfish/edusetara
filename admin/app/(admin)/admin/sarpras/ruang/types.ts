@@ -1,15 +1,15 @@
 export interface CreateInterface {
-  sekolah: string | null;
-  bangunan?: string | null;
-  kode_ruang?: string | null;
-  nama_ruang: string | null;
-  panjang?: number | null;
-  lebar?: number | null;
-  kondisi: string | null;
+  bangunan_id?: string | null;
+  kelas_id?: string | null;
+  nama: string | null;
+  luas?: string | null;
+  kondisi_id?: string | null;
 }
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  unit_kerja?: string | null;
+  nip?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;

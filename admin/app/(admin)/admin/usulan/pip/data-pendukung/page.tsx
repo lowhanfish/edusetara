@@ -10,9 +10,9 @@ import {
   Pagination,
 } from "@/app/(admin)/_components/ui";
 
-import { ResponseInterface, PipDataPendukungRecord } from "./types";
-import FormPipDataPendukungModal from "./components/FormPipDataPendukungModal";
-import DetailPipDataPendukungModal from "./components/DetailPipDataPendukungModal";
+import { ResponseInterface, UsulanPipPendukungRecord } from "./types";
+import FormUsulanPipPendukungModal from "./components/FormUsulanPipPendukungModal";
+import DetailUsulanPipPendukungModal from "./components/DetailUsulanPipPendukungModal";
 import {
   useResponseListMaster,
   useDeleteMaster,
@@ -21,7 +21,7 @@ import {
 } from "./hooks/crud";
 import { listindex } from "@/utilities/pagination";
 
-export default function PipDataPendukungPage() {
+export default function UsulanPipPendukungPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -50,16 +50,15 @@ export default function PipDataPendukungPage() {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<PipDataPendukungRecord | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<UsulanPipPendukungRecord | null>(null);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
 
   const initialForm: Partial<ResponseInterface> = {
-    sekolah: "",
-    nama_siswa: "",
-    nisn: "",
-    dokumen: "",
+    uraian: "",
+    jenjang_id: "",
+    nominal: null,
+    tahun: "",
     file: "",
-    keterangan: "",
   };
 
   const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
@@ -68,7 +67,7 @@ export default function PipDataPendukungPage() {
     setFormData(initialForm);
   };
 
-  const rawList: PipDataPendukungRecord[] = useMemo(() => {
+  const rawList: UsulanPipPendukungRecord[] = useMemo(() => {
     if (!List?.data || !Array.isArray(List.data)) return [];
     return List.data;
   }, [List]);
@@ -81,26 +80,25 @@ export default function PipDataPendukungPage() {
     setIsFormOpen(true);
   };
 
-  const handleOpenEdit = (record: PipDataPendukungRecord) => {
+  const handleOpenEdit = (record: UsulanPipPendukungRecord) => {
     setFormMode("edit");
     setFormData({
       id: record.id,
-      sekolah: (record as any).sekolah ?? "",
-      nama_siswa: (record as any).nama_siswa ?? "",
-      nisn: (record as any).nisn ?? "",
-      dokumen: (record as any).dokumen ?? "",
+      uraian: (record as any).uraian ?? "",
+      jenjang_id: (record as any).jenjang_id ?? "",
+      nominal: (record as any).nominal ?? "",
+      tahun: (record as any).tahun ?? "",
       file: (record as any).file ?? "",
-      keterangan: (record as any).keterangan ?? "",
     });
     setIsFormOpen(true);
   };
 
-  const handleOpenDetail = (record: PipDataPendukungRecord) => {
+  const handleOpenDetail = (record: UsulanPipPendukungRecord) => {
     setSelectedRecord(record);
     setIsDetailOpen(true);
   };
 
-  const handleDelete = (record: PipDataPendukungRecord) => {
+  const handleDelete = (record: UsulanPipPendukungRecord) => {
     const displayName =
       (record as any).judul ||
       (record as any).title ||
@@ -108,12 +106,12 @@ export default function PipDataPendukungPage() {
       (record as any).sekolah ||
       (record as any).nama_kombel ||
       (record as any).kegiatan ||
-      (record as any).indikator ||
+      (record as any).uraian ||
       (record as any).isi ||
       "data ini";
 
     Swal.fire({
-      title: "Hapus Data Pendukung?",
+      title: "Hapus Data Pendukung PIP?",
       text: `Apakah Anda yakin ingin menghapus "${displayName}"?`,
       icon: "warning",
       showCancelButton: true,
@@ -132,7 +130,22 @@ export default function PipDataPendukungPage() {
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload: Partial<ResponseInterface> = { ...formData };
+    const hasFile = Object.values(formData).some(
+      (v) => typeof File !== "undefined" && v instanceof File
+    );
+
+    let payload: any;
+    if (hasFile) {
+      const fd = new FormData();
+      Object.entries(formData).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== "") {
+          fd.append(k, v instanceof File ? v : String(v));
+        }
+      });
+      payload = fd;
+    } else {
+      payload = { ...formData };
+    }
 
     if (formMode === "add") {
       createMutation.mutate(payload, {
@@ -158,8 +171,8 @@ export default function PipDataPendukungPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Data Pendukung"
-        description="Arsip berkas SKTM, DTKS, dan dokumen pendukung usulan Program Indonesia Pintar."
+        title="Data Pendukung PIP"
+        description="Dokumentasi alokasi program bantuan PIP, SK, Berita Acara Rapat Penetapan Siswa Layak PIP."
         action={
           <div className="flex items-center gap-2">
             <Button
@@ -172,7 +185,7 @@ export default function PipDataPendukungPage() {
               🔄 Refresh
             </Button>
             <Button variant="gold" size="sm" onClick={handleOpenAdd}>
-              + Tambah Data Pendukung
+              + Tambah Data Pendukung PIP
             </Button>
           </div>
         }
@@ -187,7 +200,7 @@ export default function PipDataPendukungPage() {
               <p className="text-[11px] text-emerald-700 mt-0.5">Operasional Terdaftar</p>
             </div>
             <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
-              📁
+              📑
             </span>
           </div>
         </Card>
@@ -196,7 +209,7 @@ export default function PipDataPendukungPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
-              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">Usulan Sekolah</h4>
+              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">{"Usulan Sekolah > Usulan Bantuan PIP"}</h4>
               <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
             </div>
             <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
@@ -209,10 +222,13 @@ export default function PipDataPendukungPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-[#7d7152] font-medium">Status API</p>
-              <h4 className="text-2xl font-bold text-emerald-700 mt-1">Terhubung</h4>
-              <p className="text-[11px] text-emerald-600 mt-0.5">FastAPI & MySQL</p>
+              <h4 className="text-sm font-semibold text-emerald-700 mt-1 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Terhubung
+              </h4>
+              <p className="text-[10px] text-[#7d7152] mt-0.5 font-mono truncate max-w-[140px]">/api/v1/admin/usulan/pip/data-pendukung</p>
             </div>
-            <span className="text-3xl p-3 bg-emerald-50 rounded-2xl border border-emerald-200/50">
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
               ⚡
             </span>
           </div>
@@ -221,56 +237,56 @@ export default function PipDataPendukungPage() {
         <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-[#7d7152] font-medium">Standar Data</p>
-              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">Modular</h4>
-              <p className="text-[11px] text-blue-700 mt-0.5">master pattern</p>
+              <p className="text-xs text-[#7d7152] font-medium">Otoritas Akses</p>
+              <h4 className="text-sm font-semibold text-[#2d2410] mt-1">Operator & Admin</h4>
+              <p className="text-[11px] text-[#7d7152] mt-0.5">Role ASN & Dinas</p>
             </div>
-            <span className="text-3xl p-3 bg-blue-50 rounded-2xl border border-blue-200/50">
-              📋
+            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
+              🔐
             </span>
           </div>
         </Card>
       </div>
 
-      <Card className="rounded-2xl border-white/80 bg-white/70 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-[#e2d9c8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex-1 max-w-sm">
+      <Card className="p-6 rounded-3xl bg-white/80 border-white/80 space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="relative flex-1 max-w-sm">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7d7152]">
+              🔍
+            </span>
             <Input
               type="text"
-              placeholder="Cari data data pendukung..."
+              placeholder="Cari Data Pendukung PIP..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full text-xs"
+              className="pl-9"
             />
           </div>
-
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#7d7152]">Tampilkan:</span>
+            <span className="text-xs text-[#7d7152]">Baris per hal:</span>
             <select
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value));
                 setPage(1);
               }}
-              aria-label="Jumlah data per halaman"
-              className="text-xs bg-white border border-[#d5cbba] rounded-lg px-2 py-1.5 text-[#2d2410] focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="text-xs bg-white border border-[#e2d9c8] rounded-xl px-2 py-1.5 text-[#2d2410] outline-none"
             >
-              <option value={5}>5 baris</option>
-              <option value={10}>10 baris</option>
-              <option value={20}>20 baris</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
             </select>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+        <div className="overflow-x-auto rounded-2xl border border-[#e2d9c8]/80">
+          <table className="w-full text-xs text-left">
             <thead>
               <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
                 <th className="py-3 px-4 w-12 text-center">No</th>
-                <th className="py-3 px-4">Sekolah</th>
-                <th className="py-3 px-4">Nama Siswa</th>
-                <th className="py-3 px-4">NISN</th>
-                <th className="py-3 px-4">Dokumen</th>
+                <th className="py-3 px-4">Uraian SK</th>
+                <th className="py-3 px-4">Nominal (Rp)</th>
+                <th className="py-3 px-4">Tahun</th>
                 <th className="py-3 px-4">Berkas</th>
                 <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
@@ -278,7 +294,7 @@ export default function PipDataPendukungPage() {
             <tbody className="divide-y divide-[#ece5d8]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
                       <span>Memuat data dari server...</span>
@@ -287,8 +303,8 @@ export default function PipDataPendukungPage() {
                 </tr>
               ) : isError ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-rose-700">
-                    <p className="font-semibold">Gagal memuat data data pendukung</p>
+                  <td colSpan={6} className="py-12 text-center text-rose-700">
+                    <p className="font-semibold">Gagal memuat data Data Pendukung PIP</p>
                     <p className="text-[11px] mt-1 text-[#7d7152]">
                       {error?.message || "Terjadi kesalahan koneksi ke server."}
                     </p>
@@ -304,70 +320,64 @@ export default function PipDataPendukungPage() {
                 </tr>
               ) : rawList.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-[#7d7152]">
-                    <span className="text-3xl block mb-2">📁</span>
+                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
+                    <span className="text-3xl block mb-2">📑</span>
                     <p className="font-semibold text-sm text-[#2d2410]">
-                      Belum ada data Data Pendukung
+                      Belum ada data Data Pendukung PIP
                     </p>
-                    <p className="text-xs text-[#9c8e6b] mt-0.5">
-                      {debouncedSearch
-                        ? `Tidak ada data yang cocok dengan "${debouncedSearch}"`
-                        : "Klik tombol '+ Tambah Data Pendukung' untuk menambahkan data baru."}
+                    <p className="text-[11px] mt-0.5">
+                      Klik tombol "+ Tambah Data Pendukung PIP" untuk membuat data pertama.
                     </p>
                   </td>
                 </tr>
               ) : (
                 rawList.map((item, index) => {
                   const no = listindex(pageSize, page, index);
-
                   return (
                     <tr
                       key={item.id}
-                      className="hover:bg-amber-50/40 transition-colors duration-150"
+                      className="hover:bg-amber-50/50 transition-colors duration-150"
                     >
                       <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
                         {no}
                       </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).sekolah ?? "-")}
+                      {String((item as any).uraian ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).nama_siswa ?? "-")}
+                      {String((item as any).nominal ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).nisn ?? "-")}
-                    </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).dokumen ?? "-")}
+                      {String((item as any).tahun ?? "-")}
                     </td>
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
                       {String((item as any).file ?? "-")}
                     </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             type="button"
                             onClick={() => handleOpenDetail(item)}
-                            title="Detail Lembar Data"
-                            className="p-1 rounded-lg hover:bg-amber-100 text-[#7d7152] hover:text-[#2d2410] transition-colors"
+                            title="Detail"
+                            className="p-1.5 rounded-lg border border-[#e2d9c8] hover:bg-amber-100/60 text-[#7d7152] transition-colors"
                           >
                             👁️
                           </button>
                           <button
                             type="button"
                             onClick={() => handleOpenEdit(item)}
-                            title="Edit Data"
-                            className="p-1 rounded-lg hover:bg-amber-100 text-amber-700 hover:text-amber-900 transition-colors"
+                            title="Edit"
+                            className="p-1.5 rounded-lg border border-[#e2d9c8] hover:bg-amber-100/60 text-[#7d7152] transition-colors"
                           >
-                            ✏️
+                            ✎
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDelete(item)}
-                            title="Hapus Data"
-                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 transition-colors"
+                            title="Hapus"
+                            className="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 transition-colors"
                           >
-                            🗑️
+                            🗑
                           </button>
                         </div>
                       </td>
@@ -379,18 +389,17 @@ export default function PipDataPendukungPage() {
           </table>
         </div>
 
-        <div className="p-4 border-t border-[#e2d9c8] bg-white/40">
+        <div className="pt-2">
           <Pagination
-            page={page}
+            currentPage={page}
+            totalCount={totalItems}
             pageSize={pageSize}
-            total={totalItems}
             onPageChange={(p) => setPage(p)}
-            onPageSizeChange={(s) => setPageSize(s)}
           />
         </div>
       </Card>
 
-      <FormPipDataPendukungModal
+      <FormUsulanPipPendukungModal
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         formMode={formMode}
@@ -400,7 +409,7 @@ export default function PipDataPendukungPage() {
         isLoading={createMutation.isPending || updateMutation.isPending}
       />
 
-      <DetailPipDataPendukungModal
+      <DetailUsulanPipPendukungModal
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
         record={selectedRecord}

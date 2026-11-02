@@ -46,7 +46,7 @@ export default function DetailKuotaPpdbModal({
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jenjang</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Jenjang Pendidikan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).jenjang ?? "-")}
             </span>
@@ -58,25 +58,25 @@ export default function DetailKuotaPpdbModal({
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Alokasi Zonasi (Siswa)</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Alokasi Kuota Zonasi</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).jalur_zonasi ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Alokasi Afirmasi (Siswa)</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Alokasi Kuota Afirmasi</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).jalur_afirmasi ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Alokasi Prestasi (Siswa)</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Alokasi Kuota Prestasi</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).jalur_prestasi ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Alokasi Mutasi Tugas (Siswa)</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Alokasi Kuota Mutasi</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).jalur_mutasi ?? "-")}
             </span>

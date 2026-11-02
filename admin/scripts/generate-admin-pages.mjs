@@ -11,16 +11,16 @@ const menuData = JSON.parse(fs.readFileSync(menuDataPath, "utf-8"));
 
 const existingRoutes = new Set([
   "/admin",
-  "/admin/berita",
-  "/admin/pengumuman",
-  "/admin/pendidikan",
+  "/admin/publish/berita",
+  "/admin/publish/pengumuman",
+  "/admin/publish/pendidikan",
   "/admin/sekolah",
-  "/admin/kebudayaan",
-  "/admin/layanan",
-  "/admin/statistik",
-  "/admin/profil",
-  "/admin/banner",
-  "/admin/kontak",
+  "/admin/publish/kebudayaan",
+  "/admin/publish/layanan",
+  "/admin/publish/statistik",
+  "/admin/publish/profil",
+  "/admin/publish/banner",
+  "/admin/publish/kontak",
 ]);
 
 

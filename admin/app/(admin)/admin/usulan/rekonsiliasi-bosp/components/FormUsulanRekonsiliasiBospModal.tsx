@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useKategoriSpjOption } from "../hooks/crud";
 
 interface FormUsulanRekonsiliasiBospModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export default function FormUsulanRekonsiliasiBospModal({
   onSubmit,
   isLoading = false,
 }: FormUsulanRekonsiliasiBospModalProps) {
+  const { options: kategorispjOptions, isLoading: kategorispjLoading } = useKategoriSpjOption();
+
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +33,7 @@ export default function FormUsulanRekonsiliasiBospModal({
           ? "+ Tambah Usulan Rekonsiliasi Dana BOSP"
           : "✎ Edit Usulan Rekonsiliasi Dana BOSP"
       }
-      description="Pengajuan berkas LPJ / SPJ dana BOSP reguler dan kinerja satuan pendidikan."
+      description="Pengajuan pertanggungjawaban (SPJ) keuangan dan aset BOSP ke Dinas Pendidikan dan Kebudayaan."
       maxWidth="lg"
       footer={
         <>
@@ -61,24 +64,7 @@ export default function FormUsulanRekonsiliasiBospModal({
                 sekolah: e.target.value,
               })
             }
-            placeholder="Contoh: SDN 1 Kolono"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Tahap BOSP <span className="text-rose-500">*</span>
-          </label>
-          <Input
-            required
-            value={(formData as any).tahap || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                tahap: e.target.value,
-              })
-            }
-            placeholder="Contoh: Tahap 1 / Tahap 2"
+            placeholder="Contoh: SDN 4 Ranomeeto"
           />
         </div>
 
@@ -87,13 +73,12 @@ export default function FormUsulanRekonsiliasiBospModal({
             Tahun Anggaran <span className="text-rose-500">*</span>
           </label>
           <Input
-            type="number"
             required
-            value={(formData as any).tahun ?? ""}
+            value={(formData as any).tahun || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                tahun: e.target.value === "" ? null : Number(e.target.value),
+                tahun: e.target.value,
               })
             }
             placeholder="Contoh: 2026"
@@ -102,11 +87,31 @@ export default function FormUsulanRekonsiliasiBospModal({
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nominal Usulan LPJ (Rp) <span className="text-rose-500">*</span>
+            Semester / Tahap <span className="text-rose-500">*</span>
+          </label>
+          <Select
+            required
+            value={(formData as any).tahap ?? ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                tahap: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: "-- Pilih semester --" },
+              ...[{"value":"Semester I (Januari - Juni)","label":"Semester I (Januari - Juni)"},{"value":"Semester II (Juli - Desember)","label":"Semester II (Juli - Desember)"}]
+            ]}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Nominal Penyerapan Dana BOSP (Rp)
           </label>
           <Input
             type="number"
-            required
+            
             value={(formData as any).nominal_dana ?? ""}
             onChange={(e) =>
               setFormData({
@@ -114,15 +119,15 @@ export default function FormUsulanRekonsiliasiBospModal({
                 nominal_dana: e.target.value === "" ? null : Number(e.target.value),
               })
             }
-            placeholder="Contoh: 85000000"
+            placeholder="Contoh: 50000000"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Kategori Berkas SPJ
+            Kategori Dokumen SPJ (Master Kategori)
           </label>
-          <Input
+          <Select
             
             value={(formData as any).kategori_spj || ""}
             onChange={(e) =>
@@ -131,13 +136,19 @@ export default function FormUsulanRekonsiliasiBospModal({
                 kategori_spj: e.target.value,
               })
             }
-            placeholder="Contoh: BKU, Buku Bank, Pajak, SPTJM"
+            options={[
+              { value: "", label: kategorispjLoading ? "Memuat opsi data master..." : "-- Pilih kategori SPJ BOSP --" },
+              ...kategorispjOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Berkas BKU (PDF)
+            Buku Kas Umum / BKU (PDF)
           </label>
           <FileInput
             value={(formData as any).file_bku || ""}
@@ -147,13 +158,13 @@ export default function FormUsulanRekonsiliasiBospModal({
                 file_bku: fileName,
               })
             }
-            helperText="Unggah scan BKU bertanda tangan"
+            helperText="Unggah berkas BKU"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Rekening Koran BOSP
+            Rekening Koran Bank Sultra (PDF)
           </label>
           <FileInput
             value={(formData as any).file_rekening || ""}
@@ -163,13 +174,13 @@ export default function FormUsulanRekonsiliasiBospModal({
                 file_rekening: fileName,
               })
             }
-            helperText="Unggah rekening koran bank"
+            helperText="Unggah rekening koran"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Berkas SPTJM Bermaterai
+            SPTJM BOSP Bermaterai (PDF)
           </label>
           <FileInput
             value={(formData as any).file_sptjm || ""}
@@ -179,24 +190,27 @@ export default function FormUsulanRekonsiliasiBospModal({
                 file_sptjm: fileName,
               })
             }
-            helperText="Unggah SPTJM bermaterai"
+            helperText="Unggah SPTJM"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Status Verifikasi
+            Status Usulan
           </label>
-          <Input
+          <Select
             
-            value={(formData as any).status || ""}
+            value={(formData as any).status ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
                 status: e.target.value,
               })
             }
-            placeholder="Contoh: Menunggu Verifikasi"
+            options={[
+              { value: "", label: "-- Pilih status usulan --" },
+              ...[{"value":"Sedang Diproses Verifikasi","label":"Sedang Diproses Verifikasi"},{"value":"Cek Benar","label":"Cek Benar"},{"value":"Cek Lengkap","label":"Cek Lengkap"},{"value":"Disetujui","label":"Disetujui"}]
+            ]}
           />
         </div>
       </form>

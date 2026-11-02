@@ -136,7 +136,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     checkAuth().then((currentUser) => {
       if (!currentUser && typeof window !== "undefined") {
-        window.location.replace("/");
+        window.location.replace("/login");
       }
     });
   }, [checkAuth]);

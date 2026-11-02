@@ -1,6 +1,6 @@
 export interface CreateInterface {
   judul: string | null;
-  mata_pelajaran: string | null;
+  mata_pelajaran?: string | null;
   deskripsi?: string | null;
   file?: string | null;
   link?: string | null;
@@ -8,6 +8,8 @@ export interface CreateInterface {
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  unit_kerja?: string | null;
+  nip?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
@@ -20,4 +22,4 @@ export interface ResponseListInterface {
   data: ResponseInterface[];
 }
 
-export type GalleryKegiatanGuruMgmpRecord = ResponseInterface;
+export type KegiatanGuruMgmpRecord = ResponseInterface;

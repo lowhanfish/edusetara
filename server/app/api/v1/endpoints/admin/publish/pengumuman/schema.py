@@ -10,13 +10,17 @@ from app.global_schemas.operational.base_schema import (
 class PengumumanPublishBase(OperationalBase):
     judul: str
     nomor: str | None = None
+    slug: str | None = None
     kategori: str | None = None
     ringkasan: str | None = None
+    isi: str | None = None
+    tanggal: str | None = None
     target_audience: str | None = None
     deadline: str | None = None
     lampiran: str | None = None
+    file: str | None = None
     is_important: bool | None = False
-    status: str | None = "Aktif"
+    status: str | None = "Terbit"
 
 
 class PengumumanPublishCreate(PengumumanPublishBase):
@@ -28,11 +32,15 @@ class PengumumanPublishUpdate(BaseModel):
     unit_kerja: str | None = None
     nomor: str | None = None
     judul: str | None = None
+    slug: str | None = None
     kategori: str | None = None
     ringkasan: str | None = None
+    isi: str | None = None
+    tanggal: str | None = None
     target_audience: str | None = None
     deadline: str | None = None
     lampiran: str | None = None
+    file: str | None = None
     is_important: bool | None = None
     status: str | None = None
 
@@ -40,11 +48,15 @@ class PengumumanPublishUpdate(BaseModel):
 class PengumumanPublishResponse(OperationalResponse):
     nomor: str | None = None
     judul: str
+    slug: str | None = None
     kategori: str | None = None
     ringkasan: str | None = None
+    isi: str | None = None
+    tanggal: str | None = None
     target_audience: str | None = None
     deadline: str | None = None
     lampiran: str | None = None
+    file: str | None = None
     is_important: bool | None = None
     status: str | None = None
 

@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useTriwulanOption, useJenisPenerimaOption, useKelasPenerimaOption } from "../hooks/crud";
 
 interface FormUsulanTunjanganGuruModalProps {
   isOpen: boolean;
@@ -21,6 +22,10 @@ export default function FormUsulanTunjanganGuruModal({
   onSubmit,
   isLoading = false,
 }: FormUsulanTunjanganGuruModalProps) {
+  const { options: triwulanOptions, isLoading: triwulanLoading } = useTriwulanOption();
+  const { options: jenispenerimaOptions, isLoading: jenispenerimaLoading } = useJenisPenerimaOption();
+  const { options: kelaspenerimaOptions, isLoading: kelaspenerimaLoading } = useKelasPenerimaOption();
+
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +35,7 @@ export default function FormUsulanTunjanganGuruModal({
           ? "+ Tambah Usulan Tunjangan Guru"
           : "✎ Edit Usulan Tunjangan Guru"
       }
-      description="Pengajuan dan rekap usulan tunjangan profesi, khusus, dan tamsil guru."
+      description="Permohonan aneka tunjangan pendidik (TPG, Tamsil, TKG) ke Dinas Pendidikan dan Kebudayaan."
       maxWidth="lg"
       footer={
         <>
@@ -50,84 +55,15 @@ export default function FormUsulanTunjanganGuruModal({
       <form id="form-usulan-tunjangan-guru" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nama Lengkap Guru <span className="text-rose-500">*</span>
-          </label>
-          <Input
-            required
-            value={(formData as any).nama_guru || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                nama_guru: e.target.value,
-              })
-            }
-            placeholder="Contoh: Rahmawati, S.Pd., Gr."
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            NUPTK <span className="text-rose-500">*</span>
-          </label>
-          <Input
-            required
-            value={(formData as any).nuptk || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                nuptk: e.target.value,
-              })
-            }
-            placeholder="Contoh: 1234567890123456"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Satuan Pendidikan Induk <span className="text-rose-500">*</span>
-          </label>
-          <Input
-            required
-            value={(formData as any).sekolah || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                sekolah: e.target.value,
-              })
-            }
-            placeholder="Contoh: SMPN 4 Konsel"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Jenis Tunjangan <span className="text-rose-500">*</span>
-          </label>
-          <Input
-            required
-            value={(formData as any).jenis_tunjangan || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                jenis_tunjangan: e.target.value,
-              })
-            }
-            placeholder="Contoh: TPG (Profesi) / Tunjangan Khusus 3T"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
             Tahun Anggaran <span className="text-rose-500">*</span>
           </label>
           <Input
-            type="number"
             required
-            value={(formData as any).tahun ?? ""}
+            value={(formData as any).tahun || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                tahun: e.target.value === "" ? null : Number(e.target.value),
+                tahun: e.target.value,
               })
             }
             placeholder="Contoh: 2026"
@@ -136,41 +72,112 @@ export default function FormUsulanTunjanganGuruModal({
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Semester
+            Periode Triwulan <span className="text-rose-500">*</span>
           </label>
-          <Input
-            
-            value={(formData as any).semester || ""}
+          <Select
+            required
+            value={(formData as any).triwulan_id || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                semester: e.target.value,
+                triwulan_id: e.target.value,
               })
             }
-            placeholder="Contoh: Semester Ganjil / Genap"
+            options={[
+              { value: "", label: triwulanLoading ? "Memuat opsi data master..." : "-- Pilih triwulan --" },
+              ...triwulanOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Status Usulan
+            Jenis Tunjangan (Penerima) <span className="text-rose-500">*</span>
           </label>
-          <Input
-            
-            value={(formData as any).status || ""}
+          <Select
+            required
+            value={(formData as any).jenis_id || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                status: e.target.value,
+                jenis_id: e.target.value,
               })
             }
-            placeholder="Contoh: Diajukan / Terverifikasi"
+            options={[
+              { value: "", label: jenispenerimaLoading ? "Memuat opsi data master..." : "-- Pilih jenis tunjangan --" },
+              ...jenispenerimaOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Berkas Pendukung (PDF)
+            Kelas / Kategori Penerima <span className="text-rose-500">*</span>
+          </label>
+          <Select
+            required
+            value={(formData as any).kelas_id || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                kelas_id: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: kelaspenerimaLoading ? "Memuat opsi data master..." : "-- Pilih kelas penerima --" },
+              ...kelaspenerimaOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Jumlah Guru Pengusul
+          </label>
+          <Input
+            type="number"
+            
+            value={(formData as any).jml_guru ?? ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                jml_guru: e.target.value === "" ? null : Number(e.target.value),
+              })
+            }
+            placeholder="Contoh: 1"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Nominal Usulan (Rp)
+          </label>
+          <Input
+            type="number"
+            
+            value={(formData as any).nominal ?? ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                nominal: e.target.value === "" ? null : Number(e.target.value),
+              })
+            }
+            placeholder="Contoh: 12000000"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Berkas Lampiran SKTP (PDF)
           </label>
           <FileInput
             value={(formData as any).file || ""}
@@ -180,7 +187,24 @@ export default function FormUsulanTunjanganGuruModal({
                 file: fileName,
               })
             }
-            helperText="Unggah berkas Info GTK / SKTP"
+            helperText="Unggah dokumen SKTP"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Tipe Berkas (pdf)
+          </label>
+          <Input
+            
+            value={(formData as any).file_type || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                file_type: e.target.value,
+              })
+            }
+            placeholder="pdf"
           />
         </div>
       </form>

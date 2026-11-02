@@ -13,10 +13,13 @@ export function usePublicProfiles() {
     queryFn: async () => {
       try {
         const res = await fetchData<{ total: number; data: ProfileSection[] }>(
-          `${url}/api/v1/admin/profil/read?limit=50`
+          `${url}/api/v1/publish/profil?limit=50`
         );
         if (res && Array.isArray(res.data)) {
-          return res.data;
+          return res.data.map((item) => ({
+            ...item,
+            file: item.file?.startsWith("/uploads") ? `${url}${item.file}` : item.file,
+          }));
         }
       } catch (e) {
         console.warn("[usePublicProfiles] Error:", e);
@@ -32,7 +35,7 @@ export function useSubmitContact() {
 
   const mutation = useMutation({
     mutationFn: (body: ContactMessagePayload) =>
-      fetchData(`${url}/api/v1/admin/kontak/create`, {
+      fetchData(`${url}/api/v1/publish/kontak`, {
         method: "POST",
         body: JSON.stringify({ ...body, status: "Baru" }),
         headers: { "Content-Type": "application/json" },

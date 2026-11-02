@@ -1,14 +1,16 @@
 export interface CreateInterface {
   judul: string | null;
-  tema: string | null;
+  tema?: string | null;
   penyusun?: string | null;
-  tahun?: number | null;
+  tahun?: string | null;
   file?: string | null;
   link?: string | null;
 }
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  unit_kerja?: string | null;
+  nip?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
@@ -21,4 +23,4 @@ export interface ResponseListInterface {
   data: ResponseInterface[];
 }
 
-export type RegulasiModulMateriRecord = ResponseInterface;
+export type RegulasiGtkModulMateriRecord = ResponseInterface;

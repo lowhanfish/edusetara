@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AnnouncementsHero, AnnouncementsHelp } from "./components/announcements-shell";
 import { AnnouncementsFeed } from "./components/announcements-feed";
-import { announcementsData } from "./_data/announcements-data";
 
 export const metadata: Metadata = {
   title: "Pusat Pengumuman & Surat Edaran Kedinasan",
@@ -112,7 +111,7 @@ export default function AnnouncementsIndexPage() {
         </section>
 
         {/* Section 2 & 3: Feed Interaktif (Sorotan Prioritas, Filter Direktori, Kartu & Modal Maklumat) */}
-        <AnnouncementsFeed announcements={announcementsData} />
+        <AnnouncementsFeed />
 
         {/* Section 4: Maklumat Integritas & Bebas Pungli */}
         <section

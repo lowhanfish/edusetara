@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useJenjangOption } from "../hooks/crud";
 
 interface FormKuotaPpdbModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ export default function FormKuotaPpdbModal({
   onSubmit,
   isLoading = false,
 }: FormKuotaPpdbModalProps) {
+  const { options: jenjangOptions, isLoading: jenjangLoading } = useJenjangOption();
+
   return (
     <Modal
       isOpen={isOpen}
@@ -30,7 +33,7 @@ export default function FormKuotaPpdbModal({
           ? "+ Tambah Kuota PPDB"
           : "✎ Edit Kuota PPDB"
       }
-      description="Penetapan daya tampung dan alokasi persentase per jalur satuan pendidikan."
+      description="Penetapan alokasi daya tampung dan kuota jalur pendaftaran tiap satuan pendidikan."
       maxWidth="lg"
       footer={
         <>
@@ -61,16 +64,16 @@ export default function FormKuotaPpdbModal({
                 sekolah: e.target.value,
               })
             }
-            placeholder="Contoh: SMPN 2 Konsel"
+            placeholder="Contoh: SMPN 22 Konawe Selatan"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Jenjang <span className="text-rose-500">*</span>
+            Jenjang Pendidikan
           </label>
-          <Input
-            required
+          <Select
+            
             value={(formData as any).jenjang || ""}
             onChange={(e) =>
               setFormData({
@@ -78,7 +81,13 @@ export default function FormKuotaPpdbModal({
                 jenjang: e.target.value,
               })
             }
-            placeholder="Contoh: SMP / SD / PAUD"
+            options={[
+              { value: "", label: jenjangLoading ? "Memuat opsi data master..." : "-- Pilih jenjang --" },
+              ...jenjangOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
           />
         </div>
 
@@ -102,11 +111,11 @@ export default function FormKuotaPpdbModal({
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Alokasi Zonasi (Siswa) <span className="text-rose-500">*</span>
+            Alokasi Kuota Zonasi
           </label>
           <Input
             type="number"
-            required
+            
             value={(formData as any).jalur_zonasi ?? ""}
             onChange={(e) =>
               setFormData({
@@ -114,17 +123,17 @@ export default function FormKuotaPpdbModal({
                 jalur_zonasi: e.target.value === "" ? null : Number(e.target.value),
               })
             }
-            placeholder="Contoh: 64"
+            placeholder="Contoh: 70"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Alokasi Afirmasi (Siswa) <span className="text-rose-500">*</span>
+            Alokasi Kuota Afirmasi
           </label>
           <Input
             type="number"
-            required
+            
             value={(formData as any).jalur_afirmasi ?? ""}
             onChange={(e) =>
               setFormData({
@@ -138,11 +147,11 @@ export default function FormKuotaPpdbModal({
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Alokasi Prestasi (Siswa) <span className="text-rose-500">*</span>
+            Alokasi Kuota Prestasi
           </label>
           <Input
             type="number"
-            required
+            
             value={(formData as any).jalur_prestasi ?? ""}
             onChange={(e) =>
               setFormData({
@@ -150,17 +159,17 @@ export default function FormKuotaPpdbModal({
                 jalur_prestasi: e.target.value === "" ? null : Number(e.target.value),
               })
             }
-            placeholder="Contoh: 38"
+            placeholder="Contoh: 30"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Alokasi Mutasi Tugas (Siswa) <span className="text-rose-500">*</span>
+            Alokasi Kuota Mutasi
           </label>
           <Input
             type="number"
-            required
+            
             value={(formData as any).jalur_mutasi ?? ""}
             onChange={(e) =>
               setFormData({
@@ -168,7 +177,7 @@ export default function FormKuotaPpdbModal({
                 jalur_mutasi: e.target.value === "" ? null : Number(e.target.value),
               })
             }
-            placeholder="Contoh: 6"
+            placeholder="Contoh: 8"
           />
         </div>
       </form>

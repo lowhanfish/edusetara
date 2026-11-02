@@ -46,49 +46,82 @@ export default function DetailUsulanRekonsiliasiBospModal({
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Tahap BOSP</span>
-            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).tahap ?? "-")}
-            </span>
-          </div>
-          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Tahun Anggaran</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).tahun ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nominal Usulan LPJ (Rp)</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Semester / Tahap</span>
+            <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
+              {String((record as any).tahap ?? "-")}
+            </span>
+          </div>
+          <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Nominal Penyerapan Dana BOSP (Rp)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).nominal_dana ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Kategori Berkas SPJ</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Kategori Dokumen SPJ (Master Kategori)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).kategori_spj ?? "-")}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Berkas BKU (PDF)</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Buku Kas Umum / BKU (PDF)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).file_bku ?? "-")}
+              {(record as any).file_bku ? (
+                <a
+                  href={String((record as any).file_bku)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-800 underline hover:text-amber-900 inline-flex items-center gap-1 font-mono text-[11px]"
+                >
+                  📄 Lihat / Unduh Berkas
+                </a>
+              ) : (
+                "-"
+              )}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Rekening Koran BOSP</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Rekening Koran Bank Sultra (PDF)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).file_rekening ?? "-")}
+              {(record as any).file_rekening ? (
+                <a
+                  href={String((record as any).file_rekening)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-800 underline hover:text-amber-900 inline-flex items-center gap-1 font-mono text-[11px]"
+                >
+                  📄 Lihat / Unduh Berkas
+                </a>
+              ) : (
+                "-"
+              )}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Berkas SPTJM Bermaterai</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">SPTJM BOSP Bermaterai (PDF)</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
-              {String((record as any).file_sptjm ?? "-")}
+              {(record as any).file_sptjm ? (
+                <a
+                  href={String((record as any).file_sptjm)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-800 underline hover:text-amber-900 inline-flex items-center gap-1 font-mono text-[11px]"
+                >
+                  📄 Lihat / Unduh Berkas
+                </a>
+              ) : (
+                "-"
+              )}
             </span>
           </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <span className="text-[#7d7152] font-semibold sm:w-1/3">Status Verifikasi</span>
+            <span className="text-[#7d7152] font-semibold sm:w-1/3">Status Usulan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">
               {String((record as any).status ?? "-")}
             </span>

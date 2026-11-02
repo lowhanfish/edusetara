@@ -12,7 +12,7 @@ export function usePublicServices() {
     queryFn: async () => {
       try {
         const res = await fetchData<{ total: number; data: PublicService[] }>(
-          `${url}/api/v1/admin/layanan/read?limit=50`
+          `${url}/api/v1/publish/layanan?limit=50`
         );
         if (res && Array.isArray(res.data)) {
           return res.data;

@@ -1,7 +1,11 @@
-import { satisfactionTrend } from "./home-data";
+"use client";
+import { usePublicStats } from "../data-statistik/hooks/useStats";
 import { SectionHeading } from "./shared";
 
 export function SatisfactionSection() {
+  const { data: indicators = [] } = usePublicStats();
+  const satisfactionTrend = indicators.filter((item) => /kepuasan|\bIKM\b/i.test(`${item.indikator} ${item.kategori || ""}`)).map((item) => ({id: item.id, value: item.nilai, year: item.tahun, height: Math.max(0, Math.min(100, Number(String(item.nilai).replace(",", "."))))})).sort((a, b) => Number(a.year) - Number(b.year));
+  const latest = satisfactionTrend.at(-1);
   return (
     <section className="card satisfaction" id="kepuasan-masyarakat">
       <SectionHeading
@@ -13,9 +17,9 @@ export function SatisfactionSection() {
         <div className="score">
           <span>Nilai IKM Terbaru</span>
           <b>
-            90.14<small>%</small>
+            {latest?.value ?? "—"}<small>%</small>
           </b>
-          <p>Tahun 2026 (Semester 1)</p>
+          <p>{latest ? `Tahun ${latest.year}` : "Belum ada data IKM yang dipublikasikan"}</p>
         </div>
         <div className="chart">
           <strong>Grafik Tren IKM</strong>

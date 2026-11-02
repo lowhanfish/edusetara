@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useJenjangOption, useRuangOption } from "../hooks/crud";
 
 interface FormRombelPaudModalProps {
   isOpen: boolean;
@@ -21,16 +22,19 @@ export default function FormRombelPaudModal({
   onSubmit,
   isLoading = false,
 }: FormRombelPaudModalProps) {
+  const { options: jenjangOptions, isLoading: jenjangLoading } = useJenjangOption();
+  const { options: ruangOptions, isLoading: ruangLoading } = useRuangOption();
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={
         formMode === "add"
-          ? "+ Tambah Jenjang PAUD"
-          : "✎ Edit Jenjang PAUD"
+          ? "+ Tambah Rombel Jenjang PAUD"
+          : "✎ Edit Rombel Jenjang PAUD"
       }
-      description="Pengelolaan rombongan belajar dan kelompok usia jenjang PAUD/TK se-Konawe Selatan."
+      description="Pengelolaan rombongan belajar khusus kelompok bermain dan pendidikan anak usia dini."
       maxWidth="lg"
       footer={
         <>
@@ -41,8 +45,8 @@ export default function FormRombelPaudModal({
             {isLoading
               ? "Menyimpan..."
               : formMode === "add"
-              ? "Simpan Jenjang PAUD"
-              : "Perbarui Jenjang PAUD"}
+              ? "Simpan Rombel Jenjang PAUD"
+              : "Perbarui Rombel Jenjang PAUD"}
           </Button>
         </>
       }
@@ -50,75 +54,47 @@ export default function FormRombelPaudModal({
       <form id="form-rombel-paud" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Satuan PAUD / TK <span className="text-rose-500">*</span>
+            Nama Rombel PAUD <span className="text-rose-500">*</span>
           </label>
           <Input
             required
-            value={(formData as any).sekolah || ""}
+            value={(formData as any).nama || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                sekolah: e.target.value,
+                nama: e.target.value,
               })
             }
-            placeholder="Contoh: TK Pembina Andoolo"
+            placeholder="Contoh: Kelompok Bermain Melati"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nama Rombongan Belajar <span className="text-rose-500">*</span>
+            Tingkat Pendidikan / Jenjang
           </label>
-          <Input
-            required
-            value={(formData as any).nama_rombel || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                nama_rombel: e.target.value,
-              })
-            }
-            placeholder="Contoh: Kelompok A Bintang Kecil"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Tingkat / Usia
-          </label>
-          <Input
+          <Select
             
-            value={(formData as any).tingkat || ""}
+            value={(formData as any).tgkt_pendidikan || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                tingkat: e.target.value,
+                tgkt_pendidikan: e.target.value,
               })
             }
-            placeholder="Contoh: Usia 4-5 Tahun"
+            options={[
+              { value: "", label: jenjangLoading ? "Memuat opsi data master..." : "-- Pilih jenjang pendidikan --" },
+              ...jenjangOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Kurikulum Operasional
-          </label>
-          <Input
-            
-            value={(formData as any).kurikulum || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                kurikulum: e.target.value,
-              })
-            }
-            placeholder="Contoh: Kurikulum Merdeka PAUD"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Guru Pendamping / Wali
+            Guru Pendamping / Wali Kelas
           </label>
           <Input
             
@@ -129,25 +105,70 @@ export default function FormRombelPaudModal({
                 wali_kelas: e.target.value,
               })
             }
-            placeholder="Contoh: Hj. Nurlela, S.Pd"
+            placeholder="Nama guru pendamping"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Jumlah Peserta Didik <span className="text-rose-500">*</span>
+            Jenis Rombel
           </label>
-          <Input
-            type="number"
-            required
-            value={(formData as any).jumlah_siswa ?? ""}
+          <Select
+            
+            value={(formData as any).jns_rombel ?? ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                jumlah_siswa: e.target.value === "" ? null : Number(e.target.value),
+                jns_rombel: e.target.value,
               })
             }
-            placeholder="Contoh: 18"
+            options={[
+              { value: "", label: "-- Pilih jenis rombel --" },
+              ...[{"value":"0","label":"Kelas Reguler"},{"value":"1","label":"Kelas Jauh/Kecil"},{"value":"2","label":"Kelas Terbuka"}]
+            ]}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Ruang Kelas (Sarpras Ruang)
+          </label>
+          <Select
+            
+            value={(formData as any).ruang_kelas || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                ruang_kelas: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: ruangLoading ? "Memuat opsi data master..." : "-- Pilih ruang belajar --" },
+              ...ruangOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Kurikulum
+          </label>
+          <Select
+            
+            value={(formData as any).kurikulum ?? ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                kurikulum: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: "-- Pilih kurikulum --" },
+              ...[{"value":"Kurikulum Merdeka","label":"Kurikulum Merdeka"},{"value":"Kurikulum 2013","label":"Kurikulum 2013"}]
+            ]}
           />
         </div>
       </form>

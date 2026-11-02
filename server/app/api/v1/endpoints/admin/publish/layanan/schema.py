@@ -13,10 +13,11 @@ class LayananPublikBase(OperationalBase):
     deskripsi: str | None = None
     syarat: str | None = None
     prosedur: str | None = None
+    penanggung_jawab: str | None = None
     waktu_layanan: str | None = None
     biaya: str | None = "Gratis"
     kontak: str | None = None
-    status: str | None = "Online"
+    status: str | None = "Aktif"
 
 
 class LayananPublikCreate(LayananPublikBase):
@@ -31,6 +32,7 @@ class LayananPublikUpdate(BaseModel):
     deskripsi: str | None = None
     syarat: str | None = None
     prosedur: str | None = None
+    penanggung_jawab: str | None = None
     waktu_layanan: str | None = None
     biaya: str | None = None
     kontak: str | None = None
@@ -43,6 +45,7 @@ class LayananPublikResponse(OperationalResponse):
     deskripsi: str | None = None
     syarat: str | None = None
     prosedur: str | None = None
+    penanggung_jawab: str | None = None
     waktu_layanan: str | None = None
     biaya: str | None = None
     kontak: str | None = None

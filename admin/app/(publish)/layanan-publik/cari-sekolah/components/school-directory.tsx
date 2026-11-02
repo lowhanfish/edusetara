@@ -1,8 +1,9 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 export interface SchoolItem {
+  id?: string;
   npsn: string;
   name: string;
   address: string;
@@ -22,10 +23,19 @@ const ITEMS_PER_PAGE = 12;
 export function SchoolDirectory({ schools }: SchoolDirectoryProps) {
   const searchInputId = useId();
   const districtSelectId = useId();
+  const statusSelectId = useId();
+  const levelPicker = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const closeOutside = (event: PointerEvent) => { if (event.target instanceof Node && !levelPicker.current?.contains(event.target)) levelPicker.current?.removeAttribute("open"); };
+    const closeEscape = (event: KeyboardEvent) => { if (event.key === "Escape" && levelPicker.current?.open) { levelPicker.current.removeAttribute("open"); levelPicker.current.querySelector("summary")?.focus(); } };
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("keydown", closeEscape);
+    return () => { document.removeEventListener("pointerdown", closeOutside); document.removeEventListener("keydown", closeEscape); };
+  }, []);
 
   const [query, setQuery] = useState("");
   const [district, setDistrict] = useState("");
-  const [level, setLevel] = useState("");
+  const [levels, setLevels] = useState<string[]>([]);
   const [status, setStatus] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -41,7 +51,7 @@ export function SchoolDirectory({ schools }: SchoolDirectoryProps) {
     const q = query.trim().toLowerCase();
     return schools.filter((school) => {
       if (district && school.district !== district) return false;
-      if (level && school.level !== level) return false;
+      if (levels.length && !levels.includes(school.level)) return false;
       if (status && school.status !== status) return false;
       if (q) {
         const matchName = school.name.toLowerCase().includes(q);
@@ -52,7 +62,7 @@ export function SchoolDirectory({ schools }: SchoolDirectoryProps) {
       }
       return true;
     });
-  }, [schools, query, district, level, status]);
+  }, [schools, query, district, levels, status]);
 
   // Reset pagination when filter changes
   const handleQueryChange = (val: string) => {
@@ -64,23 +74,23 @@ export function SchoolDirectory({ schools }: SchoolDirectoryProps) {
     setCurrentPage(1);
   };
   const handleLevelChange = (val: string) => {
-    setLevel((prev) => (prev === val ? "" : val));
+    setLevels((prev) => prev.includes(val) ? prev.filter((item) => item !== val) : [...prev, val]);
     setCurrentPage(1);
   };
   const handleStatusChange = (val: string) => {
-    setStatus((prev) => (prev === val ? "" : val));
+    setStatus(val);
     setCurrentPage(1);
   };
 
   const resetFilters = () => {
     setQuery("");
     setDistrict("");
-    setLevel("");
+    setLevels([]);
     setStatus("");
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = Boolean(query || district || level || status);
+  const hasActiveFilters = Boolean(query || district || levels.length || status);
 
   // Pagination calculation
   const totalPages = Math.max(1, Math.ceil(filteredSchools.length / ITEMS_PER_PAGE));
@@ -178,64 +188,32 @@ export function SchoolDirectory({ schools }: SchoolDirectoryProps) {
           </div>
         </div>
 
-        {/* Row 2: Modern Pill Toggles for Level and Status */}
-        <div className="school-filter-bottom-row">
-          <div className="pill-filter-group">
-            <span className="school-filter-label">Jenjang:</span>
-            <div className="pill-buttons-wrap" role="group" aria-label="Filter Jenjang">
-              <button
-                type="button"
-                className={`filter-pill${level === "" ? " active" : ""}`}
-                onClick={() => handleLevelChange("")}
-              >
-                Semua
-              </button>
-              <button
-                type="button"
-                className={`filter-pill${level === "SD" ? " active" : ""}`}
-                onClick={() => handleLevelChange("SD")}
-              >
-                <span className="pill-indicator indicator-sd" />
-                SD (Dasar)
-              </button>
-              <button
-                type="button"
-                className={`filter-pill${level === "SMP" ? " active" : ""}`}
-                onClick={() => handleLevelChange("SMP")}
-              >
-                <span className="pill-indicator indicator-smp" />
-                SMP (Menengah)
-              </button>
-            </div>
+        <div className="school-directory-selects">
+          <div className="school-level-field">
+            <span className="school-filter-label" id={`${districtSelectId}-levels`}>Jenjang</span>
+            <details className="school-level-picker" ref={levelPicker}>
+              <summary aria-labelledby={`${districtSelectId}-levels ${districtSelectId}-selection`}>
+                <span id={`${districtSelectId}-selection`}>{levels.length === 0 ? "Semua jenjang" : levels.length <= 2 ? levels.join(", ") : `${levels.length} jenjang dipilih`}</span>
+                <span aria-hidden="true">⌄</span>
+              </summary>
+              <div className="school-level-options" role="group" aria-label="Pilihan jenjang">
+                <button type="button" className="school-level-clear" onClick={() => { setLevels([]); setCurrentPage(1); }}>Tampilkan semua jenjang</button>
+                {Array.from(new Set(schools.map((school) => school.level))).filter(Boolean).sort().map((value) => (
+                  <label key={value}>
+                    <input type="checkbox" checked={levels.includes(value)} onChange={() => handleLevelChange(value)} />
+                    <span>{value}</span>
+                  </label>
+                ))}
+              </div>
+            </details>
           </div>
-
-          <div className="pill-filter-group">
-            <span className="school-filter-label">Status:</span>
-            <div className="pill-buttons-wrap" role="group" aria-label="Filter Status">
-              <button
-                type="button"
-                className={`filter-pill${status === "" ? " active" : ""}`}
-                onClick={() => handleStatusChange("")}
-              >
-                Semua
-              </button>
-              <button
-                type="button"
-                className={`filter-pill${status === "NEGERI" ? " active" : ""}`}
-                onClick={() => handleStatusChange("NEGERI")}
-              >
-                <span className="pill-indicator indicator-negeri" />
-                Negeri
-              </button>
-              <button
-                type="button"
-                className={`filter-pill${status === "SWASTA" ? " active" : ""}`}
-                onClick={() => handleStatusChange("SWASTA")}
-              >
-                <span className="pill-indicator indicator-swasta" />
-                Swasta
-              </button>
-            </div>
+          <div>
+            <label className="school-filter-label" htmlFor={statusSelectId}>Status sekolah</label>
+            <select id={statusSelectId} className="school-filter-select" value={status} onChange={(event) => handleStatusChange(event.target.value)}>
+              <option value="">Semua status</option>
+              <option value="NEGERI">Negeri</option>
+              <option value="SWASTA">Swasta</option>
+            </select>
           </div>
 
           {hasActiveFilters && (
@@ -285,7 +263,7 @@ export function SchoolDirectory({ schools }: SchoolDirectoryProps) {
           {currentSchools.map((school) => (
             <article
               className={`school-card school-card-${school.level.toLowerCase()}`}
-              key={school.npsn}
+              key={school.id || school.npsn}
             >
               <span className="school-card-glow" aria-hidden="true" />
               <div className="school-card-top">
@@ -306,7 +284,7 @@ export function SchoolDirectory({ schools }: SchoolDirectoryProps) {
                   </span>
                   <span className="school-card-type">
                     <small>Satuan Pendidikan</small>
-                    <strong>{school.level === "SD" ? "Sekolah Dasar" : "Sekolah Menengah Pertama"}</strong>
+                    <strong>{school.level === "SD" ? "Sekolah Dasar" : school.level === "SMP" ? "Sekolah Menengah Pertama" : school.level}</strong>
                   </span>
                 </div>
                 <span className="school-npsn">
@@ -371,7 +349,7 @@ export function SchoolDirectory({ schools }: SchoolDirectoryProps) {
 
               <div className="school-card-footer">
                 <a
-                  href={school.url}
+                  href={school.url || undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="school-external-link"

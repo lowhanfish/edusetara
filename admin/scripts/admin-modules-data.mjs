@@ -1,6 +1,3 @@
-import fs from "fs";
-import path from "path";
-
 // Definition of all 49 operational modules outside master/
 export const modules = [
   // 1. Profile
@@ -71,26 +68,20 @@ export const modules = [
     entity: "SarprasTanah",
     title: "Tanah Sekolah",
     category: "Sarana dan Prasarana",
-    description: "Pangkalan data kepemilikan dan legalitas lahan tanah seluruh satuan pendidikan.",
+    description: "Pangkalan data kepemilikan dan legalitas bidang lahan tanah satuan pendidikan.",
     endpoint: "/api/v1/admin/sarpras/tanah",
     queryKey: "sarpras-tanah",
     icon: "🗺️",
     fields: [
-      { name: "sekolah", label: "Nama Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SDN 1 Ranomeeto" },
-      { name: "jenis", label: "Jenis / Peruntukan Lahan", type: "text", required: true, placeholder: "Contoh: Bangunan Sekolah & Lapangan" },
-      { name: "luas", label: "Luas Tanah (m²)", type: "number", required: true, placeholder: "Contoh: 5000" },
-      { name: "luas_lahan_tersedia", label: "Luas Lahan Tersedia (m²)", type: "number", required: false, placeholder: "Contoh: 1500" },
-      { name: "kepemilikan", label: "Status Kepemilikan", type: "text", required: true, placeholder: "Contoh: Milik Pemerintah Daerah / Hibah" },
-      { name: "bukti_kepemilikan", label: "Bukti Kepemilikan", type: "text", required: false, placeholder: "Contoh: Sertifikat Hak Pakai / Akta Hibah" },
-      { name: "nomor_sertifikat", label: "Nomor Sertifikat", type: "text", required: false, placeholder: "Contoh: No. 21.05.01..." },
-      { name: "alamat", label: "Alamat / Lokasi Lahan", type: "textarea", required: false, placeholder: "Alamat lengkap tanah sekolah..." }
+      { name: "title", label: "Luas Tanah Sekolah", type: "text", required: true, placeholder: "Contoh: 3.300 m² atau 1,19 ha" },
+      { name: "file", label: "Berkas Bukti Kepemilikan / Sertifikat Tanah (PDF/Gambar)", type: "file", required: false, placeholder: "Unggah bukti kepemilikan/sertifikat tanah" },
+      { name: "file_type", label: "Tipe Berkas (pdf/jpg/png)", type: "text", required: false, placeholder: "pdf / jpg / png" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Satuan Pendidikan" },
-      { key: "jenis", label: "Jenis Lahan" },
-      { key: "luas", label: "Luas (m²)" },
-      { key: "kepemilikan", label: "Status Hak" },
-      { key: "nomor_sertifikat", label: "No. Sertifikat" }
+      { key: "title", label: "Luas Tanah" },
+      { key: "file", label: "Berkas" },
+      { key: "file_type", label: "Tipe Berkas" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
   {
@@ -98,26 +89,26 @@ export const modules = [
     entity: "SarprasBangunan",
     title: "Bangunan Sekolah",
     category: "Sarana dan Prasarana",
-    description: "Pendataan gedung, konstruksi fisik, dan kelaikan bangunan satuan pendidikan.",
+    description: "Pendataan fisik gedung, luasan tapak, kelaikan bangunan, dan status hak kepemilikan.",
     endpoint: "/api/v1/admin/sarpras/bangunan",
     queryKey: "sarpras-bangunan",
     icon: "🏫",
     fields: [
-      { name: "sekolah", label: "Nama Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SMPN 2 Konsel" },
-      { name: "nama_bangunan", label: "Nama Gedung / Bangunan", type: "text", required: true, placeholder: "Contoh: Gedung Kelas Utama A" },
-      { name: "panjang", label: "Panjang (m)", type: "number", required: false, placeholder: "Contoh: 30" },
-      { name: "lebar", label: "Lebar (m)", type: "number", required: false, placeholder: "Contoh: 9" },
-      { name: "luas_tapak", label: "Luas Tapak (m²)", type: "number", required: false, placeholder: "Contoh: 270" },
-      { name: "jumlah_lantai", label: "Jumlah Lantai", type: "number", required: false, placeholder: "Contoh: 1" },
-      { name: "kepemilikan", label: "Status Kepemilikan", type: "text", required: false, placeholder: "Contoh: Milik Sendiri" },
-      { name: "kondisi", label: "Kondisi Bangunan", type: "text", required: true, placeholder: "Contoh: Baik / Rusak Sedang / Rusak Berat" }
+      { name: "nama", label: "Nama Unit Gedung / Bangunan Sekolah", type: "text", required: true, placeholder: "Contoh: Gedung Kelas 1 / RKB UNIT 1" },
+      { name: "luas", label: "Luas Tapak Bangunan (m²)", type: "text", required: false, placeholder: "Contoh: 800 m²" },
+      { name: "kepemilikan_id", label: "Status Kepemilikan", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/sarpras/kepemilikan/option", masterQueryKey: "master-sarpras-kepemilikan-option", hookName: "Kepemilikan", placeholder: "Pilih status kepemilikan" },
+      { name: "tahun", label: "Tahun Bangunan", type: "text", required: false, placeholder: "Contoh: 2020" },
+      { name: "persentase", label: "Persentase Kerusakan Bangunan (%)", type: "number", required: false, placeholder: "Contoh: 0" },
+      { name: "kondisi_id", label: "Kondisi Bangunan", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/sarpras/kondisi-alat/option", masterQueryKey: "master-sarpras-kondisi-option", hookName: "Kondisi", placeholder: "Pilih kondisi bangunan" },
+      { name: "jns_bantuan_id", label: "Jenis Bantuan", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/sarpras/jenis-bantuan/option", masterQueryKey: "master-sarpras-jenis-bantuan-option", hookName: "JenisBantuan", placeholder: "Pilih jenis bantuan" },
+      { name: "sumber_id", label: "Sumber Dana", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/sarpras/sumber-dana/option", masterQueryKey: "master-sarpras-sumber-dana-option", hookName: "SumberDana", placeholder: "Pilih sumber dana" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Sekolah" },
-      { key: "nama_bangunan", label: "Nama Bangunan" },
-      { key: "luas_tapak", label: "Luas Tapak (m²)" },
-      { key: "jumlah_lantai", label: "Lantai" },
-      { key: "kondisi", label: "Kondisi" }
+      { key: "nama", label: "Nama Bangunan" },
+      { key: "luas", label: "Luas" },
+      { key: "tahun", label: "Tahun" },
+      { key: "persentase", label: "Kerusakan (%)" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
   {
@@ -125,25 +116,22 @@ export const modules = [
     entity: "SarprasRuang",
     title: "Ruang Sekolah",
     category: "Sarana dan Prasarana",
-    description: "Registrasi ruang belajar, laboratorium, perpustakaan, dan fasilitas penunjang sekolah.",
+    description: "Pemetaan unit ruangan spesifik yang berada di dalam bangunan sekolah.",
     endpoint: "/api/v1/admin/sarpras/ruang",
     queryKey: "sarpras-ruang",
     icon: "🚪",
     fields: [
-      { name: "sekolah", label: "Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SDN 5 Andoolo" },
-      { name: "bangunan", label: "Lokasi Gedung / Bangunan", type: "text", required: false, placeholder: "Contoh: Gedung Utama Blok B" },
-      { name: "kode_ruang", label: "Kode Ruang", type: "text", required: false, placeholder: "Contoh: R-01" },
-      { name: "nama_ruang", label: "Nama Ruang", type: "text", required: true, placeholder: "Contoh: Ruang Kelas 1A / Lab Komputer" },
-      { name: "panjang", label: "Panjang (m)", type: "number", required: false, placeholder: "Contoh: 8" },
-      { name: "lebar", label: "Lebar (m)", type: "number", required: false, placeholder: "Contoh: 7" },
-      { name: "kondisi", label: "Kondisi Ruang", type: "text", required: true, placeholder: "Contoh: Baik / Rusak Ringan" }
+      { name: "bangunan_id", label: "Unit Bangunan / Gedung", type: "select", required: false, masterEndpoint: "/api/v1/admin/sarpras/bangunan/option", masterQueryKey: "sarpras-bangunan-option", hookName: "Bangunan", placeholder: "Pilih gedung/bangunan" },
+      { name: "kelas_id", label: "Tingkat / Kelas Rujukan", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/jurnal/kelas/option", masterQueryKey: "master-kelas-option", hookName: "Kelas", placeholder: "Pilih kelas" },
+      { name: "nama", label: "Nama Ruangan", type: "text", required: true, placeholder: "Contoh: Ruangan Kelas 1A / Lab Komputer" },
+      { name: "luas", label: "Luas Ruangan (m²)", type: "text", required: false, placeholder: "Contoh: 56 m²" },
+      { name: "kondisi_id", label: "Kondisi Ruangan", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/sarpras/kondisi-alat/option", masterQueryKey: "master-sarpras-kondisi-option", hookName: "Kondisi", placeholder: "Pilih kondisi ruangan" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Sekolah" },
-      { key: "nama_ruang", label: "Nama Ruang" },
-      { key: "bangunan", label: "Gedung" },
-      { key: "kode_ruang", label: "Kode" },
-      { key: "kondisi", label: "Kondisi" }
+      { key: "nama", label: "Nama Ruangan" },
+      { key: "luas", label: "Luas" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" },
+      { key: "created_at", label: "Waktu Catat" }
     ]
   },
   {
@@ -151,24 +139,23 @@ export const modules = [
     entity: "SarprasPeralatan",
     title: "Peralatan / Aset",
     category: "Sarana dan Prasarana",
-    description: "Inventarisasi peralatan TIK, perabot kelas, laboratorium, dan sarana multimedia.",
+    description: "Inventarisasi perangkat TIK, alat elektronik, dan furnitur penunjang di masing-masing ruangan.",
     endpoint: "/api/v1/admin/sarpras/peralatan",
     queryKey: "sarpras-peralatan",
     icon: "🖥️",
     fields: [
-      { name: "sekolah", label: "Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SMPN 1 Kolono" },
-      { name: "nama_alat", label: "Nama Peralatan / Aset", type: "text", required: true, placeholder: "Contoh: Chromebook DAK / Proyektor" },
-      { name: "kode_alat", label: "Kode Barang / NUP", type: "text", required: false, placeholder: "Contoh: TIK-2026-001" },
-      { name: "spesifikasi", label: "Spesifikasi / Merk", type: "text", required: false, placeholder: "Contoh: Core i3 / RAM 8GB / Asus" },
-      { name: "jumlah", label: "Jumlah Unit", type: "number", required: true, placeholder: "Contoh: 15" },
-      { name: "kondisi", label: "Kondisi", type: "text", required: true, placeholder: "Contoh: Baik / Rusak Ringan / Rusak Berat" }
+      { name: "ruang_id", label: "Lokasi Ruangan Penempatan", type: "select", required: false, masterEndpoint: "/api/v1/admin/sarpras/ruang/option", masterQueryKey: "sarpras-ruang-option", hookName: "Ruang", placeholder: "Pilih ruangan penempatan" },
+      { name: "nama", label: "Nama Peralatan / Aset", type: "text", required: true, placeholder: "Contoh: Komputer Asus / Printer Epson L300" },
+      { name: "jml_alat", label: "Jumlah Unit Peralatan", type: "number", required: true, placeholder: "Contoh: 2" },
+      { name: "kondisi_id", label: "Kondisi Peralatan", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/sarpras/kondisi-alat/option", masterQueryKey: "master-sarpras-kondisi-option", hookName: "Kondisi", placeholder: "Pilih kondisi peralatan" },
+      { name: "tahun", label: "Tahun Pengadaan / Perolehan", type: "number", required: false, placeholder: "Contoh: 2026" },
+      { name: "sumber_id", label: "Sumber Dana", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/sarpras/sumber-dana/option", masterQueryKey: "master-sarpras-sumber-dana-option", hookName: "SumberDana", placeholder: "Pilih sumber dana" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Sekolah" },
-      { key: "nama_alat", label: "Nama Peralatan" },
-      { key: "spesifikasi", label: "Spesifikasi" },
-      { key: "jumlah", label: "Jumlah Unit" },
-      { key: "kondisi", label: "Kondisi" }
+      { key: "nama", label: "Nama Peralatan" },
+      { key: "jml_alat", label: "Jumlah" },
+      { key: "tahun", label: "Tahun" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
 
@@ -176,76 +163,73 @@ export const modules = [
   {
     dir: "app/(admin)/admin/rombel/paud",
     entity: "RombelPaud",
-    title: "Jenjang PAUD",
+    title: "Rombel Jenjang PAUD",
     category: "Rombel",
-    description: "Pengelolaan rombongan belajar dan kelompok usia jenjang PAUD/TK se-Konawe Selatan.",
+    description: "Pengelolaan rombongan belajar khusus kelompok bermain dan pendidikan anak usia dini.",
     endpoint: "/api/v1/admin/rombel/paud",
     queryKey: "rombel-paud",
     icon: "🧸",
     fields: [
-      { name: "sekolah", label: "Satuan PAUD / TK", type: "text", required: true, placeholder: "Contoh: TK Pembina Andoolo" },
-      { name: "nama_rombel", label: "Nama Rombongan Belajar", type: "text", required: true, placeholder: "Contoh: Kelompok A Bintang Kecil" },
-      { name: "tingkat", label: "Tingkat / Usia", type: "text", required: false, placeholder: "Contoh: Usia 4-5 Tahun" },
-      { name: "kurikulum", label: "Kurikulum Operasional", type: "text", required: false, placeholder: "Contoh: Kurikulum Merdeka PAUD" },
-      { name: "wali_kelas", label: "Guru Pendamping / Wali", type: "text", required: false, placeholder: "Contoh: Hj. Nurlela, S.Pd" },
-      { name: "jumlah_siswa", label: "Jumlah Peserta Didik", type: "number", required: true, placeholder: "Contoh: 18" }
+      { name: "nama", label: "Nama Rombel PAUD", type: "text", required: true, placeholder: "Contoh: Kelompok Bermain Melati" },
+      { name: "tgkt_pendidikan", label: "Tingkat Pendidikan / Jenjang", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/jenjang/option", masterQueryKey: "master-jenjang-option", hookName: "Jenjang", placeholder: "Pilih jenjang pendidikan" },
+      { name: "wali_kelas", label: "Guru Pendamping / Wali Kelas", type: "text", required: false, placeholder: "Nama guru pendamping" },
+      { name: "jns_rombel", label: "Jenis Rombel", type: "select", required: false, options: [{ value: "0", label: "Kelas Reguler" }, { value: "1", label: "Kelas Jauh/Kecil" }, { value: "2", label: "Kelas Terbuka" }], placeholder: "Pilih jenis rombel" },
+      { name: "ruang_kelas", label: "Ruang Kelas (Sarpras Ruang)", type: "select", required: false, masterEndpoint: "/api/v1/admin/sarpras/ruang/option", masterQueryKey: "sarpras-ruang-option", hookName: "Ruang", placeholder: "Pilih ruang belajar" },
+      { name: "kurikulum", label: "Kurikulum", type: "select", required: false, options: [{ value: "Kurikulum Merdeka", label: "Kurikulum Merdeka" }, { value: "Kurikulum 2013", label: "Kurikulum 2013" }], placeholder: "Pilih kurikulum" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Satuan PAUD" },
-      { key: "nama_rombel", label: "Nama Rombel" },
-      { key: "tingkat", label: "Tingkat" },
-      { key: "wali_kelas", label: "Guru Wali" },
-      { key: "jumlah_siswa", label: "Jumlah Siswa" }
+      { key: "nama", label: "Nama Rombel" },
+      { key: "wali_kelas", label: "Wali Kelas" },
+      { key: "kurikulum", label: "Kurikulum" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
   {
     dir: "app/(admin)/admin/rombel/sd",
     entity: "RombelSd",
-    title: "Jenjang SD",
+    title: "Rombel Jenjang SD",
     category: "Rombel",
-    description: "Pengelolaan rombongan belajar jenjang Sekolah Dasar (SD) se-Kabupaten Konawe Selatan.",
+    description: "Pengelolaan rombongan belajar tingkat sekolah dasar.",
     endpoint: "/api/v1/admin/rombel/sd",
     queryKey: "rombel-sd",
     icon: "🎒",
     fields: [
-      { name: "sekolah", label: "Nama Satuan Pendidikan SD", type: "text", required: true, placeholder: "Contoh: SDN 2 Buke" },
-      { name: "nama_rombel", label: "Nama Rombel", type: "text", required: true, placeholder: "Contoh: Kelas 4 Amanah" },
-      { name: "tingkat", label: "Tingkat Kelas", type: "text", required: true, placeholder: "Contoh: Kelas 4" },
-      { name: "kurikulum", label: "Kurikulum", type: "text", required: false, placeholder: "Contoh: Kurikulum Merdeka" },
-      { name: "wali_kelas", label: "Guru Kelas / Wali", type: "text", required: false, placeholder: "Contoh: Ahmad Fauzi, S.Pd" },
-      { name: "jumlah_siswa", label: "Jumlah Peserta Didik", type: "number", required: true, placeholder: "Contoh: 28" }
+      { name: "nama", label: "Nama Rombel SD", type: "text", required: true, placeholder: "Contoh: Kelas 1A" },
+      { name: "tgkt_pendidikan", label: "Tingkat Pendidikan / Jenjang", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/jenjang/option", masterQueryKey: "master-jenjang-option", hookName: "Jenjang", placeholder: "Pilih jenjang pendidikan" },
+      { name: "wali_kelas", label: "Wali Kelas", type: "text", required: false, placeholder: "Nama wali kelas" },
+      { name: "jns_rombel", label: "Jenis Rombel", type: "select", required: false, options: [{ value: "0", label: "Kelas Reguler" }, { value: "1", label: "Kelas Jauh/Kecil" }, { value: "2", label: "Kelas Terbuka" }], placeholder: "Pilih jenis rombel" },
+      { name: "ruang_kelas", label: "Ruang Kelas (Sarpras Ruang)", type: "select", required: false, masterEndpoint: "/api/v1/admin/sarpras/ruang/option", masterQueryKey: "sarpras-ruang-option", hookName: "Ruang", placeholder: "Pilih ruang belajar" },
+      { name: "kurikulum", label: "Kurikulum", type: "select", required: false, options: [{ value: "Kurikulum Merdeka", label: "Kurikulum Merdeka" }, { value: "Kurikulum 2013", label: "Kurikulum 2013" }], placeholder: "Pilih kurikulum" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Sekolah" },
-      { key: "nama_rombel", label: "Nama Rombel" },
-      { key: "tingkat", label: "Tingkat" },
-      { key: "wali_kelas", label: "Guru Kelas" },
-      { key: "jumlah_siswa", label: "Jumlah Siswa" }
+      { key: "nama", label: "Nama Rombel" },
+      { key: "wali_kelas", label: "Wali Kelas" },
+      { key: "kurikulum", label: "Kurikulum" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
   {
     dir: "app/(admin)/admin/rombel/smp",
     entity: "RombelSmp",
-    title: "Jenjang SMP",
+    title: "Rombel Jenjang SMP",
     category: "Rombel",
-    description: "Pengelolaan rombongan belajar jenjang Sekolah Menengah Pertama (SMP).",
+    description: "Pengelolaan rombongan belajar tingkat sekolah menengah pertama.",
     endpoint: "/api/v1/admin/rombel/smp",
     queryKey: "rombel-smp",
-    icon: "🏫",
+    icon: "📘",
     fields: [
-      { name: "sekolah", label: "Nama SMP", type: "text", required: true, placeholder: "Contoh: SMPN 1 Ranomeeto" },
-      { name: "nama_rombel", label: "Nama Rombel", type: "text", required: true, placeholder: "Contoh: Kelas VII-A" },
-      { name: "tingkat", label: "Tingkat Kelas", type: "text", required: true, placeholder: "Contoh: Kelas VII" },
-      { name: "kurikulum", label: "Kurikulum", type: "text", required: false, placeholder: "Contoh: Kurikulum Merdeka" },
-      { name: "wali_kelas", label: "Wali Kelas", type: "text", required: false, placeholder: "Contoh: Sitti Rahma, M.Pd" },
-      { name: "jumlah_siswa", label: "Jumlah Siswa", type: "number", required: true, placeholder: "Contoh: 32" }
+      { name: "nama", label: "Nama Rombel SMP", type: "text", required: true, placeholder: "Contoh: Kelas VII A" },
+      { name: "tgkt_pendidikan", label: "Tingkat Pendidikan / Jenjang", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/jenjang/option", masterQueryKey: "master-jenjang-option", hookName: "Jenjang", placeholder: "Pilih jenjang pendidikan" },
+      { name: "wali_kelas", label: "Wali Kelas", type: "text", required: false, placeholder: "Nama wali kelas" },
+      { name: "jns_rombel", label: "Jenis Rombel", type: "select", required: false, options: [{ value: "0", label: "Kelas Reguler" }, { value: "1", label: "Kelas Jauh/Kecil" }, { value: "2", label: "Kelas Terbuka" }], placeholder: "Pilih jenis rombel" },
+      { name: "ruang_kelas", label: "Ruang Kelas (Sarpras Ruang)", type: "select", required: false, masterEndpoint: "/api/v1/admin/sarpras/ruang/option", masterQueryKey: "sarpras-ruang-option", hookName: "Ruang", placeholder: "Pilih ruang belajar" },
+      { name: "kurikulum", label: "Kurikulum", type: "select", required: false, options: [{ value: "Kurikulum Merdeka", label: "Kurikulum Merdeka" }, { value: "Kurikulum 2013", label: "Kurikulum 2013" }], placeholder: "Pilih kurikulum" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Sekolah" },
-      { key: "nama_rombel", label: "Nama Rombel" },
-      { key: "tingkat", label: "Tingkat" },
+      { key: "nama", label: "Nama Rombel" },
       { key: "wali_kelas", label: "Wali Kelas" },
-      { key: "jumlah_siswa", label: "Jumlah Siswa" }
+      { key: "kurikulum", label: "Kurikulum" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
 
@@ -255,77 +239,69 @@ export const modules = [
     entity: "UsulanTunjanganGuru",
     title: "Usulan Tunjangan Guru",
     category: "Usulan Sekolah",
-    description: "Pengajuan dan rekap usulan tunjangan profesi, khusus, dan tamsil guru.",
+    description: "Permohonan aneka tunjangan pendidik (TPG, Tamsil, TKG) ke Dinas Pendidikan dan Kebudayaan.",
     endpoint: "/api/v1/admin/usulan/tunjangan-guru",
     queryKey: "usulan-tunjangan-guru",
     icon: "💰",
     fields: [
-      { name: "nama_guru", label: "Nama Lengkap Guru", type: "text", required: true, placeholder: "Contoh: Rahmawati, S.Pd., Gr." },
-      { name: "nuptk", label: "NUPTK", type: "text", required: true, placeholder: "Contoh: 1234567890123456" },
-      { name: "sekolah", label: "Satuan Pendidikan Induk", type: "text", required: true, placeholder: "Contoh: SMPN 4 Konsel" },
-      { name: "jenis_tunjangan", label: "Jenis Tunjangan", type: "text", required: true, placeholder: "Contoh: TPG (Profesi) / Tunjangan Khusus 3T" },
-      { name: "tahun", label: "Tahun Anggaran", type: "number", required: true, placeholder: "Contoh: 2026" },
-      { name: "semester", label: "Semester", type: "text", required: false, placeholder: "Contoh: Semester Ganjil / Genap" },
-      { name: "status", label: "Status Usulan", type: "text", required: false, placeholder: "Contoh: Diajukan / Terverifikasi" },
-      { name: "file", label: "Berkas Pendukung (PDF)", type: "file", required: false, placeholder: "Unggah berkas Info GTK / SKTP" }
+      { name: "tahun", label: "Tahun Anggaran", type: "text", required: true, placeholder: "Contoh: 2026" },
+      { name: "triwulan_id", label: "Periode Triwulan", type: "select", required: true, masterEndpoint: "/api/v1/admin/master/usulan/triwulan/option", masterQueryKey: "master-usulan-triwulan-option", hookName: "Triwulan", placeholder: "Pilih triwulan" },
+      { name: "jenis_id", label: "Jenis Tunjangan (Penerima)", type: "select", required: true, masterEndpoint: "/api/v1/admin/master/usulan/jenis-penerima/option", masterQueryKey: "master-usulan-jenis-penerima-option", hookName: "JenisPenerima", placeholder: "Pilih jenis tunjangan" },
+      { name: "kelas_id", label: "Kelas / Kategori Penerima", type: "select", required: true, masterEndpoint: "/api/v1/admin/master/usulan/kelas-penerima/option", masterQueryKey: "master-usulan-kelas-penerima-option", hookName: "KelasPenerima", placeholder: "Pilih kelas penerima" },
+      { name: "jml_guru", label: "Jumlah Guru Pengusul", type: "number", required: false, placeholder: "Contoh: 1" },
+      { name: "nominal", label: "Nominal Usulan (Rp)", type: "number", required: false, placeholder: "Contoh: 12000000" },
+      { name: "file", label: "Berkas Lampiran SKTP (PDF)", type: "file", required: false, placeholder: "Unggah dokumen SKTP" },
+      { name: "file_type", label: "Tipe Berkas (pdf)", type: "text", required: false, placeholder: "pdf" }
     ],
     tableCols: [
-      { key: "nama_guru", label: "Nama Guru" },
-      { key: "nuptk", label: "NUPTK" },
-      { key: "sekolah", label: "Sekolah" },
-      { key: "jenis_tunjangan", label: "Jenis Tunjangan" },
-      { key: "status", label: "Status" }
+      { key: "tahun", label: "Tahun" },
+      { key: "jml_guru", label: "Jml Guru" },
+      { key: "nominal", label: "Nominal (Rp)" },
+      { key: "file", label: "Berkas" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
   {
     dir: "app/(admin)/admin/usulan/pip/data-pendukung",
-    entity: "PipDataPendukung",
-    title: "Data Pendukung",
-    category: "Usulan Sekolah",
-    description: "Arsip berkas SKTM, DTKS, dan dokumen pendukung usulan Program Indonesia Pintar.",
+    entity: "UsulanPipPendukung",
+    title: "Data Pendukung PIP",
+    category: "Usulan Sekolah > Usulan Bantuan PIP",
+    description: "Dokumentasi alokasi program bantuan PIP, SK, Berita Acara Rapat Penetapan Siswa Layak PIP.",
     endpoint: "/api/v1/admin/usulan/pip/data-pendukung",
-    queryKey: "usulan-pip-data-pendukung",
-    icon: "📁",
+    queryKey: "usulan-pip-pendukung",
+    icon: "📑",
     fields: [
-      { name: "sekolah", label: "Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SDN 3 Konda" },
-      { name: "nama_siswa", label: "Nama Siswa", type: "text", required: true, placeholder: "Contoh: Muhammad Rezki" },
-      { name: "nisn", label: "NISN", type: "text", required: true, placeholder: "Contoh: 0098765432" },
-      { name: "dokumen", label: "Nama / Jenis Dokumen", type: "text", required: true, placeholder: "Contoh: Kartu KIP / SKTM Desa" },
-      { name: "file", label: "Berkas Scan (PDF / Image)", type: "file", required: false, placeholder: "Unggah scan berkas dokumen" },
-      { name: "keterangan", label: "Keterangan", type: "textarea", required: false, placeholder: "Keterangan tambahan kelayakan..." }
+      { name: "uraian", label: "Uraian SK / Berita Acara Penetapan PIP", type: "text", required: true, placeholder: "Contoh: SK Pemberian PIP SD Tahap I T.A 2026" },
+      { name: "jenjang_id", label: "Jenjang Pendidikan", type: "select", required: true, masterEndpoint: "/api/v1/admin/master/jenjang/option", masterQueryKey: "master-jenjang-option", hookName: "Jenjang", placeholder: "Pilih jenjang" },
+      { name: "nominal", label: "Besaran Pagu Nominal Per Siswa (Rp)", type: "number", required: true, placeholder: "Contoh: 450000" },
+      { name: "tahun", label: "Tahun Penetapan", type: "text", required: true, placeholder: "Contoh: 2026" },
+      { name: "file", label: "Dokumen SK / Berita Acara (PDF)", type: "file", required: false, placeholder: "Unggah berkas SK PIP" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Sekolah" },
-      { key: "nama_siswa", label: "Nama Siswa" },
-      { key: "nisn", label: "NISN" },
-      { key: "dokumen", label: "Dokumen" },
+      { key: "uraian", label: "Uraian SK" },
+      { key: "nominal", label: "Nominal (Rp)" },
+      { key: "tahun", label: "Tahun" },
       { key: "file", label: "Berkas" }
     ]
   },
   {
     dir: "app/(admin)/admin/usulan/pip/data-penerima",
-    entity: "PipDataPenerima",
-    title: "Data Penerima",
-    category: "Usulan Sekolah",
-    description: "Daftar penerima alokasi dana bantuan Program Indonesia Pintar (PIP).",
+    entity: "UsulanPipPenerima",
+    title: "Data Penerima PIP",
+    category: "Usulan Sekolah > Usulan Bantuan PIP",
+    description: "Penetapan peserta didik aktif yang berhak menerima penyaluran dana bantuan PIP.",
     endpoint: "/api/v1/admin/usulan/pip/data-penerima",
-    queryKey: "usulan-pip-data-penerima",
-    icon: "👥",
+    queryKey: "usulan-pip-penerima",
+    icon: "🎓",
     fields: [
-      { name: "sekolah", label: "Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SMPN 5 Konsel" },
-      { name: "nama_siswa", label: "Nama Siswa Penerima", type: "text", required: true, placeholder: "Contoh: Dewi Lestari" },
-      { name: "nisn", label: "NISN", type: "text", required: true, placeholder: "Contoh: 0081234567" },
-      { name: "tahun", label: "Tahun Penyaluran", type: "number", required: true, placeholder: "Contoh: 2026" },
-      { name: "tahap", label: "Tahap Penyaluran", type: "text", required: true, placeholder: "Contoh: Tahap 1 / Tahap 2" },
-      { name: "nominal", label: "Nominal Bantuan (Rp)", type: "number", required: true, placeholder: "Contoh: 750000" },
-      { name: "status_penyaluran", label: "Status Penyaluran", type: "text", required: true, placeholder: "Contoh: Sudah Dicairkan / Siap Aktivasi" }
+      { name: "pendukung_id", label: "Data Pendukung PIP", type: "select", required: true, masterEndpoint: "/api/v1/admin/usulan/pip/data-pendukung/option", masterQueryKey: "usulan-pip-pendukung-option", hookName: "DataPendukung", placeholder: "Pilih dokumen rujukan SK PIP" },
+      { name: "siswa_id", label: "Peserta Didik (Master Siswa)", type: "select", required: true, masterEndpoint: "/api/v1/admin/master/siswa/option", masterQueryKey: "master-siswa-option", hookName: "Siswa", placeholder: "Pilih siswa penerima PIP" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Sekolah" },
-      { key: "nama_siswa", label: "Nama Siswa" },
-      { key: "nisn", label: "NISN" },
-      { key: "nominal", label: "Nominal (Rp)" },
-      { key: "status_penyaluran", label: "Status" }
+      { key: "pendukung_id", label: "ID Pendukung" },
+      { key: "siswa_id", label: "ID Siswa" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" },
+      { key: "created_at", label: "Waktu Penetapan" }
     ]
   },
   {
@@ -333,24 +309,24 @@ export const modules = [
     entity: "UsulanAssessment",
     title: "Usulan Data Assessment",
     category: "Usulan Sekolah",
-    description: "Pendataan kesiapan dan usulan Asesmen Nasional Berbasis Komputer (ANBK) satuan pendidikan.",
+    description: "Status moda pelaksanaan sekolah, jumlah siswa peserta asesmen/ANBK, dan rincian gender.",
     endpoint: "/api/v1/admin/usulan/assessment",
     queryKey: "usulan-assessment",
     icon: "📊",
     fields: [
-      { name: "sekolah", label: "Nama Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SDN 8 Moramo" },
-      { name: "tahun", label: "Tahun Pelaksanaan", type: "number", required: true, placeholder: "Contoh: 2026" },
-      { name: "jenis_asesmen", label: "Moda & Jenis Asesmen", type: "text", required: true, placeholder: "Contoh: ANBK Mandiri Online / Menumpang" },
-      { name: "jumlah_peserta", label: "Jumlah Peserta Didik", type: "number", required: true, placeholder: "Contoh: 30" },
-      { name: "status", label: "Status Kesiapan", type: "text", required: false, placeholder: "Contoh: Siap Mandiri / Perlu Tambahan Server" },
-      { name: "dokumen", label: "Berkas SPTJM / Berita Acara", type: "file", required: false, placeholder: "Unggah berkas kesiapan (PDF)" }
+      { name: "status_sekolah_id", label: "Status Pelaksanaan Sekolah", type: "select", required: true, options: [{ value: "0", label: "Mandiri / Negeri" }, { value: "1", label: "Menumpang / Swasta" }, { value: "2", label: "Satuan Pendidikan Kerjasama (SPK)" }], placeholder: "Pilih status moda pelaksanaan" },
+      { name: "jml_siswa", label: "Total Peserta Siswa", type: "number", required: true, placeholder: "Contoh: 30" },
+      { name: "jml_laki", label: "Jumlah Peserta Laki-laki", type: "number", required: false, placeholder: "Contoh: 15" },
+      { name: "jml_perempuan", label: "Jumlah Peserta Perempuan", type: "number", required: false, placeholder: "Contoh: 15" },
+      { name: "kurikulum_k13", label: "Peserta Kurikulum 2013", type: "text", required: false, placeholder: "Contoh: 0" },
+      { name: "kurikulum_kurmer", label: "Peserta Kurikulum Merdeka", type: "text", required: false, placeholder: "Contoh: 30" },
+      { name: "file", label: "Dokumen Bukti Kesiapan Asesmen (PDF)", type: "file", required: false, placeholder: "Unggah dokumen pendukung asesmen" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Sekolah" },
-      { key: "tahun", label: "Tahun" },
-      { key: "jenis_asesmen", label: "Moda Asesmen" },
-      { key: "jumlah_peserta", label: "Peserta" },
-      { key: "status", label: "Status" }
+      { key: "jml_siswa", label: "Total Siswa" },
+      { key: "jml_laki", label: "Laki-laki" },
+      { key: "jml_perempuan", label: "Perempuan" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
   {
@@ -358,338 +334,342 @@ export const modules = [
     entity: "UsulanRekonsiliasiBosp",
     title: "Usulan Rekonsiliasi Dana BOSP",
     category: "Usulan Sekolah",
-    description: "Pengajuan berkas LPJ / SPJ dana BOSP reguler dan kinerja satuan pendidikan.",
+    description: "Pengajuan pertanggungjawaban (SPJ) keuangan dan aset BOSP ke Dinas Pendidikan dan Kebudayaan.",
     endpoint: "/api/v1/admin/usulan/rekonsiliasi-bosp",
     queryKey: "usulan-rekonsiliasi-bosp",
     icon: "🧾",
     fields: [
-      { name: "sekolah", label: "Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SDN 1 Kolono" },
-      { name: "tahap", label: "Tahap BOSP", type: "text", required: true, placeholder: "Contoh: Tahap 1 / Tahap 2" },
-      { name: "tahun", label: "Tahun Anggaran", type: "number", required: true, placeholder: "Contoh: 2026" },
-      { name: "nominal_dana", label: "Nominal Usulan LPJ (Rp)", type: "number", required: true, placeholder: "Contoh: 85000000" },
-      { name: "kategori_spj", label: "Kategori Berkas SPJ", type: "text", required: false, placeholder: "Contoh: BKU, Buku Bank, Pajak, SPTJM" },
-      { name: "file_bku", label: "Berkas BKU (PDF)", type: "file", required: false, placeholder: "Unggah scan BKU bertanda tangan" },
-      { name: "file_rekening", label: "Rekening Koran BOSP", type: "file", required: false, placeholder: "Unggah rekening koran bank" },
-      { name: "file_sptjm", label: "Berkas SPTJM Bermaterai", type: "file", required: false, placeholder: "Unggah SPTJM bermaterai" },
-      { name: "status", label: "Status Verifikasi", type: "text", required: false, placeholder: "Contoh: Menunggu Verifikasi" }
+      { name: "sekolah", label: "Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SDN 4 Ranomeeto" },
+      { name: "tahun", label: "Tahun Anggaran", type: "text", required: true, placeholder: "Contoh: 2026" },
+      { name: "tahap", label: "Semester / Tahap", type: "select", required: true, options: [{ value: "Semester I (Januari - Juni)", label: "Semester I (Januari - Juni)" }, { value: "Semester II (Juli - Desember)", label: "Semester II (Juli - Desember)" }], placeholder: "Pilih semester" },
+      { name: "nominal_dana", label: "Nominal Penyerapan Dana BOSP (Rp)", type: "number", required: false, placeholder: "Contoh: 50000000" },
+      { name: "kategori_spj", label: "Kategori Dokumen SPJ (Master Kategori)", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/kategori/option", masterQueryKey: "master-kategori-option", hookName: "KategoriSpj", placeholder: "Pilih kategori SPJ BOSP" },
+      { name: "file_bku", label: "Buku Kas Umum / BKU (PDF)", type: "file", required: false, placeholder: "Unggah berkas BKU" },
+      { name: "file_rekening", label: "Rekening Koran Bank Sultra (PDF)", type: "file", required: false, placeholder: "Unggah rekening koran" },
+      { name: "file_sptjm", label: "SPTJM BOSP Bermaterai (PDF)", type: "file", required: false, placeholder: "Unggah SPTJM" },
+      { name: "status", label: "Status Usulan", type: "select", required: false, options: [{ value: "Sedang Diproses Verifikasi", label: "Sedang Diproses Verifikasi" }, { value: "Cek Benar", label: "Cek Benar" }, { value: "Cek Lengkap", label: "Cek Lengkap" }, { value: "Disetujui", label: "Disetujui" }], placeholder: "Pilih status usulan" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Sekolah" },
-      { key: "tahap", label: "Tahap" },
+      { key: "sekolah", label: "Satuan Pendidikan" },
       { key: "tahun", label: "Tahun" },
-      { key: "nominal_dana", label: "Nominal LPJ" },
-      { key: "status", label: "Status" }
+      { key: "tahap", label: "Semester" },
+      { key: "status", label: "Status Usulan" }
     ]
   },
 
-  // 5. Kegiatan
+  // 5. Kegiatan Sekolah
   {
     dir: "app/(admin)/admin/kegiatan-sekolah",
     entity: "KegiatanSekolah",
     title: "Kegiatan Sekolah",
     category: "Kegiatan Sekolah",
-    description: "Agenda, pameran karya, dan aktivitas akademik maupun ekstrakurikuler sekolah.",
+    description: "Dokumentasi dan pelaporan aktivitas belajar, ekstrakurikuler, workshop, dan hari besar sekolah.",
     endpoint: "/api/v1/admin/kegiatan-sekolah",
     queryKey: "kegiatan-sekolah",
-    icon: "🎯",
+    icon: "📸",
     fields: [
-      { name: "judul", label: "Judul Kegiatan", type: "text", required: true, placeholder: "Contoh: Gelar Karya P5 Kearifan Lokal" },
-      { name: "deskripsi", label: "Uraian Pelaksanaan", type: "textarea", required: true, placeholder: "Deskripsi jalannya aktivitas kegiatan..." },
-      { name: "tanggal", label: "Tanggal Kegiatan", type: "date", required: true, placeholder: "YYYY-MM-DD" },
-      { name: "tahun", label: "Tahun", type: "number", required: false, placeholder: "Contoh: 2026" },
-      { name: "file", label: "Dokumentasi Foto / Laporan", type: "file", required: false, placeholder: "Unggah berkas foto atau dokumen (PDF)" },
-      { name: "link", label: "Tautan YouTube / Berita", type: "text", required: false, placeholder: "https://youtube.com/..." }
+      { name: "nama_kegiatan", label: "Nama / Tajuk Kegiatan", type: "text", required: true, placeholder: "Contoh: Upacara Hardiknas & Pentas Seni" },
+      { name: "deskripsi", label: "Deskripsi Lengkap Kegiatan", type: "textarea", required: true, placeholder: "Uraian jalannya kegiatan..." },
+      { name: "tgl_kegiatan", label: "Tanggal Pelaksanaan", type: "date", required: true },
+      { name: "foto", label: "Foto Banner / Dokumentasi", type: "file", required: false, placeholder: "Unggah foto kegiatan" },
+      { name: "link_youtube", label: "Tautan Video YouTube Kegiatan", type: "text", required: false, placeholder: "https://www.youtube.com/watch?v=..." }
     ],
     tableCols: [
-      { key: "judul", label: "Judul Kegiatan" },
-      { key: "tanggal", label: "Tanggal" },
-      { key: "tahun", label: "Tahun" },
-      { key: "link", label: "Tautan" }
+      { key: "nama_kegiatan", label: "Nama Kegiatan" },
+      { key: "tgl_kegiatan", label: "Tanggal" },
+      { key: "foto", label: "Foto" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
+
+  // 6. Komunitas Belajar
   {
     dir: "app/(admin)/admin/komunitas-belajar",
     entity: "KomunitasBelajar",
     title: "Komunitas Belajar",
     category: "Komunitas Belajar",
-    description: "Pendataan Komunitas Belajar (Kombel) dalam sekolah maupun antarsekolah di PMM.",
+    description: "Pengelolaan aktivitas kelompok belajar guru dan tenaga kependidikan intra dan antar satuan pendidikan.",
     endpoint: "/api/v1/admin/komunitas-belajar",
     queryKey: "komunitas-belajar",
     icon: "🤝",
     fields: [
-      { name: "nama_kombel", label: "Nama Komunitas Belajar", type: "text", required: true, placeholder: "Contoh: Kombel Berbagi Praktik Baik Konsel" },
-      { name: "ketua", label: "Ketua / Penggerak Kombel", type: "text", required: true, placeholder: "Contoh: Drs. Wahyudin, M.Pd" },
-      { name: "jenjang", label: "Jenjang / Lingkup", type: "text", required: false, placeholder: "Contoh: SD / SMP / Antar Sekolah" },
-      { name: "jumlah_anggota", label: "Jumlah Anggota Guru", type: "number", required: true, placeholder: "Contoh: 35" },
-      { name: "kegiatan_utama", label: "Fokus & Kegiatan Utama", type: "textarea", required: false, placeholder: "Uraian topik diskusi dan praktik baik..." },
-      { name: "file_sk", label: "Berkas SK Komunitas Belajar (PDF)", type: "file", required: false, placeholder: "Unggah SK pengesahan kombel" }
+      { name: "nama", label: "Nama Komunitas Belajar", type: "text", required: true, placeholder: "Contoh: Kombel Berbagi Praktik Baik" },
+      { name: "jns_kegiatan", label: "Siklus / Jenis Kegiatan", type: "select", required: true, options: [{ value: "0", label: "Siklus Refleksi Awal" }, { value: "1", label: "Siklus Perencanaan" }, { value: "2", label: "Siklus Implementasi" }, { value: "3", label: "Siklus Evaluasi" }], placeholder: "Pilih siklus kegiatan" },
+      { name: "tgl_kegiatan", label: "Tanggal Pelaksanaan", type: "date", required: true },
+      { name: "nama_id", label: "Nama Guru / Penanggung Jawab", type: "text", required: false, placeholder: "Nama guru penggerak / penanggung jawab" },
+      { name: "jabatan", label: "Jabatan dalam Kombel", type: "select", required: false, options: [{ value: "Ketua", label: "Ketua" }, { value: "Wakil", label: "Wakil" }, { value: "Sekretaris", label: "Sekretaris" }, { value: "Koordinator", label: "Koordinator" }, { value: "Anggota", label: "Anggota" }], placeholder: "Pilih jabatan" },
+      { name: "file", label: "Dokumen Berita Acara / SK Kombel (PDF)", type: "file", required: false, placeholder: "Unggah dokumen pendukung" }
     ],
     tableCols: [
-      { key: "nama_kombel", label: "Nama Komunitas" },
-      { key: "ketua", label: "Penggerak" },
-      { key: "jenjang", label: "Jenjang" },
-      { key: "jumlah_anggota", label: "Anggota" }
+      { key: "nama", label: "Nama Kombel" },
+      { key: "jabatan", label: "Jabatan" },
+      { key: "tgl_kegiatan", label: "Tanggal" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
+
+  // 7. Piagam Sertifikat
   {
     dir: "app/(admin)/admin/piagam-sertifikat",
     entity: "PiagamSertifikat",
-    title: "Piagam Sertifikat",
-    category: "Piagam Sertifikat",
-    description: "Pencatatan dan arsip digital piagam penghargaan, bimtek, pelatihan, dan sertifikat kompetensi.",
+    title: "Piagam & Sertifikat",
+    category: "Penghargaan",
+    description: "Pencatatan prestasi, penghargaan kejuaraan dan piagam sertifikat tingkat Guru, Siswa, dan Sekolah.",
     endpoint: "/api/v1/admin/piagam-sertifikat",
     queryKey: "piagam-sertifikat",
     icon: "🏆",
     fields: [
-      { name: "kegiatan", label: "Nama Pelatihan / Bimtek / Lomba", type: "text", required: true, placeholder: "Contoh: Bimtek Kurikulum Merdeka Berkelanjutan" },
-      { name: "penyelenggara", label: "Lembaga / Instansi Penyelenggara", type: "text", required: true, placeholder: "Contoh: Balai Guru Penggerak Sultra" },
-      { name: "tahun", label: "Tahun Perolehan", type: "number", required: true, placeholder: "Contoh: 2026" },
-      { name: "tempat_pelaksana", label: "Lokasi Pelaksanaan", type: "text", required: false, placeholder: "Contoh: Hotel Claro Kendari" },
-      { name: "sebagai", label: "Peran / Predikat", type: "text", required: true, placeholder: "Contoh: Peserta / Narasumber / Juara 1" },
-      { name: "file", label: "Berkas Digital Sertifikat (PDF)", type: "file", required: false, placeholder: "Unggah dokumen PDF sertifikat" }
+      { name: "kategori", label: "Kategori Penerima Penghargaan", type: "select", required: true, options: [{ value: "Siswa", label: "Peserta Didik (Siswa)" }, { value: "Guru", label: "Pendidik (Guru)" }, { value: "Sekolah", label: "Satuan Pendidikan (Sekolah)" }], placeholder: "Pilih kategori penerima" },
+      { name: "nama", label: "Nama Penerima Penghargaan", type: "text", required: true, placeholder: "Nama penerima" },
+      { name: "kegiatan", label: "Nama Ajang / Kompetisi", type: "text", required: true, placeholder: "Contoh: Olimpiade Sains Nasional" },
+      { name: "juara", label: "Capaian Juara / Penghargaan", type: "text", required: false, placeholder: "Contoh: Juara 1 Medali Emas" },
+      { name: "tingkat", label: "Tingkat Kejuaraan", type: "select", required: false, options: [{ value: "Kecamatan", label: "Tingkat Kecamatan" }, { value: "Kabupaten", label: "Tingkat Kabupaten" }, { value: "Provinsi", label: "Tingkat Provinsi" }, { value: "Nasional", label: "Tingkat Nasional" }, { value: "Internasional", label: "Tingkat Internasional" }], placeholder: "Pilih tingkat kejuaraan" },
+      { name: "tahun", label: "Tahun Prestasi", type: "text", required: false, placeholder: "Contoh: 2026" },
+      { name: "penyelenggara", label: "Instansi / Lembaga Penyelenggara", type: "text", required: false, placeholder: "Contoh: Balai Pengembangan Talenta Indonesia" },
+      { name: "file", label: "Pindaian Piagam / Sertifikat (PDF/Gambar)", type: "file", required: false, placeholder: "Unggah piagam penghargaan" }
     ],
     tableCols: [
-      { key: "kegiatan", label: "Nama Kegiatan" },
-      { key: "penyelenggara", label: "Penyelenggara" },
-      { key: "tahun", label: "Tahun" },
-      { key: "sebagai", label: "Peran" },
+      { key: "nama", label: "Penerima" },
+      { key: "kegiatan", label: "Ajang" },
+      { key: "juara", label: "Juara" },
+      { key: "tingkat", label: "Tingkat" },
       { key: "file", label: "Berkas" }
     ]
   },
 
-  // 6. Gallery
+  // 8. Gallery (9 Modules)
   {
     dir: "app/(admin)/admin/gallery/sekolah-penggerak",
-    entity: "GallerySekolahPenggerak",
+    entity: "SekolahPenggerak",
     title: "Sekolah Penggerak",
     category: "Gallery",
-    description: "Galeri dokumentasi program Sekolah Penggerak jenjang PAUD, SD, dan SMP.",
+    description: "Dokumentasi publikasi program dan kegiatan Program Sekolah Penggerak.",
     endpoint: "/api/v1/admin/gallery/sekolah-penggerak",
     queryKey: "gallery-sekolah-penggerak",
-    icon: "🚀",
+    icon: "🌟",
     fields: [
-      { name: "judul", label: "Judul Dokumentasi", type: "text", required: true, placeholder: "Contoh: Lokakarya Komite Pembelajaran Sekolah Penggerak" },
-      { name: "deskripsi", label: "Deskripsi", type: "textarea", required: true, placeholder: "Uraian kegiatan sekolah penggerak..." },
-      { name: "angkatan", label: "Angkatan Program", type: "text", required: false, placeholder: "Contoh: Angkatan 1 / 2 / 3" },
-      { name: "file", label: "Foto Dokumentasi", type: "file", required: false, placeholder: "Unggah berkas foto kegiatan" },
-      { name: "link", label: "Tautan Video YouTube", type: "text", required: false, placeholder: "https://youtube.com/..." }
+      { name: "judul", label: "Tajuk / Nama Kegiatan", type: "text", required: true, placeholder: "Contoh: Lokakarya Komite Pembelajaran" },
+      { name: "tujuan", label: "Tujuan Pelaksanaan", type: "textarea", required: false, placeholder: "Tujuan kegiatan..." },
+      { name: "proses", label: "Tahapan / Proses Kegiatan", type: "textarea", required: false, placeholder: "Rangkaian proses pelaksanaan..." },
+      { name: "hasil", label: "Hasil Capaian Transformasi", type: "textarea", required: false, placeholder: "Output dan hasil capaian..." },
+      { name: "link", label: "Tautan Video YouTube", type: "text", required: false, placeholder: "https://www.youtube.com/watch?v=..." },
+      { name: "file", label: "Foto / Dokumentasi Kegiatan", type: "file", required: false, placeholder: "Unggah foto kegiatan" }
     ],
     tableCols: [
-      { key: "judul", label: "Judul" },
-      { key: "angkatan", label: "Angkatan" },
-      { key: "deskripsi", label: "Deskripsi" },
-      { key: "link", label: "Tautan" }
+      { key: "judul", label: "Nama Kegiatan" },
+      { key: "link", label: "Video YouTube" },
+      { key: "file", label: "Foto" },
+      { key: "created_at", label: "Waktu Catat" }
     ]
   },
   {
     dir: "app/(admin)/admin/gallery/guru-penggerak",
-    entity: "GalleryGuruPenggerak",
-    title: "Gallery Program Guru Penggerak",
+    entity: "GuruPenggerak",
+    title: "Guru Penggerak",
     category: "Gallery",
-    description: "Dokumentasi aksi nyata dan lokakarya calon Guru Penggerak Konawe Selatan.",
+    description: "Portofolio aksi nyata dan karya kepemimpinan pembelajaran Guru Penggerak.",
     endpoint: "/api/v1/admin/gallery/guru-penggerak",
     queryKey: "gallery-guru-penggerak",
-    icon: "🌟",
+    icon: "🌱",
     fields: [
-      { name: "judul", label: "Judul Aksi Nyata / Kegiatan", type: "text", required: true, placeholder: "Contoh: Panen Hasil Belajar Lokakarya 7" },
-      { name: "nama_guru", label: "Nama Calon / Guru Penggerak", type: "text", required: true, placeholder: "Contoh: Dewi Sartika, S.Pd" },
-      { name: "sekolah", label: "Satuan Pendidikan Asal", type: "text", required: true, placeholder: "Contoh: SDN 4 Moramo" },
-      { name: "angkatan", label: "Angkatan PGP", type: "text", required: false, placeholder: "Contoh: Angkatan 10" },
-      { name: "deskripsi", label: "Uraian Aksi", type: "textarea", required: false, placeholder: "Uraian aksi kepemimpinan murid..." },
-      { name: "file", label: "Foto Dokumentasi", type: "file", required: false, placeholder: "Unggah dokumentasi foto" },
-      { name: "link", label: "Tautan YouTube", type: "text", required: false, placeholder: "https://youtube.com/..." }
+      { name: "judul", label: "Tajuk Aksi Nyata / Praktik Baik", type: "text", required: true, placeholder: "Contoh: Aksi Nyata Modul 1.4 Budaya Positif" },
+      { name: "nama_guru", label: "Nama Guru Penggerak", type: "text", required: false, placeholder: "Nama lengkap guru" },
+      { name: "sekolah", label: "Satuan Pendidikan", type: "text", required: false, placeholder: "Nama sekolah bertugas" },
+      { name: "angkatan", label: "Angkatan Guru Penggerak", type: "text", required: false, placeholder: "Contoh: Angkatan 9" },
+      { name: "deskripsi", label: "Deskripsi Prakarsa Perubahan", type: "textarea", required: false, placeholder: "Uraian implementasi di kelas..." },
+      { name: "file", label: "Dokumentasi Foto Aksi Nyata", type: "file", required: false, placeholder: "Unggah foto dokumentasi" },
+      { name: "link", label: "Tautan Video Pembelajaran", type: "text", required: false, placeholder: "https://www.youtube.com/watch?v=..." }
     ],
     tableCols: [
-      { key: "judul", label: "Judul" },
-      { key: "nama_guru", label: "Nama Guru" },
-      { key: "sekolah", label: "Sekolah" },
-      { key: "angkatan", label: "Angkatan" }
+      { key: "judul", label: "Tajuk Aksi Nyata" },
+      { key: "nama_guru", label: "Guru" },
+      { key: "angkatan", label: "Angkatan" },
+      { key: "file", label: "Foto" }
     ]
   },
   {
     dir: "app/(admin)/admin/gallery/organisasi-penggerak",
-    entity: "GalleryOrganisasiPenggerak",
-    title: "Gallery Program Organisasi Penggerak",
+    entity: "OrganisasiPenggerak",
+    title: "Organisasi Penggerak",
     category: "Gallery",
-    description: "Dokumentasi kolaborasi program Ormas/NGO mitra Kemendikbud di Konsel.",
+    description: "Dokumentasi program pendampingan dari Organisasi Penggerak di sekolah sasaran.",
     endpoint: "/api/v1/admin/gallery/organisasi-penggerak",
     queryKey: "gallery-organisasi-penggerak",
-    icon: "🏛️",
+    icon: "🏢",
     fields: [
-      { name: "judul", label: "Nama Kegiatan Kemitraan", type: "text", required: true, placeholder: "Contoh: Pelatihan Literasi Numerasi Kelas Awal" },
-      { name: "nama_organisasi", label: "Nama Organisasi Penggerak", type: "text", required: true, placeholder: "Contoh: Yayasan Literasi Anak Nusantara" },
-      { name: "kegiatan", label: "Fokus Kegiatan", type: "text", required: false, placeholder: "Contoh: Peningkatan Kemampuan Membaca Dasar" },
-      { name: "deskripsi", label: "Deskripsi", type: "textarea", required: false, placeholder: "Uraian kegiatan kemitraan..." },
-      { name: "file", label: "Foto Dokumentasi", type: "file", required: false, placeholder: "Unggah foto dokumentasi" },
-      { name: "link", label: "Tautan YouTube", type: "text", required: false, placeholder: "https://youtube.com/..." }
+      { name: "judul", label: "Nama Program / Pelatihan", type: "text", required: true, placeholder: "Contoh: Pelatihan Pembelajaran Berbasis Numerasi" },
+      { name: "nama_organisasi", label: "Nama Lembaga / Yayasan Mitra", type: "text", required: false, placeholder: "Nama organisasi mitra" },
+      { name: "kegiatan", label: "Uraian Fokus Kegiatan", type: "text", required: false, placeholder: "Fokus kegiatan..." },
+      { name: "deskripsi", label: "Deskripsi Pelaksanaan", type: "textarea", required: false, placeholder: "Rincian pelaksanaan bimtek..." },
+      { name: "file", label: "Foto Dokumentasi", type: "file", required: false, placeholder: "Unggah foto kegiatan" },
+      { name: "link", label: "Tautan Video Dokumentasi", type: "text", required: false, placeholder: "https://www.youtube.com/watch?v=..." }
     ],
     tableCols: [
-      { key: "judul", label: "Judul" },
-      { key: "nama_organisasi", label: "Organisasi" },
-      { key: "kegiatan", label: "Fokus Kegiatan" }
+      { key: "judul", label: "Program" },
+      { key: "nama_organisasi", label: "Organisasi Mitra" },
+      { key: "file", label: "Foto" }
     ]
   },
   {
     dir: "app/(admin)/admin/gallery/kegiatan-kepala-sekolah",
-    entity: "GalleryKegiatanKepalaSekolah",
-    title: "Gallery Kegiatan Kepala Sekolah",
+    entity: "KegiatanKepalaSekolah",
+    title: "Kegiatan Kepala Sekolah",
     category: "Gallery",
-    description: "Dokumentasi program kerja, supervisi klinis, dan inovasi manajerial Kepala Sekolah.",
+    description: "Dokumentasi kegiatan manajerial, supervisi akademik, dan forum Kelompok Kerja Kepala Sekolah.",
     endpoint: "/api/v1/admin/gallery/kegiatan-kepala-sekolah",
     queryKey: "gallery-kegiatan-kepala-sekolah",
     icon: "👔",
     fields: [
-      { name: "judul", label: "Nama Kegiatan / Aksi Nyata", type: "text", required: true, placeholder: "Contoh: Bimtek Pemanfaatan Platform Rapor Pendidikan" },
-      { name: "tujuan", label: "Tujuan Kegiatan", type: "textarea", required: true, placeholder: "Tujuan pelaksanaan kegiatan manajerial..." },
-      { name: "proses", label: "Tahapan / Proses", type: "textarea", required: false, placeholder: "Uraian proses dan keterlibatan guru..." },
-      { name: "hasil", label: "Hasil / Capaian Positif", type: "textarea", required: false, placeholder: "Output yang berhasil dicapai..." },
-      { name: "file", label: "Foto Dokumentasi", type: "file", required: false, placeholder: "Unggah foto kegiatan" },
-      { name: "link", label: "Tautan YouTube", type: "text", required: false, placeholder: "https://youtube.com/..." }
+      { name: "judul", label: "Tajuk Kegiatan Kepemimpinan / MKKS", type: "text", required: true, placeholder: "Contoh: Rapat Koordinasi MKKS SMP" },
+      { name: "tujuan", label: "Target / Tujuan Kegiatan", type: "textarea", required: false, placeholder: "Target tata kelola..." },
+      { name: "proses", label: "Rangkaian Jalannya Kegiatan", type: "textarea", required: false, placeholder: "Uraian proses..." },
+      { name: "hasil", label: "Hasil Evaluasi & Rekomendasi", type: "textarea", required: false, placeholder: "Hasil rapat..." },
+      { name: "file", label: "Dokumentasi Foto Kegiatan", type: "file", required: false, placeholder: "Unggah foto kegiatan" },
+      { name: "link", label: "Tautan Video YouTube", type: "text", required: false, placeholder: "https://www.youtube.com/watch?v=..." }
     ],
     tableCols: [
-      { key: "judul", label: "Nama Kegiatan" },
-      { key: "tujuan", label: "Tujuan" },
-      { key: "hasil", label: "Hasil Capaian" }
+      { key: "judul", label: "Tajuk Kegiatan" },
+      { key: "file", label: "Foto" },
+      { key: "created_at", label: "Waktu Catat" }
     ]
   },
   {
     dir: "app/(admin)/admin/gallery/kegiatan-kkg-sd",
-    entity: "GalleryKegiatanKkgSd",
-    title: "Gallery Kegiatan KKG SD",
+    entity: "KegiatanKkgSd",
+    title: "Kegiatan KKG SD",
     category: "Gallery",
-    description: "Dokumentasi aktivitas Kelompok Kerja Guru (KKG) jenjang Sekolah Dasar se-Konsel.",
+    description: "Dokumentasi forum Kelompok Kerja Guru Sekolah Dasar (KKG SD) tingkat gugus/kecamatan.",
     endpoint: "/api/v1/admin/gallery/kegiatan-kkg-sd",
     queryKey: "gallery-kegiatan-kkg-sd",
-    icon: "🎨",
+    icon: "👥",
     fields: [
-      { name: "judul", label: "Nama Kegiatan KKG", type: "text", required: true, placeholder: "Contoh: Penyusunan Modul Ajar Berdiferensiasi" },
-      { name: "gugus", label: "Gugus / Wilayah KKG", type: "text", required: true, placeholder: "Contoh: Gugus 2 Ranomeeto" },
-      { name: "materi", label: "Materi / Topik Pelatihan", type: "text", required: false, placeholder: "Contoh: Asesmen Diagnostik Awal" },
-      { name: "deskripsi", label: "Deskripsi", type: "textarea", required: false, placeholder: "Uraian jalannya pertemuan KKG..." },
-      { name: "file", label: "Foto Dokumentasi", type: "file", required: false, placeholder: "Unggah foto kegiatan KKG" },
-      { name: "link", label: "Tautan YouTube", type: "text", required: false, placeholder: "https://youtube.com/..." }
+      { name: "judul", label: "Agenda / Topik KKG SD", type: "text", required: true, placeholder: "Contoh: Bedah CP dan Penyusunan ATP Fase C" },
+      { name: "gugus", label: "Nama Gugus / Kecamatan", type: "text", required: false, placeholder: "Contoh: Gugus I Buke" },
+      { name: "materi", label: "Materi Pembahasan Bersama", type: "text", required: false, placeholder: "Contoh: Modul Ajar Matematika" },
+      { name: "deskripsi", label: "Deskripsi Pelaksanaan", type: "textarea", required: false, placeholder: "Uraian diskusi & hasil rekomendasi..." },
+      { name: "file", label: "Foto Dokumentasi KKG", type: "file", required: false, placeholder: "Unggah foto KKG" },
+      { name: "link", label: "Tautan Video YouTube", type: "text", required: false, placeholder: "https://www.youtube.com/watch?v=..." }
     ],
     tableCols: [
-      { key: "judul", label: "Nama Kegiatan" },
-      { key: "gugus", label: "Gugus KKG" },
-      { key: "materi", label: "Materi" }
+      { key: "judul", label: "Agenda KKG" },
+      { key: "gugus", label: "Gugus" },
+      { key: "file", label: "Foto" }
     ]
   },
   {
     dir: "app/(admin)/admin/gallery/kegiatan-guru-mgmp",
-    entity: "GalleryKegiatanGuruMgmp",
-    title: "Gallery Kegiatan Guru MGMP",
+    entity: "KegiatanGuruMgmp",
+    title: "Kegiatan Guru MGMP",
     category: "Gallery",
-    description: "Dokumentasi Musyawarah Guru Mata Pelajaran (MGMP) jenjang SMP se-Konawe Selatan.",
+    description: "Dokumentasi kegiatan Musyawarah Guru Mata Pelajaran jenjang SMP.",
     endpoint: "/api/v1/admin/gallery/kegiatan-guru-mgmp",
     queryKey: "gallery-kegiatan-guru-mgmp",
     icon: "🔬",
     fields: [
-      { name: "judul", label: "Nama Kegiatan MGMP", type: "text", required: true, placeholder: "Contoh: Pembuatan Media Interaktif IPA SMP" },
-      { name: "mata_pelajaran", label: "Mata Pelajaran MGMP", type: "text", required: true, placeholder: "Contoh: IPA / Matematika / Bahasa Inggris" },
-      { name: "deskripsi", label: "Deskripsi", type: "textarea", required: false, placeholder: "Uraian workshop atau diskusi materi ajar..." },
-      { name: "file", label: "Foto Dokumentasi", type: "file", required: false, placeholder: "Unggah foto kegiatan MGMP" },
-      { name: "link", label: "Tautan YouTube", type: "text", required: false, placeholder: "https://youtube.com/..." }
+      { name: "judul", label: "Agenda Kegiatan MGMP", type: "text", required: true, placeholder: "Contoh: Workshop Pengajaran Bahasa Inggris Komunikatif" },
+      { name: "mata_pelajaran", label: "Bidang Studi / Mata Pelajaran", type: "text", required: false, placeholder: "Contoh: IPA / Matematika" },
+      { name: "deskripsi", label: "Deskripsi Pelaksanaan", type: "textarea", required: false, placeholder: "Uraian lokakarya instrumen..." },
+      { name: "file", label: "Foto Dokumentasi MGMP", type: "file", required: false, placeholder: "Unggah foto kegiatan" },
+      { name: "link", label: "Tautan Video YouTube", type: "text", required: false, placeholder: "https://www.youtube.com/watch?v=..." }
     ],
     tableCols: [
-      { key: "judul", label: "Nama Kegiatan" },
+      { key: "judul", label: "Agenda MGMP" },
       { key: "mata_pelajaran", label: "Mata Pelajaran" },
-      { key: "deskripsi", label: "Deskripsi" }
+      { key: "file", label: "Foto" }
     ]
   },
   {
     dir: "app/(admin)/admin/gallery/kegiatan-tk-paud",
-    entity: "GalleryKegiatanTkPaud",
-    title: "Gallery Kegiatan TK & PAUD",
+    entity: "KegiatanTkPaud",
+    title: "Kegiatan TK & PAUD",
     category: "Gallery",
-    description: "Dokumentasi kreativitas, transisi PAUD ke SD menyenangkan, dan parenting.",
+    description: "Dokumentasi ragam kegiatan belajar sambil bermain dan penguatan karakter usia dini.",
     endpoint: "/api/v1/admin/gallery/kegiatan-tk-paud",
     queryKey: "gallery-kegiatan-tk-paud",
-    icon: "🎈",
+    icon: "🎨",
     fields: [
-      { name: "judul", label: "Nama Acara / Kegiatan", type: "text", required: true, placeholder: "Contoh: Festival Gerak dan Lagu Anak Usia Dini" },
-      { name: "sekolah", label: "Satuan PAUD / PKG", type: "text", required: true, placeholder: "Contoh: PKG Kecamatan Andoolo" },
-      { name: "deskripsi", label: "Deskripsi", type: "textarea", required: false, placeholder: "Uraian keceriaan kegiatan anak didik..." },
-      { name: "file", label: "Foto Dokumentasi", type: "file", required: false, placeholder: "Unggah foto kegiatan TK/PAUD" },
-      { name: "link", label: "Tautan YouTube", type: "text", required: false, placeholder: "https://youtube.com/..." }
+      { name: "judul", label: "Nama / Tajuk Kegiatan Anak Usia Dini", type: "text", required: true, placeholder: "Contoh: Kegiatan Berkebun & Mengenal Tanaman Obat" },
+      { name: "sekolah", label: "Satuan PAUD / TK", type: "text", required: false, placeholder: "Contoh: TK Negeri 1 Palangga" },
+      { name: "deskripsi", label: "Deskripsi Stimulasi / Capaian Anak", type: "textarea", required: false, placeholder: "Uraian pengenalan lingkungan..." },
+      { name: "file", label: "Foto Kegiatan", type: "file", required: false, placeholder: "Unggah foto anak didik" },
+      { name: "link", label: "Tautan Video YouTube", type: "text", required: false, placeholder: "https://www.youtube.com/watch?v=..." }
     ],
     tableCols: [
-      { key: "judul", label: "Nama Kegiatan" },
-      { key: "sekolah", label: "Satuan PAUD" },
-      { key: "deskripsi", label: "Deskripsi" }
+      { key: "judul", label: "Kegiatan" },
+      { key: "sekolah", label: "Sekolah" },
+      { key: "file", label: "Foto" }
     ]
   },
   {
     dir: "app/(admin)/admin/gallery/kegiatan-pengawas",
-    entity: "GalleryKegiatanPengawas",
-    title: "Gallery Kegiatan Pengawas Satdik",
+    entity: "KegiatanPengawas",
+    title: "Kegiatan Pengawas Satdik",
     category: "Gallery",
-    description: "Dokumentasi pendampingan sekolah, monitoring, dan evaluasi pengawas satuan pendidikan.",
+    description: "Dokumentasi forum pembinaan, rakor korwas, dan workshop kepengawasan satuan pendidikan.",
     endpoint: "/api/v1/admin/gallery/kegiatan-pengawas",
     queryKey: "gallery-kegiatan-pengawas",
     icon: "📋",
     fields: [
-      { name: "judul", label: "Nama Kegiatan Pendampingan", type: "text", required: true, placeholder: "Contoh: Supervisi Keterlaksanaan Kurikulum Merdeka" },
-      { name: "nama_pengawas", label: "Nama Pengawas Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: Drs. H. Sukirman, M.Si" },
-      { name: "wilayah_binaan", label: "Wilayah / Rayon Binaan", type: "text", required: false, placeholder: "Contoh: Rayon 3 Konda - Ranomeeto" },
-      { name: "deskripsi", label: "Deskripsi", type: "textarea", required: false, placeholder: "Uraian catatan pembinaan..." },
-      { name: "file", label: "Foto Dokumentasi", type: "file", required: false, placeholder: "Unggah foto supervisi sekolah" },
-      { name: "link", label: "Tautan YouTube", type: "text", required: false, placeholder: "https://youtube.com/..." }
+      { name: "judul", label: "Tema Pembinaan / Rakor Pengawas", type: "text", required: true, placeholder: "Contoh: Rakor Kelompok Kerja Pengawas Sekolah" },
+      { name: "nama_pengawas", label: "Nama Pengawas Satuan Pendidikan", type: "text", required: false, placeholder: "Nama koordinator pengawas" },
+      { name: "wilayah_binaan", label: "Wilayah Satuan Pendidikan Binaan", type: "text", required: false, placeholder: "Contoh: Korwas Palangga" },
+      { name: "deskripsi", label: "Uraian Diseminasi Kebijakan & Hasil Supervisi", type: "textarea", required: false, placeholder: "Hasil evaluasi..." },
+      { name: "file", label: "Dokumentasi Foto Rakor / Kunjungan", type: "file", required: false, placeholder: "Unggah foto kepengawasan" },
+      { name: "link", label: "Tautan Video YouTube", type: "text", required: false, placeholder: "https://www.youtube.com/watch?v=..." }
     ],
     tableCols: [
-      { key: "judul", label: "Nama Kegiatan" },
+      { key: "judul", label: "Tema Pembinaan" },
       { key: "nama_pengawas", label: "Pengawas" },
-      { key: "wilayah_binaan", label: "Wilayah Binaan" }
+      { key: "file", label: "Foto" }
     ]
   },
   {
     dir: "app/(admin)/admin/gallery/video-testimoni",
-    entity: "GalleryVideoTestimoni",
+    entity: "VideoTestimoni",
     title: "Video Testimoni",
     category: "Gallery",
-    description: "Koleksi video testimoni guru, siswa, orang tua, dan tokoh masyarakat Konawe Selatan.",
+    description: "Unggahan video testimoni, apresiasi, dan ulasan dampak program dari stakeholder pendidikan.",
     endpoint: "/api/v1/admin/gallery/video-testimoni",
     queryKey: "gallery-video-testimoni",
     icon: "🎬",
     fields: [
-      { name: "judul", label: "Judul Video Testimoni", type: "text", required: true, placeholder: "Contoh: Dampak Positif Bantuan Chromebook Bagi Siswa Pelosok" },
-      { name: "narasumber", label: "Nama Narasumber", type: "text", required: true, placeholder: "Contoh: Aisyah Putri (Siswa Berprestasi)" },
-      { name: "peran", label: "Status / Peran", type: "text", required: true, placeholder: "Contoh: Siswa SMPN 1 Kolono / Orang Tua Wali" },
-      { name: "link_video", label: "Tautan Video (YouTube / Drive)", type: "text", required: true, placeholder: "https://youtube.com/watch?v=..." },
-      { name: "keterangan", label: "Kutipan / Ringkasan Testimoni", type: "textarea", required: false, placeholder: "Kutipan kalimat kunci narasumber..." }
+      { name: "judul", label: "Tajuk Testimoni / Pernyataan", type: "text", required: true, placeholder: "Contoh: Testimoni Bupati Konawe Selatan" },
+      { name: "narasumber", label: "Nama Tokoh / Narasumber", type: "text", required: true, placeholder: "Nama lengkap narasumber" },
+      { name: "peran", label: "Peran / Jabatan Pemangku Kepentingan", type: "text", required: false, placeholder: "Contoh: Kepala Daerah / Kepala Sekolah / Guru" },
+      { name: "link_video", label: "Tautan Video YouTube (Wajib)", type: "text", required: true, placeholder: "https://www.youtube.com/watch?v=..." },
+      { name: "keterangan", label: "Ringkasan Ulasan / Kutipan Dampak", type: "textarea", required: false, placeholder: "Kutipan pernyataan positif..." }
     ],
     tableCols: [
       { key: "judul", label: "Judul" },
       { key: "narasumber", label: "Narasumber" },
       { key: "peran", label: "Peran" },
-      { key: "link_video", label: "Link Video" }
+      { key: "link_video", label: "Tautan Video" }
     ]
   },
 
-  // 7. Verifikasi
+  // 9. Verifikasi
   {
     dir: "app/(admin)/admin/verifikasi/tunjangan-guru",
     entity: "VerifikasiTunjanganGuru",
     title: "Verifikasi Tunjangan Guru",
     category: "Verifikasi",
-    description: "Pemeriksaan berkas kelayakan jam mengajar, keaktifan dapodik, dan SKTP guru.",
+    description: "Pemeriksaan dan validasi berkas pengajuan tunjangan guru dari satuan pendidikan.",
     endpoint: "/api/v1/admin/verifikasi/tunjangan-guru",
     queryKey: "verifikasi-tunjangan-guru",
-    icon: "💰",
+    icon: "✅",
     fields: [
-      { name: "nama_guru", label: "Nama Lengkap Guru", type: "text", required: true, placeholder: "Contoh: Sunardi, S.Pd" },
-      { name: "nuptk", label: "NUPTK", type: "text", required: true, placeholder: "Contoh: 8765432109876543" },
-      { name: "sekolah", label: "Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SMPN 3 Ranomeeto" },
-      { name: "jenis_tunjangan", label: "Jenis Tunjangan", type: "text", required: true, placeholder: "Contoh: TPG / Tunjangan Daerah Khusus" },
-      { name: "status_verifikasi", label: "Status Verifikasi", type: "text", required: true, placeholder: "Contoh: Disetujui / Perlu Perbaikan Berkas / Ditolak" },
-      { name: "catatan", label: "Catatan Verifikator", type: "textarea", required: false, placeholder: "Catatan hasil verifikasi berkas..." }
+      { name: "nama_guru", label: "Nama Guru Pengusul", type: "text", required: false, placeholder: "Nama guru" },
+      { name: "nuptk", label: "NUPTK", type: "text", required: false, placeholder: "Nomor NUPTK" },
+      { name: "sekolah", label: "Satuan Pendidikan", type: "text", required: false, placeholder: "Sekolah" },
+      { name: "jenis_tunjangan", label: "Jenis Tunjangan", type: "text", required: false, placeholder: "TPG / Tamsil / TKG" },
+      { name: "status_verifikasi", label: "Status Verifikasi Tim Dinas", type: "select", required: true, options: [{ value: "Menunggu", label: "Menunggu Verifikasi" }, { value: "Disetujui", label: "Disetujui / Terbit SKTP" }, { value: "Perbaikan", label: "Perlu Perbaikan Berkas" }, { value: "Ditolak", label: "Ditolak" }], placeholder: "Pilih status verifikasi" },
+      { name: "catatan", label: "Catatan Verifikator Dinas", type: "textarea", required: false, placeholder: "Catatan hasil verifikasi..." }
     ],
     tableCols: [
-      { key: "nama_guru", label: "Nama Guru" },
-      { key: "nuptk", label: "NUPTK" },
+      { key: "nama_guru", label: "Guru" },
       { key: "sekolah", label: "Sekolah" },
       { key: "jenis_tunjangan", label: "Tunjangan" },
-      { key: "status_verifikasi", label: "Status Verifikasi" }
+      { key: "status_verifikasi", label: "Status" }
     ]
   },
   {
@@ -697,43 +677,42 @@ export const modules = [
     entity: "VerifikasiRekonsiliasiBosp",
     title: "Verifikasi Usulan Rekonsiliasi Dana BOSP",
     category: "Verifikasi",
-    description: "Validasi kepatuhan pembukuan, faktur belanja, dan setoran pajak dana BOSP sekolah.",
+    description: "Verifikasi dokumen pertanggungjawaban (SPJ) dana BOSP satuan pendidikan oleh dinas.",
     endpoint: "/api/v1/admin/verifikasi/rekonsiliasi-bosp",
     queryKey: "verifikasi-rekonsiliasi-bosp",
-    icon: "📑",
+    icon: "🔍",
     fields: [
-      { name: "sekolah", label: "Nama Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SDN 1 Ranomeeto" },
-      { name: "tahap", label: "Tahap BOSP", type: "text", required: true, placeholder: "Contoh: Tahap 1 / Tahap 2" },
-      { name: "tahun", label: "Tahun Anggaran", type: "number", required: true, placeholder: "Contoh: 2026" },
-      { name: "nominal_disetujui", label: "Nominal Disetujui (Rp)", type: "number", required: true, placeholder: "Contoh: 95000000" },
-      { name: "status_verifikasi", label: "Status Rekonsiliasi", type: "text", required: true, placeholder: "Contoh: Rekonsiliasi Selesai / Siap BA / Belum Lengkap" },
-      { name: "catatan_verifikator", label: "Catatan Tim Verifikasi BOSP", type: "textarea", required: false, placeholder: "Catatan kesesuaian berkas pajak dan BKU..." }
+      { name: "sekolah", label: "Nama Satuan Pendidikan", type: "text", required: false, placeholder: "Sekolah pengusul" },
+      { name: "tahap", label: "Semester / Tahap", type: "text", required: false, placeholder: "Semester I / Semester II" },
+      { name: "tahun", label: "Tahun Anggaran", type: "text", required: false, placeholder: "2026" },
+      { name: "nominal_disetujui", label: "Nominal Dana Disetujui (Rp)", type: "number", required: false, placeholder: "Nominal disetujui" },
+      { name: "status_verifikasi", label: "Status Verifikasi Tim Dinas", type: "select", required: true, options: [{ value: "Sedang Diproses Verifikasi", label: "Sedang Diproses Verifikasi" }, { value: "Cek Benar", label: "Tahap Cek Benar (Kesesuaian Angka)" }, { value: "Cek Lengkap", label: "Tahap Cek Lengkap (26 Berkas Valid)" }, { value: "Disetujui", label: "Disetujui (Bebas Rekonsiliasi)" }, { value: "Perbaikan", label: "Perlu Koreksi Berkas SPJ" }], placeholder: "Pilih status verifikasi" },
+      { name: "catatan_verifikator", label: "Catatan Hasil Koreksi Verifikator", type: "textarea", required: false, placeholder: "Catatan koreksi SPJ..." }
     ],
     tableCols: [
       { key: "sekolah", label: "Sekolah" },
       { key: "tahap", label: "Tahap" },
       { key: "tahun", label: "Tahun" },
-      { key: "nominal_disetujui", label: "Nominal Disetujui" },
-      { key: "status_verifikasi", label: "Status" }
+      { key: "status_verifikasi", label: "Status Verifikasi" }
     ]
   },
 
-  // 8. Regulasi GTK
+  // 10. Regulasi dan Info GTK
   {
     dir: "app/(admin)/admin/regulasi-gtk/pengumuman",
-    entity: "RegulasiPengumuman",
+    entity: "RegulasiGtkPengumuman",
     title: "Pengumuman GTK",
     category: "Regulasi dan Info GTK",
-    description: "Pengumuman resmi seleksi PPG, uji kompetensi, dan pembagian sertifikat pendidik.",
+    description: "Publikasi pengumuman kedinasan khusus Guru dan Tenaga Kependidikan.",
     endpoint: "/api/v1/admin/regulasi-gtk/pengumuman",
     queryKey: "regulasi-gtk-pengumuman",
-    icon: "📣",
+    icon: "📢",
     fields: [
-      { name: "judul", label: "Judul Pengumuman", type: "text", required: true, placeholder: "Contoh: Jadwal Uji Kompetensi Kenaikan Jabatan Fungsional Guru" },
-      { name: "isi", label: "Isi Ringkasan Pengumuman", type: "textarea", required: true, placeholder: "Uraian isi pengumuman GTK..." },
-      { name: "tanggal", label: "Tanggal Diterbitkan", type: "date", required: true, placeholder: "YYYY-MM-DD" },
-      { name: "target", label: "Sasaran Guru / Tendik", type: "text", required: false, placeholder: "Contoh: Guru Jenjang SD dan SMP se-Konsel" },
-      { name: "file", label: "Berkas Lampiran PDF", type: "file", required: false, placeholder: "Unggah dokumen surat edaran (PDF)" }
+      { name: "judul", label: "Judul Pengumuman GTK", type: "text", required: true, placeholder: "Contoh: Jadwal Pemberkasan TPG Triwulan I" },
+      { name: "isi", label: "Isi Ringkas Pengumuman", type: "textarea", required: true, placeholder: "Uraian pengumuman..." },
+      { name: "tanggal", label: "Tanggal Pengumuman", type: "date", required: true },
+      { name: "target", label: "Sasaran Penerima Pengumuman", type: "text", required: false, placeholder: "Contoh: Seluruh Guru Penerima TPG" },
+      { name: "file", label: "Lampiran Surat Edaran / Pengumuman (PDF)", type: "file", required: false, placeholder: "Unggah dokumen surat edaran" }
     ],
     tableCols: [
       { key: "judul", label: "Judul Pengumuman" },
@@ -744,20 +723,20 @@ export const modules = [
   },
   {
     dir: "app/(admin)/admin/regulasi-gtk/modul-materi",
-    entity: "RegulasiModulMateri",
+    entity: "RegulasiGtkModulMateri",
     title: "Modul dan Materi Pelatihan",
     category: "Regulasi dan Info GTK",
-    description: "Repositori bahan ajar, modul pelatihan bimtek, dan instrumen Kurikulum Merdeka.",
+    description: "Repository modul pelatihan, pedoman ajar, dan materi peningkatan kompetensi GTK.",
     endpoint: "/api/v1/admin/regulasi-gtk/modul-materi",
     queryKey: "regulasi-gtk-modul-materi",
-    icon: "📖",
+    icon: "📚",
     fields: [
-      { name: "judul", label: "Judul Modul / Bahan Ajar", type: "text", required: true, placeholder: "Contoh: Panduan Asesmen dan Pembelajaran KSP Konsel" },
-      { name: "tema", label: "Tema / Bidang Studi", type: "text", required: true, placeholder: "Contoh: Kurikulum Merdeka / Literasi Numerasi" },
-      { name: "penyusun", label: "Penyusun / Tim Pengembang", type: "text", required: false, placeholder: "Contoh: Tim Pengembang Kurikulum Dikbud Konsel" },
-      { name: "tahun", label: "Tahun Terbit", type: "number", required: false, placeholder: "Contoh: 2026" },
-      { name: "file", label: "Berkas Modul PDF", type: "file", required: false, placeholder: "Unggah berkas modul digital (PDF)" },
-      { name: "link", label: "Tautan Sumber Drive", type: "text", required: false, placeholder: "https://drive.google.com/..." }
+      { name: "judul", label: "Judul Modul / Materi Pelatihan", type: "text", required: true, placeholder: "Contoh: Modul Ajar Diferensiasi Kurikulum Merdeka" },
+      { name: "tema", label: "Tema / Bidang Pelatihan", type: "text", required: false, placeholder: "Contoh: Pedagogik & Numerasi" },
+      { name: "penyusun", label: "Tim Penyusun / Narasumber", type: "text", required: false, placeholder: "Contoh: Tim Balai Guru Penggerak" },
+      { name: "tahun", label: "Tahun Terbit", type: "text", required: false, placeholder: "2026" },
+      { name: "file", label: "Berkas Dokumen Modul (PDF)", type: "file", required: false, placeholder: "Unggah modul PDF" },
+      { name: "link", label: "Tautan Materi / Video Penjelas", type: "text", required: false, placeholder: "https://..." }
     ],
     tableCols: [
       { key: "judul", label: "Judul Modul" },
@@ -768,29 +747,29 @@ export const modules = [
   },
   {
     dir: "app/(admin)/admin/regulasi-gtk/regulasi",
-    entity: "RegulasiGtk",
-    title: "Regulasi",
+    entity: "RegulasiGtkRegulasi",
+    title: "Regulasi GTK",
     category: "Regulasi dan Info GTK",
-    description: "Dokumen hukum Perbup, Permendikbudristek, dan Keputusan Kepala Dinas.",
+    description: "Himpunan produk hukum, Perbup, dan SK Kadis terkait Guru dan Tenaga Kependidikan.",
     endpoint: "/api/v1/admin/regulasi-gtk/regulasi",
     queryKey: "regulasi-gtk-regulasi",
-    icon: "⚖️",
+    icon: "📜",
     fields: [
-      { name: "nomor_regulasi", label: "Nomor & Tahun Regulasi", type: "text", required: true, placeholder: "Contoh: Perbup No. 14 Tahun 2026" },
-      { name: "tentang", label: "Perihal / Tentang", type: "textarea", required: true, placeholder: "Contoh: Tata Cara Penyaluran Tambahan Penghasilan Guru ASN Daerah" },
-      { name: "tahun", label: "Tahun", type: "number", required: true, placeholder: "Contoh: 2026" },
-      { name: "jenis", label: "Tingkat Regulasi", type: "text", required: false, placeholder: "Contoh: Peraturan Bupati / Surat Edaran Kadis" },
-      { name: "file", label: "Berkas Lembaran Hukum (PDF)", type: "file", required: false, placeholder: "Unggah dokumen PDF regulasi" }
+      { name: "nomor_regulasi", label: "Nomor Dokumen Regulasi / Surat Keputusan", type: "text", required: true, placeholder: "Contoh: Perbup No. 14 Tahun 2026" },
+      { name: "tentang", label: "Tentang / Pokok Regulasi", type: "textarea", required: true, placeholder: "Uraian isi ketentuan regulasi..." },
+      { name: "tahun", label: "Tahun Penetapan", type: "text", required: true, placeholder: "2026" },
+      { name: "jenis", label: "Jenis Produk Hukum", type: "text", required: false, placeholder: "Contoh: Peraturan Bupati / Keputusan Kadis" },
+      { name: "file", label: "Salinan Dokumen Regulasi (PDF)", type: "file", required: false, placeholder: "Unggah dokumen regulasi PDF" }
     ],
     tableCols: [
       { key: "nomor_regulasi", label: "Nomor Regulasi" },
       { key: "tentang", label: "Tentang" },
       { key: "tahun", label: "Tahun" },
-      { key: "jenis", label: "Tingkat" }
+      { key: "file", label: "Berkas" }
     ]
   },
 
-  // 9. PPDB & Kuota
+  // 11. PPDB
   {
     dir: "app/(admin)/admin/ppdb/paud",
     entity: "PpdbPaud",
@@ -799,20 +778,19 @@ export const modules = [
     description: "Pendaftaran peserta didik baru jenjang PAUD dan Taman Kanak-Kanak.",
     endpoint: "/api/v1/admin/ppdb/paud",
     queryKey: "ppdb-paud",
-    icon: "🧸",
+    icon: "🚼",
     fields: [
-      { name: "nama_siswa", label: "Nama Calon Murid", type: "text", required: true, placeholder: "Contoh: Muhammad Farhan" },
-      { name: "nik", label: "NIK Calon Murid", type: "text", required: true, placeholder: "Contoh: 740501..." },
-      { name: "sekolah_tujuan", label: "Satuan PAUD Pilihan", type: "text", required: true, placeholder: "Contoh: TK Negeri Pembina Konsel" },
-      { name: "jalur", label: "Jalur Pendaftaran", type: "text", required: true, placeholder: "Contoh: Domisili / Afirmasi" },
-      { name: "status", label: "Status Verifikasi", type: "text", required: true, placeholder: "Contoh: Diterima / Diproses" },
-      { name: "file_berkas", label: "Berkas Akta / KK (PDF/Gambar)", type: "file", required: false, placeholder: "Unggah dokumen KK dan akta kelahiran" }
+      { name: "nama_siswa", label: "Nama Lengkap Calon Siswa", type: "text", required: true, placeholder: "Nama calon siswa" },
+      { name: "nik", label: "NIK Calon Siswa", type: "text", required: true, placeholder: "16 digit NIK" },
+      { name: "sekolah_tujuan", label: "Satuan PAUD / TK Tujuan", type: "text", required: true, placeholder: "Contoh: TK Negeri 1 Palangga" },
+      { name: "jalur", label: "Jalur Pendaftaran", type: "select", required: false, options: [{ value: "Reguler", label: "Jalur Reguler" }, { value: "Afirmasi", label: "Jalur Afirmasi" }], placeholder: "Pilih jalur" },
+      { name: "status", label: "Status Pendaftaran", type: "select", required: false, options: [{ value: "Diverifikasi", label: "Diverifikasi" }, { value: "Diterima", label: "Diterima" }, { value: "Menunggu", label: "Menunggu" }, { value: "Ditolak", label: "Ditolak" }], placeholder: "Pilih status" },
+      { name: "file_berkas", label: "Berkas Akta / KK (PDF/Gambar)", type: "file", required: false, placeholder: "Unggah berkas pendaftaran" }
     ],
     tableCols: [
-      { key: "nama_siswa", label: "Nama Murid" },
+      { key: "nama_siswa", label: "Nama Calon Siswa" },
       { key: "nik", label: "NIK" },
       { key: "sekolah_tujuan", label: "Sekolah Tujuan" },
-      { key: "jalur", label: "Jalur" },
       { key: "status", label: "Status" }
     ]
   },
@@ -821,22 +799,21 @@ export const modules = [
     entity: "PpdbSd",
     title: "PPDB SD",
     category: "PPDB",
-    description: "Sistem seleksi dan registrasi peserta didik baru jenjang Sekolah Dasar (SD).",
+    description: "Pendaftaran peserta didik baru jenjang Sekolah Dasar jalur zonasi, afirmasi, dan mutasi.",
     endpoint: "/api/v1/admin/ppdb/sd",
     queryKey: "ppdb-sd",
     icon: "🎒",
     fields: [
-      { name: "nama_siswa", label: "Nama Calon Siswa", type: "text", required: true, placeholder: "Contoh: Anisa Rahmawati" },
-      { name: "nik", label: "NIK", type: "text", required: true, placeholder: "Contoh: 7405..." },
-      { name: "nisn", label: "NISN (Jika Ada)", type: "text", required: false, placeholder: "Contoh: 0123456789" },
-      { name: "sekolah_tujuan", label: "SD Negeri Pilihan", type: "text", required: true, placeholder: "Contoh: SDN 1 Ranomeeto" },
-      { name: "jalur", label: "Jalur Seleksi", type: "text", required: true, placeholder: "Contoh: Zonasi / Afirmasi / Perpindahan Tugas" },
-      { name: "status", label: "Status Seleksi", type: "text", required: true, placeholder: "Contoh: Diterima / Menunggu Pengumuman" },
-      { name: "file_berkas", label: "Berkas Pendaftaran (PDF)", type: "file", required: false, placeholder: "Unggah berkas KK / Akta" }
+      { name: "nama_siswa", label: "Nama Calon Siswa", type: "text", required: true, placeholder: "Nama calon siswa" },
+      { name: "nik", label: "NIK Calon Siswa", type: "text", required: true, placeholder: "16 digit NIK" },
+      { name: "nisn", label: "NISN (Jika Ada)", type: "text", required: false, placeholder: "10 digit NISN" },
+      { name: "sekolah_tujuan", label: "Sekolah Dasar Tujuan", type: "text", required: true, placeholder: "Contoh: SDN 1 Ranomeeto" },
+      { name: "jalur", label: "Jalur Pendaftaran PPDB", type: "select", required: true, options: [{ value: "Zonasi", label: "Jalur Zonasi Domisili" }, { value: "Afirmasi", label: "Jalur Afirmasi Keluarga Kurang Mampu" }, { value: "Mutasi", label: "Jalur Perpindahan Tugas Orang Tua" }], placeholder: "Pilih jalur" },
+      { name: "status", label: "Status Pendaftaran", type: "select", required: false, options: [{ value: "Diverifikasi", label: "Diverifikasi" }, { value: "Diterima", label: "Diterima" }, { value: "Menunggu", label: "Menunggu" }, { value: "Ditolak", label: "Ditolak" }], placeholder: "Pilih status" },
+      { name: "file_berkas", label: "Berkas Persyaratan (PDF)", type: "file", required: false, placeholder: "Unggah dokumen persyaratan" }
     ],
     tableCols: [
-      { key: "nama_siswa", label: "Nama Siswa" },
-      { key: "nik", label: "NIK" },
+      { key: "nama_siswa", label: "Calon Siswa" },
       { key: "sekolah_tujuan", label: "Sekolah Tujuan" },
       { key: "jalur", label: "Jalur" },
       { key: "status", label: "Status" }
@@ -847,25 +824,23 @@ export const modules = [
     entity: "PpdbSmp",
     title: "PPDB SMP",
     category: "PPDB",
-    description: "Penerimaan peserta didik baru jenjang Sekolah Menengah Pertama (SMP) 4 jalur.",
+    description: "Pendaftaran peserta didik baru jenjang SMP jalur zonasi, afirmasi, mutasi, dan prestasi.",
     endpoint: "/api/v1/admin/ppdb/smp",
     queryKey: "ppdb-smp",
     icon: "🏫",
     fields: [
-      { name: "nama_siswa", label: "Nama Calon Siswa", type: "text", required: true, placeholder: "Contoh: Fadhil Muhammad" },
-      { name: "nik", label: "NIK", type: "text", required: true, placeholder: "Contoh: 7405..." },
-      { name: "nisn", label: "NISN", type: "text", required: true, placeholder: "Contoh: 0098765432" },
-      { name: "asal_sekolah", label: "Asal Satuan Pendidikan SD", type: "text", required: true, placeholder: "Contoh: SDN 2 Buke" },
-      { name: "sekolah_tujuan", label: "SMP Pilihan", type: "text", required: true, placeholder: "Contoh: SMPN 1 Ranomeeto" },
-      { name: "jalur", label: "Jalur Pendaftaran", type: "text", required: true, placeholder: "Contoh: Zonasi / Prestasi / Afirmasi / Mutasi" },
-      { name: "status", label: "Status Seleksi", type: "text", required: true, placeholder: "Contoh: Diterima / Cadangan" },
-      { name: "file_berkas", label: "Berkas Rapor & Piagam (PDF)", type: "file", required: false, placeholder: "Unggah gabungan berkas pendaftaran (PDF)" }
+      { name: "nama_siswa", label: "Nama Calon Siswa", type: "text", required: true, placeholder: "Nama calon siswa" },
+      { name: "nik", label: "NIK Calon Siswa", type: "text", required: true, placeholder: "16 digit NIK" },
+      { name: "nisn", label: "NISN", type: "text", required: true, placeholder: "10 digit NISN" },
+      { name: "asal_sekolah", label: "Asal Sekolah Dasar", type: "text", required: false, placeholder: "Nama SD asal" },
+      { name: "sekolah_tujuan", label: "SMP Negeri Tujuan", type: "text", required: true, placeholder: "Contoh: SMPN 22 Konawe Selatan" },
+      { name: "jalur", label: "Jalur Pendaftaran PPDB", type: "select", required: true, options: [{ value: "Zonasi", label: "Jalur Zonasi" }, { value: "Afirmasi", label: "Jalur Afirmasi" }, { value: "Prestasi", label: "Jalur Prestasi Akademik/Non-Akademik" }, { value: "Mutasi", label: "Jalur Perpindahan Tugas Orang Tua" }], placeholder: "Pilih jalur" },
+      { name: "status", label: "Status Pendaftaran", type: "select", required: false, options: [{ value: "Diverifikasi", label: "Diverifikasi" }, { value: "Diterima", label: "Diterima" }, { value: "Menunggu", label: "Menunggu" }, { value: "Ditolak", label: "Ditolak" }], placeholder: "Pilih status" },
+      { name: "file_berkas", label: "Berkas Lampiran Nilai / Sertifikat (PDF)", type: "file", required: false, placeholder: "Unggah dokumen lampiran" }
     ],
     tableCols: [
-      { key: "nama_siswa", label: "Nama Siswa" },
-      { key: "nisn", label: "NISN" },
-      { key: "asal_sekolah", label: "Asal SD" },
-      { key: "sekolah_tujuan", label: "SMP Tujuan" },
+      { key: "nama_siswa", label: "Calon Siswa" },
+      { key: "sekolah_tujuan", label: "Sekolah Tujuan" },
       { key: "jalur", label: "Jalur" },
       { key: "status", label: "Status" }
     ]
@@ -875,277 +850,57 @@ export const modules = [
     entity: "KuotaPpdb",
     title: "Kuota PPDB",
     category: "PPDB",
-    description: "Penetapan daya tampung dan alokasi persentase per jalur satuan pendidikan.",
+    description: "Penetapan alokasi daya tampung dan kuota jalur pendaftaran tiap satuan pendidikan.",
     endpoint: "/api/v1/admin/kuota-ppdb",
     queryKey: "kuota-ppdb",
-    icon: "🔢",
+    icon: "🎯",
     fields: [
-      { name: "sekolah", label: "Nama Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SMPN 2 Konsel" },
-      { name: "jenjang", label: "Jenjang", type: "text", required: true, placeholder: "Contoh: SMP / SD / PAUD" },
+      { name: "sekolah", label: "Nama Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SMPN 22 Konawe Selatan" },
+      { name: "jenjang", label: "Jenjang Pendidikan", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/jenjang/option", masterQueryKey: "master-jenjang-option", hookName: "Jenjang", placeholder: "Pilih jenjang" },
       { name: "total_kuota", label: "Total Daya Tampung (Siswa)", type: "number", required: true, placeholder: "Contoh: 128" },
-      { name: "jalur_zonasi", label: "Alokasi Zonasi (Siswa)", type: "number", required: true, placeholder: "Contoh: 64" },
-      { name: "jalur_afirmasi", label: "Alokasi Afirmasi (Siswa)", type: "number", required: true, placeholder: "Contoh: 20" },
-      { name: "jalur_prestasi", label: "Alokasi Prestasi (Siswa)", type: "number", required: true, placeholder: "Contoh: 38" },
-      { name: "jalur_mutasi", label: "Alokasi Mutasi Tugas (Siswa)", type: "number", required: true, placeholder: "Contoh: 6" }
+      { name: "jalur_zonasi", label: "Alokasi Kuota Zonasi", type: "number", required: false, placeholder: "Contoh: 70" },
+      { name: "jalur_afirmasi", label: "Alokasi Kuota Afirmasi", type: "number", required: false, placeholder: "Contoh: 20" },
+      { name: "jalur_prestasi", label: "Alokasi Kuota Prestasi", type: "number", required: false, placeholder: "Contoh: 30" },
+      { name: "jalur_mutasi", label: "Alokasi Kuota Mutasi", type: "number", required: false, placeholder: "Contoh: 8" }
     ],
     tableCols: [
       { key: "sekolah", label: "Sekolah" },
-      { key: "jenjang", label: "Jenjang" },
       { key: "total_kuota", label: "Total Kuota" },
       { key: "jalur_zonasi", label: "Zonasi" },
+      { key: "jalur_afirmasi", label: "Afirmasi" },
       { key: "jalur_prestasi", label: "Prestasi" }
     ]
   },
 
-  // 10. Publish
-  {
-    dir: "app/(admin)/admin/berita",
-    entity: "Berita",
-    title: "Manajemen Berita",
-    category: "Publish",
-    description: "Kelola publikasi warta, liputan kegiatan, dan dokumentasi pendidikan & kebudayaan.",
-    endpoint: "/api/v1/admin/berita",
-    queryKey: "publish-berita",
-    icon: "📰",
-    fields: [
-      { name: "judul", label: "Judul Berita", type: "text", required: true, placeholder: "Judul berita aktual dan informatif..." },
-      { name: "slug", label: "Slug URL", type: "text", required: false, placeholder: "judul-berita-anda" },
-      { name: "kategori", label: "Kategori Berita", type: "text", required: true, placeholder: "Contoh: Pendidikan / Kebudayaan / Prestasi" },
-      { name: "author", label: "Penulis / Redaksi", type: "text", required: false, placeholder: "Contoh: Tim Humas Dikbud" },
-      { name: "deskripsi", label: "Ringkasan Singkat (Excerpt)", type: "textarea", required: true, placeholder: "Ringkasan 1-2 kalimat untuk beranda..." },
-      { name: "isi", label: "Isi Lengkap Berita", type: "textarea", required: true, placeholder: "Isi naskah berita lengkap..." },
-      { name: "foto", label: "Foto Sampul Utama", type: "file", required: false, placeholder: "Unggah foto berita (JPG/PNG)" },
-      { name: "status", label: "Status Publikasi", type: "text", required: true, placeholder: "Terbit / Draft" },
-      { name: "featured", label: "Berita Utama (Featured)", type: "text", required: false, placeholder: "Ya / Tidak" }
-    ],
-    tableCols: [
-      { key: "judul", label: "Judul Berita" },
-      { key: "kategori", label: "Kategori" },
-      { key: "author", label: "Penulis" },
-      { key: "status", label: "Status" }
-    ]
-  },
-  {
-    dir: "app/(admin)/admin/pengumuman",
-    entity: "Pengumuman",
-    title: "Manajemen Pengumuman",
-    category: "Publish",
-    description: "Publikasi pengumuman dinas kepada guru, kepala sekolah, siswa, dan wali murid.",
-    endpoint: "/api/v1/admin/pengumuman",
-    queryKey: "publish-pengumuman",
-    icon: "📢",
-    fields: [
-      { name: "judul", label: "Judul Pengumuman", type: "text", required: true, placeholder: "Judul pengumuman dinas..." },
-      { name: "slug", label: "Slug URL", type: "text", required: false, placeholder: "judul-pengumuman" },
-      { name: "isi", label: "Uraian Isi Pengumuman", type: "textarea", required: true, placeholder: "Detail pengumuman resmi..." },
-      { name: "tanggal", label: "Tanggal Diterbitkan", type: "date", required: true, placeholder: "YYYY-MM-DD" },
-      { name: "status", label: "Status Publikasi", type: "text", required: true, placeholder: "Terbit / Arsip" },
-      { name: "file", label: "Berkas Lampiran PDF", type: "file", required: false, placeholder: "Unggah berkas dokumen pengumuman (PDF)" }
-    ],
-    tableCols: [
-      { key: "judul", label: "Judul Pengumuman" },
-      { key: "tanggal", label: "Tanggal" },
-      { key: "status", label: "Status" },
-      { key: "file", label: "Berkas" }
-    ]
-  },
-  {
-    dir: "app/(admin)/admin/pendidikan",
-    entity: "PublishPendidikan",
-    title: "Informasi & Artikel Pendidikan",
-    category: "Publish",
-    description: "Katalog konten literasi, kurikulum, dan informasi program pendidikan.",
-    endpoint: "/api/v1/admin/pendidikan",
-    queryKey: "publish-pendidikan",
-    icon: "🎓",
-    fields: [
-      { name: "judul", label: "Judul Artikel / Informasi", type: "text", required: true, placeholder: "Contoh: Optimalisasi Asesmen Formatif Guru Kelas" },
-      { name: "kategori", label: "Kategori Info", type: "text", required: true, placeholder: "Contoh: Kurikulum Merdeka / Literasi / Numerasi" },
-      { name: "penulis", label: "Penulis", type: "text", required: false, placeholder: "Contoh: Bidang Pembinaan Dikdas" },
-      { name: "konten", label: "Uraian Konten", type: "textarea", required: true, placeholder: "Isi materi atau artikel edukasi..." },
-      { name: "file", label: "Foto / Poster Edukasi", type: "file", required: false, placeholder: "Unggah gambar pendukung" },
-      { name: "status", label: "Status Publikasi", type: "text", required: true, placeholder: "Terbit / Draft" }
-    ],
-    tableCols: [
-      { key: "judul", label: "Judul" },
-      { key: "kategori", label: "Kategori" },
-      { key: "penulis", label: "Penulis" },
-      { key: "status", label: "Status" }
-    ]
-  },
-  {
-    dir: "app/(admin)/admin/kebudayaan",
-    entity: "PublishKebudayaan",
-    title: "Warisan & Seni Kebudayaan",
-    category: "Publish",
-    description: "Data cagar budaya, warisan takbenda, sanggar seni, dan kalender agenda budaya daerah.",
-    endpoint: "/api/v1/admin/kebudayaan",
-    queryKey: "publish-kebudayaan",
-    icon: "🎭",
-    fields: [
-      { name: "nama", label: "Nama Objek / Warisan Budaya", type: "text", required: true, placeholder: "Contoh: Tarian Lulo Tolaki / Situs Benteng Kuno" },
-      { name: "kategori", label: "Klasifikasi Budaya", type: "text", required: true, placeholder: "Contoh: Cagar Budaya / Warisan Takbenda (WBTb) / Sanggar Seni" },
-      { name: "lokasi", label: "Lokasi / Kecamatan", type: "text", required: true, placeholder: "Contoh: Kecamatan Andoolo" },
-      { name: "deskripsi", label: "Uraian Sejarah & Deskripsi", type: "textarea", required: true, placeholder: "Penjelasan nilai historis dan pelestarian..." },
-      { name: "foto", label: "Foto Dokumentasi", type: "file", required: false, placeholder: "Unggah foto cagar budaya / sanggar" },
-      { name: "status", label: "Status Registrasi", type: "text", required: true, placeholder: "Terverifikasi / Dalam Kajian" }
-    ],
-    tableCols: [
-      { key: "nama", label: "Nama Objek Budaya" },
-      { key: "kategori", label: "Klasifikasi" },
-      { key: "lokasi", label: "Lokasi" },
-      { key: "status", label: "Status" }
-    ]
-  },
-  {
-    dir: "app/(admin)/admin/layanan",
-    entity: "PublishLayanan",
-    title: "Katalog Layanan Publik",
-    category: "Publish",
-    description: "Standar operasional prosedur (SOP) dan persyaratan pelayanan administrasi dinas.",
-    endpoint: "/api/v1/admin/layanan",
-    queryKey: "publish-layanan",
-    icon: "🏛️",
-    fields: [
-      { name: "nama_layanan", label: "Nama Layanan", type: "text", required: true, placeholder: "Contoh: Legalisir Ijazah / Mutasi Siswa / Rekomendasi Izin Operasional" },
-      { name: "deskripsi", label: "Deskripsi Singkat Layanan", type: "textarea", required: true, placeholder: "Penjelasan umum mengenai layanan..." },
-      { name: "syarat", label: "Persyaratan Berkas", type: "textarea", required: true, placeholder: "Daftar syarat kelengkapan dokumen..." },
-      { name: "prosedur", label: "Alur & Estimasi Waktu", type: "textarea", required: false, placeholder: "Contoh: 1 Hari Kerja - Tanpa Biaya (Gratis)" },
-      { name: "penanggung_jawab", label: "Seksi / Bidang Pelaksana", type: "text", required: false, placeholder: "Contoh: Subbag Umum & Kepegawaian" },
-      { name: "status", label: "Status Layanan", type: "text", required: true, placeholder: "Aktif / Pemeliharaan" }
-    ],
-    tableCols: [
-      { key: "nama_layanan", label: "Nama Layanan" },
-      { key: "penanggung_jawab", label: "Bidang Pelaksana" },
-      { key: "prosedur", label: "Estimasi Waktu" },
-      { key: "status", label: "Status" }
-    ]
-  },
-  {
-    dir: "app/(admin)/admin/statistik",
-    entity: "PublishStatistik",
-    title: "Data & Indikator Statistik",
-    category: "Publish",
-    description: "Indikator angka partisipasi murni, rasio murid-guru, dan statistik pendidikan daerah.",
-    endpoint: "/api/v1/admin/statistik",
-    queryKey: "publish-statistik",
-    icon: "📈",
-    fields: [
-      { name: "indikator", label: "Nama Indikator Statistik", type: "text", required: true, placeholder: "Contoh: Angka Partisipasi Murni (APM) SMP" },
-      { name: "nilai", label: "Nilai Capaian", type: "text", required: true, placeholder: "Contoh: 94.85" },
-      { name: "satuan", label: "Satuan Pengukuran", type: "text", required: true, placeholder: "Contoh: % / Jiwa / Ruang" },
-      { name: "tahun", label: "Tahun Data", type: "number", required: true, placeholder: "Contoh: 2026" },
-      { name: "kategori", label: "Kategori Indikator", type: "text", required: false, placeholder: "Contoh: Akses Pendidikan / Kualitas Guru / Sarpras" },
-      { name: "keterangan", label: "Keterangan Sumber Data", type: "textarea", required: false, placeholder: "Sumber rujukan data (Dapodik / BPS Konsel)..." }
-    ],
-    tableCols: [
-      { key: "indikator", label: "Indikator" },
-      { key: "nilai", label: "Nilai" },
-      { key: "satuan", label: "Satuan" },
-      { key: "tahun", label: "Tahun" },
-      { key: "kategori", label: "Kategori" }
-    ]
-  },
-  {
-    dir: "app/(admin)/admin/profil",
-    entity: "PublishProfil",
-    title: "Profil & Standar Layanan",
-    category: "Publish",
-    description: "Struktur organisasi, maklumat pelayanan, dan standar integritas Dinas Pendidikan.",
-    endpoint: "/api/v1/admin/profil",
-    queryKey: "publish-profil",
-    icon: "📋",
-    fields: [
-      { name: "judul", label: "Judul Bagian Profil", type: "text", required: true, placeholder: "Contoh: Maklumat Pelayanan Publik" },
-      { name: "kategori", label: "Kategori", type: "text", required: true, placeholder: "Contoh: Maklumat / Struktur Organisasi / Sejarah" },
-      { name: "konten", label: "Uraian Lengkap", type: "textarea", required: true, placeholder: "Isi dokumen profil..." },
-      { name: "file", label: "Bagan Struktur / Berkas SK (PDF/Gambar)", type: "file", required: false, placeholder: "Unggah dokumen bagan" },
-      { name: "urutan", label: "Nomor Urut Tampil", type: "number", required: false, placeholder: "Contoh: 1" }
-    ],
-    tableCols: [
-      { key: "judul", label: "Judul" },
-      { key: "kategori", label: "Kategori" },
-      { key: "urutan", label: "Urutan" }
-    ]
-  },
-  {
-    dir: "app/(admin)/admin/banner",
-    entity: "PublishBanner",
-    title: "Banner & Slider Beranda",
-    category: "Publish",
-    description: "Pengaturan slide spanduk utama, tajuk sorotan, dan tautan aksi beranda website.",
-    endpoint: "/api/v1/admin/banner",
-    queryKey: "publish-banner",
-    icon: "🖼️",
-    fields: [
-      { name: "title", label: "Judul Utama Banner", type: "text", required: true, placeholder: "Contoh: Transformasi Digital Pendidikan Konawe Selatan" },
-      { name: "subtitle", label: "Subjudul / Slogan", type: "textarea", required: false, placeholder: "Contoh: Terwujudnya layanan pendidikan berkualitas dan merata bagi seluruh generasi." },
-      { name: "badge_text", label: "Label Badge", type: "text", required: false, placeholder: "Contoh: Portal Resmi Dikbud Konsel" },
-      { name: "primary_button_label", label: "Label Tombol Utama", type: "text", required: false, placeholder: "Contoh: Jelajahi Layanan" },
-      { name: "primary_button_link", label: "Tautan Tombol Utama", type: "text", required: false, placeholder: "Contoh: /layanan-publik" },
-      { name: "image", label: "Gambar Latar Banner (1920x1080)", type: "file", required: false, placeholder: "Unggah berkas foto banner" },
-      { name: "order", label: "Urutan Slide", type: "number", required: false, placeholder: "Contoh: 1" },
-      { name: "status", label: "Status Tampil", type: "text", required: true, placeholder: "Aktif / Nonaktif" }
-    ],
-    tableCols: [
-      { key: "title", label: "Judul Banner" },
-      { key: "badge_text", label: "Badge" },
-      { key: "order", label: "Urutan" },
-      { key: "status", label: "Status" }
-    ]
-  },
-  {
-    dir: "app/(admin)/admin/kontak",
-    entity: "PublishKontak",
-    title: "Pesan & Kontak Masuk",
-    category: "Publish",
-    description: "Pengelolaan aspirasi masyarakat, saran publik, dan pengaduan layanan terpadu.",
-    endpoint: "/api/v1/admin/kontak",
-    queryKey: "publish-kontak",
-    icon: "💬",
-    fields: [
-      { name: "nama", label: "Nama Pengirim", type: "text", required: true, placeholder: "Contoh: Hendra Kusuma" },
-      { name: "email", label: "Alamat Email", type: "text", required: false, placeholder: "Contoh: hendra@gmail.com" },
-      { name: "telepon", label: "Nomor WhatsApp / HP", type: "text", required: false, placeholder: "Contoh: 081234567890" },
-      { name: "subjek", label: "Subjek Pesan", type: "text", required: true, placeholder: "Contoh: Permohonan Informasi Beasiswa PIP" },
-      { name: "pesan", label: "Uraian Isi Pesan", type: "textarea", required: true, placeholder: "Uraian aspirasi atau pengaduan warga..." },
-      { name: "status", label: "Status Tindak Lanjut", type: "text", required: true, placeholder: "Baru / Ditindaklanjuti / Selesai" }
-    ],
-    tableCols: [
-      { key: "nama", label: "Pengirim" },
-      { key: "email", label: "Email" },
-      { key: "subjek", label: "Subjek" },
-      { key: "status", label: "Status" }
-    ]
-  },
-
-  // 11. Jurnal
+  // 12. Jurnal V2
   {
     dir: "app/(admin)/admin/jurnal/guru-kelas",
     entity: "JurnalGuruKelas",
     title: "Jurnal Guru Kelas",
     category: "Jurnal V2",
-    description: "Pencatatan harian aktivitas belajar mengajar, capaian materi, dan refleksi pedagogik guru kelas.",
+    description: "Dokumentasi pelaksanaan KBM guru kelas, tema ajar, model pembelajaran, dan evaluasi harian.",
     endpoint: "/api/v1/admin/jurnal/guru-kelas",
     queryKey: "jurnal-guru-kelas",
-    icon: "👨‍🏫",
+    icon: "📖",
     fields: [
-      { name: "sekolah", label: "Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SDN 2 Buke" },
-      { name: "tema", label: "Tema / Muatan Pelajaran", type: "text", required: true, placeholder: "Contoh: Siklus Air dan Peristiwa Alam" },
-      { name: "materi_pokok", label: "Materi Pokok Pembelajaran", type: "text", required: true, placeholder: "Contoh: Evaporasi, Kondensasi, dan Presipitasi" },
-      { name: "pertemuan_ke", label: "Pertemuan Ke-", type: "number", required: true, placeholder: "Contoh: 4" },
-      { name: "model_pembelajaran", label: "Model Pembelajaran", type: "text", required: false, placeholder: "Contoh: Problem Based Learning (PBL)" },
-      { name: "metode_pembelajaran", label: "Metode Pembelajaran", type: "text", required: false, placeholder: "Contoh: Eksperimen Sederhana & Diskusi" },
-      { name: "teknik_penilaian", label: "Teknik Penilaian", type: "text", required: false, placeholder: "Contoh: Rubrik Observasi Sikap & Lembar Formatif" },
-      { name: "kendala", label: "Catatan Refleksi / Kendala", type: "textarea", required: false, placeholder: "Kendala pemahaman siswa di kelas..." },
-      { name: "solusi", label: "Solusi / Tindak Lanjut", type: "textarea", required: false, placeholder: "Pendampingan remedial atau media tambahan..." }
+      { name: "tgl", label: "Tanggal Pelaksanaan KBM", type: "date", required: true },
+      { name: "tema", label: "Tema / Bahan Ajar", type: "text", required: true, placeholder: "Contoh: Indahnya Kebersamaan" },
+      { name: "materi_pokok", label: "Materi Pokok Pembelajaran", type: "text", required: true, placeholder: "Contoh: Keberagaman Suku Bangsa" },
+      { name: "pertemuan_ke", label: "Pertemuan Ke-", type: "number", required: false, placeholder: "Contoh: 1" },
+      { name: "model_pembelajaran", label: "Model Pembelajaran (Master Model)", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/model-pembelajaran/option", masterQueryKey: "master-model-pembelajaran-option", hookName: "ModelPembelajaran", placeholder: "Pilih model pembelajaran" },
+      { name: "metode_pembelajaran", label: "Metode Pembelajaran", type: "text", required: false, placeholder: "Contoh: Diskusi, Demonstrasi, Tanya Jawab" },
+      { name: "kegiatan", label: "Uraian Ringkas Aktivitas KBM", type: "textarea", required: false, placeholder: "Ringkasan kegiatan mengajar..." },
+      { name: "penilaian", label: "Teknik Penilaian Pembelajaran", type: "text", required: false, placeholder: "Contoh: Penilaian Sikap & Kuis Formatif" },
+      { name: "siswa_hadir", label: "Jumlah Siswa Hadir", type: "number", required: false, placeholder: "Contoh: 28" },
+      { name: "persentase", label: "Persentase Kehadiran (%)", type: "number", required: false, placeholder: "Contoh: 100" },
+      { name: "file", label: "Dokumentasi / Foto KBM", type: "file", required: false, placeholder: "Unggah foto KBM" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Sekolah" },
-      { key: "tema", label: "Tema Pelajaran" },
+      { key: "tema", label: "Tema / Bahan" },
       { key: "materi_pokok", label: "Materi Pokok" },
-      { key: "pertemuan_ke", label: "Pertemuan" },
-      { key: "model_pembelajaran", label: "Model" }
+      { key: "tgl", label: "Tanggal" },
+      { key: "siswa_hadir", label: "Hadir" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
   {
@@ -1153,75 +908,197 @@ export const modules = [
     entity: "JurnalKepalaSekolah",
     title: "Jurnal Kepala Sekolah",
     category: "Jurnal V2",
-    description: "Agenda supervisi manajerial, pembinaan guru, dan tata kelola satuan pendidikan.",
+    description: "Pencatatan aktivitas manajerial, supervisi internal guru, dan pembinaan komite sekolah.",
     endpoint: "/api/v1/admin/jurnal/kepala-sekolah",
     queryKey: "jurnal-kepala-sekolah",
-    icon: "👔",
+    icon: "🖊️",
     fields: [
-      { name: "sekolah", label: "Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SDN 1 Ranomeeto" },
-      { name: "nama_kegiatan", label: "Nama Aktivitas / Kegiatan", type: "text", required: true, placeholder: "Contoh: Supervisi Akademik Guru Kelas 5" },
-      { name: "sasaran", label: "Sasaran Supervisi", type: "text", required: false, placeholder: "Contoh: Guru Kelas 5A dan 5B" },
-      { name: "tujuan", label: "Tujuan Supervisi", type: "textarea", required: true, placeholder: "Tujuan peningkatan kompetensi pedagogik..." },
-      { name: "keterlibatan", label: "Keterlibatan Pihak", type: "text", required: false, placeholder: "Contoh: Komite Sekolah, Tim Kurikulum" },
-      { name: "hasil", label: "Hasil Temuan & Catatan", type: "textarea", required: false, placeholder: "Catatan hasil pemantauan di kelas..." },
-      { name: "tindak_lanjut", label: "Rencana Tindak Lanjut", type: "textarea", required: false, placeholder: "Bimbingan teknis penyusunan modul..." },
-      { name: "status", label: "Status Pelaksanaan", type: "text", required: true, placeholder: "Selesai / Terjadwal" }
+      { name: "tgl", label: "Tanggal Kegiatan", type: "date", required: true },
+      { name: "uraian", label: "Tajuk / Uraian Kegiatan Kepemimpinan", type: "text", required: true, placeholder: "Contoh: Rapat Evaluasi RKT dan RKAS" },
+      { name: "target", label: "Target Peningkatan Tata Kelola", type: "text", required: false, placeholder: "Contoh: Kepatuhan 100% pelaporan ARKAS" },
+      { name: "hasil", label: "Hasil / Capaian Kegiatan", type: "textarea", required: false, placeholder: "Hasil evaluasi..." },
+      { name: "keterlibatan", label: "Pihak yang Terlibat", type: "text", required: false, placeholder: "Contoh: Seluruh Dewan Guru dan Komite" },
+      { name: "keterangan", label: "Catatan Tambahan / Rekomendasi", type: "textarea", required: false, placeholder: "Catatan..." },
+      { name: "file", label: "Dokumen / Berita Acara (PDF/Gambar)", type: "file", required: false, placeholder: "Unggah dokumen pendukung" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Sekolah" },
-      { key: "nama_kegiatan", label: "Nama Kegiatan" },
-      { key: "sasaran", label: "Sasaran" },
-      { key: "status", label: "Status" }
+      { key: "uraian", label: "Uraian Kegiatan" },
+      { key: "target", label: "Target" },
+      { key: "tgl", label: "Tanggal" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
   },
   {
     dir: "app/(admin)/admin/jurnal/pengawas",
     entity: "JurnalPengawas",
-    title: "Jurnal Pengawas Satdik",
+    title: "Jurnal Pengawas Sekolah",
     category: "Jurnal V2",
-    description: "Catatan supervisi akademik, evaluasi kurikulum, dan bimbingan manajerial sekolah binaan.",
+    description: "Pelaporan pendampingan klinis, pengawasan manajerial, dan supervisi akademik sekolah binaan.",
     endpoint: "/api/v1/admin/jurnal/pengawas",
     queryKey: "jurnal-pengawas",
-    icon: "🔍",
+    icon: "🧐",
     fields: [
-      { name: "sekolah_binaan", label: "Nama Sekolah Binaan", type: "text", required: true, placeholder: "Contoh: SMPN 2 Kolono" },
-      { name: "fokus_supervisi", label: "Fokus Pendampingan", type: "text", required: true, placeholder: "Contoh: Implementasi Rapor Pendidikan & KSP" },
-      { name: "pendekatan", label: "Metode Pendampingan", type: "text", required: false, placeholder: "Contoh: Coaching / Mentoring / Focus Group" },
-      { name: "temuan", label: "Uraian Temuan Fakta", type: "textarea", required: true, placeholder: "Hasil evaluasi capaian literasi dan numerasi..." },
-      { name: "rekomendasi", label: "Rekomendasi Pembenahan", type: "textarea", required: true, placeholder: "Rekomendasi tindak lanjut bagi kepala sekolah..." },
-      { name: "status", label: "Status Supervisi", type: "text", required: true, placeholder: "Selesai / Menunggu Monitoring Ulang" }
+      { name: "tgl", label: "Tanggal Kunjungan / Supervisi", type: "date", required: true },
+      { name: "kepsek", label: "Kepala Sekolah yang Disupervisi", type: "text", required: false, placeholder: "Nama Kepala Satuan Pendidikan" },
+      { name: "pendampingan_id", label: "Tahapan Siklus Pendampingan (Master Pendampingan)", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/pendampingan/option", masterQueryKey: "master-pendampingan-option", hookName: "Pendampingan", placeholder: "Pilih tahapan pendampingan" },
+      { name: "tugas_id", label: "Fungsi Penugasan (Master Tugas)", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/tugas/option", masterQueryKey: "master-tugas-option", hookName: "Tugas", placeholder: "Pilih peran penugasan" },
+      { name: "temuan_akademik", label: "Temuan Supervisi Akademik", type: "textarea", required: false, placeholder: "Catatan perangkat ajar & KBM guru..." },
+      { name: "temuan_manajerial", label: "Temuan Supervisi Manajerial", type: "textarea", required: false, placeholder: "Catatan administrasi sekolah..." },
+      { name: "tindak_lanjut", label: "Rencana Tindak Lanjut / Rekomendasi", type: "textarea", required: false, placeholder: "Tindak lanjut..." },
+      { name: "file", label: "Instrumen Supervisi / Laporan (PDF)", type: "file", required: false, placeholder: "Unggah instrumen pembinaan" }
     ],
     tableCols: [
-      { key: "sekolah_binaan", label: "Sekolah Binaan" },
-      { key: "fokus_supervisi", label: "Fokus" },
-      { key: "pendekatan", label: "Pendekatan" },
-      { key: "status", label: "Status" }
+      { key: "kepsek", label: "Kepala Sekolah" },
+      { key: "tgl", label: "Tanggal" },
+      { key: "tindak_lanjut", label: "Tindak Lanjut" },
+      { key: "unit_kerja", label: "Sekolah Binaan" }
     ]
   },
   {
     dir: "app/(admin)/admin/jurnal/bk",
     entity: "JurnalBk",
-    title: "Jurnal BK (Bimbingan Konseling)",
+    title: "Jurnal Bimbingan Konseling (BK)",
     category: "Jurnal V2",
-    description: "Dokumentasi konseling individual, bimbingan kelompok, dan layanan konseling sekolah.",
+    description: "Pendokumentasian layanan bimbingan konseling peserta didik: bimbingan pribadi, sosial, belajar, dan karir.",
     endpoint: "/api/v1/admin/jurnal/bk",
     queryKey: "jurnal-bk",
-    icon: "🧑‍⚕️",
+    icon: "🧘",
     fields: [
-      { name: "sekolah", label: "Satuan Pendidikan", type: "text", required: true, placeholder: "Contoh: SMPN 1 Ranomeeto" },
-      { name: "jenis_layanan", label: "Jenis Layanan BK", type: "text", required: true, placeholder: "Contoh: Konseling Individual / Bimbingan Klasikal" },
-      { name: "bidang_bimbingan", label: "Bidang Bimbingan", type: "text", required: true, placeholder: "Contoh: Pribadi / Sosial / Belajar / Karier" },
-      { name: "sasaran_siswa", label: "Nama Siswa / Kelompok Siswa", type: "text", required: true, placeholder: "Contoh: Siswa Kelas VIII-C" },
-      { name: "permasalahan", label: "Uraian Kebutuhan / Masalah", type: "textarea", required: true, placeholder: "Kebutuhan motivasi belajar dan manajemen waktu..." },
-      { name: "layanan_diberikan", label: "Layanan yang Diberikan", type: "textarea", required: true, placeholder: "Teknik restrukturisasi kognitif dan pembinaan..." },
-      { name: "evaluasi", label: "Evaluasi Capaian", type: "textarea", required: false, placeholder: "Perkembangan perilaku positif konseli..." },
-      { name: "tindak_lanjut", label: "Rencana Tindak Lanjut", type: "textarea", required: false, placeholder: "Sesi konseling tindak lanjut..." }
+      { name: "tgl", label: "Tanggal Pelaksanaan Layanan BK", type: "date", required: true },
+      { name: "nm_siswa", label: "Nama Peserta Didik (Master Siswa)", type: "select", required: true, masterEndpoint: "/api/v1/admin/master/siswa/option", masterQueryKey: "master-siswa-option", hookName: "Siswa", placeholder: "Pilih siswa konseling" },
+      { name: "kelas_id", label: "Tingkat / Kelas Siswa (Master Kelas)", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/jurnal/kelas/option", masterQueryKey: "master-kelas-option", hookName: "Kelas", placeholder: "Pilih kelas" },
+      { name: "jns_layanan_id", label: "Bidang Layanan BK (Master BK Jenis Layanan)", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/bk-jenis-layanan/option", masterQueryKey: "master-bk-jenis-layanan-option", hookName: "JenisLayanan", placeholder: "Pilih bidang layanan" },
+      { name: "mdl_kegiatan_id", label: "Format / Kegiatan Layanan (Master BK Kegiatan Layanan)", type: "select", required: false, masterEndpoint: "/api/v1/admin/master/bk-kegiatan-layanan/option", masterQueryKey: "master-bk-kegiatan-layanan-option", hookName: "KegiatanLayanan", placeholder: "Pilih format kegiatan" },
+      { name: "materi_layanan", label: "Topik / Materi Layanan", type: "text", required: false, placeholder: "Contoh: Bimbingan Disiplin & Motivasi Belajar" },
+      { name: "permasalahan", label: "Gejala / Masalah yang Dihadapi", type: "textarea", required: false, placeholder: "Uraian problematika..." },
+      { name: "hasil", label: "Hasil Konseling yang Dicapai", type: "textarea", required: false, placeholder: "Hasil kesepakatan konseling..." },
+      { name: "rnc_tindak_lanjut", label: "Rencana Tindak Lanjut Penanganan", type: "textarea", required: false, placeholder: "Rencana pemantauan..." },
+      { name: "file", label: "Dokumen Lembar Komitmen / Bukti (PDF/Foto)", type: "file", required: false, placeholder: "Unggah dokumen konseling" }
     ],
     tableCols: [
-      { key: "sekolah", label: "Sekolah" },
-      { key: "jenis_layanan", label: "Jenis Layanan" },
-      { key: "bidang_bimbingan", label: "Bidang" },
-      { key: "sasaran_siswa", label: "Sasaran" }
+      { key: "nm_siswa", label: "Nama Siswa" },
+      { key: "tgl", label: "Tanggal" },
+      { key: "materi_layanan", label: "Topik Layanan" },
+      { key: "unit_kerja", label: "Satuan Pendidikan" }
     ]
+  },
+
+  // 13. Publish (Custom pages preserved)
+  {
+    dir: "app/(admin)/admin/publish/berita",
+    entity: "Berita",
+    title: "Manajemen Berita",
+    category: "Publish",
+    description: "Pengelolaan artikel berita seputar pendidikan dan kebudayaan daerah.",
+    endpoint: "/api/v1/admin/publish/berita",
+    queryKey: "publish-berita",
+    icon: "📰",
+    skipRefactor: true,
+    fields: [],
+    tableCols: []
+  },
+  {
+    dir: "app/(admin)/admin/publish/pengumuman",
+    entity: "Pengumuman",
+    title: "Manajemen Pengumuman",
+    category: "Publish",
+    description: "Publikasi pengumuman penting dinas untuk khalayak umum.",
+    endpoint: "/api/v1/admin/publish/pengumuman",
+    queryKey: "publish-pengumuman",
+    icon: "📢",
+    skipRefactor: true,
+    fields: [],
+    tableCols: []
+  },
+  {
+    dir: "app/(admin)/admin/publish/pendidikan",
+    entity: "Pendidikan",
+    title: "Artikel Pendidikan",
+    category: "Publish",
+    description: "Pengelolaan artikel edukatif, info kurikulum, dan direktori GTK.",
+    endpoint: "/api/v1/admin/publish/pendidikan",
+    queryKey: "publish-pendidikan",
+    icon: "🎓",
+    skipRefactor: true,
+    fields: [],
+    tableCols: []
+  },
+  {
+    dir: "app/(admin)/admin/publish/kebudayaan",
+    entity: "Kebudayaan",
+    title: "Artikel Kebudayaan",
+    category: "Publish",
+    description: "Promosi agenda festival budaya, sanggar seni, dan situs warisan daerah.",
+    endpoint: "/api/v1/admin/publish/kebudayaan",
+    queryKey: "publish-kebudayaan",
+    icon: "🎭",
+    skipRefactor: true,
+    fields: [],
+    tableCols: []
+  },
+  {
+    dir: "app/(admin)/admin/publish/layanan",
+    entity: "Layanan",
+    title: "Layanan Publik",
+    category: "Publish",
+    description: "Pengelolaan informasi standar operasional prosedur dan penanggung jawab layanan dinas.",
+    endpoint: "/api/v1/admin/publish/layanan",
+    queryKey: "publish-layanan",
+    icon: "🏛️",
+    skipRefactor: true,
+    fields: [],
+    tableCols: []
+  },
+  {
+    dir: "app/(admin)/admin/publish/statistik",
+    entity: "Statistik",
+    title: "Data Statistik",
+    category: "Publish",
+    description: "Pengelolaan indikator capaian, SPM, dan indeks kepuasan publik.",
+    endpoint: "/api/v1/admin/publish/statistik",
+    queryKey: "publish-statistik",
+    icon: "📊",
+    skipRefactor: true,
+    fields: [],
+    tableCols: []
+  },
+  {
+    dir: "app/(admin)/admin/publish/profil",
+    entity: "Profil",
+    title: "Profil Dinas",
+    category: "Publish",
+    description: "Pengelolaan profil organisasi dinas, tupoksi, dan pimpinan.",
+    endpoint: "/api/v1/admin/publish/profil",
+    queryKey: "publish-profil",
+    icon: "🏢",
+    skipRefactor: true,
+    fields: [],
+    tableCols: []
+  },
+  {
+    dir: "app/(admin)/admin/publish/banner",
+    entity: "Banner",
+    title: "Banner Carousel",
+    category: "Publish",
+    description: "Pengaturan slide sorotan visual beranda portal publik.",
+    endpoint: "/api/v1/admin/publish/banner",
+    queryKey: "publish-banner",
+    icon: "🖼️",
+    skipRefactor: true,
+    fields: [],
+    tableCols: []
+  },
+  {
+    dir: "app/(admin)/admin/publish/kontak",
+    entity: "Kontak",
+    title: "Pesan Masuk",
+    category: "Publish",
+    description: "Pengelolaan aspirasi, aduan, dan pesan kontak masyarakat.",
+    endpoint: "/api/v1/admin/publish/kontak",
+    queryKey: "publish-kontak",
+    icon: "✉️",
+    skipRefactor: true,
+    fields: [],
+    tableCols: []
   }
 ];

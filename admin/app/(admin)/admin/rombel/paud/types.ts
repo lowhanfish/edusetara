@@ -1,14 +1,16 @@
 export interface CreateInterface {
-  sekolah: string | null;
-  nama_rombel: string | null;
-  tingkat?: string | null;
-  kurikulum?: string | null;
+  nama: string | null;
+  tgkt_pendidikan?: string | null;
   wali_kelas?: string | null;
-  jumlah_siswa: number | null;
+  jns_rombel?: string | null;
+  ruang_kelas?: string | null;
+  kurikulum?: string | null;
 }
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  unit_kerja?: string | null;
+  nip?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;

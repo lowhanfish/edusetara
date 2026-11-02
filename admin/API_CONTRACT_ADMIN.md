@@ -99,7 +99,7 @@ Seluruh modul admin (termasuk Data Master) wajib mengadopsi pola arsitektur yang
 
 | No | Modul | Kategori | Route Frontend | Endpoint Backend | Tabel Database |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | **Berita** | Publish & Informasi | `/admin/berita` | `/api/v1/admin/berita` | `berita` |
+| 1 | **Berita** | Publish & Informasi | `/admin/publish/berita` | `/api/v1/admin/berita` | `berita` |
 | 2 | **Tanah Sekolah** | Sarana dan Prasarana | `/admin/sarpras/tanah` | `/api/v1/admin/sarpras/tanah` | `sarpras_tanah` |
 | 3 | **Bangunan (Fisik Gedung)** | Sarana dan Prasarana | `/admin/sarpras/bangunan` | `/api/v1/admin/sarpras/bangunan` | `sarpras_bangunan` |
 | 4 | **Ruang** | Sarana dan Prasarana | `/admin/sarpras/ruang` | `/api/v1/admin/sarpras/ruang` | `sarpras_ruang` |
@@ -177,7 +177,7 @@ Seluruh modul admin (termasuk Data Master) wajib mengadopsi pola arsitektur yang
 
 ### 1. Berita
 **Kategori:** `Publish & Informasi`  
-**Route Frontend:** [`/admin/berita`](http://localhost:3000/admin/berita)  
+**Route Frontend:** [`/admin/publish/berita`](http://localhost:3000/admin/publish/berita)  
 **Endpoint Backend:** `http://localhost:8000/api/v1/admin/berita`  
 **Tabel Database:** `berita`  
 

@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
+import { useSiswaOption, useKelasOption, useJenisLayananOption, useKegiatanLayananOption } from "../hooks/crud";
 
 interface FormJurnalBkModalProps {
   isOpen: boolean;
@@ -21,16 +22,21 @@ export default function FormJurnalBkModal({
   onSubmit,
   isLoading = false,
 }: FormJurnalBkModalProps) {
+  const { options: siswaOptions, isLoading: siswaLoading } = useSiswaOption();
+  const { options: kelasOptions, isLoading: kelasLoading } = useKelasOption();
+  const { options: jenislayananOptions, isLoading: jenislayananLoading } = useJenisLayananOption();
+  const { options: kegiatanlayananOptions, isLoading: kegiatanlayananLoading } = useKegiatanLayananOption();
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={
         formMode === "add"
-          ? "+ Tambah Jurnal BK (Bimbingan Konseling)"
-          : "✎ Edit Jurnal BK (Bimbingan Konseling)"
+          ? "+ Tambah Jurnal Bimbingan Konseling (BK)"
+          : "✎ Edit Jurnal Bimbingan Konseling (BK)"
       }
-      description="Dokumentasi konseling individual, bimbingan kelompok, dan layanan konseling sekolah."
+      description="Pendokumentasian layanan bimbingan konseling peserta didik: bimbingan pribadi, sosial, belajar, dan karir."
       maxWidth="lg"
       footer={
         <>
@@ -41,8 +47,8 @@ export default function FormJurnalBkModal({
             {isLoading
               ? "Menyimpan..."
               : formMode === "add"
-              ? "Simpan Jurnal BK (Bimbingan Konseling)"
-              : "Perbarui Jurnal BK (Bimbingan Konseling)"}
+              ? "Simpan Jurnal Bimbingan Konseling (BK)"
+              : "Perbarui Jurnal Bimbingan Konseling (BK)"}
           </Button>
         </>
       }
@@ -50,78 +56,136 @@ export default function FormJurnalBkModal({
       <form id="form-jurnal-bk" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Satuan Pendidikan <span className="text-rose-500">*</span>
+            Tanggal Pelaksanaan Layanan BK <span className="text-rose-500">*</span>
           </label>
           <Input
+            type="date"
             required
-            value={(formData as any).sekolah || ""}
+            value={(formData as any).tgl || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                sekolah: e.target.value,
+                tgl: e.target.value,
               })
             }
-            placeholder="Contoh: SMPN 1 Ranomeeto"
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Jenis Layanan BK <span className="text-rose-500">*</span>
+            Nama Peserta Didik (Master Siswa) <span className="text-rose-500">*</span>
           </label>
-          <Input
+          <Select
             required
-            value={(formData as any).jenis_layanan || ""}
+            value={(formData as any).nm_siswa || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                jenis_layanan: e.target.value,
+                nm_siswa: e.target.value,
               })
             }
-            placeholder="Contoh: Konseling Individual / Bimbingan Klasikal"
+            options={[
+              { value: "", label: siswaLoading ? "Memuat opsi data master..." : "-- Pilih siswa konseling --" },
+              ...siswaOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Bidang Bimbingan <span className="text-rose-500">*</span>
+            Tingkat / Kelas Siswa (Master Kelas)
           </label>
-          <Input
-            required
-            value={(formData as any).bidang_bimbingan || ""}
+          <Select
+            
+            value={(formData as any).kelas_id || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                bidang_bimbingan: e.target.value,
+                kelas_id: e.target.value,
               })
             }
-            placeholder="Contoh: Pribadi / Sosial / Belajar / Karier"
+            options={[
+              { value: "", label: kelasLoading ? "Memuat opsi data master..." : "-- Pilih kelas --" },
+              ...kelasOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Nama Siswa / Kelompok Siswa <span className="text-rose-500">*</span>
+            Bidang Layanan BK (Master BK Jenis Layanan)
           </label>
-          <Input
-            required
-            value={(formData as any).sasaran_siswa || ""}
+          <Select
+            
+            value={(formData as any).jns_layanan_id || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                sasaran_siswa: e.target.value,
+                jns_layanan_id: e.target.value,
               })
             }
-            placeholder="Contoh: Siswa Kelas VIII-C"
+            options={[
+              { value: "", label: jenislayananLoading ? "Memuat opsi data master..." : "-- Pilih bidang layanan --" },
+              ...jenislayananOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Uraian Kebutuhan / Masalah <span className="text-rose-500">*</span>
+            Format / Kegiatan Layanan (Master BK Kegiatan Layanan)
+          </label>
+          <Select
+            
+            value={(formData as any).mdl_kegiatan_id || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                mdl_kegiatan_id: e.target.value,
+              })
+            }
+            options={[
+              { value: "", label: kegiatanlayananLoading ? "Memuat opsi data master..." : "-- Pilih format kegiatan --" },
+              ...kegiatanlayananOptions.map((opt) => ({
+                value: String(opt.id),
+                label: opt.value,
+              })),
+            ]}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Topik / Materi Layanan
+          </label>
+          <Input
+            
+            value={(formData as any).materi_layanan || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                materi_layanan: e.target.value,
+              })
+            }
+            placeholder="Contoh: Bimbingan Disiplin & Motivasi Belajar"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Gejala / Masalah yang Dihadapi
           </label>
           <Textarea
-            required
+            
             rows={3}
             value={(formData as any).permasalahan || ""}
             onChange={(e) =>
@@ -130,61 +194,59 @@ export default function FormJurnalBkModal({
                 permasalahan: e.target.value,
               })
             }
-            placeholder="Kebutuhan motivasi belajar dan manajemen waktu..."
+            placeholder="Uraian problematika..."
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Layanan yang Diberikan <span className="text-rose-500">*</span>
-          </label>
-          <Textarea
-            required
-            rows={3}
-            value={(formData as any).layanan_diberikan || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                layanan_diberikan: e.target.value,
-              })
-            }
-            placeholder="Teknik restrukturisasi kognitif dan pembinaan..."
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Evaluasi Capaian
+            Hasil Konseling yang Dicapai
           </label>
           <Textarea
             
             rows={3}
-            value={(formData as any).evaluasi || ""}
+            value={(formData as any).hasil || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                evaluasi: e.target.value,
+                hasil: e.target.value,
               })
             }
-            placeholder="Perkembangan perilaku positif konseli..."
+            placeholder="Hasil kesepakatan konseling..."
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Rencana Tindak Lanjut
+            Rencana Tindak Lanjut Penanganan
           </label>
           <Textarea
             
             rows={3}
-            value={(formData as any).tindak_lanjut || ""}
+            value={(formData as any).rnc_tindak_lanjut || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                tindak_lanjut: e.target.value,
+                rnc_tindak_lanjut: e.target.value,
               })
             }
-            placeholder="Sesi konseling tindak lanjut..."
+            placeholder="Rencana pemantauan..."
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
+            Dokumen Lembar Komitmen / Bukti (PDF/Foto)
+          </label>
+          <FileInput
+            value={(formData as any).file || ""}
+            onChange={(fileName) =>
+              setFormData({
+                ...formData,
+                file: fileName,
+              })
+            }
+            helperText="Unggah dokumen konseling"
           />
         </div>
       </form>

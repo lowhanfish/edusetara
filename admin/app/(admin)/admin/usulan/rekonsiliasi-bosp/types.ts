@@ -1,8 +1,8 @@
 export interface CreateInterface {
   sekolah: string | null;
+  tahun: string | null;
   tahap: string | null;
-  tahun: number | null;
-  nominal_dana: number | null;
+  nominal_dana?: number | null;
   kategori_spj?: string | null;
   file_bku?: string | null;
   file_rekening?: string | null;
@@ -12,6 +12,8 @@ export interface CreateInterface {
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  unit_kerja?: string | null;
+  nip?: string | null;
   created_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;

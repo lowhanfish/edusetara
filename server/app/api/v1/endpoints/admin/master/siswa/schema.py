@@ -59,7 +59,7 @@ class SiswaOption(BaseModel):
 
     id: str
     uraian: str
-    nisn: str
+    nisn: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -68,6 +68,13 @@ class SiswaResponse(SiswaBase):
     """Response schema for Siswa item."""
 
     id: str
+    nama: str
+    nisn: str | None = None
+    nik: str | None = None
+    jns_kelamin: str | None = None
+    tgl_lahir: date | None = None
+    alamat: str | None = None
+    is_active: bool | None = True
     nip: str | None = None
     unit_kerja: str | None = None
     unit_kerja_id: str | None = None
