@@ -1,6 +1,6 @@
 """Operational models for Usulan Sekolah."""
 
-from sqlalchemy import Column, Integer, Numeric, String, Text
+from sqlalchemy import Column, JSON, Integer, Numeric, String, Text
 from app.db.base import Base
 from app.models.operational.base import OperationalBaseMixin
 
@@ -58,6 +58,7 @@ class UsulanRekonsiliasiBosp(Base, OperationalBaseMixin):
     tahap = Column(String(50), nullable=True)
     tahun = Column(String(20), nullable=True)
     nominal_dana = Column(Numeric(15, 2), nullable=True)
+    dokumen_spj = Column(JSON, nullable=True)
     kategori_spj = Column(String(255), nullable=True)
     file_bku = Column(String(255), nullable=True)
     file_rekening = Column(String(255), nullable=True)

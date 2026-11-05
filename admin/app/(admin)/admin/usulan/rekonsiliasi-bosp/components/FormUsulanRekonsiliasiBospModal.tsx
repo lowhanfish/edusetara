@@ -1,5 +1,7 @@
-import React from "react";
-import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
+import React, { useState } from "react";
+import { fetchData } from "@/lib/api_secure";
+import { useUrlStore } from "@/store/useUrlStore";
+import { Button, Input, Modal, FileInput, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
 import { useKategoriSpjOption } from "../hooks/crud";
 
@@ -22,7 +24,36 @@ export default function FormUsulanRekonsiliasiBospModal({
   onSubmit,
   isLoading = false,
 }: FormUsulanRekonsiliasiBospModalProps) {
-  const { options: kategorispjOptions, isLoading: kategorispjLoading } = useKategoriSpjOption();
+  const { options: kategorispjOptions, isLoading: kategorispjLoading, isError: kategoriError } = useKategoriSpjOption();
+
+  const baseUrl = useUrlStore((state) => state.URL.APP);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const uploadDocument = async (kategori: { id: string; value: string }, file?: File) => {
+    setUploadError("");
+    let path = "";
+    if (file) {
+      setUploading(true);
+      try {
+        const body = new FormData();
+        body.append("file", file);
+        const result = await fetchData<{ file_url: string }>(`${baseUrl}/api/v1/admin/usulan/rekonsiliasi-bosp/upload`, { method: "POST", body });
+        path = result.file_url;
+      } catch (error) {
+        setUploadError(error instanceof Error ? error.message : "Gagal mengunggah berkas");
+        return;
+      } finally {
+        setUploading(false);
+      }
+    }
+    setFormData((previous) => ({
+      ...previous,
+      dokumen_spj: [
+        ...(previous.dokumen_spj ?? []).filter((item) => item.kategori_id !== kategori.id),
+        { kategori_id: kategori.id, nama: kategori.value, file: path },
+      ],
+    }));
+  };
 
   return (
     <Modal
@@ -37,10 +68,10 @@ export default function FormUsulanRekonsiliasiBospModal({
       maxWidth="lg"
       footer={
         <>
-          <Button variant="outline" type="button" onClick={onClose} disabled={isLoading}>
+          <Button variant="outline" type="button" onClick={onClose} disabled={isLoading || uploading}>
             Batal
           </Button>
-          <Button variant="gold" type="submit" form="form-usulan-rekonsiliasi-bosp" disabled={isLoading}>
+          <Button variant="gold" type="submit" form="form-usulan-rekonsiliasi-bosp" disabled={isLoading || uploading}>
             {isLoading
               ? "Menyimpan..."
               : formMode === "add"
@@ -123,81 +154,25 @@ export default function FormUsulanRekonsiliasiBospModal({
           />
         </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Kategori Dokumen SPJ (Master Kategori)
-          </label>
-          <Select
-            
-            value={(() => {
-              const cur = (formData as any).kategori_spj;
-              if (!cur) return "";
-              const match = kategorispjOptions.find((o) => o.id === cur || o.value === cur);
-              return match ? String(match.value || match.id) : String(cur);
-            })()}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                kategori_spj: e.target.value,
-              })
-            }
-            options={[
-              { value: "", label: kategorispjLoading ? "Memuat opsi data master..." : "-- Pilih kategori SPJ BOSP --" },
-              ...kategorispjOptions.map((opt) => ({
-                value: String(opt.value || opt.id),
-                label: opt.value,
-              })),
-            ]}
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Buku Kas Umum / BKU (PDF)
-          </label>
-          <FileInput
-            value={(formData as any).file_bku || ""}
-            onChange={(fileName) =>
-              setFormData({
-                ...formData,
-                file_bku: fileName,
-              })
-            }
-            helperText="Unggah berkas BKU"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            Rekening Koran Bank Sultra (PDF)
-          </label>
-          <FileInput
-            value={(formData as any).file_rekening || ""}
-            onChange={(fileName) =>
-              setFormData({
-                ...formData,
-                file_rekening: fileName,
-              })
-            }
-            helperText="Unggah rekening koran"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-[#2d2410] mb-1">
-            SPTJM BOSP Bermaterai (PDF)
-          </label>
-          <FileInput
-            value={(formData as any).file_sptjm || ""}
-            onChange={(fileName) =>
-              setFormData({
-                ...formData,
-                file_sptjm: fileName,
-              })
-            }
-            helperText="Unggah SPTJM"
-          />
-        </div>
+        <fieldset disabled={uploading} className="space-y-4">
+          <legend className="text-xs font-semibold">Dokumen SPJ BOSP</legend>
+          {kategorispjLoading && <p className="text-xs">Memuat kategori dokumen...</p>}
+          {kategoriError && <p role="alert" className="text-xs text-rose-600">Gagal memuat master kategori. Silakan coba kembali.</p>}
+          {!kategorispjLoading && !kategoriError && kategorispjOptions.length === 0 && (
+            <p className="text-xs">Belum ada kategori dokumen. Tambahkan melalui Master Kategori.</p>
+          )}
+          {kategorispjOptions.map((kategori) => (
+            <FileInput
+              key={kategori.id}
+              label={kategori.value}
+              value={formData.dokumen_spj?.find((item) => item.kategori_id === kategori.id)?.file || ""}
+              onChange={(_, file) => void uploadDocument(kategori, file)}
+              helperText={`Unggah ${kategori.value}`}
+            />
+          ))}
+          {uploading && <p className="text-xs">Mengunggah berkas...</p>}
+          {uploadError && <p role="alert" className="text-xs text-rose-600">{uploadError}</p>}
+        </fieldset>
 
         <div>
           <label className="block text-xs font-semibold text-[#2d2410] mb-1">

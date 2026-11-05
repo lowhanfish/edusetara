@@ -1,4 +1,11 @@
+export interface DokumenSpj {
+  kategori_id: string;
+  nama: string;
+  file: string;
+}
+
 export interface CreateInterface {
+  dokumen_spj?: DokumenSpj[] | null;
   sekolah: string | null;
   tahun: string | null;
   tahap: string | null;

@@ -8,11 +8,18 @@ from app.global_schemas.operational.base_schema import (
 )
 
 
+class DokumenSpj(BaseModel):
+    kategori_id: str
+    nama: str
+    file: str
+
+
 class RekonsiliasiBospBase(OperationalBase):
     sekolah: str | None = None
     tahap: str | None = None
     tahun: int | str | None = None
     nominal_dana: Decimal | float | int | None = None
+    dokumen_spj: list[DokumenSpj] | None = None
     kategori_spj: str | None = None
     file_bku: str | None = None
     file_rekening: str | None = None
@@ -33,6 +40,7 @@ class RekonsiliasiBospUpdate(BaseModel):
     tahap: str | None = None
     tahun: int | str | None = None
     nominal_dana: Decimal | float | int | None = None
+    dokumen_spj: list[DokumenSpj] | None = None
     kategori_spj: str | None = None
     file_bku: str | None = None
     file_rekening: str | None = None
@@ -47,6 +55,7 @@ class RekonsiliasiBospResponse(OperationalResponse):
     tahap: str | None = None
     tahun: int | str | None = None
     nominal_dana: Decimal | float | int | None = None
+    dokumen_spj: list[DokumenSpj] | None = None
     kategori_spj: str | None = None
     file_bku: str | None = None
     file_rekening: str | None = None

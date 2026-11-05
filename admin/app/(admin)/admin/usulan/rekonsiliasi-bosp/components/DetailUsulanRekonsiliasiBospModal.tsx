@@ -1,4 +1,5 @@
 import React from "react";
+import { useUrlStore } from "@/store/useUrlStore";
 import { Button, Modal } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
 import { useKategoriSpjOption } from "../hooks/crud";
@@ -14,6 +15,7 @@ export default function DetailUsulanRekonsiliasiBospModal({
   onClose,
   record,
 }: DetailUsulanRekonsiliasiBospModalProps) {
+  const baseUrl = useUrlStore((state) => state.URL.APP);
   const { options: kategorispjOptions } = useKategoriSpjOption();
   return (
     <Modal
@@ -41,6 +43,12 @@ export default function DetailUsulanRekonsiliasiBospModal({
       {record && (
         <div className="space-y-4 text-xs text-[#2d2410]">
           <div className="p-4 rounded-2xl bg-white/60 border border-white/80 space-y-1">
+          {record.dokumen_spj?.filter((item) => item.file).map((item) => (
+            <div key={item.kategori_id} className="py-2 border-b border-[#e2d9c8]/60 flex justify-between gap-2">
+              <span>{kategorispjOptions.find((kategori) => kategori.id === item.kategori_id)?.value || item.nama}</span>
+              <a href={item.file.startsWith("/") ? `${baseUrl}${item.file}` : item.file} target="_blank" rel="noopener noreferrer" className="text-amber-800 underline">Lihat / Unduh Berkas</a>
+            </div>
+          ))}
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Satuan Pendidikan</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">

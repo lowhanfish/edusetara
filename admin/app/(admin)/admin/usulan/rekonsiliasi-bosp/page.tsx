@@ -61,6 +61,7 @@ export default function UsulanRekonsiliasiBospPage() {
     tahap: "",
     nominal_dana: null,
     kategori_spj: "",
+    dokumen_spj: [],
     file_bku: "",
     file_rekening: "",
     file_sptjm: "",
@@ -90,6 +91,7 @@ export default function UsulanRekonsiliasiBospPage() {
     setFormMode("edit");
     setFormData({
       id: record.id,
+      dokumen_spj: record.dokumen_spj ?? [],
       sekolah: (record as any).sekolah ?? "",
       tahun: (record as any).tahun ?? "",
       tahap: (record as any).tahap ?? "",
@@ -414,8 +416,8 @@ export default function UsulanRekonsiliasiBospPage() {
 
         <div className="pt-2">
           <Pagination
-            currentPage={page}
-            totalCount={totalItems}
+            page={page}
+            total={totalItems}
             pageSize={pageSize}
             onPageChange={(p) => setPage(p)}
           />

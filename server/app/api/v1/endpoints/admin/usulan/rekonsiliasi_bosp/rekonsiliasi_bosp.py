@@ -3,11 +3,12 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, UploadFile, HTTPException, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user_optional, get_db
+from app.api.deps import get_current_user, get_current_user_optional, get_db
+from app.services.upload_service import FileUploadService
 from app.models.auth.user import User
 from app.models.operational.usulan import UsulanRekonsiliasiBosp
 from app.services.crud_service import CRUDBase
@@ -21,6 +22,14 @@ from .schema import (
 
 router = APIRouter()
 crud_rekonsiliasi_bosp = CRUDBase(UsulanRekonsiliasiBosp)
+
+
+@router.post("/upload")
+async def upload_document(
+    file: UploadFile,
+    current_user: User = Depends(get_current_user),
+):
+    return await FileUploadService(module="rekonsiliasi-bosp").save_file(file)
 
 
 @router.get("/option", response_model=list[RekonsiliasiBospResponse])

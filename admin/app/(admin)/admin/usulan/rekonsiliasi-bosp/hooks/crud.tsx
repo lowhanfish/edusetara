@@ -139,10 +139,19 @@ export const useUpdateMaster = () => {
 export const useKategoriSpjOption = (search: string = "") => {
   const url = useUrlStore((state) => state.URL.APP);
   const { data, isLoading, isError, error } = useQuery({
-    queryFn: () =>
-      fetchData<any[]>(
-        `${url}/api/v1/admin/master/kategori/option?search=${encodeURIComponent(search)}`
-      ),
+    queryFn: async () => {
+      const categories: { id: string; title?: string; uraian?: string }[] = [];
+      let total = 0;
+      do {
+        const page = await fetchData<{ data: typeof categories; total: number }>(
+          `${url}/api/v1/admin/master/kategori/read?skip=${categories.length}&limit=100&search=${encodeURIComponent(search)}`
+        );
+        categories.push(...page.data);
+        total = page.total;
+        if (page.data.length === 0) break;
+      } while (categories.length < total);
+      return categories;
+    },
     queryKey: ["master-kategori-option", search],
   });
 
