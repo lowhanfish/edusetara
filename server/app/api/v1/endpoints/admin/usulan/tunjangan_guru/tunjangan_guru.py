@@ -1,7 +1,6 @@
 """Usulan Tunjangan Guru endpoints (matching master pattern)."""
 
 import uuid
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, or_, select
@@ -11,6 +10,7 @@ from app.api.deps import get_current_user_optional, get_db
 from app.models.auth.user import User
 from app.models.operational.usulan import UsulanTunjanganGuru
 from app.services.crud_service import CRUDBase
+from app.services.tunjangan_verification import attach_verifications
 
 from .schema import (
     TunjanganGuruCreate,
@@ -38,7 +38,7 @@ async def option(
         )
     query = query.limit(50)
     result = await db.execute(query)
-    return list(result.scalars().all())
+    return await attach_verifications(db, list(result.scalars().all()))
 
 
 @router.get("", response_model=TunjanganGuruResponseList)
@@ -65,7 +65,7 @@ async def read_tunjangan_guru(
 
     query = query.order_by(UsulanTunjanganGuru.created_at.desc()).offset(skip).limit(limit)
     result = await db.execute(query)
-    data = list(result.scalars().all())
+    data = await attach_verifications(db, list(result.scalars().all()))
 
     return {
         "total": total,
@@ -83,6 +83,7 @@ async def get_tunjangan_guru(
     item = await crud_tunjangan_guru.get(db, id=id)
     if not item:
         raise HTTPException(status_code=404, detail="Data tidak ditemukan")
+    await attach_verifications(db, [item])
     return item
 
 
@@ -107,9 +108,12 @@ async def update_tunjangan_guru(
     payload: TunjanganGuruUpdate,
     db: AsyncSession = Depends(get_db),
 ):
-    updated = await crud_tunjangan_guru.update(db, id=id, obj_in=payload.model_dump(exclude_unset=True))
+    updated = await crud_tunjangan_guru.update(
+        db, id=id, obj_in=payload.model_dump(exclude_unset=True)
+    )
     if not updated:
         raise HTTPException(status_code=404, detail="Data tidak ditemukan")
+    await attach_verifications(db, [updated])
     return updated
 
 

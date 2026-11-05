@@ -142,22 +142,7 @@ export default function UsulanTunjanganGuruPage() {
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const hasFile = Object.values(formData).some(
-      (v) => typeof File !== "undefined" && v instanceof File
-    );
-
-    let payload: any;
-    if (hasFile) {
-      const fd = new FormData();
-      Object.entries(formData).forEach(([k, v]) => {
-        if (v !== undefined && v !== null && v !== "") {
-          fd.append(k, v instanceof File ? v : String(v));
-        }
-      });
-      payload = fd;
-    } else {
-      payload = { ...formData };
-    }
+    const payload = { ...formData };
 
     if (formMode === "add") {
       createMutation.mutate(payload, {
@@ -302,13 +287,14 @@ export default function UsulanTunjanganGuruPage() {
                 <th className="py-3 px-4">Kelas Penerima</th>
                 <th className="py-3 px-4">Nominal Usulan</th>
                 <th className="py-3 px-4">Satuan Pendidikan</th>
+                <th className="py-3 px-4">Hasil Verifikasi</th>
                 <th className="py-3 px-4 w-28 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#ece5d8]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={9} className="py-12 text-center text-[#7d7152]">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
                       <span>Memuat data dari server...</span>
@@ -317,7 +303,7 @@ export default function UsulanTunjanganGuruPage() {
                 </tr>
               ) : isError ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-rose-700">
+                  <td colSpan={9} className="py-12 text-center text-rose-700">
                     <p className="font-semibold">Gagal memuat data Usulan Tunjangan Guru</p>
                     <p className="text-[11px] mt-1 text-[#7d7152]">
                       {error?.message || "Terjadi kesalahan koneksi ke server."}
@@ -334,7 +320,7 @@ export default function UsulanTunjanganGuruPage() {
                 </tr>
               ) : rawList.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-[#7d7152]">
+                  <td colSpan={9} className="py-12 text-center text-[#7d7152]">
                     <span className="text-3xl block mb-2">💰</span>
                     <p className="font-semibold text-sm text-[#2d2410]">
                       Belum ada data Usulan Tunjangan Guru
@@ -388,6 +374,10 @@ export default function UsulanTunjanganGuruPage() {
                     <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
                       {String((item as any).unit_kerja ?? "-")}
                     </td>
+                      <td className="py-3 px-4 min-w-44">
+                        <span className="font-semibold">{item.status_verifikasi || "Menunggu"}</span>
+                        {item.catatan && <p className="mt-1 text-[#7d7152] whitespace-pre-wrap">{item.catatan}</p>}
+                      </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1.5">
                           <button
@@ -426,8 +416,8 @@ export default function UsulanTunjanganGuruPage() {
 
         <div className="pt-2">
           <Pagination
-            currentPage={page}
-            totalCount={totalItems}
+            page={page}
+            total={totalItems}
             pageSize={pageSize}
             onPageChange={(p) => setPage(p)}
           />

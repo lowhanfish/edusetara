@@ -1,6 +1,9 @@
 """Pydantic schemas for Verifikasi Tunjangan Guru (matching master pattern)."""
 
-from pydantic import BaseModel
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
+
 from app.global_schemas.operational.base_schema import (
     OperationalBase,
     OperationalResponse,
@@ -36,3 +39,10 @@ class VerifikasiTunjanganGuruResponseList(BaseModel):
     skip: int = 0
     limit: int = 100
     data: list[VerifikasiTunjanganGuruResponse]
+
+
+class AdminVerificationInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    status: Literal["Menunggu", "Disetujui", "Perbaikan", "Ditolak"]
+    pesan: str | None = Field(None, max_length=5000)

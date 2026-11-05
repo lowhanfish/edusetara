@@ -43,6 +43,14 @@ export default function DetailUsulanTunjanganGuruModal({
       {record && (
         <div className="space-y-4 text-xs text-[#2d2410]">
           <div className="p-4 rounded-2xl bg-white/60 border border-white/80 space-y-1">
+            <div className="py-2 border-b border-[#e2d9c8]/60">
+              <p className="text-[#7d7152] font-semibold">Status Verifikasi Tim Dinas</p>
+              <p className="mt-1 font-medium">{record.status_verifikasi || "Menunggu"}</p>
+            </div>
+            <div className="py-2 border-b border-[#e2d9c8]/60">
+              <p className="text-[#7d7152] font-semibold">Catatan Verifikator</p>
+              <p className="mt-1 whitespace-pre-wrap">{record.catatan || "Belum ada catatan."}</p>
+            </div>
           <div className="py-2 border-b border-[#e2d9c8]/60 flex flex-col sm:flex-row sm:items-start justify-between gap-1">
             <span className="text-[#7d7152] font-semibold sm:w-1/3">Tahun Anggaran</span>
             <span className="text-[#2d2410] sm:w-2/3 font-medium break-words">

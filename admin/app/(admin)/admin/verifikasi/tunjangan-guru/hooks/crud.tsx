@@ -137,3 +137,33 @@ export const useUpdateMaster = () => {
 };
 
 
+
+
+export const useUsulanForVerification = (page: number, limit: number, search: string, enabled: boolean) => {
+  const url = useUrlStore((state) => state.URL.APP);
+  return useQuery({
+    queryKey: ["tunjangan-usulan-verifikasi", page, limit, search],
+    enabled,
+    queryFn: () => fetchData<import("../../../usulan/tunjangan-guru/types").ResponseListInterface>(
+      `${url}/api/v1/admin/verifikasi/tunjangan-guru/usulan/read?skip=${(page - 1) * limit}&limit=${limit}&search=${encodeURIComponent(search)}`
+    ),
+  });
+};
+
+export const useVerifyUsulan = () => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status, pesan }: { id: string; status: string; pesan: string }) =>
+      fetchData(`${url}/api/v1/admin/verifikasi/tunjangan-guru/usulan/${id}/verifikasi`, {
+        method: "PATCH", body: { status, pesan },
+      }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["tunjangan-usulan-verifikasi"] }),
+        queryClient.invalidateQueries({ queryKey: ["usulan-tunjangan-guru"] }),
+        queryClient.invalidateQueries({ queryKey: ["verifikasi-tunjangan-guru"] }),
+      ]);
+    },
+  });
+};

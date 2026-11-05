@@ -11,6 +11,9 @@ export interface CreateInterface {
 
 export interface ResponseInterface extends CreateInterface {
   id: string;
+  status_verifikasi?: string;
+  catatan?: string | null;
+  verifikasi_id?: string | null;
   unit_kerja?: string | null;
   nip?: string | null;
   created_by?: string | null;
