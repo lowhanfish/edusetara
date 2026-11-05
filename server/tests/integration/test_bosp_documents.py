@@ -12,6 +12,7 @@ from app.services import upload_service
 from main import app
 
 BASE = "/api/v1/admin/usulan/rekonsiliasi-bosp"
+VERIFY = "/api/v1/admin/verifikasi/rekonsiliasi-bosp/usulan"
 
 
 @pytest_asyncio.fixture
@@ -68,11 +69,19 @@ async def test_independent_admin_checks_reset_when_document_changes(client, setu
     first = (await client.post(base, json=body)).json()
     second = (await client.post(base, json=body)).json()
     url = f"{base}/{first['id']}"
-    assert (await client.patch(f"{url}/verifikasi", json={"cek_benar": True})).status_code == 403
+    verify_url = f"{VERIFY}/{proposal['id']}/dokumen/{first['id']}/verifikasi"
+    assert (await client.patch(verify_url, json={"cek_benar": True})).status_code == 403
+    assert (await client.get(f"{VERIFY}/read")).status_code == 403
+    assert (await client.get(f"{VERIFY}/{proposal['id']}/dokumen")).status_code == 403
+    assert (await client.patch(f"{url}/verifikasi", json={"cek_benar": True})).status_code == 404
     user.role.name = "admin"
-    approved = await client.patch(
-        f"{url}/verifikasi", json={"cek_benar": True, "cek_lengkap": True}
-    )
+    listing = await client.get(f"{VERIFY}/read")
+    assert listing.status_code == 200
+    assert listing.json()["data"][0]["id"] == proposal["id"]
+    detail = await client.get(f"{VERIFY}/{proposal['id']}/dokumen")
+    assert detail.status_code == 200
+    assert {item["id"] for item in detail.json()} == {first["id"], second["id"]}
+    approved = await client.patch(verify_url, json={"cek_benar": True, "cek_lengkap": True})
     assert approved.status_code == 200
     assert approved.json()["cek_benar"] and approved.json()["cek_lengkap"]
     rows = (await client.get(base)).json()
@@ -99,3 +108,12 @@ async def test_invalid_references_files_and_unauthenticated_access(client, setup
     assert (await client.get(url)).json() == []
     app.dependency_overrides.pop(get_current_user)
     assert (await client.get(url)).status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_proposal_screen_cannot_set_status(client, setup_documents):
+    proposal, _, _ = setup_documents
+    update = await client.put(f"{BASE}/update/{proposal['id']}", json={"status": "Disetujui"})
+    assert update.status_code == 403
+    create = await client.post(f"{BASE}/create", json={"sekolah": "UJI", "status": "Disetujui"})
+    assert create.status_code == 403

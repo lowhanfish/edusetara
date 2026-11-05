@@ -1,13 +1,23 @@
 """Verifikasi Rekonsiliasi BOSP endpoints (matching master pattern)."""
 
 import uuid
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user_optional, get_db
+from app.api.deps import get_current_user_optional, get_db, require_roles
+from app.api.v1.endpoints.admin.usulan.rekonsiliasi_bosp.rekonsiliasi_bosp import (
+    read_documents,
+    read_rekonsiliasi_bosp,
+    require_document,
+)
+from app.api.v1.endpoints.admin.usulan.rekonsiliasi_bosp.schema import (
+    DokumenResponse,
+    DokumenVerification,
+    RekonsiliasiBospResponseList,
+)
+from app.db.transaction import commit_or_raise_unique_conflict
 from app.models.auth.user import User
 from app.models.operational.verifikasi import VerifikasiRekonsiliasiBosp
 from app.services.crud_service import CRUDBase
@@ -19,7 +29,7 @@ from .schema import (
     VerifikasiRekonsiliasiBospUpdate,
 )
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_roles("admin", "superadmin"))])
 crud_verifikasi_bosp = CRUDBase(VerifikasiRekonsiliasiBosp)
 
 
@@ -87,8 +97,14 @@ async def get_verifikasi_rekonsiliasi_bosp(
     return item
 
 
-@router.post("", response_model=VerifikasiRekonsiliasiBospResponse, status_code=status.HTTP_201_CREATED)
-@router.post("/create", response_model=VerifikasiRekonsiliasiBospResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "", response_model=VerifikasiRekonsiliasiBospResponse, status_code=status.HTTP_201_CREATED
+)
+@router.post(
+    "/create",
+    response_model=VerifikasiRekonsiliasiBospResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_verifikasi_rekonsiliasi_bosp(
     payload: VerifikasiRekonsiliasiBospCreate,
     db: AsyncSession = Depends(get_db),
@@ -108,7 +124,9 @@ async def update_verifikasi_rekonsiliasi_bosp(
     payload: VerifikasiRekonsiliasiBospUpdate,
     db: AsyncSession = Depends(get_db),
 ):
-    updated = await crud_verifikasi_bosp.update(db, id=id, obj_in=payload.model_dump(exclude_unset=True))
+    updated = await crud_verifikasi_bosp.update(
+        db, id=id, obj_in=payload.model_dump(exclude_unset=True)
+    )
     if not updated:
         raise HTTPException(status_code=404, detail="Data tidak ditemukan")
     return updated
@@ -124,3 +142,37 @@ async def delete_verifikasi_rekonsiliasi_bosp(
     if not success:
         raise HTTPException(status_code=404, detail="Gagal menghapus data")
     return {"message": "Berhasil menghapus data", "id": id, "data": {"id": id}, "success": True}
+
+
+@router.get("/usulan/read", response_model=RekonsiliasiBospResponseList)
+async def read_proposals_for_verification(
+    db: AsyncSession = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+    search: str | None = None,
+):
+    return await read_rekonsiliasi_bosp(db=db, skip=skip, limit=limit, search=search)
+
+
+@router.get("/usulan/{id}/dokumen", response_model=list[DokumenResponse])
+async def read_documents_for_verification(
+    id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User | None = Depends(get_current_user_optional),
+):
+    return await read_documents(id=id, db=db, current_user=current_user)
+
+
+@router.patch("/usulan/{id}/dokumen/{dokumen_id}/verifikasi", response_model=DokumenResponse)
+async def verify_document(
+    id: str,
+    dokumen_id: str,
+    payload: DokumenVerification,
+    db: AsyncSession = Depends(get_db),
+):
+    document = await require_document(db, id, dokumen_id)
+    for field, value in payload.model_dump(exclude_unset=True, exclude_none=True).items():
+        setattr(document, field, value)
+    await commit_or_raise_unique_conflict(db)
+    await db.refresh(document)
+    return document

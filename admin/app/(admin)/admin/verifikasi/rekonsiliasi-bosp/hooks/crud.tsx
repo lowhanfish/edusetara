@@ -137,3 +137,15 @@ export const useUpdateMaster = () => {
 };
 
 
+
+
+export const useUsulanForVerification = (page: number, limit: number, search: string, enabled: boolean) => {
+  const url = useUrlStore((state) => state.URL.APP);
+  return useQuery({
+    queryKey: ["bosp-usulan-verifikasi", page, limit, search],
+    enabled,
+    queryFn: () => fetchData<import("../../../usulan/rekonsiliasi-bosp/types").ResponseListInterface>(
+      `${url}/api/v1/admin/verifikasi/rekonsiliasi-bosp/usulan/read?skip=${(page - 1) * limit}&limit=${limit}&search=${encodeURIComponent(search)}`
+    ),
+  });
+};

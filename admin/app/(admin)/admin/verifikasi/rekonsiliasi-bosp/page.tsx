@@ -1,422 +1,66 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import Swal from "sweetalert2";
-import {
-  Button,
-  Card,
-  Input,
-  PageHeader,
-  Pagination,
-} from "@/app/(admin)/_components/ui";
-
-import { ResponseInterface, VerifikasiRekonsiliasiBospRecord } from "./types";
-import FormVerifikasiRekonsiliasiBospModal from "./components/FormVerifikasiRekonsiliasiBospModal";
-import DetailVerifikasiRekonsiliasiBospModal from "./components/DetailVerifikasiRekonsiliasiBospModal";
-import {
-  useResponseListMaster,
-  useDeleteMaster,
-  useCreateMaster,
-  useUpdateMaster,
-} from "./hooks/crud";
-import { listindex } from "@/utilities/pagination";
+import React, { useEffect, useState } from "react";
+import { Button, Card, Input, PageHeader, Pagination } from "@/app/(admin)/_components/ui";
+import { useAuthStore } from "@/store/useAuthStore";
+import { ResponseInterface } from "../../usulan/rekonsiliasi-bosp/types";
+import DetailUsulanRekonsiliasiBospModal from "../../usulan/rekonsiliasi-bosp/components/DetailUsulanRekonsiliasiBospModal";
+import { useUsulanForVerification } from "./hooks/crud";
 
 export default function VerifikasiRekonsiliasiBospPage() {
-
+  const role = useAuthStore((state) => state.user?.role);
+  const authLoading = useAuthStore((state) => state.isLoading);
+  const canVerify = role === "admin" || role === "superadmin";
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [selectedRecord, setSelectedRecord] = useState<ResponseInterface | null>(null);
+  const proposals = useUsulanForVerification(page, pageSize, debouncedSearch, canVerify);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(search);
-      setPage(1);
-    }, 400);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    const timer = setTimeout(() => { setDebouncedSearch(search); setPage(1); }, 400);
+    return () => clearTimeout(timer);
   }, [search]);
 
-  const { List, isLoading, isError, error, refetch } = useResponseListMaster(
-    page,
-    pageSize,
-    debouncedSearch
-  );
-  const deleteMutation = useDeleteMaster();
-  const createMutation = useCreateMaster();
-  const updateMutation = useUpdateMaster();
-
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<VerifikasiRekonsiliasiBospRecord | null>(null);
-  const [formMode, setFormMode] = useState<"add" | "edit">("add");
-
-  const initialForm: Partial<ResponseInterface> = {
-    sekolah: "",
-    tahap: "",
-    tahun: "",
-    nominal_disetujui: null,
-    status_verifikasi: "",
-    catatan_verifikator: "",
-  };
-
-  const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
-
-  const emptyForm = () => {
-    setFormData(initialForm);
-  };
-
-  const rawList: VerifikasiRekonsiliasiBospRecord[] = useMemo(() => {
-    if (!List?.data || !Array.isArray(List.data)) return [];
-    return List.data;
-  }, [List]);
-
-  const totalItems = List?.total ?? rawList.length;
-
-  const handleOpenAdd = () => {
-    setFormMode("add");
-    emptyForm();
-    setIsFormOpen(true);
-  };
-
-  const handleOpenEdit = (record: VerifikasiRekonsiliasiBospRecord) => {
-    setFormMode("edit");
-    setFormData({
-      id: record.id,
-      sekolah: (record as any).sekolah ?? "",
-      tahap: (record as any).tahap ?? "",
-      tahun: (record as any).tahun ?? "",
-      nominal_disetujui: (record as any).nominal_disetujui ?? "",
-      status_verifikasi: (record as any).status_verifikasi ?? "",
-      catatan_verifikator: (record as any).catatan_verifikator ?? "",
-    });
-    setIsFormOpen(true);
-  };
-
-  const handleOpenDetail = (record: VerifikasiRekonsiliasiBospRecord) => {
-    setSelectedRecord(record);
-    setIsDetailOpen(true);
-  };
-
-  const handleDelete = (record: VerifikasiRekonsiliasiBospRecord) => {
-    const displayName =
-      (record as any).judul ||
-      (record as any).title ||
-      (record as any).nama ||
-      (record as any).sekolah ||
-      (record as any).nama_kombel ||
-      (record as any).kegiatan ||
-      (record as any).uraian ||
-      (record as any).isi ||
-      "data ini";
-
-    Swal.fire({
-      title: "Hapus Verifikasi Usulan Rekonsiliasi Dana BOSP?",
-      text: `Apakah Anda yakin ingin menghapus "${displayName}"?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#c2410c",
-      cancelButtonColor: "#64748b",
-      confirmButtonText: "Ya, Hapus Data",
-      cancelButtonText: "Batal",
-      reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deleteMutation.mutate(record.id);
-      }
-    });
-  };
-
-  const handleSubmitForm = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const hasFile = Object.values(formData).some(
-      (v) => typeof File !== "undefined" && v instanceof File
-    );
-
-    let payload: any;
-    if (hasFile) {
-      const fd = new FormData();
-      Object.entries(formData).forEach(([k, v]) => {
-        if (v !== undefined && v !== null && v !== "") {
-          fd.append(k, v instanceof File ? v : String(v));
-        }
-      });
-      payload = fd;
-    } else {
-      payload = { ...formData };
-    }
-
-    if (formMode === "add") {
-      createMutation.mutate(payload, {
-        onSuccess: () => {
-          setIsFormOpen(false);
-          emptyForm();
-        },
-      });
-    } else {
-      if (!formData.id) return;
-      updateMutation.mutate(
-        { body: payload, id: formData.id },
-        {
-          onSuccess: () => {
-            setIsFormOpen(false);
-            emptyForm();
-          },
-        }
-      );
-    }
-  };
+  if (authLoading) return <p className="p-6 text-sm">Memuat akses pengguna...</p>;
+  if (!canVerify) return <Card className="p-6"><p role="alert" className="text-sm text-rose-700">Halaman verifikasi rekonsiliasi BOSP hanya dapat diakses oleh admin.</p></Card>;
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Verifikasi Usulan Rekonsiliasi Dana BOSP"
-        description="Verifikasi dokumen pertanggungjawaban (SPJ) dana BOSP satuan pendidikan oleh dinas."
-        action={
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refetch()}
-              disabled={isLoading}
-              className="hidden sm:inline-flex"
-            >
-              🔄 Refresh
-            </Button>
-            <Button variant="gold" size="sm" onClick={handleOpenAdd}>
-              + Tambah Verifikasi Usulan Rekonsiliasi Dana BOSP
-            </Button>
-          </div>
-        }
-      />
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-[#7d7152] font-medium">Total Data</p>
-              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{totalItems}</h4>
-              <p className="text-[11px] text-emerald-700 mt-0.5">Operasional Terdaftar</p>
-            </div>
-            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
-              🔍
-            </span>
-          </div>
-        </Card>
-
-        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
-              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">{"Verifikasi"}</h4>
-              <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
-            </div>
-            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
-              📁
-            </span>
-          </div>
-        </Card>
-
-        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-[#7d7152] font-medium">Status API</p>
-              <h4 className="text-sm font-semibold text-emerald-700 mt-1 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Terhubung
-              </h4>
-              <p className="text-[10px] text-[#7d7152] mt-0.5 font-mono truncate max-w-[140px]">/api/v1/admin/verifikasi/rekonsiliasi-bosp</p>
-            </div>
-            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
-              ⚡
-            </span>
-          </div>
-        </Card>
-
-        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-[#7d7152] font-medium">Otoritas Akses</p>
-              <h4 className="text-sm font-semibold text-[#2d2410] mt-1">Operator & Admin</h4>
-              <p className="text-[11px] text-[#7d7152] mt-0.5">Role ASN & Dinas</p>
-            </div>
-            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
-              🔐
-            </span>
-          </div>
-        </Card>
-      </div>
-
-      <Card className="p-6 rounded-3xl bg-white/80 border-white/80 space-y-4 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-sm">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7d7152]">
-              🔍
-            </span>
-            <Input
-              type="text"
-              placeholder="Cari Verifikasi Usulan Rekonsiliasi Dana BOSP..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-[#7d7152]">Baris per hal:</span>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPage(1);
-              }}
-              className="text-xs bg-white border border-[#e2d9c8] rounded-xl px-2 py-1.5 text-[#2d2410] outline-none"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-            </select>
-          </div>
+      <PageHeader title="Verifikasi Rekonsiliasi Dana BOSP"
+        description="Periksa lampiran usulan kepala sekolah dan tetapkan Cek Benar serta Cek Lengkap untuk setiap dokumen." />
+      <Card className="p-6 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Input className="max-w-sm" aria-label="Cari usulan verifikasi" placeholder="Cari sekolah, tahun, atau status..."
+            value={search} onChange={(event) => setSearch(event.target.value)} />
+          <Button variant="outline" disabled={proposals.isFetching} onClick={() => proposals.refetch()}>Muat Ulang</Button>
         </div>
-
-        <div className="overflow-x-auto rounded-2xl border border-[#e2d9c8]/80">
+        <div className="overflow-x-auto rounded-2xl border border-[#e2d9c8]">
           <table className="w-full text-xs text-left">
-            <thead>
-              <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
-                <th className="py-3 px-4 w-12 text-center">No</th>
-                <th className="py-3 px-4">Sekolah</th>
-                <th className="py-3 px-4">Tahap</th>
-                <th className="py-3 px-4">Tahun</th>
-                <th className="py-3 px-4">Status Verifikasi</th>
-                <th className="py-3 px-4 w-28 text-center">Aksi</th>
-              </tr>
-            </thead>
+            <thead className="bg-[#fbf9f4] text-[#7d7152]"><tr>
+              <th className="p-3">No</th><th className="p-3">Satuan Pendidikan</th><th className="p-3">Tahun</th>
+              <th className="p-3">Semester</th><th className="p-3">Pengusul</th><th className="p-3">Pemeriksaan</th>
+            </tr></thead>
             <tbody className="divide-y divide-[#ece5d8]">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
-                      <span>Memuat data dari server...</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : isError ? (
-                <tr>
-                  <td colSpan={6} className="py-12 text-center text-rose-700">
-                    <p className="font-semibold">Gagal memuat data Verifikasi Usulan Rekonsiliasi Dana BOSP</p>
-                    <p className="text-[11px] mt-1 text-[#7d7152]">
-                      {error?.message || "Terjadi kesalahan koneksi ke server."}
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-3"
-                      onClick={() => refetch()}
-                    >
-                      Coba Lagi
-                    </Button>
-                  </td>
-                </tr>
-              ) : rawList.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-12 text-center text-[#7d7152]">
-                    <span className="text-3xl block mb-2">🔍</span>
-                    <p className="font-semibold text-sm text-[#2d2410]">
-                      Belum ada data Verifikasi Usulan Rekonsiliasi Dana BOSP
-                    </p>
-                    <p className="text-[11px] mt-0.5">
-                      Klik tombol "+ Tambah Verifikasi Usulan Rekonsiliasi Dana BOSP" untuk membuat data pertama.
-                    </p>
-                  </td>
-                </tr>
-              ) : (
-                rawList.map((item, index) => {
-                  const no = listindex(pageSize, page, index);
-                  return (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-amber-50/50 transition-colors duration-150"
-                    >
-                      <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
-                        {no}
-                      </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).sekolah ?? "-")}
-                    </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).tahap ?? "-")}
-                    </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).tahun ?? "-")}
-                    </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).status_verifikasi ?? "-")}
-                    </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenDetail(item)}
-                            title="Detail"
-                            className="p-1.5 rounded-lg border border-[#e2d9c8] hover:bg-amber-100/60 text-[#7d7152] transition-colors"
-                          >
-                            👁️
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEdit(item)}
-                            title="Edit"
-                            className="p-1.5 rounded-lg border border-[#e2d9c8] hover:bg-amber-100/60 text-[#7d7152] transition-colors"
-                          >
-                            ✎
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(item)}
-                            title="Hapus"
-                            className="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 transition-colors"
-                          >
-                            🗑
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
+              {proposals.isLoading ? <tr><td colSpan={6} className="p-10 text-center">Memuat usulan...</td></tr>
+                : proposals.isError ? <tr><td colSpan={6} role="alert" className="p-10 text-center text-rose-600">{proposals.error?.message || "Gagal memuat usulan. Silakan muat ulang."}</td></tr>
+                : !proposals.data?.data.length ? <tr><td colSpan={6} className="p-10 text-center text-[#7d7152]">Belum ada usulan rekonsiliasi untuk diperiksa.</td></tr>
+                : proposals.data.data.map((record, index) => <tr key={record.id} className="hover:bg-amber-50/50">
+                  <td className="p-3">{(page - 1) * pageSize + index + 1}</td>
+                  <td className="p-3 font-semibold">{record.sekolah || record.unit_kerja || "—"}</td>
+                  <td className="p-3">{record.tahun || "—"}</td><td className="p-3">{record.tahap || "—"}</td>
+                  <td className="p-3">{record.created_by || "—"}</td>
+                  <td className="p-3"><Button size="sm" variant="gold" onClick={() => setSelectedRecord(record)}>Periksa Dokumen</Button></td>
+                </tr>)}
             </tbody>
           </table>
         </div>
-
-        <div className="pt-2">
-          <Pagination
-            currentPage={page}
-            totalCount={totalItems}
-            pageSize={pageSize}
-            onPageChange={(p) => setPage(p)}
-          />
-        </div>
+        <Pagination page={page} total={proposals.data?.total || 0} pageSize={pageSize} onPageChange={setPage}
+          onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} />
       </Card>
-
-      <FormVerifikasiRekonsiliasiBospModal
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        formMode={formMode}
-        formData={formData}
-        setFormData={setFormData}
-        onSubmit={handleSubmitForm}
-        isLoading={createMutation.isPending || updateMutation.isPending}
-      />
-
-      <DetailVerifikasiRekonsiliasiBospModal
-        isOpen={isDetailOpen}
-        onClose={() => setIsDetailOpen(false)}
-        record={selectedRecord}
-      />
+      {selectedRecord && <DetailUsulanRekonsiliasiBospModal key={selectedRecord.id} isOpen verification
+        onClose={() => setSelectedRecord(null)} record={selectedRecord} />}
     </div>
   );
 }

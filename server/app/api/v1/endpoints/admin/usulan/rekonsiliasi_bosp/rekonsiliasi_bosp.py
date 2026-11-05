@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, get_current_user_optional, get_db, require_roles
+from app.api.deps import get_current_user, get_current_user_optional, get_db
 from app.db.transaction import commit_or_raise_unique_conflict
 from app.models.auth.user import User
 from app.models.master.pelengkap import MasterKategori
@@ -18,7 +18,6 @@ from app.services.upload_service import BASE_UPLOAD_DIR, FileUploadService
 from .schema import (
     DokumenCreate,
     DokumenResponse,
-    DokumenVerification,
     RekonsiliasiBospCreate,
     RekonsiliasiBospResponse,
     RekonsiliasiBospResponseList,
@@ -113,6 +112,8 @@ async def create_rekonsiliasi_bosp(
     db: AsyncSession = Depends(get_db),
     current_user: User | None = Depends(get_current_user_optional),
 ):
+    if "status" in payload.model_fields_set:
+        raise HTTPException(status_code=403, detail="Status hanya diubah melalui verifikasi admin")
     create_data = payload.model_dump(exclude_unset=True)
     if not create_data.get("id"):
         create_data["id"] = str(uuid.uuid4())
@@ -131,6 +132,8 @@ async def update_rekonsiliasi_bosp(
     payload: RekonsiliasiBospUpdate,
     db: AsyncSession = Depends(get_db),
 ):
+    if "status" in payload.model_fields_set:
+        raise HTTPException(status_code=403, detail="Status hanya diubah melalui verifikasi admin")
     update_data = payload.model_dump(exclude_unset=True)
     if update_data.get("sekolah") and not update_data.get("unit_kerja"):
         update_data["unit_kerja"] = update_data["sekolah"]
@@ -266,19 +269,3 @@ async def delete_document(
     await db.delete(document)
     await commit_or_raise_unique_conflict(db)
     return {"message": "Dokumen berhasil dihapus"}
-
-
-@router.patch("/{id}/dokumen/{dokumen_id}/verifikasi", response_model=DokumenResponse)
-async def verify_document(
-    id: str,
-    dokumen_id: str,
-    payload: DokumenVerification,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("admin", "superadmin")),
-):
-    document = await require_document(db, id, dokumen_id)
-    for field, value in payload.model_dump(exclude_unset=True, exclude_none=True).items():
-        setattr(document, field, value)
-    await commit_or_raise_unique_conflict(db)
-    await db.refresh(document)
-    return document

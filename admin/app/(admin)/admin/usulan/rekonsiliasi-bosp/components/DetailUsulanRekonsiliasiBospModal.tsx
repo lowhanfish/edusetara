@@ -8,15 +8,15 @@ import { fetchData } from "@/lib/api_secure";
 import { DokumenInput, DokumenSpj, ResponseInterface } from "../types";
 import { useDokumenMutation, useDokumenSpj, useKategoriSpjOption } from "../hooks/crud";
 
-interface Props { isOpen: boolean; onClose: () => void; record: ResponseInterface }
+interface Props { isOpen: boolean; onClose: () => void; record: ResponseInterface; verification?: boolean }
 const emptyDocument: DokumenInput = { kategori_id: "", uraian: "", file: "" };
 
-export default function DetailUsulanRekonsiliasiBospModal({ isOpen, onClose, record }: Props) {
+export default function DetailUsulanRekonsiliasiBospModal({ isOpen, onClose, record, verification = false }: Props) {
   const baseUrl = useUrlStore((state) => state.URL.APP);
   const role = useAuthStore((state) => state.user?.role);
-  const canVerify = role === "admin" || role === "superadmin";
+  const canVerify = verification && (role === "admin" || role === "superadmin");
   const categories = useKategoriSpjOption();
-  const documents = useDokumenSpj(record.id, isOpen);
+  const documents = useDokumenSpj(record.id, isOpen, verification);
   const mutation = useDokumenMutation(record.id);
   const [draft, setDraft] = useState<DokumenInput>(emptyDocument);
   const [editingId, setEditingId] = useState<string | undefined>();
@@ -83,7 +83,7 @@ export default function DetailUsulanRekonsiliasiBospModal({ isOpen, onClose, rec
 
   return (
     <Modal isOpen={isOpen} onClose={() => { if (!busy) { if (isEditing) setIsEditing(false); else onClose(); } }}
-      title={isEditing ? (editingId ? "Edit Dokumen" : "Tambah Dokumen") : "Rincian Dokumen Rekonsiliasi BOSP"}
+      title={isEditing ? (editingId ? "Edit Dokumen" : "Tambah Dokumen") : verification ? "Verifikasi Dokumen Rekonsiliasi BOSP" : "Rincian Dokumen Rekonsiliasi BOSP"}
       description={`${record.sekolah || record.unit_kerja || "Satuan Pendidikan"} · ${record.tahun || "—"} · ${record.tahap || "—"}`}
       maxWidth={isEditing ? "lg" : "4xl"}
       footer={isEditing ? <>
@@ -121,21 +121,21 @@ export default function DetailUsulanRekonsiliasiBospModal({ isOpen, onClose, rec
             {!groups.length && <p className="text-xs text-center py-8">Belum ada kategori dokumen. Tambahkan kategori melalui Master Kategori terlebih dahulu.</p>}
             <div className="overflow-x-auto rounded-xl border border-[#e2d9c8]">
               <table className="w-full text-xs text-left">
-                <thead className="bg-[#fbf9f4]"><tr><th className="p-3">Rincian</th><th className="p-3">Cek Benar</th><th className="p-3">Cek Lengkap</th><th className="p-3">Aksi</th></tr></thead>
+                <thead className="bg-[#fbf9f4]"><tr><th className="p-3">Rincian</th><th className="p-3">Cek Benar</th><th className="p-3">Cek Lengkap</th>{!verification && <th className="p-3">Aksi</th>}</tr></thead>
                 <tbody>{groups.map((group) => <React.Fragment key={group.id}>
                   <tr className="bg-amber-50 text-amber-900 border-y border-[#e2d9c8]">
-                    <th colSpan={4} className="p-3">
+                    <th colSpan={verification ? 3 : 4} className="p-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span>{group.name} <span className="font-normal">({group.documents.length})</span></span>
-                        <ActionIconButton action="add"
+                        {!verification && <ActionIconButton action="add"
                           label={`Tambah Dokumen: ${group.name}`}
                           disabled={busy || categories.isError || !categories.options.some((category) => category.id === group.id)}
                           title={categories.options.some((category) => category.id === group.id) ? `Tambah dokumen ${group.name}` : "Kategori ini sudah tidak tersedia di Master Kategori"}
-                          onClick={() => openEditor(undefined, group.id)} />
+                          onClick={() => openEditor(undefined, group.id)} />}
                       </div>
                     </th>
                   </tr>
-                  {!group.documents.length && <tr><td colSpan={4} className="p-3 text-[#7d7152]">Belum ada dokumen</td></tr>}
+                  {!group.documents.length && <tr><td colSpan={verification ? 3 : 4} className="p-3 text-[#7d7152]">Belum ada dokumen</td></tr>}
                   {group.documents.map((document) => <tr key={document.id} className="border-b border-[#ece5d8]">
                     <td className="p-3 min-w-52"><p className="font-medium whitespace-pre-wrap break-words">{document.uraian}</p>
                       <a className="inline-block mt-1 text-amber-800 underline" href={fileUrl(document.file)} target="_blank" rel="noopener noreferrer">Lihat / Unduh Lampiran</a></td>
@@ -146,10 +146,10 @@ export default function DetailUsulanRekonsiliasiBospModal({ isOpen, onClose, rec
                         className={`rounded-lg border px-3 py-2 ${document[field] ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-white text-stone-500 border-stone-200"}`}>{document[field] ? "✓ Sudah" : "Belum"}</button>
                         : <span className={document[field] ? "text-emerald-700" : "text-stone-500"}>{document[field] ? "✓ Sudah" : "Belum"}</span>}
                     </td>)}
-                    <td className="p-3"><div className="flex gap-2">
+                    {!verification && <td className="p-3"><div className="flex gap-2">
                       <ActionIconButton action="edit" label={`Edit Dokumen: ${document.uraian}`} disabled={busy} onClick={() => openEditor(document)} />
                       <ActionIconButton action="delete" label={`Hapus Dokumen: ${document.uraian}`} disabled={busy} onClick={() => void remove(document)} />
-                    </div></td>
+                    </div></td>}
                   </tr>)}
                 </React.Fragment>)}</tbody>
               </table>

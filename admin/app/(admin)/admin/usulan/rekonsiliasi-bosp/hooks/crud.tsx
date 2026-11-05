@@ -182,12 +182,14 @@ export const useKategoriSpjOption = (search: string = "") => {
 };
 
 
-export const useDokumenSpj = (usulanId: string | undefined, enabled: boolean) => {
+export const useDokumenSpj = (usulanId: string | undefined, enabled: boolean, verification = false) => {
   const url = useUrlStore((state) => state.URL.APP);
   return useQuery({
     queryKey: ["bosp-dokumen", usulanId],
     enabled: enabled && Boolean(usulanId),
-    queryFn: () => fetchData<DokumenSpj[]>(`${url}/api/v1/admin/usulan/rekonsiliasi-bosp/${usulanId}/dokumen`),
+    queryFn: () => fetchData<DokumenSpj[]>(verification
+      ? `${url}/api/v1/admin/verifikasi/rekonsiliasi-bosp/usulan/${usulanId}/dokumen`
+      : `${url}/api/v1/admin/usulan/rekonsiliasi-bosp/${usulanId}/dokumen`),
   });
 };
 
@@ -202,7 +204,7 @@ export const useDokumenMutation = (usulanId: string | undefined) => {
     ) => {
       const base = `${url}/api/v1/admin/usulan/rekonsiliasi-bosp/${usulanId}/dokumen`;
       if (action.type === "delete") return fetchData(`${base}/${action.id}`, { method: "DELETE" });
-      if (action.type === "verify") return fetchData(`${base}/${action.id}/verifikasi`, { method: "PATCH", body: action.body });
+      if (action.type === "verify") return fetchData(`${url}/api/v1/admin/verifikasi/rekonsiliasi-bosp/usulan/${usulanId}/dokumen/${action.id}/verifikasi`, { method: "PATCH", body: action.body });
       return fetchData(action.id ? `${base}/${action.id}` : base, { method: action.id ? "PUT" : "POST", body: action.body });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["bosp-dokumen", usulanId] }),
