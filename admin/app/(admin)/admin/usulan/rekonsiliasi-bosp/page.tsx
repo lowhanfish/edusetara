@@ -1,444 +1,102 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import {
-  Button,
-  Card,
-  Input,
-  PageHeader,
-  Pagination,
-} from "@/app/(admin)/_components/ui";
-
-import { ResponseInterface, UsulanRekonsiliasiBospRecord } from "./types";
+import ActionIconButton from "./components/ActionIconButton";
+import { Button, Card, Input, PageHeader, Pagination } from "@/app/(admin)/_components/ui";
+import { ResponseInterface } from "./types";
 import FormUsulanRekonsiliasiBospModal from "./components/FormUsulanRekonsiliasiBospModal";
 import DetailUsulanRekonsiliasiBospModal from "./components/DetailUsulanRekonsiliasiBospModal";
-import {
-  useResponseListMaster,
-  useDeleteMaster,
-  useCreateMaster,
-  useUpdateMaster,
-  useKategoriSpjOption,
-} from "./hooks/crud";
-import { listindex } from "@/utilities/pagination";
+import { useResponseListMaster, useDeleteMaster, useCreateMaster, useUpdateMaster } from "./hooks/crud";
+
+const emptyForm: Partial<ResponseInterface> = { sekolah: "", tahun: "", tahap: "" };
 
 export default function UsulanRekonsiliasiBospPage() {
-  const { options: kategorispjOptions } = useKategoriSpjOption();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(search);
-      setPage(1);
-    }, 400);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [search]);
-
-  const { List, isLoading, isError, error, refetch } = useResponseListMaster(
-    page,
-    pageSize,
-    debouncedSearch
-  );
-  const deleteMutation = useDeleteMaster();
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
+  const [formData, setFormData] = useState<Partial<ResponseInterface>>(emptyForm);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<ResponseInterface | null>(null);
+  const { List, isLoading, isError, error, refetch } = useResponseListMaster(page, pageSize, debouncedSearch);
   const createMutation = useCreateMaster();
   const updateMutation = useUpdateMaster();
+  const deleteMutation = useDeleteMaster();
 
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<UsulanRekonsiliasiBospRecord | null>(null);
-  const [formMode, setFormMode] = useState<"add" | "edit">("add");
+  useEffect(() => {
+    const timer = setTimeout(() => { setDebouncedSearch(search); setPage(1); }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  const initialForm: Partial<ResponseInterface> = {
-    sekolah: "",
-    tahun: "",
-    tahap: "",
-    nominal_dana: null,
-    kategori_spj: "",
-    dokumen_spj: [],
-    file_bku: "",
-    file_rekening: "",
-    file_sptjm: "",
-    status: "",
-  };
-
-  const [formData, setFormData] = useState<Partial<ResponseInterface>>(initialForm);
-
-  const emptyForm = () => {
-    setFormData(initialForm);
-  };
-
-  const rawList: UsulanRekonsiliasiBospRecord[] = useMemo(() => {
-    if (!List?.data || !Array.isArray(List.data)) return [];
-    return List.data;
-  }, [List]);
-
-  const totalItems = List?.total ?? rawList.length;
-
-  const handleOpenAdd = () => {
-    setFormMode("add");
-    emptyForm();
+  const openForm = (record?: ResponseInterface) => {
+    setFormMode(record ? "edit" : "add");
+    setFormData(record ? { id: record.id, sekolah: record.sekolah, tahun: record.tahun, tahap: record.tahap } : emptyForm);
     setIsFormOpen(true);
   };
 
-  const handleOpenEdit = (record: UsulanRekonsiliasiBospRecord) => {
-    setFormMode("edit");
-    setFormData({
-      id: record.id,
-      dokumen_spj: record.dokumen_spj ?? [],
-      sekolah: (record as any).sekolah ?? "",
-      tahun: (record as any).tahun ?? "",
-      tahap: (record as any).tahap ?? "",
-      nominal_dana: (record as any).nominal_dana ?? "",
-      kategori_spj: (record as any).kategori_spj ?? "",
-      file_bku: (record as any).file_bku ?? "",
-      file_rekening: (record as any).file_rekening ?? "",
-      file_sptjm: (record as any).file_sptjm ?? "",
-      status: (record as any).status ?? "",
-    });
-    setIsFormOpen(true);
-  };
-
-  const handleOpenDetail = (record: UsulanRekonsiliasiBospRecord) => {
-    setSelectedRecord(record);
-    setIsDetailOpen(true);
-  };
-
-  const handleDelete = (record: UsulanRekonsiliasiBospRecord) => {
-    const displayName =
-      (record as any).judul ||
-      (record as any).title ||
-      (record as any).nama ||
-      (record as any).sekolah ||
-      (record as any).nama_kombel ||
-      (record as any).kegiatan ||
-      (record as any).uraian ||
-      (record as any).isi ||
-      "data ini";
-
-    Swal.fire({
-      title: "Hapus Usulan Rekonsiliasi Dana BOSP?",
-      text: `Apakah Anda yakin ingin menghapus "${displayName}"?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#c2410c",
-      cancelButtonColor: "#64748b",
-      confirmButtonText: "Ya, Hapus Data",
-      cancelButtonText: "Batal",
-      reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deleteMutation.mutate(record.id);
-      }
-    });
-  };
-
-  const handleSubmitForm = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const hasFile = Object.values(formData).some(
-      (v) => typeof File !== "undefined" && v instanceof File
-    );
-
-    let payload: any;
-    if (hasFile) {
-      const fd = new FormData();
-      Object.entries(formData).forEach(([k, v]) => {
-        if (v !== undefined && v !== null && v !== "") {
-          fd.append(k, v instanceof File ? v : String(v));
-        }
-      });
-      payload = fd;
-    } else {
-      payload = { ...formData };
-    }
-
+  const submit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const body = { sekolah: formData.sekolah?.trim(), tahun: formData.tahun, tahap: formData.tahap };
+    if (!body.sekolah || !body.tahun || !body.tahap) return;
     if (formMode === "add") {
-      createMutation.mutate(payload, {
-        onSuccess: () => {
-          setIsFormOpen(false);
-          emptyForm();
-        },
-      });
-    } else {
-      if (!formData.id) return;
-      updateMutation.mutate(
-        { body: payload, id: formData.id },
-        {
-          onSuccess: () => {
-            setIsFormOpen(false);
-            emptyForm();
-          },
-        }
-      );
+      createMutation.mutate(body, { onSuccess: (record) => {
+        setIsFormOpen(false);
+        setSelectedRecord(record);
+      } });
+    } else if (formData.id) {
+      updateMutation.mutate({ id: formData.id, body }, { onSuccess: () => setIsFormOpen(false) });
     }
+  };
+
+  const remove = async (record: ResponseInterface) => {
+    const result = await Swal.fire({ title: "Hapus usulan rekonsiliasi?",
+      text: `${record.sekolah} — ${record.tahun}. Seluruh rincian dokumen dalam usulan ini juga akan dihapus.`,
+      icon: "warning", showCancelButton: true, confirmButtonText: "Hapus Usulan", cancelButtonText: "Batal" });
+    if (result.isConfirmed) deleteMutation.mutate(record.id);
   };
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Usulan Rekonsiliasi Dana BOSP"
-        description="Pengajuan pertanggungjawaban (SPJ) keuangan dan aset BOSP ke Dinas Pendidikan dan Kebudayaan."
-        action={
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refetch()}
-              disabled={isLoading}
-              className="hidden sm:inline-flex"
-            >
-              🔄 Refresh
-            </Button>
-            <Button variant="gold" size="sm" onClick={handleOpenAdd}>
-              + Tambah Usulan Rekonsiliasi Dana BOSP
-            </Button>
-          </div>
-        }
-      />
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-[#7d7152] font-medium">Total Data</p>
-              <h4 className="text-2xl font-bold text-[#2d2410] mt-1">{totalItems}</h4>
-              <p className="text-[11px] text-emerald-700 mt-0.5">Operasional Terdaftar</p>
-            </div>
-            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
-              🧾
-            </span>
-          </div>
-        </Card>
-
-        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-[#7d7152] font-medium">Kategori</p>
-              <h4 className="text-lg font-bold text-amber-700 mt-1 truncate max-w-[140px]">{"Usulan Sekolah"}</h4>
-              <p className="text-[11px] text-[#7d7152] mt-0.5">EduSetara</p>
-            </div>
-            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
-              📁
-            </span>
-          </div>
-        </Card>
-
-        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-[#7d7152] font-medium">Status API</p>
-              <h4 className="text-sm font-semibold text-emerald-700 mt-1 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Terhubung
-              </h4>
-              <p className="text-[10px] text-[#7d7152] mt-0.5 font-mono truncate max-w-[140px]">/api/v1/admin/usulan/rekonsiliasi-bosp</p>
-            </div>
-            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
-              ⚡
-            </span>
-          </div>
-        </Card>
-
-        <Card className="p-4 rounded-2xl bg-white/70 border-white/80">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-[#7d7152] font-medium">Otoritas Akses</p>
-              <h4 className="text-sm font-semibold text-[#2d2410] mt-1">Operator & Admin</h4>
-              <p className="text-[11px] text-[#7d7152] mt-0.5">Role ASN & Dinas</p>
-            </div>
-            <span className="text-3xl p-3 bg-amber-50 rounded-2xl border border-amber-200/50">
-              🔐
-            </span>
-          </div>
-        </Card>
-      </div>
-
-      <Card className="p-6 rounded-3xl bg-white/80 border-white/80 space-y-4 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-sm">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7d7152]">
-              🔍
-            </span>
-            <Input
-              type="text"
-              placeholder="Cari Usulan Rekonsiliasi Dana BOSP..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-[#7d7152]">Baris per hal:</span>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPage(1);
-              }}
-              className="text-xs bg-white border border-[#e2d9c8] rounded-xl px-2 py-1.5 text-[#2d2410] outline-none"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-            </select>
-          </div>
+      <PageHeader title="Usulan Rekonsiliasi Dana BOSP"
+        description="Kelola usulan per sekolah, tahun, dan semester. Buka Rincian Dokumen untuk melengkapi berkas SPJ."
+        action={<ActionIconButton action="add" label="Tambah Usulan" onClick={() => openForm()} />} />
+      <Card className="p-6 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Input className="max-w-sm" aria-label="Cari usulan" placeholder="Cari sekolah, tahun, atau status..." value={search} onChange={(event) => setSearch(event.target.value)} />
+          <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>Muat Ulang</Button>
         </div>
-
-        <div className="overflow-x-auto rounded-2xl border border-[#e2d9c8]/80">
+        <div className="overflow-x-auto rounded-2xl border border-[#e2d9c8]">
           <table className="w-full text-xs text-left">
-            <thead>
-              <tr className="border-b border-[#e2d9c8] bg-[#fbf9f4]/80 text-[#7d7152] font-semibold">
-                <th className="py-3 px-4 w-12 text-center">No</th>
-                <th className="py-3 px-4">Satuan Pendidikan</th>
-                <th className="py-3 px-4">Tahun</th>
-                <th className="py-3 px-4">Semester</th>
-                <th className="py-3 px-4">Kategori SPJ</th>
-                <th className="py-3 px-4">Nominal</th>
-                <th className="py-3 px-4">Status Usulan</th>
-                <th className="py-3 px-4 w-28 text-center">Aksi</th>
-              </tr>
-            </thead>
+            <thead className="bg-[#fbf9f4] text-[#7d7152]"><tr>
+              <th className="p-3">No</th><th className="p-3">Satuan Pendidikan</th><th className="p-3">Tahun</th>
+              <th className="p-3">Semester</th><th className="p-3">Pencatat</th><th className="p-3">Aksi</th>
+            </tr></thead>
             <tbody className="divide-y divide-[#ece5d8]">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-[#7d7152]">
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
-                      <span>Memuat data dari server...</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : isError ? (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-rose-700">
-                    <p className="font-semibold">Gagal memuat data Usulan Rekonsiliasi Dana BOSP</p>
-                    <p className="text-[11px] mt-1 text-[#7d7152]">
-                      {error?.message || "Terjadi kesalahan koneksi ke server."}
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-3"
-                      onClick={() => refetch()}
-                    >
-                      Coba Lagi
-                    </Button>
-                  </td>
-                </tr>
-              ) : rawList.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-[#7d7152]">
-                    <span className="text-3xl block mb-2">🧾</span>
-                    <p className="font-semibold text-sm text-[#2d2410]">
-                      Belum ada data Usulan Rekonsiliasi Dana BOSP
-                    </p>
-                    <p className="text-[11px] mt-0.5">
-                      Klik tombol "+ Tambah Usulan Rekonsiliasi Dana BOSP" untuk membuat data pertama.
-                    </p>
-                  </td>
-                </tr>
-              ) : (
-                rawList.map((item, index) => {
-                  const no = listindex(pageSize, page, index);
-                  return (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-amber-50/50 transition-colors duration-150"
-                    >
-                      <td className="py-3 px-4 text-center text-[#7d7152] font-mono">
-                        {no}
-                      </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).sekolah ?? "-")}
-                    </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).tahun ?? "-")}
-                    </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).tahap ?? "-")}
-                    </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {(() => {
-                        const val = (item as any).kategori_spj;
-                        if (!val) return "-";
-                        const match = kategorispjOptions.find((o) => o.id === String(val) || o.value === String(val));
-                        return match ? match.value : String(val);
-                      })()}
-                    </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).nominal_dana ?? "-")}
-                    </td>
-                    <td className="py-3 px-4 text-[#2d2410] font-medium max-w-xs truncate">
-                      {String((item as any).status ?? "-")}
-                    </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenDetail(item)}
-                            title="Detail"
-                            className="p-1.5 rounded-lg border border-[#e2d9c8] hover:bg-amber-100/60 text-[#7d7152] transition-colors"
-                          >
-                            👁️
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEdit(item)}
-                            title="Edit"
-                            className="p-1.5 rounded-lg border border-[#e2d9c8] hover:bg-amber-100/60 text-[#7d7152] transition-colors"
-                          >
-                            ✎
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(item)}
-                            title="Hapus"
-                            className="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-rose-600 transition-colors"
-                          >
-                            🗑
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
+              {isLoading ? <tr><td colSpan={6} className="p-10 text-center">Memuat usulan...</td></tr>
+                : isError ? <tr><td colSpan={6} className="p-10 text-center text-rose-600">{error?.message || "Gagal memuat usulan. Silakan muat ulang."}</td></tr>
+                : !List?.data.length ? <tr><td colSpan={6} className="p-10 text-center text-[#7d7152]">Belum ada usulan rekonsiliasi.</td></tr>
+                : List.data.map((record, index) => <tr key={record.id} className="hover:bg-amber-50/50">
+                  <td className="p-3">{(page - 1) * pageSize + index + 1}</td>
+                  <td className="p-3 font-semibold">{record.sekolah || record.unit_kerja || "—"}</td>
+                  <td className="p-3">{record.tahun || "—"}</td><td className="p-3">{record.tahap || "—"}</td>
+                  <td className="p-3">{record.created_by || "—"}</td>
+                  <td className="p-3"><div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="gold" onClick={() => setSelectedRecord(record)}>Rincian Dokumen</Button>
+                    <ActionIconButton action="edit" label={`Edit Usulan: ${record.sekolah}`} onClick={() => openForm(record)} />
+                    <ActionIconButton action="delete" label={`Hapus Usulan: ${record.sekolah}`} disabled={deleteMutation.isPending} onClick={() => void remove(record)} />
+                  </div></td>
+                </tr>)}
             </tbody>
           </table>
         </div>
-
-        <div className="pt-2">
-          <Pagination
-            page={page}
-            total={totalItems}
-            pageSize={pageSize}
-            onPageChange={(p) => setPage(p)}
-          />
-        </div>
+        <Pagination page={page} total={List?.total || 0} pageSize={pageSize} onPageChange={setPage}
+          onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} />
       </Card>
-
-      <FormUsulanRekonsiliasiBospModal
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        formMode={formMode}
-        formData={formData}
-        setFormData={setFormData}
-        onSubmit={handleSubmitForm}
-        isLoading={createMutation.isPending || updateMutation.isPending}
-      />
-
-      <DetailUsulanRekonsiliasiBospModal
-        isOpen={isDetailOpen}
-        onClose={() => setIsDetailOpen(false)}
-        record={selectedRecord}
-      />
+      <FormUsulanRekonsiliasiBospModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} formMode={formMode}
+        formData={formData} setFormData={setFormData} onSubmit={submit} isLoading={createMutation.isPending || updateMutation.isPending} />
+      {selectedRecord && <DetailUsulanRekonsiliasiBospModal key={selectedRecord.id} isOpen onClose={() => setSelectedRecord(null)} record={selectedRecord} />}
     </div>
   );
 }

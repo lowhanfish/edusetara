@@ -3,7 +3,7 @@
 import { fetchData } from "@/lib/api_secure";
 import { useUrlStore } from "@/store/useUrlStore";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ResponseListInterface, ResponseInterface } from "../types";
+import { DokumenSpj, DokumenInput, ResponseListInterface, ResponseInterface } from "../types";
 import { swallAlert, showLoadingAlert } from "@/lib/show_swall";
 import { ListOptionSchema } from "@/types/global";
 
@@ -91,7 +91,7 @@ export const useCreateMaster = () => {
   const createMutation = useMutation({
     mutationFn: (body: any) => {
       const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
-      return fetchData(`${url}/api/v1/admin/usulan/rekonsiliasi-bosp/create`, {
+      return fetchData<ResponseInterface>(`${url}/api/v1/admin/usulan/rekonsiliasi-bosp/create`, {
         method: "POST",
         body: isFormData ? body : JSON.stringify(body),
         headers: isFormData ? undefined : { "Content-Type": "application/json" },
@@ -179,4 +179,32 @@ export const useKategoriSpjOption = (search: string = "") => {
     isError,
     error,
   };
+};
+
+
+export const useDokumenSpj = (usulanId: string | undefined, enabled: boolean) => {
+  const url = useUrlStore((state) => state.URL.APP);
+  return useQuery({
+    queryKey: ["bosp-dokumen", usulanId],
+    enabled: enabled && Boolean(usulanId),
+    queryFn: () => fetchData<DokumenSpj[]>(`${url}/api/v1/admin/usulan/rekonsiliasi-bosp/${usulanId}/dokumen`),
+  });
+};
+
+export const useDokumenMutation = (usulanId: string | undefined) => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (action:
+      | { type: "save"; id?: string; body: DokumenInput }
+      | { type: "delete"; id: string }
+      | { type: "verify"; id: string; body: Partial<Pick<DokumenSpj, "cek_benar" | "cek_lengkap">> }
+    ) => {
+      const base = `${url}/api/v1/admin/usulan/rekonsiliasi-bosp/${usulanId}/dokumen`;
+      if (action.type === "delete") return fetchData(`${base}/${action.id}`, { method: "DELETE" });
+      if (action.type === "verify") return fetchData(`${base}/${action.id}/verifikasi`, { method: "PATCH", body: action.body });
+      return fetchData(action.id ? `${base}/${action.id}` : base, { method: action.id ? "PUT" : "POST", body: action.body });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["bosp-dokumen", usulanId] }),
+  });
 };

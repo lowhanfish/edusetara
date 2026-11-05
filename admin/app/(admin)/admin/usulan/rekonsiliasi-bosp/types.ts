@@ -1,11 +1,21 @@
 export interface DokumenSpj {
+  id: string;
+  usulan_id: string;
+  kategori_id: string | null;
+  kategori_nama: string;
+  uraian: string;
+  file: string;
+  cek_benar: boolean;
+  cek_lengkap: boolean;
+}
+
+export interface DokumenInput {
   kategori_id: string;
-  nama: string;
+  uraian: string;
   file: string;
 }
 
 export interface CreateInterface {
-  dokumen_spj?: DokumenSpj[] | null;
   sekolah: string | null;
   tahun: string | null;
   tahap: string | null;

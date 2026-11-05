@@ -1,6 +1,6 @@
 """Operational models for Usulan Sekolah."""
 
-from sqlalchemy import Column, JSON, Integer, Numeric, String, Text
+from sqlalchemy import Boolean, Column, ForeignKey, JSON, Integer, Numeric, String, Text
 from app.db.base import Base
 from app.models.operational.base import OperationalBaseMixin
 
@@ -67,3 +67,16 @@ class UsulanRekonsiliasiBosp(Base, OperationalBaseMixin):
     semester_id = Column(String(50), nullable=True, index=True)
     file = Column(String(255), nullable=True)
 
+
+
+class UsulanRekonsiliasiBospDokumen(Base, OperationalBaseMixin):
+    """One attachment and its verification within a BOSP proposal."""
+    __tablename__ = "usulan_rekonsiliasi_bosp_dokumen"
+
+    usulan_id = Column(String(50), ForeignKey("usulan_rekonsiliasi_bosp.id", ondelete="CASCADE"), nullable=False, index=True)
+    kategori_id = Column(String(50), ForeignKey("master_kategori.id", ondelete="SET NULL"), nullable=True, index=True)
+    kategori_nama = Column(String(255), nullable=False)
+    uraian = Column(Text, nullable=False)
+    file = Column(String(255), nullable=False)
+    cek_benar = Column(Boolean, nullable=False, default=False, server_default="0")
+    cek_lengkap = Column(Boolean, nullable=False, default=False, server_default="0")

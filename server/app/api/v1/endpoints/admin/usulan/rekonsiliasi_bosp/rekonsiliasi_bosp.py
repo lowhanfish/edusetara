@@ -1,19 +1,24 @@
 """Usulan Rekonsiliasi BOSP endpoints (matching master pattern)."""
 
 import uuid
-from typing import Any
+from pathlib import Path
 
-from fastapi import APIRouter, Depends, UploadFile, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, get_current_user_optional, get_db
-from app.services.upload_service import FileUploadService
+from app.api.deps import get_current_user, get_current_user_optional, get_db, require_roles
+from app.db.transaction import commit_or_raise_unique_conflict
 from app.models.auth.user import User
-from app.models.operational.usulan import UsulanRekonsiliasiBosp
+from app.models.master.pelengkap import MasterKategori
+from app.models.operational.usulan import UsulanRekonsiliasiBosp, UsulanRekonsiliasiBospDokumen
 from app.services.crud_service import CRUDBase
+from app.services.upload_service import BASE_UPLOAD_DIR, FileUploadService
 
 from .schema import (
+    DokumenCreate,
+    DokumenResponse,
+    DokumenVerification,
     RekonsiliasiBospCreate,
     RekonsiliasiBospResponse,
     RekonsiliasiBospResponseList,
@@ -100,7 +105,9 @@ async def get_rekonsiliasi_bosp(
 
 
 @router.post("", response_model=RekonsiliasiBospResponse, status_code=status.HTTP_201_CREATED)
-@router.post("/create", response_model=RekonsiliasiBospResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/create", response_model=RekonsiliasiBospResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_rekonsiliasi_bosp(
     payload: RekonsiliasiBospCreate,
     db: AsyncSession = Depends(get_db),
@@ -145,3 +152,133 @@ async def delete_rekonsiliasi_bosp(
     if not success:
         raise HTTPException(status_code=404, detail="Gagal menghapus data")
     return {"message": "Berhasil menghapus data", "id": id, "data": {"id": id}, "success": True}
+
+
+async def require_proposal(db: AsyncSession, usulan_id: str):
+    proposal = await db.get(UsulanRekonsiliasiBosp, usulan_id)
+    if proposal is None:
+        raise HTTPException(status_code=404, detail="Usulan tidak ditemukan")
+    return proposal
+
+
+async def require_document(db: AsyncSession, usulan_id: str, dokumen_id: str):
+    await require_proposal(db, usulan_id)
+    document = await db.scalar(
+        select(UsulanRekonsiliasiBospDokumen).where(
+            UsulanRekonsiliasiBospDokumen.id == dokumen_id,
+            UsulanRekonsiliasiBospDokumen.usulan_id == usulan_id,
+        )
+    )
+    if document is None:
+        raise HTTPException(status_code=404, detail="Dokumen tidak ditemukan pada usulan ini")
+    return document
+
+
+async def document_values(
+    db: AsyncSession, payload: DokumenCreate, existing_file: str | None = None
+):
+    category = await db.get(MasterKategori, payload.kategori_id)
+    if category is None:
+        raise HTTPException(
+            status_code=422, detail="Kategori dokumen tidak ditemukan di master kategori"
+        )
+    # New attachments must be files saved by this module's upload service.
+    if payload.file != existing_file:
+        prefix = "/uploads/rekonsiliasi-bosp/"
+        filename = payload.file.removeprefix(prefix)
+        if (
+            not payload.file.startswith(prefix)
+            or Path(filename).name != filename
+            or not (BASE_UPLOAD_DIR / "rekonsiliasi-bosp" / filename).is_file()
+        ):
+            raise HTTPException(status_code=422, detail="Lampiran belum diunggah atau tidak valid")
+    return {**payload.model_dump(), "kategori_nama": category.uraian}
+
+
+@router.get("/{id}/dokumen", response_model=list[DokumenResponse])
+async def read_documents(
+    id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    await require_proposal(db, id)
+    result = await db.scalars(
+        select(UsulanRekonsiliasiBospDokumen)
+        .where(
+            UsulanRekonsiliasiBospDokumen.usulan_id == id,
+        )
+        .order_by(UsulanRekonsiliasiBospDokumen.created_at, UsulanRekonsiliasiBospDokumen.id)
+    )
+    return list(result.all())
+
+
+@router.post("/{id}/dokumen", response_model=DokumenResponse, status_code=201)
+async def create_document(
+    id: str,
+    payload: DokumenCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    await require_proposal(db, id)
+    values = await document_values(db, payload)
+    document = UsulanRekonsiliasiBospDokumen(
+        usulan_id=id,
+        created_by=current_user.username,
+        **values,
+    )
+    db.add(document)
+    await commit_or_raise_unique_conflict(db)
+    await db.refresh(document)
+    return document
+
+
+@router.put("/{id}/dokumen/{dokumen_id}", response_model=DokumenResponse)
+async def update_document(
+    id: str,
+    dokumen_id: str,
+    payload: DokumenCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    document = await require_document(db, id, dokumen_id)
+    values = await document_values(db, payload, document.file)
+    changed = any(
+        getattr(document, field) != values[field] for field in ("kategori_id", "uraian", "file")
+    )
+    for field, value in values.items():
+        setattr(document, field, value)
+    if changed:
+        document.cek_benar = False
+        document.cek_lengkap = False
+    await commit_or_raise_unique_conflict(db)
+    await db.refresh(document)
+    return document
+
+
+@router.delete("/{id}/dokumen/{dokumen_id}")
+async def delete_document(
+    id: str,
+    dokumen_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    document = await require_document(db, id, dokumen_id)
+    await db.delete(document)
+    await commit_or_raise_unique_conflict(db)
+    return {"message": "Dokumen berhasil dihapus"}
+
+
+@router.patch("/{id}/dokumen/{dokumen_id}/verifikasi", response_model=DokumenResponse)
+async def verify_document(
+    id: str,
+    dokumen_id: str,
+    payload: DokumenVerification,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles("admin", "superadmin")),
+):
+    document = await require_document(db, id, dokumen_id)
+    for field, value in payload.model_dump(exclude_unset=True, exclude_none=True).items():
+        setattr(document, field, value)
+    await commit_or_raise_unique_conflict(db)
+    await db.refresh(document)
+    return document
