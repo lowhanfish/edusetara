@@ -1,5 +1,13 @@
 """Master data models package."""
 
+from app.models.master.aset import (
+    MasterAsetKapitalisasiMasaManfaat,
+    MasterAsetKodeBarang,
+    MasterAsetKondisiBarang,
+    MasterAsetMasaManfaat,
+    MasterAsetMetodePenyusutan,
+    MasterAsetStatusPemilik,
+)
 from app.models.master.auth_rbac import AuthGroup, AuthGroupPermission, AuthMenu
 from app.models.master.base_master import MasterBaseMixin
 from app.models.master.jenjang import MasterJenjang
@@ -67,6 +75,13 @@ __all__ = [
     "MasterSarprasSumberDana",
     "MasterSarprasKondisiAlat",
     "MasterSarprasJenisBantuan",
+    # Aset
+    "MasterAsetKodeBarang",
+    "MasterAsetMetodePenyusutan",
+    "MasterAsetMasaManfaat",
+    "MasterAsetKapitalisasiMasaManfaat",
+    "MasterAsetKondisiBarang",
+    "MasterAsetStatusPemilik",
     # Pelengkap
     "MasterBkJenisLayanan",
     "MasterBkKegiatanLayanan",

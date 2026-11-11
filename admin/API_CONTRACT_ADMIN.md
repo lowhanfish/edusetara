@@ -3103,6 +3103,10 @@ Setiap baris selalu memuat `id` (UUID), `created_by`, `created_at`, `updated_at`
 | `kondisi-barang` | `Ref_Kondisi` | `kode` *(kunci)*, `uraian`, `keterangan` | - |
 | `status-pemilik` | `Ref_Pemilik` | `kode` *(kunci, 0 = Pemerintah Pusat)*, `nama`, `keterangan` | - |
 
+**Implementasi backend:** `server/app/api/v1/endpoints/admin/master/master_aset/` (satu pabrik router untuk semua slug), model di `server/app/models/master/aset.py`, migrasi `b7c4d1e92f05`. Semua endpoint **wajib login** (cookie/Bearer). Kode kesalahan: `404` data tidak ada, `409` kode sudah ada atau masih dipakai (hapus), `422` format salah atau kode barang/metode rujukan belum ada, `400` mengubah kode yang terkunci.
+
+**Impor data awal:** `server/scripts/import_simda_master_aset.py` membaca SIMDA BMD (SQL Server, hanya baca) dan mengisi keenam master; aman dijalankan berulang. Hasil impor pada database pelatihan: 13.734 kode barang, 3.479 masa manfaat, 338 aturan kapitalisasi, 2 metode, 6 kondisi, 6 pemilik.
+
 **Catatan:**
 - `uraian_barang` pada `masa-manfaat` dan `kapitalisasi-masa-manfaat` diisi backend dari `kode-barang`.
 - Arti kode `jenis_kapitalisasi` (`Jn_Kap`) di SIMDA belum dipastikan.

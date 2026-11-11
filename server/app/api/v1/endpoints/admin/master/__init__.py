@@ -6,6 +6,7 @@ from app.api.v1.endpoints.admin.master.auth import auth_router
 from app.api.v1.endpoints.admin.master.jenjang import router as jenjang_router
 from app.api.v1.endpoints.admin.master.jurnal import jurnal_router
 from app.api.v1.endpoints.admin.master.lookup import router as lookup_router
+from app.api.v1.endpoints.admin.master.master_aset import master_aset_router
 from app.api.v1.endpoints.admin.master.pelengkap import pelengkap_router
 from app.api.v1.endpoints.admin.master.ppdb import ppdb_router
 from app.api.v1.endpoints.admin.master.sarpras import sarpras_router
@@ -50,6 +51,9 @@ master_router.include_router(sekolah_router, prefix="/sekolah")
 
 # 11. Master Wilayah (/wilayah)
 master_router.include_router(wilayah_router, prefix="/wilayah")
+
+# 12. Master Aset (/master_aset/*)
+master_router.include_router(master_aset_router)
 
 # Alias for backward compatibility
 router = master_router
