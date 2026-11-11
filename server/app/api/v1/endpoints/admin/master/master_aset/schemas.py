@@ -1,7 +1,7 @@
 """Pydantic schemas for Master Aset resources."""
 
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
@@ -169,3 +169,123 @@ class StatusPemilikResponse(AuditResponse):
     kode: int
     nama: str
     keterangan: str | None = None
+
+
+# --- alasan-penghapusan --------------------------------------------------------------------
+
+
+class AlasanPenghapusanCreate(BaseModel):
+    kode: int = Field(ge=1, le=255)
+    uraian: Teks
+    keterangan: str | None = None
+
+
+class AlasanPenghapusanUpdate(BaseModel):
+    kode: int | None = Field(None, ge=1, le=255)
+    uraian: Teks | None = None
+    keterangan: str | None = None
+
+
+class AlasanPenghapusanResponse(AuditResponse):
+    kode: int
+    uraian: str
+    keterangan: str | None = None
+
+
+# --- nilai-minimum-kapitalisasi ------------------------------------------------------------
+
+Rupiah = Annotated[int, Field(ge=0, le=999_999_999_999)]
+
+
+class NilaiMinimumKapitalisasiCreate(BaseModel):
+    tahun_berlaku: int = Field(ge=2000, le=2100)
+    kode_barang: Kode3to6
+    nilai_minimum_satuan: Rupiah
+    nilai_minimum_total: Rupiah = 0
+    dasar_hukum: str | None = Field(None, max_length=255)
+
+
+class NilaiMinimumKapitalisasiUpdate(BaseModel):
+    tahun_berlaku: int | None = Field(None, ge=2000, le=2100)
+    kode_barang: Kode3to6 | None = None
+    nilai_minimum_satuan: Rupiah | None = None
+    nilai_minimum_total: Rupiah | None = None
+    dasar_hukum: str | None = Field(None, max_length=255)
+
+
+class NilaiMinimumKapitalisasiResponse(AuditResponse):
+    tahun_berlaku: int
+    kode_barang: str
+    nilai_minimum_satuan: int
+    nilai_minimum_total: int
+    dasar_hukum: str | None = None
+    uraian_barang: str | None = None
+
+
+# --- unit-sekolah --------------------------------------------------------------------------
+
+JenisUnit = Literal["DINAS", "UPT", "SD", "SMP", "SATAP", "TK", "SMA", "SMK", "SKB", "LAINNYA"]
+StatusPencocokan = Literal["belum", "otomatis", "manual", "bukan_sekolah"]
+IdSekolah = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]
+
+
+class UnitSekolahCreate(BaseModel):
+    kd_bidang: int = Field(ge=1, le=99)
+    kd_unit: int = Field(ge=1, le=999)
+    kd_sub: int | None = Field(None, ge=1, le=999)
+    kd_upb: int | None = Field(None, ge=1, le=9999)
+    jenis: JenisUnit
+    nama: Teks
+    nama_lama: Teks | None = None
+    tahun_perubahan: int | None = Field(None, ge=1990, le=2100)
+    sekolah_id: IdSekolah | None = None
+    sekolah_kedua_id: IdSekolah | None = None
+    status_pencocokan: StatusPencocokan = "belum"
+    keterangan: str | None = None
+
+    @model_validator(mode="after")
+    def check_levels(self) -> "UnitSekolahCreate":
+        if self.kd_upb is not None and self.kd_sub is None:
+            raise ValueError("Kode UPB memerlukan kode sub unit.")
+        return self
+
+
+class UnitSekolahUpdate(BaseModel):
+    kd_bidang: int | None = Field(None, ge=1, le=99)
+    kd_unit: int | None = Field(None, ge=1, le=999)
+    kd_sub: int | None = Field(None, ge=1, le=999)
+    kd_upb: int | None = Field(None, ge=1, le=9999)
+    jenis: JenisUnit | None = None
+    nama: Teks | None = None
+    nama_lama: Teks | None = None
+    tahun_perubahan: int | None = Field(None, ge=1990, le=2100)
+    sekolah_id: IdSekolah | None = None
+    sekolah_kedua_id: IdSekolah | None = None
+    status_pencocokan: StatusPencocokan | None = None
+    keterangan: str | None = None
+
+
+class UnitSekolahResponse(AuditResponse):
+    kode: str
+    tingkat: str
+    kode_induk: str | None = None
+    kd_bidang: int
+    kd_unit: int
+    kd_sub: int | None = None
+    kd_upb: int | None = None
+    jenis: str
+    nama: str
+    nama_lama: str | None = None
+    nama_simda: str | None = None
+    tahun_perubahan: int | None = None
+    sekolah_id: str | None = None
+    sekolah_kedua_id: str | None = None
+    status_pencocokan: str
+    catatan_pencocokan: str | None = None
+    keterangan: str | None = None
+    # diisi backend
+    nama_induk: str | None = None
+    sekolah_label: str | None = None
+    sekolah_kedua_label: str | None = None
+    unit_kerja_id: str | None = None
+    unit_kerja_nama: str | None = None

@@ -3,6 +3,7 @@
 import uuid
 
 from sqlalchemy import (
+    BigInteger,
     Column,
     DateTime,
     Index,
@@ -105,4 +106,62 @@ class MasterAsetStatusPemilik(Base, AsetMasterMixin):
 
     kode = Column(Integer, nullable=False, unique=True)
     nama = Column(String(255), nullable=False)
+    keterangan = Column(Text, nullable=True)
+
+
+class MasterAsetAlasanPenghapusan(Base, AsetMasterMixin):
+    """Alasan penghapusan barang (SIMDA: Ref_Alasan)."""
+
+    __tablename__ = "master_aset_alasan_penghapusan"
+
+    kode = Column(Integer, nullable=False, unique=True)
+    uraian = Column(String(255), nullable=False)
+    keterangan = Column(Text, nullable=True)
+
+
+class MasterAsetNilaiMinimumKapitalisasi(Base, AsetMasterMixin):
+    """Nilai minimum kapitalisasi per tahun dan kelompok barang (SIMDA: Ta_KA)."""
+
+    __tablename__ = "master_aset_nilai_minimum_kapitalisasi"
+    __table_args__ = (
+        UniqueConstraint("tahun_berlaku", "kode_barang", name="uq_master_aset_nilai_min_kap"),
+        Index("ix_master_aset_nilai_min_kap_kode", "kode_barang"),
+    )
+
+    tahun_berlaku = Column(Integer, nullable=False, index=True)
+    kode_barang = Column(String(30), nullable=False)  # 3-6 segmen; SIMDA memakai 5 segmen
+    nilai_minimum_satuan = Column(BigInteger, nullable=False)  # rupiah (SIMDA MinSatuan)
+    nilai_minimum_total = Column(BigInteger, nullable=False, default=0)  # SIMDA MinTotal
+    dasar_hukum = Column(String(255), nullable=True)
+
+
+class MasterAsetUnit(Base, AsetMasterMixin):
+    """Unit, sub unit dan UPB (sekolah) menurut SIMDA: Ref_Unit, Ref_Sub_Unit, Ref_UPB.
+
+    Satu baris per tingkat. `nama` adalah nama sekarang, `nama_lama` nama sebelum perubahan
+    nomenklatur. UPB sekolah dihubungkan ke master_sekolah lewat `sekolah_id`; unit kerja SIMPEG
+    mengikuti master_sekolah.simpeg_unit_kerja_id, tidak disalin ke sini.
+    """
+
+    __tablename__ = "master_aset_unit"
+    __table_args__ = (
+        Index("ix_master_aset_unit_kunci", "kd_bidang", "kd_unit", "kd_sub", "kd_upb"),
+    )
+
+    kode = Column(String(20), nullable=False, unique=True)  # mis. 08.01.002.003
+    tingkat = Column(String(10), nullable=False, index=True)  # unit / sub_unit / upb
+    kode_induk = Column(String(20), nullable=True, index=True)
+    kd_bidang = Column(Integer, nullable=False)
+    kd_unit = Column(Integer, nullable=False)
+    kd_sub = Column(Integer, nullable=True)
+    kd_upb = Column(Integer, nullable=True)
+    jenis = Column(String(10), nullable=False, index=True)  # DINAS, UPT, SD, SMP, SATAP, ...
+    nama = Column(String(255), nullable=False)
+    nama_lama = Column(String(255), nullable=True)
+    nama_simda = Column(String(255), nullable=True)  # teks asli SIMDA, hanya diisi impor
+    tahun_perubahan = Column(Integer, nullable=True)  # tahun `nama` mulai berlaku
+    sekolah_id = Column(String(50), nullable=True, index=True)  # master_sekolah.id
+    sekolah_kedua_id = Column(String(50), nullable=True, index=True)  # satu atap: SD + SMP
+    status_pencocokan = Column(String(20), nullable=False, default="belum", index=True)
+    catatan_pencocokan = Column(String(255), nullable=True)
     keterangan = Column(Text, nullable=True)

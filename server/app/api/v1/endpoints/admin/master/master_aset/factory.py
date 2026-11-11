@@ -40,7 +40,7 @@ class AsetMasterSpec:
     #: Returns a SQLAlchemy clause for the free-text `search` parameter.
     search: Callable[[str], Any]
     order_by: tuple[Any, ...]
-    #: Query parameter name -> model column, compared as integers.
+    #: Query parameter name -> model column (integer columns are compared as integers).
     filters: dict[str, Any] = field(default_factory=dict)
     #: Fields that cannot change once created (business keys).
     lock_fields: tuple[str, ...] = ()
@@ -113,13 +113,17 @@ def build_router(spec: AsetMasterSpec) -> APIRouter:
             query = query.where(spec.search(search))
         for param, column in spec.filters.items():
             raw = request.query_params.get(param)
-            if raw:
-                try:
-                    query = query.where(column == int(raw))
-                except ValueError:
-                    raise HTTPException(
-                        status_code=422, detail=f"Filter {param} harus berupa angka"
-                    ) from None
+            if not raw:
+                continue
+            if column.type.python_type is not int:
+                query = query.where(column == raw)
+                continue
+            try:
+                query = query.where(column == int(raw))
+            except ValueError:
+                raise HTTPException(
+                    status_code=422, detail=f"Filter {param} harus berupa angka"
+                ) from None
 
         total = (await db.execute(select(func.count()).select_from(query.subquery()))).scalar_one()
         query = query.order_by(*spec.order_by).offset(max(skip, 0)).limit(min(max(limit, 1), 500))

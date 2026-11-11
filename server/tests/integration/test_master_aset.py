@@ -200,3 +200,176 @@ async def test_simple_masters_option_uses_code_as_id(authed, slug):
     await authed.post(f"{BASE}/{slug}/create", json={"kode": kode, field: "Contoh"})
     options = (await authed.get(f"{BASE}/{slug}/option")).json()
     assert options == [{"id": str(kode), "value": "Contoh"}]
+
+
+# --- tahap 2: alasan penghapusan, nilai minimum kapitalisasi, unit & sekolah ----------------
+
+
+async def test_alasan_penghapusan_crud_and_lock(authed):
+    res = await authed.post(
+        f"{BASE}/alasan-penghapusan/create", json={"kode": 103, "uraian": "Hilang"}
+    )
+    assert res.status_code == 201, res.text
+    row = res.json()
+    options = (await authed.get(f"{BASE}/alasan-penghapusan/option")).json()
+    assert options == [{"id": "103", "value": "Hilang"}]
+
+    url = f"{BASE}/alasan-penghapusan/update/{row['id']}"
+    assert (await authed.put(url, json={"kode": 104})).status_code == 400
+    assert (await authed.put(url, json={"uraian": "Hilang/kerugian"})).json()["uraian"] == (
+        "Hilang/kerugian"
+    )
+    too_big = await authed.post(
+        f"{BASE}/alasan-penghapusan/create", json={"kode": 999, "uraian": "x"}
+    )
+    assert too_big.status_code == 422
+
+
+async def test_nilai_minimum_kapitalisasi_reference_filter_and_guard(authed):
+    body = {
+        "tahun_berlaku": 2025,
+        "kode_barang": "01.03.02.05.01",
+        "nilai_minimum_satuan": "1000000",  # the admin form may send numbers as strings
+        "nilai_minimum_total": 0,
+    }
+    url = f"{BASE}/nilai-minimum-kapitalisasi"
+    assert (await authed.post(f"{url}/create", json=body)).status_code == 422  # kode unknown
+
+    kode = await _kode(authed, "01.03.02.05.01", "Alat Kantor")
+    res = await authed.post(f"{url}/create", json=body)
+    assert res.status_code == 201, res.text
+    row = res.json()
+    assert row["nilai_minimum_satuan"] == 1_000_000
+    assert row["uraian_barang"] == "Alat Kantor"
+
+    assert (await authed.post(f"{url}/create", json=body)).status_code in DUPLICATE
+    negative = await authed.post(f"{url}/create", json={**body, "nilai_minimum_satuan": -1})
+    assert negative.status_code == 422
+
+    assert (await authed.get(f"{url}/read?tahun_berlaku=2024")).json()["total"] == 0
+    assert (await authed.get(f"{url}/read?search=kantor")).json()["total"] == 1
+
+    # kode barang cannot be removed while a threshold still refers to it
+    assert (await authed.delete(f"{BASE}/kode-barang/delete/{kode['id']}")).status_code == 409
+    assert (await authed.delete(f"{url}/delete/{row['id']}")).status_code == 200
+    assert (await authed.delete(f"{BASE}/kode-barang/delete/{kode['id']}")).status_code == 200
+
+
+UNIT = f"{BASE}/unit-sekolah"
+
+
+async def _unit(client, **body):
+    payload = {"kd_bidang": 8, "kd_unit": 1, "jenis": "DINAS", "status_pencocokan": "bukan_sekolah"}
+    res = await client.post(f"{UNIT}/create", json={**payload, **body})
+    assert res.status_code == 201, res.text
+    return res.json()
+
+
+async def _sekolah(db_session, sid: str, nama: str, simpeg: str | None = None):
+    from app.models.master.sekolah import MasterSekolah
+
+    db_session.add(
+        MasterSekolah(
+            id=sid,
+            npsn=sid[-8:],
+            nama_sekolah=nama,
+            bentuk_pendidikan="SD",
+            status_sekolah="NEGERI",
+            simpeg_unit_kerja_id=simpeg,
+            simpeg_unit_kerja_nama=f"UK {nama}" if simpeg else None,
+        )
+    )
+    await db_session.commit()
+
+
+async def test_unit_hierarchy_codes_parents_and_delete_guard(authed):
+    orphan = await authed.post(
+        f"{UNIT}/create",
+        json={"kd_bidang": 8, "kd_unit": 1, "kd_sub": 2, "jenis": "UPT", "nama": "UPT",
+              "status_pencocokan": "bukan_sekolah"},
+    )
+    assert orphan.status_code == 422  # parent unit missing
+
+    unit = await _unit(authed, nama="DINAS PENDIDIKAN DAN KEBUDAYAAN",
+                       nama_lama="DINAS PENDIDIKAN PEMUDA DAN OLAHRAGA")
+    assert (unit["kode"], unit["tingkat"], unit["kode_induk"]) == ("08.01", "unit", None)
+
+    sub = await _unit(authed, kd_sub=2, jenis="UPT", nama="UPT KECAMATAN TINANGGEA")
+    assert (sub["kode"], sub["tingkat"], sub["kode_induk"]) == ("08.01.002", "sub_unit", "08.01")
+    assert sub["nama_induk"] == "DINAS PENDIDIKAN DAN KEBUDAYAAN"
+
+    upb = await _unit(authed, kd_sub=2, kd_upb=3, jenis="SD", nama="SDN 2 TINANGGEA",
+                      nama_lama="SDN NGAPAAHA", status_pencocokan="belum")
+    assert (upb["kode"], upb["tingkat"]) == ("08.01.002.003", "upb")
+
+    no_sub = await authed.post(
+        f"{UNIT}/create",
+        json={"kd_bidang": 8, "kd_unit": 1, "kd_upb": 3, "jenis": "SD", "nama": "x"},
+    )
+    assert no_sub.status_code == 422
+    dup = await authed.post(
+        f"{UNIT}/create",
+        json={"kd_bidang": 8, "kd_unit": 1, "kd_sub": 2, "jenis": "UPT", "nama": "lagi",
+              "status_pencocokan": "bukan_sekolah"},
+    )
+    assert dup.status_code in DUPLICATE
+
+    listing = (await authed.get(f"{UNIT}/read")).json()
+    assert [r["kode"] for r in listing["data"]] == ["08.01", "08.01.002", "08.01.002.003"]
+    assert (await authed.get(f"{UNIT}/read?tingkat=upb")).json()["total"] == 1
+    assert (await authed.get(f"{UNIT}/read?jenis=UPT")).json()["total"] == 1
+    assert (await authed.get(f"{UNIT}/read?search=ngapaaha")).json()["total"] == 1  # nama lama
+
+    locked = await authed.put(f"{UNIT}/update/{upb['id']}", json={"kd_upb": 4})
+    assert locked.status_code == 400
+
+    assert (await authed.delete(f"{UNIT}/delete/{unit['id']}")).status_code == 409
+    assert (await authed.delete(f"{UNIT}/delete/{sub['id']}")).status_code == 409
+    assert (await authed.delete(f"{UNIT}/delete/{upb['id']}")).status_code == 200
+    assert (await authed.delete(f"{UNIT}/delete/{sub['id']}")).status_code == 200
+
+
+async def test_unit_school_matching_rules(authed, db_session):
+    await _sekolah(db_session, "sch_10000001", "SD NEGERI 1 TINANGGEA", simpeg="uk-1")
+    await _sekolah(db_session, "sch_10000002", "SMP NEGERI SATAP 1")
+    await _unit(authed, nama="DINAS")
+    sub = await _unit(authed, kd_sub=2, jenis="UPT", nama="UPT")
+    upb = await _unit(authed, kd_sub=2, kd_upb=2, jenis="SD", nama="SDN 1 TINANGGEA",
+                      status_pencocokan="belum")
+    url = f"{UNIT}/update/{upb['id']}"
+
+    async def put(target: str, **body):
+        return await authed.put(target, json=body)
+
+    # status and link must agree
+    assert (await put(url, status_pencocokan="manual")).status_code == 422
+    assert (await put(url, sekolah_id="sch_10000001")).status_code == 422
+    assert (await put(url, sekolah_id="tidak-ada", status_pencocokan="manual")).status_code == 422
+    assert (
+        await put(url, sekolah_kedua_id="sch_10000002", status_pencocokan="belum")
+    ).status_code == 422
+    # only UPB rows can be linked
+    sub_url = f"{UNIT}/update/{sub['id']}"
+    assert (
+        await put(sub_url, sekolah_id="sch_10000001", status_pencocokan="manual")
+    ).status_code == 422
+
+    ok = await put(url, sekolah_id="sch_10000001", sekolah_kedua_id="sch_10000002",
+                   status_pencocokan="manual")
+    assert ok.status_code == 200, ok.text
+    body = ok.json()
+    assert body["sekolah_label"] == "SD NEGERI 1 TINANGGEA (NPSN 10000001)"
+    assert body["sekolah_kedua_label"] == "SMP NEGERI SATAP 1 (NPSN 10000002)"
+    assert (body["unit_kerja_id"], body["unit_kerja_nama"]) == ("uk-1", "UK SD NEGERI 1 TINANGGEA")
+    assert (await authed.get(f"{UNIT}/read?status_pencocokan=manual")).json()["total"] == 1
+
+    # one school cannot be matched to two UPB
+    other = await _unit(authed, kd_sub=2, kd_upb=3, jenis="SD", nama="SDN 2",
+                        status_pencocokan="belum")
+    clash = await put(f"{UNIT}/update/{other['id']}", sekolah_id="sch_10000002",
+                      status_pencocokan="manual")
+    assert clash.status_code == 409
+
+    # unlinking: both ids cleared together with the status
+    cleared = await put(url, sekolah_id=None, sekolah_kedua_id=None, status_pencocokan="belum")
+    assert cleared.status_code == 200 and cleared.json()["sekolah_label"] is None
