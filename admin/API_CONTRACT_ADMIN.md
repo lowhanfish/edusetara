@@ -3075,3 +3075,35 @@ Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggara
   }
 ]
 ```
+
+---
+
+## 4. Master Aset (`/admin/master/master_aset/*`)
+
+Data rujukan aset untuk Dinas Pendidikan (sebelum dan sesudah perubahan nomenklatur) beserta sekolahnya. Struktur mengikuti SIMDA BMD (SQL Server) dan aplikasi manual penyusutan; implementasi frontend ada di `app/(admin)/admin/master/master_aset/`.
+
+**Endpoint seragam** untuk setiap slug, dengan prefix `/api/v1/admin/master/master_aset/<slug>`:
+
+| Aksi | Method & path | Keterangan |
+|---|---|---|
+| Daftar | `GET /read?skip=&limit=&search=&<filter>=` | Respons `{ skip, limit, total, data[] }` |
+| Pilihan | `GET /option?search=` | Respons `[{ "id": "<kode bisnis>", "value": "<label>" }]`; `id` berisi kode master, bukan UUID |
+| Tambah | `POST /create` | Body sesuai field slug |
+| Ubah | `PUT /update/{id}` | Field bertanda *kunci* tidak boleh diubah |
+| Hapus | `DELETE /delete/{id}` | Ditolak bila kode masih dipakai master/aset lain |
+
+Setiap baris selalu memuat `id` (UUID), `created_by`, `created_at`, `updated_at` yang dibuat backend.
+
+| Slug | Sumber SIMDA | Field (kunci = tidak dapat diubah) | Filter `read` |
+|---|---|---|---|
+| `kode-barang` | `Ref_Rek5_108` | `kode` *(kunci, mis. 01.03.02.05.01.05.12)*, `uraian`, `keterangan` | `level` 1–7 (jumlah segmen kode) |
+| `masa-manfaat` | `Ref_Penyusutan` | `tahun_berlaku`, `kode_barang` *(kunci, 6 segmen)*, `metode_id` (kode metode), `umur_tahun`, `dasar_hukum`; respons tambahan: `uraian_barang`, `metode_nama` | `tahun_berlaku` |
+| `metode-penyusutan` | `Ref_Metode` | `kode` *(kunci)*, `nama`, `keterangan` | - |
+| `kapitalisasi-masa-manfaat` | `Ref_Kap_Umur` | `kode_barang` (3–6 segmen), `batas_bawah_persen`, `batas_atas_persen`, `tambahan_umur_tahun`, `jenis_kapitalisasi` (1/2); respons tambahan: `uraian_barang` | - |
+| `kondisi-barang` | `Ref_Kondisi` | `kode` *(kunci)*, `uraian`, `keterangan` | - |
+| `status-pemilik` | `Ref_Pemilik` | `kode` *(kunci, 0 = Pemerintah Pusat)*, `nama`, `keterangan` | - |
+
+**Catatan:**
+- `uraian_barang` pada `masa-manfaat` dan `kapitalisasi-masa-manfaat` diisi backend dari `kode-barang`.
+- Arti kode `jenis_kapitalisasi` (`Jn_Kap`) di SIMDA belum dipastikan.
+- Nilai minimum kapitalisasi per kelompok barang (ambang Rp300 ribu / Rp500 ribu / Rp1 juta di Excel) belum ada master-nya; sumbernya di sheet `kebijakan akuntansi` dan Perbup Konawe Selatan, bukan di tabel SIMDA yang dipetakan di atas.

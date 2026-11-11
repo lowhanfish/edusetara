@@ -531,6 +531,49 @@
         ]
       },
       {
+        "title": "Master Aset",
+        "path": null,
+        "icon": "🏷️",
+        "children": [
+          {
+            "title": "Kode Barang",
+            "path": "/admin/master/master_aset/kode-barang",
+            "icon": "🏷️",
+            "children": null
+          },
+          {
+            "title": "Masa Manfaat",
+            "path": "/admin/master/master_aset/masa-manfaat",
+            "icon": "⏳",
+            "children": null
+          },
+          {
+            "title": "Metode Penyusutan",
+            "path": "/admin/master/master_aset/metode-penyusutan",
+            "icon": "📉",
+            "children": null
+          },
+          {
+            "title": "Kapitalisasi Masa Manfaat",
+            "path": "/admin/master/master_aset/kapitalisasi-masa-manfaat",
+            "icon": "🔧",
+            "children": null
+          },
+          {
+            "title": "Kondisi Barang",
+            "path": "/admin/master/master_aset/kondisi-barang",
+            "icon": "🩺",
+            "children": null
+          },
+          {
+            "title": "Status Pemilik",
+            "path": "/admin/master/master_aset/status-pemilik",
+            "icon": "🏛️",
+            "children": null
+          }
+        ]
+      },
+      {
         "title": "Master BK Jenis Layanan",
         "path": "/admin/master/bk-jenis-layanan",
         "icon": "🧑‍⚕️",

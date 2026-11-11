@@ -1,0 +1,85 @@
+import type { MasterAsetConfig } from "../_shared/types";
+
+export const config: MasterAsetConfig = {
+  slug: "kapitalisasi-masa-manfaat",
+  title: "Master Kapitalisasi Masa Manfaat",
+  singular: "Aturan Kapitalisasi",
+  description:
+    "Tambahan masa manfaat bila aset direnovasi, direstorasi, atau di-overhaul, menurut persentase biaya terhadap harga perolehan.",
+  icon: "🔧",
+  simdaSource: "Ref_Kap_Umur",
+  searchPlaceholder: "Cari kode atau uraian barang...",
+  titleKey: "kode_barang",
+  columns: [
+    {
+      key: "kode_barang",
+      label: "Kode Barang",
+      className: "w-44",
+      render: (r) => <span className="font-mono font-semibold text-amber-800">{String(r.kode_barang ?? "-")}</span>,
+    },
+    { key: "uraian_barang", label: "Uraian Barang" },
+    {
+      key: "rentang",
+      label: "Biaya terhadap Harga Perolehan",
+      className: "w-56",
+      render: (r) => `${r.batas_bawah_persen ?? "-"}% – ${r.batas_atas_persen ?? "-"}%`,
+    },
+    {
+      key: "tambahan_umur_tahun",
+      label: "Tambahan Masa Manfaat",
+      className: "w-44",
+      render: (r) => (r.tambahan_umur_tahun == null ? "-" : `+${r.tambahan_umur_tahun} tahun`),
+    },
+    { key: "jenis_kapitalisasi", label: "Jenis", className: "w-24" },
+  ],
+  fields: [
+    {
+      key: "kode_barang",
+      label: "Kode Barang",
+      type: "text",
+      required: true,
+      pattern: /^\d{2}(\.\d{2}){2,5}$/,
+      patternMessage: "Kode harus 3–6 segmen, contoh 01.03.02.05.",
+      placeholder: "01.03.02.05",
+      helper: "Boleh pada tingkat jenis, objek, atau rincian objek.",
+    },
+    {
+      key: "batas_bawah_persen",
+      label: "Batas Bawah (%)",
+      type: "number",
+      required: true,
+      min: 0,
+      max: 100,
+      placeholder: "0",
+    },
+    {
+      key: "batas_atas_persen",
+      label: "Batas Atas (%)",
+      type: "number",
+      required: true,
+      min: 0,
+      max: 100,
+      placeholder: "25",
+    },
+    {
+      key: "tambahan_umur_tahun",
+      label: "Tambahan Masa Manfaat (tahun)",
+      type: "number",
+      required: true,
+      min: 0,
+      max: 50,
+      placeholder: "1",
+    },
+    {
+      key: "jenis_kapitalisasi",
+      label: "Jenis Kapitalisasi",
+      type: "select",
+      required: true,
+      options: [
+        { value: "1", label: "Jenis 1" },
+        { value: "2", label: "Jenis 2" },
+      ],
+      helper: "Kode jenis mengikuti SIMDA (Jn_Kap); artinya belum dipastikan.",
+    },
+  ],
+};
