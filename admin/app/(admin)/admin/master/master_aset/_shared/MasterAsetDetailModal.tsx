@@ -62,8 +62,18 @@ export default function MasterAsetDetailModal({ config, isOpen, onClose, record 
                 </dd>
               </div>
             ))}
+            {(config.detailExtras ?? []).map((col) => (
+              <div key={col.key} className="p-3 rounded-xl bg-white/50 border border-white/70">
+                <dt className="text-[#9c8e6b] text-[10px] uppercase font-semibold">{col.label}</dt>
+                <dd className="mt-0.5 font-medium text-[#2d2410] break-words">
+                  {col.render ? col.render(record) : show(record[col.key])}
+                </dd>
+              </div>
+            ))}
             {config.fields
+              .filter((f) => f.type !== "lookup")
               .filter((f) => !config.columns.some((c) => c.key === f.key))
+              .filter((f) => !(config.detailExtras ?? []).some((c) => c.key === f.key))
               .map((f) => (
                 <div key={f.key} className="p-3 rounded-xl bg-white/50 border border-white/70 sm:col-span-2">
                   <dt className="text-[#9c8e6b] text-[10px] uppercase font-semibold">{f.label}</dt>

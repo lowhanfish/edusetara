@@ -570,6 +570,24 @@
             "path": "/admin/master/master_aset/status-pemilik",
             "icon": "🏛️",
             "children": null
+          },
+          {
+            "title": "Unit & Sekolah (UPB)",
+            "path": "/admin/master/master_aset/unit-sekolah",
+            "icon": "🏫",
+            "children": null
+          },
+          {
+            "title": "Alasan Penghapusan",
+            "path": "/admin/master/master_aset/alasan-penghapusan",
+            "icon": "🗑️",
+            "children": null
+          },
+          {
+            "title": "Nilai Minimum Kapitalisasi",
+            "path": "/admin/master/master_aset/nilai-minimum-kapitalisasi",
+            "icon": "💰",
+            "children": null
           }
         ]
       },

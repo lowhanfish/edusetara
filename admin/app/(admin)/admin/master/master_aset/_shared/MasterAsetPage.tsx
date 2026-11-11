@@ -10,7 +10,7 @@ import {
   useMasterAsetList,
   useUpdateMasterAset,
 } from "./hooks";
-import MasterAsetFormModal, { type FormValues } from "./MasterAsetFormModal";
+import MasterAsetFormModal, { lookupLabelKey, type FormValues } from "./MasterAsetFormModal";
 import MasterAsetDetailModal from "./MasterAsetDetailModal";
 import type { MasterAsetConfig, MasterAsetRecord } from "./types";
 
@@ -71,9 +71,13 @@ export default function MasterAsetPage({ config }: { config: MasterAsetConfig })
   const openEdit = (record: MasterAsetRecord) => {
     setMode("edit");
     setEditId(record.id);
-    setValues(
-      Object.fromEntries(config.fields.map((f) => [f.key, record[f.key] == null ? "" : String(record[f.key])]))
+    const next: FormValues = Object.fromEntries(
+      config.fields.map((f) => [f.key, record[f.key] == null ? "" : String(record[f.key])])
     );
+    for (const f of config.fields) {
+      if (f.lookup) next[lookupLabelKey(f.key)] = show(record[f.lookup.labelKey]);
+    }
+    setValues(next);
     setIsFormOpen(true);
   };
 

@@ -54,6 +54,19 @@ export const useMasterAsetOption = (slug: string, search: string = "") => {
   return { List: (data ?? []) as ListOptionSchema, isLoading, isError };
 };
 
+/** Pencarian ke endpoint lain (mis. Master Sekolah) untuk field "lookup". */
+export const useLookupSearch = (path: string, search: string, enabled: boolean) => {
+  const url = useUrlStore((state) => state.URL.APP);
+  const { data, isLoading, isError } = useQuery({
+    queryFn: () =>
+      fetchData<Record<string, unknown>[]>(`${url}${path}?search=${encodeURIComponent(search)}`),
+    queryKey: ["master-aset-lookup", path, search],
+    enabled,
+  });
+
+  return { items: Array.isArray(data) ? data : [], isLoading, isError };
+};
+
 export const useDeleteMasterAset = (slug: string) => {
   const url = useUrlStore((state) => state.URL.APP);
   const queryClient = useQueryClient();

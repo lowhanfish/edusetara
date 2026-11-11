@@ -3102,12 +3102,36 @@ Setiap baris selalu memuat `id` (UUID), `created_by`, `created_at`, `updated_at`
 | `kapitalisasi-masa-manfaat` | `Ref_Kap_Umur` | `kode_barang` (3–6 segmen), `batas_bawah_persen`, `batas_atas_persen`, `tambahan_umur_tahun`, `jenis_kapitalisasi` (1/2); respons tambahan: `uraian_barang` | - |
 | `kondisi-barang` | `Ref_Kondisi` | `kode` *(kunci)*, `uraian`, `keterangan` | - |
 | `status-pemilik` | `Ref_Pemilik` | `kode` *(kunci, 0 = Pemerintah Pusat)*, `nama`, `keterangan` | - |
+| `alasan-penghapusan` | `Ref_Alasan` | `kode` *(kunci, 1–255; SIMDA memakai 1–6 dan 101–105)*, `uraian`, `keterangan` | - |
+| `nilai-minimum-kapitalisasi` | `Ta_KA` | `tahun_berlaku`, `kode_barang` *(kunci, 3–6 segmen; SIMDA 5 segmen)*, `nilai_minimum_satuan` (rupiah, bilangan bulat ≥ 0), `nilai_minimum_total`, `dasar_hukum`; respons tambahan: `uraian_barang` | `tahun_berlaku` |
+| `unit-sekolah` | `Ref_Unit`, `Ref_Sub_Unit`, `Ref_UPB` | lihat 4.1 | `tingkat`, `jenis`, `status_pencocokan` |
 
-**Implementasi backend:** `server/app/api/v1/endpoints/admin/master/master_aset/` (satu pabrik router untuk semua slug), model di `server/app/models/master/aset.py`, migrasi `b7c4d1e92f05`. Semua endpoint **wajib login** (cookie/Bearer). Kode kesalahan: `404` data tidak ada, `409` kode sudah ada atau masih dipakai (hapus), `422` format salah atau kode barang/metode rujukan belum ada, `400` mengubah kode yang terkunci.
+**Implementasi backend:** `server/app/api/v1/endpoints/admin/master/master_aset/` (satu pabrik router untuk semua slug), model di `server/app/models/master/aset.py`, migrasi `b7c4d1e92f05` (tahap 1) dan `c8d5e2fa3016` (tahap 2). Semua endpoint **wajib login** (cookie/Bearer). Kode kesalahan: `404` data tidak ada, `409` kode sudah ada atau masih dipakai (hapus), `422` format salah atau kode barang/metode rujukan belum ada, `400` mengubah kode yang terkunci.
 
-**Impor data awal:** `server/scripts/import_simda_master_aset.py` membaca SIMDA BMD (SQL Server, hanya baca) dan mengisi keenam master; aman dijalankan berulang. Hasil impor pada database pelatihan: 13.734 kode barang, 3.479 masa manfaat, 338 aturan kapitalisasi, 2 metode, 6 kondisi, 6 pemilik.
+**Impor data awal:** `server/scripts/import_simda_master_aset.py` membaca SIMDA BMD (SQL Server, hanya baca) dan mengisi semua master; aman dijalankan berulang. Hasil impor pada database pelatihan: 13.734 kode barang, 3.479 masa manfaat, 338 aturan kapitalisasi, 2 metode, 6 kondisi, 6 pemilik, 11 alasan penghapusan, 365 nilai minimum kapitalisasi (73 kelompok × 2021–2025), 650 unit/sub unit/UPB.
 
 **Catatan:**
 - `uraian_barang` pada `masa-manfaat` dan `kapitalisasi-masa-manfaat` diisi backend dari `kode-barang`.
 - Arti kode `jenis_kapitalisasi` (`Jn_Kap`) di SIMDA belum dipastikan.
-- Nilai minimum kapitalisasi per kelompok barang (ambang Rp300 ribu / Rp500 ribu / Rp1 juta di Excel) belum ada master-nya; sumbernya di sheet `kebijakan akuntansi` dan Perbup Konawe Selatan, bukan di tabel SIMDA yang dipetakan di atas.
+- `nilai-minimum-kapitalisasi` bersumber dari `Ta_KA` SIMDA (kode Permendagri 108; peralatan Rp1 juta, alat kedokteran/kesehatan Rp1,5 juta, gedung Rp25 juta, jalan Rp40 juta, sisanya Rp0). Ambang di Excel penyusutan (sheet `kebijakan akuntansi`: Rp300 ribu / Rp500 ribu / Rp1 juta / Rp1,5 juta) memakai kode lama Permendagri 17 dan **berbeda**; bila Perbup yang berlaku mengikuti Excel, nilainya disunting manual. Kolom `ThnPenyusutan` dan `Kd_KA` di `Ta_KA` belum diketahui artinya dan tidak diimpor.
+
+### 4.1 `unit-sekolah` — Unit, Sub Unit, dan UPB Dinas Pendidikan
+
+Satu tabel (`master_aset_unit`) untuk tiga tingkat, hanya Dinas Pendidikan (SIMDA `Kd_Bidang` 8, `Kd_Unit` 1; nama lama "Dinas Pendidikan Pemuda dan Olahraga", nama sekarang "Dinas Pendidikan dan Kebudayaan"). Kunci SIMDA `(kd_bidang, kd_unit, kd_sub, kd_upb)` sama dengan kunci tabel aset (`Ta_KIB_A..F`).
+
+| Field | Keterangan |
+|---|---|
+| `kd_bidang`, `kd_unit`, `kd_sub`, `kd_upb` | *Kunci*. `kd_sub` kosong = baris unit; `kd_upb` kosong = baris sub unit. Induknya harus sudah ada. |
+| `kode`, `tingkat`, `kode_induk` | Diisi backend: `08.01` (`unit`), `08.01.002` (`sub_unit`), `08.01.002.003` (`upb`). `kode` dipakai sebagai `id` pada `/option`. |
+| `jenis` | `DINAS`, `UPT`, `SD`, `SMP`, `SATAP`, `TK`, `SMA`, `SMK`, `SKB`, `LAINNYA` |
+| `nama`, `nama_lama`, `tahun_perubahan` | Nama sekarang, nama sebelum perubahan nomenklatur, dan tahun nama sekarang mulai berlaku (nama lama berlaku sampai tahun sebelumnya). SIMDA tidak menyimpan tahunnya, jadi `tahun_perubahan` diisi manual. |
+| `nama_simda` | Teks asli SIMDA, mis. `SDN 1 TINANGGEA (SDN RORAYA)`; hanya diisi impor. |
+| `sekolah_id`, `sekolah_kedua_id` | `master_sekolah.id`; hanya untuk tingkat `upb`. `sekolah_kedua_id` untuk UPB satu atap (SD + SMP, dua NPSN). Satu sekolah hanya boleh dipadankan dengan satu UPB (`409`). |
+| `status_pencocokan` | `belum`, `otomatis` (hasil impor, perlu ditinjau), `manual` (sudah diverifikasi), `bukan_sekolah`. `otomatis`/`manual` wajib punya `sekolah_id`; `belum`/`bukan_sekolah` tidak boleh punya. |
+| `catatan_pencocokan`, `keterangan` | Catatan impor (hanya baca) dan keterangan bebas. |
+| Respons tambahan | `nama_induk`, `sekolah_label`, `sekolah_kedua_label` (`<nama> (NPSN <npsn>)`), `unit_kerja_id`, `unit_kerja_nama` |
+
+- **Hubungan ke `unit_kerja`:** tidak disalin. `unit_kerja_id`/`unit_kerja_nama` dibaca dari `master_sekolah.simpeg_unit_kerja_id/_nama` milik `sekolah_id`, yaitu `simpeg.unit_kerja` yang namanya dipakai kolom `unit_kerja` modul sarpras/usulan.
+- **Pencocokan otomatis (impor):** nama baru UPB dinormalkan (`SDN` = `SD NEGERI`, `SATU ATAP` = `SATAP`, `KONSEL` = `KONAWE SELATAN`, dst.) lalu dibandingkan dengan `nama_sekolah` dan `simpeg_unit_kerja_nama` pada bentuk pendidikan yang sama. Hanya kecocokan tunggal yang diterima; nama lama tidak dipakai karena sering sama dengan nama baru sekolah lain. Impor ulang tidak mengubah baris berstatus `manual`, dan tidak menimpa `nama`/`nama_lama`/`jenis` selama teks SIMDA tidak berubah.
+- **Dilewati impor:** sub unit dan UPB tanpa nama di SIMDA (kosong, `.`, `'`); tidak ada baris KIB yang memakainya. Unit lain di bidang 8 (Dinas Kepemudaan dan Olahraga) tidak diambil.
+- Pencarian sekolah di form memakai `GET /api/v1/admin/master/sekolah/option?search=`.

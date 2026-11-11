@@ -21,7 +21,23 @@ export interface SelectChoice {
   label: string;
 }
 
-export type FieldType = "text" | "number" | "textarea" | "select";
+export type FieldType = "text" | "number" | "textarea" | "select" | "lookup";
+
+/** Hasil pencarian untuk field "lookup" (mis. memilih sekolah dari Master Sekolah). */
+export interface LookupChoice {
+  value: string;
+  label: string;
+  description?: string;
+}
+
+export interface LookupDef {
+  /** Path endpoint pencarian (setelah host API); menerima query `search`. */
+  path: string;
+  /** Mengubah satu baris respons endpoint menjadi pilihan. */
+  toChoice: (item: Record<string, unknown>) => LookupChoice;
+  /** Field pada baris data yang berisi label pilihan tersimpan (diisi backend). */
+  labelKey: string;
+}
 
 export interface FieldDef {
   key: string;
@@ -40,6 +56,8 @@ export interface FieldDef {
   options?: SelectChoice[];
   /** Slug master lain; pilihan diambil dari endpoint `option` master tersebut. */
   optionSource?: string;
+  /** Sumber pencarian untuk type "lookup". */
+  lookup?: LookupDef;
   /** Kunci yang tidak boleh diubah setelah data dibuat (kode bisnis). */
   lockOnEdit?: boolean;
   /** Lebar kolom form: 2 = penuh. */
@@ -75,6 +93,8 @@ export interface MasterAsetConfig {
   columns: ColumnDef[];
   fields: FieldDef[];
   filters?: FilterDef[];
+  /** Field tambahan dari respons backend yang hanya ditampilkan di dialog detail. */
+  detailExtras?: ColumnDef[];
   /** Field yang dipakai sebagai judul di dialog hapus dan detail. */
   titleKey: string;
 }

@@ -3,9 +3,13 @@
 import React from "react";
 import { Button, Input, Modal, Select, Textarea } from "@/app/(admin)/_components/ui";
 import { useMasterAsetOption } from "./hooks";
+import LookupField from "./LookupField";
 import type { FieldDef, MasterAsetConfig } from "./types";
 
 export type FormValues = Record<string, string>;
+
+/** Kunci tambahan di FormValues untuk label pilihan field "lookup" (tidak ikut dikirim). */
+export const lookupLabelKey = (key: string) => `${key}__label`;
 
 interface Props {
   config: MasterAsetConfig;
@@ -88,7 +92,16 @@ export default function MasterAsetFormModal({
 
           return (
             <div key={field.key} className={wrapper}>
-              {field.type === "select" && field.optionSource ? (
+              {field.type === "lookup" && field.lookup ? (
+                <LookupField
+                  field={field}
+                  value={value}
+                  valueLabel={values[lookupLabelKey(field.key)] ?? ""}
+                  onChange={(v, label) =>
+                    setValues((prev) => ({ ...prev, [field.key]: v, [lookupLabelKey(field.key)]: label }))
+                  }
+                />
+              ) : field.type === "select" && field.optionSource ? (
                 <SourceSelect field={field} value={value} onChange={(v) => set(field.key, v)} />
               ) : field.type === "select" ? (
                 <Select
