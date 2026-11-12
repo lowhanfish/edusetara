@@ -1,6 +1,5 @@
 "use client";
 
-import { AdminPageSkeleton } from "@/app/(admin)/_components/admin-page-skeleton";
 
 import { SkeletonTableRows } from "@/app/(admin)/_components/ui/skeleton";
 
@@ -27,7 +26,7 @@ export default function VerifikasiRekonsiliasiBospPage() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  if (authLoading) return <AdminPageSkeleton />;
+  if (authLoading) return <p className="p-6 text-sm">Memuat akses pengguna...</p>;
   if (!canVerify) return <Card className="p-6"><p role="alert" className="text-sm text-rose-700">Halaman verifikasi rekonsiliasi BOSP hanya dapat diakses oleh admin.</p></Card>;
 
   return (
