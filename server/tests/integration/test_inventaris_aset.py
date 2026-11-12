@@ -16,6 +16,8 @@ BASE = "/api/v1/admin/inventaris-aset"
 PNG = base64.b64decode(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg=="
 )
+BUKU = "01.03.05.01.01.01.01"
+PERSEDIAAN = "01.01.07.01.01.01.01"
 PAYLOAD = {
     "sekolah_id": "school1",
     "kode_barang": "01.03.02.05.01.05.12",
@@ -60,6 +62,8 @@ async def inventory(client, db_session, monkeypatch, tmp_path):
                 is_active=True,
             ),
             MasterAsetKodeBarang(kode=PAYLOAD["kode_barang"], uraian="Laptop", level=7),
+            MasterAsetKodeBarang(kode=BUKU, uraian="Buku", level=7),
+            MasterAsetKodeBarang(kode=PERSEDIAAN, uraian="Kertas", level=7),
             MasterAsetKodeBarang(kode="01.03", uraian="Kelompok", level=2),
             MasterAsetKondisiBarang(kode=1, uraian="Baik"),
             MasterAsetKondisiBarang(kode=2, uraian="Rusak Ringan"),
@@ -105,7 +109,12 @@ async def test_inventory_shared_upb_pagination_and_decimal_totals(inventory):
     asset = await make_asset(client)
     assert asset["nilai_perolehan"] == PAYLOAD["nilai_perolehan"]
     await make_asset(
-        client, nomor_register="000002", nama="Printer", nilai_perolehan="100.25", kib="E"
+        client,
+        nomor_register="000002",
+        nama="Buku",
+        nilai_perolehan="100.25",
+        kib="E",
+        kode_barang=BUKU,
     )
     listed = (await client.get(f"{BASE}?sekolah_id=school2&limit=1&skip=1")).json()
     assert listed["total"] == 2
@@ -126,6 +135,8 @@ async def test_inventory_references_duplicates_and_unverified_upb(inventory):
     for changes in (
         {"sekolah_id": "unlinked"},
         {"kode_barang": "01.03"},
+        {"kib": "A"},
+        {"kode_barang": PERSEDIAAN},
         {"kondisi_kode": 999},
         {"sumber_dana_id": "missing"},
         {"nilai_perolehan": "-1"},
@@ -220,6 +231,8 @@ async def test_inventory_options_only_leaf_codes_and_master_delete_guards(invent
     options = await client.get(f"{BASE}/pilihan-kode-barang?search=Laptop")
     assert options.status_code == 200, options.text
     assert [item["id"] for item in options.json()] == [PAYLOAD["kode_barang"]]
+    every = (await client.get(f"{BASE}/pilihan-kode-barang")).json()
+    assert [item["id"] for item in every] == [PAYLOAD["kode_barang"], BUKU]  # tanpa persediaan
     await make_asset(client)
     barang = (
         await db.execute(
@@ -315,3 +328,34 @@ async def test_sub_unit_filter_options_combination_totals_and_pagination(invento
     assert second["total"] == 1 and second["nilai_total"] == "999.00"
     assert (await client.get(f"{BASE}?sub_unit_id=sub2&sekolah_id=school1")).json()["total"] == 0
     assert (await client.get(f"{BASE}?sub_unit_id=upb1")).json()["total"] == 0
+
+
+async def test_inventory_correction_keeps_history_and_rejects_conflicts(inventory):
+    client, _, _, _ = inventory
+    asset = await make_asset(client)
+    other = await make_asset(client, nomor_register="000002")
+    url = f"{BASE}/{asset['id']}"
+    body = {
+        key: value for key, value in PAYLOAD.items() if key not in ("sekolah_id", "kondisi_kode")
+    }
+    fixed = {**body, "nilai_perolehan": "2500000.00", "nama": "Laptop TU", "version": 1}
+    assert (await client.put(url, json=fixed)).status_code == 422  # alasan wajib
+    response = await client.put(url, json={**fixed, "alasan": "Salah ketik nilai"})
+    assert response.status_code == 200, response.text
+    detail = response.json()
+    assert detail["version"] == 2 and detail["nilai_perolehan"] == "2500000.00"
+    assert detail["nama"] == "Laptop TU" and detail["kondisi_kode"] == 1
+    entry = detail["riwayat"][0]
+    assert entry["kondisi_lama"] == entry["kondisi_baru"]
+    assert "nilai perolehan: 1234567890123.45 → 2500000.00" in entry["catatan"]
+    assert "Alasan: Salah ketik nilai" in entry["catatan"]
+    assert entry["created_by"] == "admin-test"
+    current = {**fixed, "alasan": "uji", "version": 2}
+    assert (await client.put(url, json={**current, "version": 1})).status_code == 409
+    assert (await client.put(url, json=current)).status_code == 422  # tidak ada perubahan
+    assert (await client.put(url, json={**current, "nomor_register": "000002"})).status_code == 409
+    assert (await client.put(url, json={**current, "kib": "C"})).status_code == 422
+    assert (await client.put(url, json={**current, "kondisi_kode": 2})).status_code == 422
+    assert (await client.put(f"{BASE}/missing", json=current)).status_code == 404
+    listed = (await client.get(f"{BASE}?search=000002")).json()
+    assert listed["data"][0]["id"] == other["id"] and listed["data"][0]["version"] == 1

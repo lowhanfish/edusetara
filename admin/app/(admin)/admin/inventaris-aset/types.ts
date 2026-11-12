@@ -2,6 +2,9 @@ export const KIB: Record<string, string> = {
   A: "A · Tanah", B: "B · Peralatan dan mesin", C: "C · Gedung dan bangunan",
   D: "D · Jalan, irigasi, dan jaringan", E: "E · Aset tetap lainnya", F: "F · Konstruksi dalam pengerjaan",
 };
+const KIB_BY_PREFIX: Record<string, string> = { "01.03.01": "A", "01.03.02": "B", "01.03.03": "C", "01.03.04": "D", "01.03.05": "E", "01.03.06": "F" };
+/** Kelompok KIB ditentukan oleh tiga tingkat pertama kode barang. */
+export const kibOf = (code: string) => KIB_BY_PREFIX[code.split(".").slice(0, 3).join(".")] ?? "";
 export interface Asset {
   id: string; upb_id: string; upb_kode: string; upb_nama: string;
   kode_barang: string; uraian_barang: string; nomor_register: string; kib: string;

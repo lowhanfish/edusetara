@@ -6,7 +6,7 @@ import LookupField from "../master/master_aset/_shared/LookupField";
 import type { FieldDef } from "../master/master_aset/_shared/types";
 import { useInventory, useInventoryOptions, useInventorySchool, useInventorySubUnits } from "./hooks";
 import { KIB, errorText, rupiah } from "./types";
-import AssetCreateModal from "./components/AssetCreateModal";
+import AssetFormModal from "./components/AssetFormModal";
 import AssetDetailModal from "./components/AssetDetailModal";
 
 const schoolField: FieldDef = {
@@ -38,6 +38,14 @@ export default function InventoryPage() {
   }, [school.data]);
   const upb = school.data?.simda_upb;
   const verified = upb?.status_pencocokan === "manual";
+  const hasItemFilters = Boolean(search || kib || condition || subUnitId);
+  const emptyTitle = hasItemFilters
+    ? "Tidak ada aset sesuai filter"
+    : schoolId ? "Belum ada aset tercatat untuk sekolah ini" : "Belum ada aset tercatat";
+  const emptyDescription = hasItemFilters
+    ? "Coba ubah atau reset filter untuk melihat barang yang sudah tercatat."
+    : "Data barang belum dicatat atau diimpor. Hubungan sekolah–UPB belum otomatis mengisi inventaris barang.";
+
   return <div className="space-y-6">
     <PageHeader title="Inventaris Aset Sekolah" description="Catat barang per register, pantau nilai perolehan, dan dokumentasikan kondisi fisiknya."
       action={<Button onClick={() => setCreating(true)} disabled={!verified || school.isFetching}>+ Catat aset</Button>} />
@@ -71,7 +79,14 @@ export default function InventoryPage() {
         {conditions.isError && <p role="alert" className="text-xs text-rose-700 sm:col-span-2 lg:col-span-12">Filter kondisi gagal dimuat. <button className="underline" onClick={() => conditions.refetch()}>Coba lagi</button></p>}
       </div>
       <div className="overflow-x-auto"><table className="w-full text-left text-xs"><thead className="bg-white/40 text-[#7d7152]"><tr>{["Barang / register", "UPB", "Perolehan", "Lokasi", "Kondisi", "Aksi"].map((label) => <th key={label} className="px-4 py-3 font-semibold">{label}</th>)}</tr></thead><tbody className="divide-y divide-amber-100/70">
-        {list.isPending ? <tr><td colSpan={6} className="p-10 text-center text-[#7d7152]">Memuat inventaris...</td></tr> : list.isError ? <tr><td colSpan={6} className="p-10 text-center text-rose-700" role="alert">{errorText(list.error)} <button className="underline" onClick={() => list.refetch()}>Coba lagi</button></td></tr> : !list.data?.data.length ? <tr><td colSpan={6} className="p-10 text-center"><p className="font-semibold text-[#2d2410]">Belum ada aset sesuai filter</p><p className="mt-1 text-[#7d7152]">{verified ? "Catat barang pertama atau ubah filter pencarian." : "Pilih sekolah dengan UPB terverifikasi untuk mulai mencatat aset."}</p></td></tr> : list.data.data.map((asset) => <tr key={asset.id} className="hover:bg-white/40">
+        {list.isPending ? <tr><td colSpan={6} className="p-10 text-center text-[#7d7152]">Memuat inventaris...</td></tr> : list.isError ? <tr><td colSpan={6} className="p-10 text-center text-rose-700" role="alert">{errorText(list.error)} <button className="underline" onClick={() => list.refetch()}>Coba lagi</button></td></tr> : !list.data?.data.length ? <tr><td colSpan={6} className="p-10 text-center"><p className="font-semibold text-[#2d2410]">{emptyTitle}</p>
+          <p className="mx-auto mt-2 max-w-lg leading-relaxed text-[#7d7152]">{emptyDescription}</p>
+          {verified ? <Button size="sm" className="mt-4" onClick={() => setCreating(true)}>+ Catat aset pertama</Button>
+            : !schoolId ? <p className="mt-3 text-[#7d7152]">Pilih sekolah pada bagian Lingkup inventaris untuk mulai mencatat barang.</p>
+            : school.isPending ? <p className="mt-3 text-[#7d7152]">Memeriksa padanan UPB sekolah...</p>
+            : school.isError ? <p className="mt-3 text-rose-700">Identitas sekolah gagal dimuat. Coba muat ulang melalui panel di atas.</p>
+            : <p className="mt-3 text-[#7d7152]">{upb ? "Sekolah sudah terhubung ke UPB; padanannya perlu diverifikasi sebelum pencatatan barang." : "Sekolah belum terhubung ke UPB. Hubungkan melalui Master Sekolah terlebih dahulu."}</p>}
+</td></tr> : list.data.data.map((asset) => <tr key={asset.id} className="hover:bg-white/40">
           <td className="px-4 py-4"><p className="font-bold text-[#2d2410]">{asset.nama}</p><p className="mt-1 font-mono text-[11px] text-amber-800">{asset.kode_barang}</p><p className="mt-1 text-[#7d7152]">Register {asset.nomor_register} · KIB {asset.kib}</p></td>
           <td className="px-4 py-4"><p className="font-medium text-[#2d2410]">{asset.upb_nama}</p><p className="mt-1 font-mono text-[#7d7152]">{asset.upb_kode}</p></td>
           <td className="whitespace-nowrap px-4 py-4"><p className="font-semibold text-[#2d2410]">{rupiah(asset.nilai_perolehan)}</p><p className="mt-1 text-[#7d7152]">Tahun {asset.tahun_perolehan}</p></td>
@@ -81,7 +96,7 @@ export default function InventoryPage() {
       </tbody></table></div>
       <div className="border-t border-amber-100 p-4"><Pagination page={page} pageSize={10} total={list.data?.total ?? 0} onPageChange={setPage} /></div>
     </Card>
-    {creating && schoolId && verified && <AssetCreateModal schoolId={schoolId} schoolName={schoolName} onClose={() => setCreating(false)} />}
+    {creating && schoolId && verified && <AssetFormModal schoolId={schoolId} schoolName={schoolName} onClose={() => setCreating(false)} />}
     {selected && <AssetDetailModal key={selected} id={selected} onClose={() => setSelected("")} />}
   </div>;
 }

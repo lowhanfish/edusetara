@@ -34,6 +34,11 @@ export function useCreateInventory() {
   const cache = useQueryClient();
   return useMutation({ mutationFn: (body: Record<string, unknown>) => fetchData<Asset>(`${base}/api/v1/admin/inventaris-aset`, { method: "POST", body }), onSuccess: () => cache.invalidateQueries({ queryKey: ["inventaris-aset"] }) });
 }
+export function useCorrectInventory(id: string) {
+  const base = useUrlStore((s) => s.URL.APP);
+  const cache = useQueryClient();
+  return useMutation({ mutationFn: (body: Record<string, unknown>) => fetchData<AssetDetail>(`${base}/api/v1/admin/inventaris-aset/${id}`, { method: "PUT", body }), onSuccess: () => cache.invalidateQueries({ queryKey: ["inventaris-aset"] }) });
+}
 export function useUpdateCondition(id: string) {
   const base = useUrlStore((s) => s.URL.APP);
   const cache = useQueryClient();

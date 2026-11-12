@@ -20,8 +20,15 @@ from app.models.operational.inventaris_aset import InventarisAset as Aset
 from app.models.operational.inventaris_aset import RiwayatKondisiAset as Riwayat
 from app.services.upload_service import BASE_UPLOAD_DIR
 
-from .schema import AsetCreate, AsetDetail, AsetList, AsetResponse
-from .service import get_condition, inventory_query, serialize, validate_create
+from .schema import AsetCreate, AsetDetail, AsetList, AsetResponse, AsetUpdate
+from .service import (
+    KIB_BY_PREFIX,
+    get_condition,
+    inventory_query,
+    serialize,
+    validate_create,
+    validate_item,
+)
 
 admin_access = require_roles("admin", "superadmin")
 router = APIRouter(
@@ -86,7 +93,10 @@ async def list_assets(
 
 @router.get("/pilihan-kode-barang")
 async def code_options(search: str = Query("", max_length=255), db: AsyncSession = Depends(get_db)):
-    query = select(Barang).where(Barang.level == 7)
+    query = select(Barang).where(
+        Barang.level == 7,
+        or_(*(Barang.kode.startswith(f"{prefix}.", autoescape=True) for prefix in KIB_BY_PREFIX)),
+    )
     if search.strip():
         query = query.where(
             or_(
@@ -161,6 +171,81 @@ async def create(
         await db.rollback()
         raise
     return await detail(asset_id, db)
+
+
+LABELS = {
+    "kode_barang": "kode barang",
+    "nomor_register": "nomor register",
+    "kib": "KIB",
+    "nama": "nama",
+    "merk": "merk",
+    "nomor_seri": "nomor seri",
+    "tahun_perolehan": "tahun perolehan",
+    "tanggal_perolehan": "tanggal perolehan",
+    "nilai_perolehan": "nilai perolehan",
+    "lokasi": "lokasi",
+    "sumber_dana_id": "sumber dana",
+    "keterangan": "keterangan",
+}
+
+
+@router.put("/{aset_id}", response_model=AsetDetail)
+async def correct(
+    aset_id: str,
+    payload: AsetUpdate,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(admin_access),
+):
+    """Correct recorded data. Every correction is kept in the history with its reason."""
+    obj = (
+        await db.execute(select(Aset).where(Aset.id == aset_id).with_for_update())
+    ).scalar_one_or_none()
+    if obj is None:
+        raise HTTPException(404, "Aset tidak ditemukan")
+    if obj.version != payload.version:
+        raise HTTPException(409, "Data aset sudah berubah. Muat ulang detail sebelum menyimpan.")
+    await validate_item(db, payload, obj.upb_id, exclude_id=aset_id)
+    data = payload.model_dump(exclude={"version", "alasan"})
+    changes = [
+        f"{LABELS[key]}: {getattr(obj, key) if getattr(obj, key) is not None else '—'}"
+        f" → {value if value is not None else '—'}"
+        for key, value in data.items()
+        if getattr(obj, key) != value
+    ]
+    if not changes:
+        raise HTTPException(422, "Tidak ada data yang diubah")
+    condition = await get_condition(db, obj.kondisi_kode)
+    snapshot = {"kode": condition.kode, "nama": condition.uraian}
+    try:
+        result = await db.execute(
+            update(Aset)
+            .where(Aset.id == aset_id, Aset.version == payload.version)
+            .values(**data, version=payload.version + 1, updated_at=func.now())
+        )
+        if result.rowcount != 1:
+            raise HTTPException(409, "Data aset sudah berubah. Muat ulang detail.")
+        db.add(
+            Riwayat(
+                aset_id=aset_id,
+                kondisi_lama=snapshot,
+                kondisi_baru=snapshot,
+                catatan=f"Koreksi data — {'; '.join(changes)}. Alasan: {payload.alasan}",
+                version=payload.version + 1,
+                created_by=user.username,
+            )
+        )
+        await commit_or_raise_unique_conflict(db, "Register aset sudah tercatat")
+    except IntegrityError as exc:
+        await db.rollback()
+        raise HTTPException(
+            409,
+            "Register sudah tercatat atau referensi telah berubah. Muat ulang dan periksa data.",
+        ) from exc
+    except Exception:
+        await db.rollback()
+        raise
+    db.expire_all()
+    return await detail(aset_id, db)
 
 
 async def read_photo(photo: UploadFile) -> tuple[bytes, str]:

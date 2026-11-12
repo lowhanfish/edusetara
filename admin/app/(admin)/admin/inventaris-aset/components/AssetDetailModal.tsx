@@ -4,6 +4,7 @@ import { Button, Input, Modal, Select } from "@/app/(admin)/_components/ui";
 import { useUrlStore } from "@/store/useUrlStore";
 import { useInventoryDetail, useInventoryOptions, useUpdateCondition } from "../hooks";
 import { KIB, errorText, rupiah } from "../types";
+import AssetFormModal from "./AssetFormModal";
 
 export default function AssetDetailModal({ id, onClose }: { id: string; onClose: () => void }) {
   const base = useUrlStore((state) => state.URL.APP);
@@ -16,6 +17,7 @@ export default function AssetDetailModal({ id, onClose }: { id: string; onClose:
   const [preview, setPreview] = useState("");
   const [validation, setValidation] = useState("");
   const [saved, setSaved] = useState(false);
+  const [correcting, setCorrecting] = useState(false);
   useEffect(() => {
     if (!photo) { setPreview(""); return; }
     const url = URL.createObjectURL(photo);
@@ -24,7 +26,7 @@ export default function AssetDetailModal({ id, onClose }: { id: string; onClose:
   }, [photo]);
   const asset = detail.data;
   return <Modal isOpen onClose={() => { if (!update.isPending) onClose(); }} title={asset?.nama || "Detail Aset"} description="Identitas barang, kondisi terkini, dan riwayat pemeriksaan." maxWidth="xl"
-    footer={<><Button variant="outline" disabled={update.isPending} onClick={onClose}>Tutup</Button>{asset && !editing && <Button onClick={() => { setEditingVersion(asset.version); setEditing(true); setSaved(false); }}>Perbarui kondisi</Button>}</>}>
+    footer={<><Button variant="outline" disabled={update.isPending} onClick={onClose}>Tutup</Button>{asset && !editing && <><Button variant="outline" disabled={detail.isFetching} onClick={() => { setSaved(false); setCorrecting(true); }}>Koreksi data</Button><Button onClick={() => { setEditingVersion(asset.version); setEditing(true); setSaved(false); }}>Perbarui kondisi</Button></>}</>}>
     {detail.isPending ? <p className="text-sm text-[#7d7152]">Memuat detail aset...</p> : detail.isError ? <p role="alert" className="text-sm text-rose-700">{errorText(detail.error)} <button className="underline" onClick={() => detail.refetch()}>Coba lagi</button></p> : asset && <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
         <div><p className="text-[11px] font-medium text-amber-800">UPB {asset.upb_kode}</p><p className="text-sm font-bold text-[#2d2410]">{asset.upb_nama}</p></div>
@@ -66,12 +68,13 @@ export default function AssetDetailModal({ id, onClose }: { id: string; onClose:
       <section className="border-t border-amber-100 pt-4">
         <h3 className="mb-3 text-sm font-bold text-[#2d2410]">Riwayat kondisi <span className="font-normal text-[#7d7152]">({asset.riwayat.length})</span></h3>
         <ol className="space-y-3">{asset.riwayat.map((entry) => <li key={entry.id} className="rounded-xl border border-[#efe3c2] bg-white/70 p-3">
-          <div className="flex flex-wrap justify-between gap-2 text-xs"><strong className="text-[#2d2410]">{entry.kondisi_lama ? `${entry.kondisi_lama.nama} → ` : "Kondisi awal: "}{entry.kondisi_baru.nama}</strong><time className="text-[#7d7152]" dateTime={entry.created_at}>{new Date(entry.created_at).toLocaleString("id-ID")}</time></div>
+          <div className="flex flex-wrap justify-between gap-2 text-xs"><strong className="text-[#2d2410]">{!entry.kondisi_lama ? `Kondisi awal: ${entry.kondisi_baru.nama}` : entry.kondisi_lama.kode === entry.kondisi_baru.kode && !entry.foto_url ? "Koreksi data" : `${entry.kondisi_lama.nama} → ${entry.kondisi_baru.nama}`}</strong><time className="text-[#7d7152]" dateTime={entry.created_at}>{new Date(entry.created_at).toLocaleString("id-ID")}</time></div>
           <p className="mt-2 whitespace-pre-wrap break-words text-xs text-[#2d2410]">{entry.catatan}</p>
           <p className="mt-1 text-[11px] text-[#7d7152]">Dicatat oleh {entry.created_by}</p>
           {entry.foto_url && <a href={`${base}${entry.foto_url}`} target="_blank" rel="noreferrer"><img src={`${base}${entry.foto_url}`} alt={`Bukti pemeriksaan kondisi ${entry.kondisi_baru.nama}`} loading="lazy" className="mt-3 max-h-40 rounded-lg object-contain" /></a>}
         </li>)}</ol>
       </section>
     </div>}
+    {correcting && asset && <AssetFormModal asset={asset} onClose={() => setCorrecting(false)} />}
   </Modal>;
 }

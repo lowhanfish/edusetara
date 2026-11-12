@@ -17,10 +17,12 @@ barang individual karena ringkasan tersebut belum mempunyai register atau nilai 
    verifikasi kedua sekolah pada referensi UPB terlebih dahulu.
 2. Buka menu inventaris atau tombol **Lihat inventaris** di detail Master Sekolah.
 3. Pilih **Catat aset**. Satu entri mewakili satu barang dengan nomor register.
-4. Pilih kode barang level 7 dan KIB; isi nama, register, lokasi, tahun, nilai, dan kondisi.
+4. Pilih kode barang level 7; kelompok KIB mengikuti kode itu secara otomatis. Isi nama,
+   register, lokasi, tahun, nilai, dan kondisi.
    Tanggal, merk, nomor seri, sumber dana, dan keterangan bersifat opsional.
 5. Buka detail → **Perbarui kondisi**. Isi kondisi hasil pemeriksaan, catatan, dan foto.
 6. Periksa riwayat kondisi, pencatat, tanggal, serta bukti foto yang tersimpan.
+7. Bila ada salah catat, buka detail → **Koreksi data**, perbaiki, dan isi alasan koreksi.
 
 Nilai total adalah nilai perolehan semua barang sesuai filter, bukan hanya halaman
 aktif dan bukan nilai buku setelah penyusutan. Mata uang dikirim API sebagai string
@@ -33,15 +35,17 @@ Decimal dan diformat tanpa konversi ke floating point pada frontend.
 | Pemegang inventaris | `inventaris_aset.upb_id` merujuk `master_aset_unit.id` |
 | Sekolah | Ditelusuri dari relasi utama / kedua pada UPB; tidak disalin ke barang |
 | Identitas barang | UPB + kode barang + tahun perolehan + nomor register harus unik |
-| Klasifikasi | Kode barang rinci level 7 dan kelompok KIB A–F |
+| Klasifikasi | Kode barang rinci level 7; KIB wajib sesuai kode: `01.03.01`–`01.03.06` = A–F. Kode di luar itu (persediaan, akumulasi penyusutan, aset lainnya) ditolak |
 | Perolehan | Tahun, tanggal opsional, nilai `NUMERIC(20,2)`, sumber dana opsional |
 | Fisik | Nama, merk, nomor seri, lokasi, kondisi master |
 | Kondisi awal | Dicatat sebagai riwayat pertama bersama pembuatan barang |
 | Pemeriksaan | Snapshot kondisi lama/baru, catatan, foto, pencatat, waktu, versi |
+| Koreksi data | Semua kolom kecuali UPB dan kondisi; alasan wajib. Perubahan (lama → baru), alasan, pengoreksi, dan waktu masuk ke riwayat tanpa foto |
 | Konflik perubahan | Versi wajib cocok; perubahan dari detail lama ditolak dengan 409 |
 
 Dua sekolah dalam UPB SATAP melihat inventaris yang sama. Barang tidak digandakan.
-Tidak ada endpoint penghapusan barang/riwayat, mutasi, atau koreksi nilai pada tahap ini.
+Tidak ada endpoint penghapusan barang/riwayat atau mutasi pada tahap ini. Koreksi data hanya
+untuk salah catat; perubahan nilai karena kapitalisasi atau penilaian ulang bukan lingkupnya.
 Referensi kode barang, UPB, dan kondisi yang masih dipakai inventaris tidak dapat dihapus.
 
 ## Kontrak API
@@ -52,9 +56,10 @@ Seluruh endpoint berikut berawalan `/api/v1/admin/inventaris-aset`.
 |---|---|
 | `GET /` | Daftar, jumlah, dan `nilai_total`; filter `sekolah_id`, `sub_unit_id`, `search`, `kib`, `kondisi_kode`, `skip`, `limit` |
 | `GET /pilihan-sub-unit` | Pilihan semua Sub Unit/UPT, urut kode SIMDA; memakai ID referensi |
-| `GET /pilihan-kode-barang` | Pencarian `search` khusus kode barang level 7, maksimal 50 hasil |
+| `GET /pilihan-kode-barang` | Pencarian `search` khusus kode barang level 7 aset tetap KIB A–F, maksimal 50 hasil |
 | `POST /` | Pencatatan awal, JSON sesuai `AsetCreate` |
 | `GET /{id}` | Detail dan seluruh riwayat kondisi, terbaru dahulu |
+| `PUT /{id}` | Koreksi data, JSON sesuai `AsetUpdate` (kolom barang + `version` + `alasan`) |
 | `POST /{id}/kondisi` | Multipart: `kondisi_kode`, `version`, `catatan`, `foto` |
 
 Foto: JPG/JPEG, PNG, atau WebP; maksimum 10 MB, diperiksa berdasarkan signature
@@ -66,9 +71,13 @@ Respons penting: 401 belum login, 403 role tidak sesuai, 404 tidak ditemukan,
 
 ## Persiapan impor SIMDA
 
-Impor barang aktual **belum dijalankan atau diimplementasikan**. Daftar tabel dan kolom
-barang sumber belum tersedia untuk diverifikasi saat SQL Server down. Jangan menebak
-struktur tabel barang dari tabel referensi yang sudah diimpor.
+Impor barang aktual **belum dijalankan atau diimplementasikan**. Struktur `Ta_KIB_A`–`Ta_KIB_E`
+harus diperiksa langsung di SQL Server sebelum menulis importer; jangan menebaknya dari
+tabel referensi yang sudah diimpor.
+
+Referensi UPB: `Ref_UPB` Dinas Pendidikan berisi 521 baris, 469 di antaranya diimpor. Sebanyak
+52 baris dilewati karena tidak bernama (kosong atau `.`); pada pemeriksaan 12 November 2026
+tidak satu pun dari 52 baris itu mempunyai barang di `Ta_KIB_A`–`Ta_KIB_E`.
 
 Saat sumber tersedia, petakan identitas UPB (bidang/unit/subunit/UPB), kode barang
 rinci, kelompok KIB, register, tahun/tanggal perolehan, nama/spesifikasi, nilai,
@@ -83,6 +92,6 @@ modul lanjutan, tidak diasumsikan selesai oleh tahap pencatatan awal ini.
 
 `python -m pytest tests/integration/test_inventaris_aset.py tests/integration/test_master_aset.py tests/integration/test_sekolah_simda.py tests/integration/test_sekolah_endpoints.py -q`
 
-Pengujian memakai SQLite terisolasi dan direktori foto sementara. SQL migrasi juga
+Pengujian otomatis memakai SQLite terisolasi dan direktori foto sementara. SQL migrasi juga
 dapat diperiksa tanpa koneksi database menggunakan:
 `alembic upgrade c8d5e2fa3016:d9e6f3ab4127 --sql`.

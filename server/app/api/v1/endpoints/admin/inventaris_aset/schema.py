@@ -4,12 +4,11 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
-class AsetCreate(BaseModel):
+class AsetFields(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
-    sekolah_id: str = Field(min_length=1, max_length=50)
     kode_barang: str = Field(min_length=1, max_length=30)
     nomor_register: str = Field(min_length=1, max_length=50)
     kib: Literal["A", "B", "C", "D", "E", "F"]
@@ -20,15 +19,31 @@ class AsetCreate(BaseModel):
     tanggal_perolehan: date | None = None
     nilai_perolehan: Decimal = Field(ge=0, max_digits=20, decimal_places=2)
     lokasi: str = Field(min_length=1, max_length=255)
-    kondisi_kode: int
     sumber_dana_id: str | None = Field(None, max_length=50)
     keterangan: str | None = Field(None, max_length=4000)
+
+    @field_validator("merk", "nomor_seri", "sumber_dana_id", "keterangan", mode="before")
+    @classmethod
+    def blank_as_none(cls, value):
+        return None if isinstance(value, str) and not value.strip() else value
 
     @model_validator(mode="after")
     def valid_date(self):
         if self.tanggal_perolehan and self.tanggal_perolehan.year != self.tahun_perolehan:
             raise ValueError("Tahun dan tanggal perolehan harus sesuai")
         return self
+
+
+class AsetCreate(AsetFields):
+    sekolah_id: str = Field(min_length=1, max_length=50)
+    kondisi_kode: int
+
+
+class AsetUpdate(AsetFields):
+    """Data correction; condition changes only through an inspection with photo evidence."""
+
+    version: int = Field(ge=1)
+    alasan: str = Field(min_length=1, max_length=1000)
 
 
 class AsetResponse(BaseModel):
