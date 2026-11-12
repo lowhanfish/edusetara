@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Input, Modal, Select } from "../../../../_components/ui";
 import { SekolahRecord, SekolahUpdatePayload } from "../types";
+import SimdaIdentity from "./SimdaIdentity";
 import { useKecamatanList, useDesaKelurahanList } from "../hooks/crud";
 
 interface EditSekolahModalProps {
@@ -20,6 +21,15 @@ export default function EditSekolahModal({
   onSave,
   isLoading = false,
 }: EditSekolahModalProps) {
+  const [simdaUpb, setSimdaUpb] = useState<SekolahRecord["simda_upb"]>(null);
+  const [simdaChanged, setSimdaChanged] = useState(false);
+  useEffect(() => {
+    if (isOpen) {
+      setSimdaUpb(record?.simda_upb ?? null);
+      setSimdaChanged(false);
+    }
+  }, [record, isOpen]);
+
   const { kecamatanList, isLoading: isKecLoading } = useKecamatanList();
 
   const [formData, setFormData] = useState<SekolahUpdatePayload>({
@@ -116,6 +126,7 @@ export default function EditSekolahModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(record.id || record.npsn, {
+      ...(simdaChanged ? { simda_upb_id: simdaUpb?.id ?? null } : {}),
       nama_sekolah: formData.nama_sekolah?.trim(),
       bentuk_pendidikan: formData.bentuk_pendidikan || formData.jenjang,
       jenjang: formData.bentuk_pendidikan || formData.jenjang,
@@ -283,6 +294,9 @@ export default function EditSekolahModal({
             )}
           </div>
         </div>
+
+        <SimdaIdentity schoolId={record.id} value={simdaUpb} editable disabled={isLoading}
+          onChange={(unit) => { setSimdaUpb(unit); setSimdaChanged(true); }} />
 
         <Input
           label="Alamat Jalan / Lokasi"

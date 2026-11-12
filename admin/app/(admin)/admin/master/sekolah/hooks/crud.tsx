@@ -78,6 +78,7 @@ export const useUpdateSekolah = () => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["master-sekolah"] });
+      queryClient.invalidateQueries({ queryKey: ["master-aset", "unit-sekolah"] });
       swallAlert("Profil sekolah berhasil diperbarui", "success");
     },
     onError: (err: any) => {

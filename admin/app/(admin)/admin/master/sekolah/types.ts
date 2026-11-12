@@ -1,4 +1,20 @@
+export interface SimdaUpb {
+  id: string;
+  kode: string;
+  nama: string;
+  nama_lama?: string | null;
+  nama_simda?: string | null;
+  nama_induk?: string | null;
+  jenis: string;
+  status_pencocokan: string;
+  sekolah_id?: string | null;
+  sekolah_kedua_id?: string | null;
+  sekolah_label?: string | null;
+  sekolah_kedua_label?: string | null;
+}
+
 export interface SekolahRecord {
+  simda_upb?: SimdaUpb | null;
   id: string;
   npsn: string;
   nama_sekolah: string;
@@ -39,6 +55,7 @@ export interface SekolahListResponse {
 }
 
 export interface SekolahUpdatePayload {
+  simda_upb_id?: string | null;
   nama_sekolah?: string;
   bentuk_pendidikan?: string;
   jenjang?: string;

@@ -10,6 +10,8 @@ from app.api.deps import get_current_user, get_db
 from app.db.seed_master_sekolah import import_schools_from_excel
 from app.models.auth.user import User
 
+from .simda import enrich_schools, set_school_upb
+
 from .schema import (
     SekolahLookupItem,
     SekolahResponse,
@@ -237,11 +239,13 @@ async def read_sekolah(
     result = await db.execute(data_sql, params)
     rows = result.fetchall()
 
+    schools = [map_row_to_response(r) for r in rows]
+    await enrich_schools(db, schools)
     return {
         "total": total,
         "skip": skip,
         "limit": limit,
-        "data": [map_row_to_response(r) for r in rows],
+        "data": schools,
     }
 
 
@@ -280,7 +284,9 @@ async def get_sekolah_detail(
     row = result.fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Data sekolah tidak ditemukan")
-    return map_row_to_response(row)
+    school = map_row_to_response(row)
+    await enrich_schools(db, [school])
+    return school
 
 
 @router.put("/{sekolah_id}", response_model=SekolahResponse)
@@ -296,6 +302,8 @@ async def update_sekolah(
     Supports updating simpeg_unit_kerja_id, simpeg_unit_kerja_nama, wilayah, or spatial coordinates.
     """
     update_data = payload.model_dump(exclude_unset=True)
+    if "simda_upb_id" in update_data:
+        await set_school_upb(db, sekolah_id, update_data.pop("simda_upb_id"))
     if "jenjang" in update_data and not update_data.get("bentuk_pendidikan"):
         update_data["bentuk_pendidikan"] = update_data.pop("jenjang")
     elif "jenjang" in update_data:
@@ -320,9 +328,10 @@ async def update_sekolah(
             update_data["simpeg_unit_kerja_nama"] = None
 
     if not update_data:
+        await db.commit()
         return await get_sekolah_detail(sekolah_id, db)
 
-    set_clauses = ["updated_at = NOW()"]
+    set_clauses = ["updated_at = CURRENT_TIMESTAMP"]
     params: dict[str, Any] = {"id": sekolah_id}
 
     for key, val in update_data.items():

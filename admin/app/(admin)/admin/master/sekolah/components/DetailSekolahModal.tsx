@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Badge, Button, Modal } from "../../../../_components/ui";
+import SimdaIdentity from "./SimdaIdentity";
 import { SekolahRecord } from "../types";
 
 interface DetailSekolahModalProps {
@@ -143,6 +144,8 @@ export default function DetailSekolahModal({
             </p>
           )}
         </div>
+
+        <SimdaIdentity schoolId={record.id} value={record.simda_upb} />
 
         {/* Grid Parameter Pendidikan */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">

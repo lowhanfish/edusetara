@@ -3135,3 +3135,23 @@ Satu tabel (`master_aset_unit`) untuk tiga tingkat, hanya Dinas Pendidikan (SIMD
 - **Pencocokan otomatis (impor):** nama baru UPB dinormalkan (`SDN` = `SD NEGERI`, `SATU ATAP` = `SATAP`, `KONSEL` = `KONAWE SELATAN`, dst.) lalu dibandingkan dengan `nama_sekolah` dan `simpeg_unit_kerja_nama` pada bentuk pendidikan yang sama. Hanya kecocokan tunggal yang diterima; nama lama tidak dipakai karena sering sama dengan nama baru sekolah lain. Impor ulang tidak mengubah baris berstatus `manual`, dan tidak menimpa `nama`/`nama_lama`/`jenis` selama teks SIMDA tidak berubah.
 - **Dilewati impor:** sub unit dan UPB tanpa nama di SIMDA (kosong, `.`, `'`); tidak ada baris KIB yang memakainya. Unit lain di bidang 8 (Dinas Kepemudaan dan Olahraga) tidak diambil.
 - Pencarian sekolah di form memakai `GET /api/v1/admin/master/sekolah/option?search=`.
+
+
+### Integrasi Identitas SIMDA pada Master Sekolah
+
+Respons daftar dan detail Master Sekolah menyertakan `simda_upb` berupa
+UnitSekolahResponse atau `null`. Data dibaca dari relasi `master_aset_unit.sekolah_id`
+atau `sekolah_kedua_id`, tanpa menyalin kode ke tabel sekolah.
+
+`PUT /api/v1/admin/master/sekolah/{id}` menerima `simda_upb_id` (ID baris referensi,
+bukan kode SIMDA). Field tidak dikirim: pertahankan relasi; `null`: lepas;
+ID: hubungkan atau pindahkan ke UPB. Perubahan profil dan relasi disimpan dalam
+satu transaksi dan menggunakan autentikasi pemutakhiran profil sekolah.
+
+Pencarian pilihan menggunakan `unit-sekolah/read?tingkat=upb&search=...`.
+Referensi bukan UPB atau berstatus bukan sekolah ditolak (422). UPB biasa yang
+sudah dipakai sekolah lain atau UPB SATAP dengan dua sekolah ditolak (409).
+Saat sekolah utama dilepas dari UPB bersama, sekolah kedua menjadi utama.
+UPB tanpa sekolah kembali berstatus `belum`. Pemilihan UPB tunggal menandai
+padanan `manual`; penambahan sekolah kedua pada UPB SATAP menandai padanan
+`otomatis` untuk ditinjau bersama pada halaman Referensi Unit & UPB SIMDA.

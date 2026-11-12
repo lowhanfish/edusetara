@@ -50,10 +50,10 @@ const sekolahCell = (r: MasterAsetRecord) => {
 
 export const config: MasterAsetConfig = {
   slug: "unit-sekolah",
-  title: "Master Unit & Sekolah (UPB)",
+  title: "Referensi Unit & UPB SIMDA",
   singular: "Unit/Sekolah",
   description:
-    "Unit, sub unit (UPT kecamatan), dan UPB (sekolah) Dinas Pendidikan menurut kunci SIMDA BMD, dengan nama lama dan nama baru serta padanannya di Master Sekolah. Padanan otomatis wajib ditinjau.",
+    "Unit, sub unit (UPT kecamatan), dan UPB (sekolah) Dinas Pendidikan menurut kunci SIMDA BMD, dengan nama lama dan nama baru serta padanannya di Master Sekolah. Padanan otomatis wajib ditinjau. Hubungkan sekolah ke UPB melalui Edit Profil pada Master Sekolah; halaman ini untuk pemeliharaan hierarki dan rekonsiliasi referensi SIMDA.",
   icon: "🏫",
   simdaSource: "Ref_Unit · Ref_Sub_Unit · Ref_UPB",
   searchPlaceholder: "Cari kode, nama baru, atau nama lama...",

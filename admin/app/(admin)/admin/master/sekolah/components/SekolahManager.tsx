@@ -431,6 +431,9 @@ export default function SekolahManager({
                             </span>
                           )}
                         </div>
+                        <p className="mt-1 text-[11px] text-amber-800">
+                          {item.simda_upb ? `SIMDA: ${item.simda_upb.kode}` : "SIMDA: belum terhubung"}
+                        </p>
                       </td>
 
                       {/* 4. Jenjang & Status */}

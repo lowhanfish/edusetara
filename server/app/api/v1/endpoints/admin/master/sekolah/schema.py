@@ -4,6 +4,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ..master_aset.schemas import UnitSekolahResponse
+
 
 class SekolahBase(BaseModel):
     npsn: str = Field(..., description="Nomor Pokok Sekolah Nasional")
@@ -27,6 +29,7 @@ class SekolahBase(BaseModel):
 
 
 class SekolahUpdate(BaseModel):
+    simda_upb_id: str | None = Field(None, min_length=1, max_length=50)
     nama_sekolah: str | None = None
     bentuk_pendidikan: str | None = None
     jenjang: str | None = None
@@ -48,6 +51,7 @@ class SekolahUpdate(BaseModel):
 
 
 class SekolahResponse(SekolahBase):
+    simda_upb: UnitSekolahResponse | None = None
     id: str
     unit_kerja_id: str | None = None
     name: str
