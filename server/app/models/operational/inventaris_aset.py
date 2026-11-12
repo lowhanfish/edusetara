@@ -29,6 +29,7 @@ class InventarisAset(Base):
             "nomor_register",
             name="uq_inventaris_register",
         ),
+        UniqueConstraint("kib", "simda_id", name="uq_inventaris_simda"),
     )
 
     id = Column(String(50), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -63,6 +64,16 @@ class InventarisAset(Base):
         String(50), ForeignKey("master_sarpras_sumber_dana.id", ondelete="RESTRICT"), nullable=True
     )
     keterangan = Column(Text, nullable=True)
+    # IDPemda baris sumber di Ta_KIB_<kib> SIMDA; kosong untuk barang yang dicatat manual.
+    simda_id = Column(String(30), nullable=True)
+    # UPB sekolah tempat barang berada bila berbeda dari UPB pembukuan (mis. dibukukan di Dinas).
+    upb_penempatan_id = Column(
+        String(50),
+        ForeignKey("master_aset_unit.id", ondelete="RESTRICT"),
+        nullable=True,
+        index=True,
+    )
+    status_penempatan = Column(String(10), nullable=True)  # otomatis | manual
     version = Column(Integer, nullable=False, default=1)
     created_by = Column(String(100), nullable=False)
     created_at = Column(DateTime, nullable=False, server_default=func.now())

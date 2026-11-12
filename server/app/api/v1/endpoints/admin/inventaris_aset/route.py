@@ -20,9 +20,10 @@ from app.models.operational.inventaris_aset import InventarisAset as Aset
 from app.models.operational.inventaris_aset import RiwayatKondisiAset as Riwayat
 from app.services.upload_service import BASE_UPLOAD_DIR
 
-from .schema import AsetCreate, AsetDetail, AsetList, AsetResponse, AsetUpdate
+from .schema import AsetCreate, AsetDetail, AsetList, AsetResponse, AsetUpdate, PenempatanUpdate
 from .service import (
     KIB_BY_PREFIX,
+    Tempat,
     get_condition,
     inventory_query,
     serialize,
@@ -50,7 +51,14 @@ async def list_assets(
 ):
     query = inventory_query()
     if sekolah_id:
-        query = query.where(or_(Unit.sekolah_id == sekolah_id, Unit.sekolah_kedua_id == sekolah_id))
+        query = query.where(
+            or_(
+                Unit.sekolah_id == sekolah_id,
+                Unit.sekolah_kedua_id == sekolah_id,
+                Tempat.sekolah_id == sekolah_id,
+                Tempat.sekolah_kedua_id == sekolah_id,
+            )
+        )
     if sub_unit_id:
         parent = aliased(Unit)
         parent_code = (
@@ -58,7 +66,7 @@ async def list_assets(
             .where(parent.id == sub_unit_id, parent.tingkat == "sub_unit")
             .scalar_subquery()
         )
-        query = query.where(Unit.kode_induk == parent_code)
+        query = query.where(or_(Unit.kode_induk == parent_code, Tempat.kode_induk == parent_code))
     if kondisi_kode is not None:
         query = query.where(Aset.kondisi_kode == kondisi_kode)
     if kib:
@@ -69,6 +77,7 @@ async def list_assets(
                 Aset.nama.icontains(search.strip(), autoescape=True),
                 Aset.kode_barang.icontains(search.strip(), autoescape=True),
                 Aset.nomor_register.icontains(search.strip(), autoescape=True),
+                Aset.keterangan.icontains(search.strip(), autoescape=True),
             )
         )
     subset = query.subquery()
@@ -118,6 +127,22 @@ async def sub_unit_options(db: AsyncSession = Depends(get_db)):
     return [{"id": item.id, "value": f"{item.kode} · {item.nama}"} for item in rows]
 
 
+@router.get("/pilihan-upb")
+async def upb_options(search: str = Query("", max_length=255), db: AsyncSession = Depends(get_db)):
+    """UPB sekolah untuk penempatan barang."""
+    query = select(Unit).where(Unit.tingkat == "upb", Unit.jenis.notin_(("DINAS", "UPT")))
+    if search.strip():
+        query = query.where(
+            or_(
+                Unit.kode.icontains(search.strip(), autoescape=True),
+                Unit.nama.icontains(search.strip(), autoescape=True),
+                Unit.nama_lama.icontains(search.strip(), autoescape=True),
+            )
+        )
+    rows = (await db.execute(query.order_by(Unit.kode).limit(50))).scalars().all()
+    return [{"id": item.id, "value": f"{item.kode} · {item.nama}"} for item in rows]
+
+
 @router.get("/{aset_id}", response_model=AsetDetail)
 async def detail(aset_id: str, db: AsyncSession = Depends(get_db)):
     row = (await db.execute(inventory_query().where(Aset.id == aset_id))).one_or_none()
@@ -128,7 +153,7 @@ async def detail(aset_id: str, db: AsyncSession = Depends(get_db)):
             await db.execute(
                 select(Riwayat)
                 .where(Riwayat.aset_id == aset_id)
-                .order_by(Riwayat.version.desc(), Riwayat.id)
+                .order_by(Riwayat.version.desc(), Riwayat.created_at.desc(), Riwayat.id)
             )
         )
         .scalars()
@@ -241,6 +266,60 @@ async def correct(
             409,
             "Register sudah tercatat atau referensi telah berubah. Muat ulang dan periksa data.",
         ) from exc
+    except Exception:
+        await db.rollback()
+        raise
+    db.expire_all()
+    return await detail(aset_id, db)
+
+
+@router.put("/{aset_id}/penempatan", response_model=AsetDetail)
+async def place(
+    aset_id: str,
+    payload: PenempatanUpdate,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(admin_access),
+):
+    """Set or clear the school UPB where the asset is placed; the booking UPB is unchanged."""
+    obj = (
+        await db.execute(select(Aset).where(Aset.id == aset_id).with_for_update())
+    ).scalar_one_or_none()
+    if obj is None:
+        raise HTTPException(404, "Aset tidak ditemukan")
+    target = await db.get(Unit, payload.upb_id) if payload.upb_id else None
+    if payload.upb_id and (target is None or target.tingkat != "upb"):
+        raise HTTPException(422, "Pilih UPB sekolah dari Referensi Unit & UPB SIMDA")
+    if target is not None and target.id == obj.upb_id:
+        raise HTTPException(422, "Barang sudah dibukukan pada UPB ini")
+    if (target.id if target else None) == obj.upb_penempatan_id and (
+        target is None or obj.status_penempatan == "manual"
+    ):
+        raise HTTPException(422, "Penempatan tidak berubah")
+    before = await db.get(Unit, obj.upb_penempatan_id) if obj.upb_penempatan_id else None
+    condition = await get_condition(db, obj.kondisi_kode)
+    snapshot = {"kode": condition.kode, "nama": condition.uraian}
+
+    def label(unit, status=None):
+        if unit is None:
+            return "belum ditetapkan"
+        return f"{unit.kode} {unit.nama}" + (" (otomatis)" if status == "otomatis" else "")
+
+    obj.upb_penempatan_id = target.id if target else None
+    note = f"Penempatan — {label(before, obj.status_penempatan)} → {label(target)}"
+    obj.status_penempatan = "manual" if target else None
+    # Placement is local data: the version is kept so SIMDA re-imports still refresh the item.
+    db.add(
+        Riwayat(
+            aset_id=aset_id,
+            kondisi_lama=snapshot,
+            kondisi_baru=snapshot,
+            catatan=note,
+            version=obj.version,
+            created_by=user.username,
+        )
+    )
+    try:
+        await db.commit()
     except Exception:
         await db.rollback()
         raise

@@ -46,6 +46,13 @@ class AsetUpdate(AsetFields):
     alasan: str = Field(min_length=1, max_length=1000)
 
 
+class PenempatanUpdate(BaseModel):
+    """School UPB where the asset is placed; null clears it."""
+
+    model_config = ConfigDict(extra="forbid")
+    upb_id: str | None = Field(None, min_length=1, max_length=50)
+
+
 class AsetResponse(BaseModel):
     id: str
     upb_id: str
@@ -67,6 +74,11 @@ class AsetResponse(BaseModel):
     sumber_dana_id: str | None
     sumber_dana_nama: str | None
     keterangan: str | None
+    simda_id: str | None
+    upb_penempatan_id: str | None
+    penempatan_kode: str | None
+    penempatan_nama: str | None
+    status_penempatan: str | None
     version: int
     created_by: str
     created_at: datetime

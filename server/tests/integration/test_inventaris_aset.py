@@ -359,3 +359,61 @@ async def test_inventory_correction_keeps_history_and_rejects_conflicts(inventor
     assert (await client.put(f"{BASE}/missing", json=current)).status_code == 404
     listed = (await client.get(f"{BASE}?search=000002")).json()
     assert listed["data"][0]["id"] == other["id"] and listed["data"][0]["version"] == 1
+
+
+async def test_inventory_placement_links_dinas_assets_to_a_school(inventory):
+    client, db, _, _ = inventory
+    db.add_all(
+        [
+            MasterAsetUnit(
+                id="dinas",
+                kode="08.01.001.009",
+                tingkat="upb",
+                kd_bidang=8,
+                kd_unit=1,
+                kd_sub=1,
+                kd_upb=9,
+                jenis="DINAS",
+                nama="Dinas",
+                status_pencocokan="bukan_sekolah",
+            ),
+            InventarisAset(
+                id="booked-at-dinas",
+                upb_id="dinas",
+                kode_barang=PAYLOAD["kode_barang"],
+                nomor_register="000009",
+                kib="B",
+                nama="Meja",
+                tahun_perolehan=2024,
+                nilai_perolehan=500,
+                lokasi="Belum dicatat",
+                kondisi_kode=1,
+                version=1,
+                created_by="import-simda",
+                simda_id="0801",
+            ),
+        ]
+    )
+    await db.commit()
+    url = f"{BASE}/booked-at-dinas/penempatan"
+    assert (await client.get(f"{BASE}?sekolah_id=school1")).json()["total"] == 0
+    options = (await client.get(f"{BASE}/pilihan-upb?search=satap")).json()
+    assert [item["id"] for item in options] == ["upb1"]  # UPB Dinas tidak ditawarkan
+    assert (await client.put(url, json={"upb_id": "dinas"})).status_code == 422
+    assert (await client.put(url, json={"upb_id": "missing"})).status_code == 422
+    placed = await client.put(url, json={"upb_id": "upb1"})
+    assert placed.status_code == 200, placed.text
+    detail = placed.json()
+    assert detail["penempatan_kode"] == "08.01.001.001" and detail["status_penempatan"] == "manual"
+    assert detail["upb_id"] == "dinas" and detail["version"] == 1  # pembukuan & versi tetap
+    assert "belum ditetapkan → 08.01.001.001" in detail["riwayat"][0]["catatan"]
+    assert (await client.put(url, json={"upb_id": "upb1"})).status_code == 422
+    for school in ("school1", "school2"):
+        listed = (await client.get(f"{BASE}?sekolah_id={school}")).json()
+        assert listed["total"] == 1 and listed["nilai_total"] == "500.00"
+    cleared = (await client.put(url, json={"upb_id": None})).json()
+    assert cleared["upb_penempatan_id"] is None and cleared["status_penempatan"] is None
+    assert (await client.get(f"{BASE}?sekolah_id=school1")).json()["total"] == 0
+    assert (
+        await client.put(f"{BASE}/missing/penempatan", json={"upb_id": None})
+    ).status_code == 404

@@ -12,7 +12,9 @@ export interface Asset {
   tahun_perolehan: number; tanggal_perolehan: string | null; nilai_perolehan: string;
   lokasi: string; kondisi_kode: number; kondisi_nama: string;
   sumber_dana_id: string | null; sumber_dana_nama: string | null;
-  keterangan: string | null; version: number; created_by: string; created_at: string; updated_at: string;
+  keterangan: string | null; simda_id: string | null;
+  upb_penempatan_id: string | null; penempatan_kode: string | null; penempatan_nama: string | null; status_penempatan: "otomatis" | "manual" | null;
+  version: number; created_by: string; created_at: string; updated_at: string;
 }
 export interface ConditionHistory {
   id: string; kondisi_lama: { kode: number; nama: string } | null;

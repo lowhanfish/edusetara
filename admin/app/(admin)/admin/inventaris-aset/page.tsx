@@ -88,7 +88,7 @@ export default function InventoryPage() {
             : <p className="mt-3 text-[#7d7152]">{upb ? "Sekolah sudah terhubung ke UPB; padanannya perlu diverifikasi sebelum pencatatan barang." : "Sekolah belum terhubung ke UPB. Hubungkan melalui Master Sekolah terlebih dahulu."}</p>}
 </td></tr> : list.data.data.map((asset) => <tr key={asset.id} className="hover:bg-white/40">
           <td className="px-4 py-4"><p className="font-bold text-[#2d2410]">{asset.nama}</p><p className="mt-1 font-mono text-[11px] text-amber-800">{asset.kode_barang}</p><p className="mt-1 text-[#7d7152]">Register {asset.nomor_register} · KIB {asset.kib}</p></td>
-          <td className="px-4 py-4"><p className="font-medium text-[#2d2410]">{asset.upb_nama}</p><p className="mt-1 font-mono text-[#7d7152]">{asset.upb_kode}</p></td>
+          <td className="px-4 py-4"><p className="font-medium text-[#2d2410]">{asset.upb_nama}</p><p className="mt-1 font-mono text-[#7d7152]">{asset.upb_kode}</p>{asset.penempatan_nama && <p className="mt-1 text-amber-800">Ditempatkan di {asset.penempatan_nama}{asset.status_penempatan === "otomatis" ? " (otomatis)" : ""}</p>}</td>
           <td className="whitespace-nowrap px-4 py-4"><p className="font-semibold text-[#2d2410]">{rupiah(asset.nilai_perolehan)}</p><p className="mt-1 text-[#7d7152]">Tahun {asset.tahun_perolehan}</p></td>
           <td className="px-4 py-4 text-[#2d2410]">{asset.lokasi}</td><td className="px-4 py-4"><span className="inline-block rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-amber-900">{asset.kondisi_nama}</span></td>
           <td className="px-4 py-4"><Button size="sm" variant="outline" onClick={() => setSelected(asset.id)}>Detail</Button></td>

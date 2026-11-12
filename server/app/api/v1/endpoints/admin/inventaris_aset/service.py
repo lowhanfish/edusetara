@@ -3,6 +3,7 @@
 from fastapi import HTTPException
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.models.master.aset import MasterAsetKodeBarang as Barang
 from app.models.master.aset import MasterAsetKondisiBarang as Kondisi
@@ -21,6 +22,9 @@ KIB_BY_PREFIX = {
     "01.03.06": "F",
 }
 
+# UPB penempatan: sekolah tempat barang berada bila dibukukan pada UPB lain.
+Tempat = aliased(Unit)
+
 
 def kib_of(kode_barang: str) -> str | None:
     return KIB_BY_PREFIX.get(".".join(kode_barang.split(".")[:3]))
@@ -35,11 +39,14 @@ def inventory_query():
             Barang.uraian.label("uraian_barang"),
             Kondisi.uraian.label("kondisi_nama"),
             Sumber.uraian.label("sumber_dana_nama"),
+            Tempat.kode.label("penempatan_kode"),
+            Tempat.nama.label("penempatan_nama"),
         )
         .join(Unit, Unit.id == Aset.upb_id)
         .join(Barang, Barang.kode == Aset.kode_barang)
         .join(Kondisi, Kondisi.kode == Aset.kondisi_kode)
         .outerjoin(Sumber, Sumber.id == Aset.sumber_dana_id)
+        .outerjoin(Tempat, Tempat.id == Aset.upb_penempatan_id)
     )
 
 
@@ -49,7 +56,15 @@ def serialize(row):
         **{c.name: getattr(obj, c.name) for c in Aset.__table__.columns},
         **{
             key: getattr(row, key)
-            for key in ("upb_kode", "upb_nama", "uraian_barang", "kondisi_nama", "sumber_dana_nama")
+            for key in (
+                "upb_kode",
+                "upb_nama",
+                "uraian_barang",
+                "kondisi_nama",
+                "sumber_dana_nama",
+                "penempatan_kode",
+                "penempatan_nama",
+            )
         },
     }
 

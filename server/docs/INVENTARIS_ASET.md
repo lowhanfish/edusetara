@@ -6,8 +6,8 @@ Akses API tahap ini dibatasi pada role `admin` dan `superadmin` Dinas.
 ## Mengaktifkan
 
 Dari direktori `server`, jalankan `.venv/bin/alembic upgrade head` melalui terminal
-lokal yang dapat mengakses database aplikasi. Migrasi baru: `d9e6f3ab4127`;
-pendahulu: `c8d5e2fa3016`. Modul tidak mengubah database SQL Server, SIMPEG, atau egov.
+lokal yang dapat mengakses database aplikasi. Migrasi: `d9e6f3ab4127` (tabel)
+`e1a7c4b95238` (kolom `simda_id`) dan `f2b8d5c06349` (kolom penempatan). Modul tidak mengubah database SQL Server, SIMPEG, atau egov.
 Migrasi ini menambah dua tabel; tidak menyalin ringkasan `sarpras_peralatan` menjadi
 barang individual karena ringkasan tersebut belum mempunyai register atau nilai per barang.
 
@@ -54,11 +54,13 @@ Seluruh endpoint berikut berawalan `/api/v1/admin/inventaris-aset`.
 
 | Metode / path | Fungsi |
 |---|---|
-| `GET /` | Daftar, jumlah, dan `nilai_total`; filter `sekolah_id`, `sub_unit_id`, `search`, `kib`, `kondisi_kode`, `skip`, `limit` |
+| `GET /` | Daftar, jumlah, dan `nilai_total`; filter `sekolah_id` dan `sub_unit_id` mencakup UPB pembukuan maupun penempatan; `search` mencari di nama, kode barang, register, dan keterangan; filter `sekolah_id`, `sub_unit_id`, `search`, `kib`, `kondisi_kode`, `skip`, `limit` |
 | `GET /pilihan-sub-unit` | Pilihan semua Sub Unit/UPT, urut kode SIMDA; memakai ID referensi |
 | `GET /pilihan-kode-barang` | Pencarian `search` khusus kode barang level 7 aset tetap KIB A–F, maksimal 50 hasil |
 | `POST /` | Pencatatan awal, JSON sesuai `AsetCreate` |
 | `GET /{id}` | Detail dan seluruh riwayat kondisi, terbaru dahulu |
+| `GET /pilihan-upb` | Pencarian UPB sekolah (bukan Dinas/UPT) untuk penempatan, maksimal 50 hasil |
+| `PUT /{id}/penempatan` | Tetapkan atau kosongkan sekolah penempatan: `{"upb_id": "..." atau null}` |
 | `PUT /{id}` | Koreksi data, JSON sesuai `AsetUpdate` (kolom barang + `version` + `alasan`) |
 | `POST /{id}/kondisi` | Multipart: `kondisi_kode`, `version`, `catatan`, `foto` |
 
@@ -69,24 +71,74 @@ Foto dan kondisi disimpan bersama secara transaksional; berkas dibersihkan jika 
 Respons penting: 401 belum login, 403 role tidak sesuai, 404 tidak ditemukan,
 409 duplikasi/konflik versi, 413 foto terlalu besar, 422 input/referensi tidak sesuai.
 
-## Persiapan impor SIMDA
+## Impor barang dari SIMDA
 
-Impor barang aktual **belum dijalankan atau diimplementasikan**. Struktur `Ta_KIB_A`–`Ta_KIB_E`
-harus diperiksa langsung di SQL Server sebelum menulis importer; jangan menebaknya dari
-tabel referensi yang sudah diimpor.
+Skrip: `scripts/import_simda_inventaris.py` (hanya membaca SQL Server, menulis ke MySQL).
+Lingkup: `Ta_KIB_A`–`Ta_KIB_E` milik UPB yang ada di Referensi Unit & UPB SIMDA
+(Dinas Pendidikan, `Kd_Bidang` 8, `Kd_Unit` 1). `Ta_KIB_F` kosong untuk lingkup ini.
+
+    python scripts/import_simda_inventaris.py --dry-run                      # hitung saja
+    python scripts/import_simda_inventaris.py --dry-run --upb 08.01.002.002  # pratinjau satu UPB
+    python scripts/import_simda_inventaris.py --rejects penolakan.csv        # impor
+
+| Inventaris | Sumber SIMDA |
+|---|---|
+| `simda_id` | `IDPemda` (unik per tabel KIB; kunci pencocokan saat impor ulang) |
+| `upb_id` | `Kd_Sub` + `Kd_UPB` → `master_aset_unit` |
+| `kode_barang` | `Kd_Aset8`, `80`–`85` (Permendagri 108), dua digit per tingkat |
+| `nomor_register` | `No_Reg8`, enam digit |
+| `tahun_perolehan`, `tanggal_perolehan` | `Tgl_Perolehan` (kolom `Tahun` kosong di sumber) |
+| `nilai_perolehan` | `Harga`, dibulatkan ke dua desimal |
+| `kondisi_kode` | `Kondisi`; KIB A tidak punya kondisi sehingga diisi 1 (Baik) |
+| `nama` | `Judul` (KIB E) bila ada, selain itu uraian kode barang |
+| `merk`, `nomor_seri` | KIB B: `Merk` + `Type`, `Nomor_Pabrik` |
+| `lokasi` | KIB A `Alamat`, KIB C/D `Lokasi`; kosong menjadi "Belum dicatat" |
+| `keterangan` | `Keterangan` + "Asal-usul: `Asal_usul`"; `sumber_dana_id` tidak diisi |
+
+Aturan impor ulang: barang baru ditambah bersama riwayat kondisi awal; barang impor yang masih
+versi 1 mengikuti SIMDA; barang yang sudah dikoreksi atau diperiksa di aplikasi tidak disentuh;
+tidak ada yang dihapus. Baris ditolak bila ditandai hapus (`Kd_Hapus`), register ganda pada
+UPB + kode barang + tahun yang sama, atau referensinya tidak ada di master.
+
+Belum diimpor karena inventaris belum punya kolomnya: `Masa_Manfaat`, `Nilai_Sisa`,
+`Kd_Pemilik`, `Kd_KA`, `Kd_Data`, luas/ukuran, dokumen dan sertifikat. Data ini diperlukan
+modul penyusutan dan dapat disusulkan lewat `simda_id`.
+
+Hasil impor 12 November 2026 (database SIMDA pelatihan): 280.800 barang, nilai perolehan
+Rp 732.453.308.630,61; 13 baris ditolak (daftar di `docs/penolakan_impor_simda_inventaris.csv`).
+**Hampir seluruh barang dibukukan SIMDA pada UPB `08.01.001.001` (Dinas), bukan per sekolah**;
+nama sekolah hanya muncul sebagai teks bebas di `Keterangan`.
+
+## Sekolah penempatan
+
+UPB pembukuan (`upb_id`) mengikuti SIMDA dan tidak diubah. Sekolah tempat barang berada dicatat
+terpisah di `upb_penempatan_id` dengan `status_penempatan`:
+
+- `otomatis`: diisi `scripts/match_penempatan_inventaris.py` dari teks keterangan. Skrip
+  mencocokkan nama sekarang dan nama lama UPB sekolah serta nama sekolah yang terhubung, dan
+  hanya mengisi bila teks menunjuk tepat satu UPB. Pencocokan bertumpu pada nama, jadi barang
+  lama yang ditulis dengan nama yang kemudian dipakai sekolah lain bisa salah alamat.
+- `manual`: ditetapkan atau dikonfirmasi admin lewat detail aset; tercatat di riwayat barang.
+
+Penempatan tidak menaikkan versi barang, sehingga impor ulang SIMDA tetap memperbarui datanya
+dan tidak menyentuh penempatan. Skrip hanya mengisi barang di UPB Dinas/UPT yang penempatannya
+masih kosong; aman dijalankan berulang.
+
+Hasil 12 November 2026 dari 280.798 barang di UPB Dinas:
+
+| Kelompok | Barang | Nilai perolehan |
+|---|---|---|
+| Diisi otomatis (394 UPB sekolah) | 48.943 | Rp 270.912.670.307,30 |
+| Nama dipakai lebih dari satu UPB (dibiarkan kosong) | 1.977 | Rp 19.132.004.811,93 |
+| Menyebut sekolah di luar referensi (dibiarkan kosong) | 2.298 | Rp 63.515.541.269,32 |
+| Tidak menyebut sekolah | 227.580 | Rp 378.893.092.241,06 |
 
 Referensi UPB: `Ref_UPB` Dinas Pendidikan berisi 521 baris, 469 di antaranya diimpor. Sebanyak
 52 baris dilewati karena tidak bernama (kosong atau `.`); pada pemeriksaan 12 November 2026
 tidak satu pun dari 52 baris itu mempunyai barang di `Ta_KIB_A`–`Ta_KIB_E`.
 
-Saat sumber tersedia, petakan identitas UPB (bidang/unit/subunit/UPB), kode barang
-rinci, kelompok KIB, register, tahun/tanggal perolehan, nama/spesifikasi, nilai,
-kondisi, lokasi dan sumber perolehan. Gunakan kunci bisnis inventaris untuk pemeriksaan
-duplikasi. Siapkan preview satu UPB, daftar penolakan, serta identitas sumber sebelum
-menulis importernya. Impor tidak boleh menimpa riwayat kondisi pemeriksaan lokal.
-
 Penyusutan, mutasi, penghapusan, rekonsiliasi SIMDA dan laporan ekspor merupakan
-modul lanjutan, tidak diasumsikan selesai oleh tahap pencatatan awal ini.
+modul lanjutan, tidak diasumsikan selesai oleh tahap ini.
 
 ## Validasi
 
