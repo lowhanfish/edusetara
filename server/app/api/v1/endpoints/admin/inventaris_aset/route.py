@@ -46,6 +46,7 @@ async def list_assets(
     sub_unit_id: str | None = Query(None, min_length=1, max_length=50),
     kondisi_kode: int | None = None,
     kib: Literal["A", "B", "C", "D", "E", "F"] | None = None,
+    tahun_perolehan: int | None = Query(None, ge=1900, le=2100),
     search: str = Query("", max_length=255),
     db: AsyncSession = Depends(get_db),
 ):
@@ -71,6 +72,8 @@ async def list_assets(
         query = query.where(Aset.kondisi_kode == kondisi_kode)
     if kib:
         query = query.where(Aset.kib == kib)
+    if tahun_perolehan is not None:
+        query = query.where(Aset.tahun_perolehan == tahun_perolehan)
     if search.strip():
         query = query.where(
             or_(
@@ -115,6 +118,21 @@ async def code_options(search: str = Query("", max_length=255), db: AsyncSession
         )
     rows = (await db.execute(query.order_by(Barang.kode).limit(50))).scalars().all()
     return [{"id": item.kode, "value": f"{item.kode} · {item.uraian}"} for item in rows]
+
+
+@router.get("/pilihan-tahun")
+async def year_options(db: AsyncSession = Depends(get_db)):
+    """Tahun perolehan yang benar-benar ada di inventaris, terbaru lebih dulu."""
+    years = (
+        (
+            await db.execute(
+                select(Aset.tahun_perolehan).distinct().order_by(Aset.tahun_perolehan.desc())
+            )
+        )
+        .scalars()
+        .all()
+    )
+    return [{"id": str(year), "value": str(year)} for year in years]
 
 
 @router.get("/pilihan-sub-unit")
