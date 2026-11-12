@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter
 
+from app.api.v1.endpoints.admin.inventaris_aset import router as inventaris_aset_router
 from app.api.v1.endpoints.admin.gallery import gallery_router
 from app.api.v1.endpoints.admin.jurnal import jurnal_router
 from app.api.v1.endpoints.admin.kegiatan import (
@@ -39,6 +40,7 @@ admin_router.include_router(master_router)
 # 2. Operational Domains
 admin_router.include_router(profile_router)
 admin_router.include_router(sarpras_router)
+admin_router.include_router(inventaris_aset_router)
 admin_router.include_router(rombel_router)
 admin_router.include_router(usulan_router)
 admin_router.include_router(jurnal_router)

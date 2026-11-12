@@ -3155,3 +3155,10 @@ Saat sekolah utama dilepas dari UPB bersama, sekolah kedua menjadi utama.
 UPB tanpa sekolah kembali berstatus `belum`. Pemilihan UPB tunggal menandai
 padanan `manual`; penambahan sekolah kedua pada UPB SATAP menandai padanan
 `otomatis` untuk ditinjau bersama pada halaman Referensi Unit & UPB SIMDA.
+
+### Inventaris Aset Sekolah (BMD)
+
+Modul `/admin/inventaris-aset` memakai API `/api/v1/admin/inventaris-aset`.
+Kontrak, migrasi, alur percontohan, batas akses, dan persiapan pemetaan impor
+tersedia pada `server/docs/INVENTARIS_ASET.md`. Pencatatan per register berbeda dari
+ringkasan jumlah alat pada Sarpras Peralatan; kedua data tidak disalin otomatis.

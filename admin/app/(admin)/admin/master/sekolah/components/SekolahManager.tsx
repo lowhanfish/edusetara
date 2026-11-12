@@ -52,6 +52,7 @@ export default function SekolahManager({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Semua");
   const [kecamatanFilter, setKecamatanFilter] = useState("Semua");
+  const [bmdFilter, setBmdFilter] = useState<"" | "sudah" | "belum">("");
 
   // Pagination State
   const [page, setPage] = useState(1);
@@ -80,6 +81,7 @@ export default function SekolahManager({
     jenjang: queryJenjang,
     statusSekolah: statusFilter,
     kecamatan: kecamatanFilter,
+    statusBmd: bmdFilter,
   });
 
   const { kecamatanList } = useKecamatanList();
@@ -241,77 +243,145 @@ export default function SekolahManager({
       {/* 4. Kontainer Utama (Toolbar Filter & Tabel Semantik) */}
       <Card className="border border-white/80 shadow-xs">
         {/* Toolbar Filter */}
-        <div className="p-4 sm:p-5 border-b border-[#2d2410]/15 bg-white/30 backdrop-blur-sm flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="w-full md:w-80">
-            <Input
-              value={search}
-              onChange={(e: any) => setSearch(e.target.value)}
-              placeholder="Cari nama sekolah, NPSN, alamat..."
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-            <Select
-              value={statusFilter}
-              onChange={(e: any) => {
-                setStatusFilter(e.target.value);
-                setPage(1);
-              }}
-              className="text-xs"
-            >
-              <option value="Semua">Semua Status</option>
-              <option value="NEGERI">Negeri</option>
-              <option value="SWASTA">Swasta</option>
-            </Select>
-
-            <Select
-              value={kecamatanFilter}
-              onChange={(e: any) => {
-                setKecamatanFilter(e.target.value);
-                setPage(1);
-              }}
-              className="text-xs"
-            >
-              <option value="Semua">Semua Kecamatan</option>
-              {kecamatanList.length > 0
-                ? kecamatanList.map((kec) => (
-                    <option key={kec.id} value={kec.label}>
-                      Kec. {kec.label}
-                    </option>
-                  ))
-                : KECAMATAN_OPTIONS.map((kec) => (
-                    <option key={kec} value={kec}>
-                      Kec. {kec}
-                    </option>
-                  ))}
-            </Select>
-
-            {(search || statusFilter !== "Semua" || kecamatanFilter !== "Semua") && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSearch("");
-                  setStatusFilter("Semua");
-                  setKecamatanFilter("Semua");
-                  setPage(1);
-                }}
-                className="text-rose-600 hover:text-rose-700"
-              >
-                Reset Filter
-              </Button>
-            )}
-
+        <section aria-labelledby="school-filter-heading" className="border-b border-[#2d2410]/10 bg-white/40 p-4 sm:p-5">
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-200/70 bg-amber-50 text-amber-800" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 7h16M7 12h10M10 17h4" />
+                  <circle cx="8" cy="7" r="2" fill="currentColor" stroke="none" />
+                  <circle cx="15" cy="12" r="2" fill="currentColor" stroke="none" />
+                </svg>
+              </span>
+              <div>
+                <h2 id="school-filter-heading" className="text-sm font-bold text-[#2d2410]">Cari & Filter Sekolah</h2>
+                <p className="mt-0.5 text-xs text-[#7d7152]">Temukan sekolah berdasarkan identitas, status, atau kecamatan.</p>
+              </div>
+            </div>
             <Button
+              type="button"
               variant="outline"
               size="sm"
               onClick={() => refetch()}
-              title="Segarkan Data"
+              disabled={isLoading}
+              className="shrink-0"
+              icon={
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 7v5h-5M4 17v-5h5" />
+                  <path d="M6.1 6.1A8 8 0 0 1 20 12M4 12a8 8 0 0 0 13.9 5.9" />
+                </svg>
+              }
             >
-              🔄
+              Segarkan
             </Button>
           </div>
-        </div>
+
+          <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-12">
+            <div className="min-w-0 sm:col-span-2 lg:col-span-4">
+              <Input
+                id="school-search"
+                label="Pencarian sekolah"
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Nama sekolah, NPSN, atau alamat..."
+                leftIcon={
+                  <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
+                    <circle cx="10.5" cy="10.5" r="6.5" />
+                    <path d="m16 16 4.5 4.5" />
+                  </svg>
+                }
+              />
+            </div>
+            <div className="min-w-0 lg:col-span-2">
+              <Select
+                id="school-status-filter"
+                label="Status sekolah"
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="Semua">Semua status</option>
+                <option value="NEGERI">Negeri</option>
+                <option value="SWASTA">Swasta</option>
+              </Select>
+            </div>
+            <div className="min-w-0 lg:col-span-3">
+              <Select
+                id="school-district-filter"
+                label="Kecamatan"
+                value={kecamatanFilter}
+                onChange={(e) => {
+                  setKecamatanFilter(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="Semua">Semua kecamatan</option>
+                {kecamatanList.length > 0
+                  ? kecamatanList.map((kec) => (
+                      <option key={kec.id} value={kec.label}>{kec.label}</option>
+                    ))
+                  : KECAMATAN_OPTIONS.map((kec) => (
+                      <option key={kec} value={kec}>{kec}</option>
+                    ))}
+              </Select>
+            </div>
+            <div className="min-w-0 lg:col-span-3">
+              <Select
+                id="school-bmd-filter"
+                label="Status BMD"
+                value={bmdFilter}
+                onChange={(e) => {
+                  setBmdFilter(e.target.value as "" | "sudah" | "belum");
+                  setPage(1);
+                }}
+              >
+                <option value="">Semua status BMD</option>
+                <option value="sudah">Sudah terhubung BMD</option>
+                <option value="belum">Belum terhubung BMD</option>
+              </Select>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#2d2410]/8 pt-3">
+            <div className="flex min-w-0 flex-wrap items-center gap-2 text-[11px] text-[#7d7152]">
+              {search || statusFilter !== "Semua" || kecamatanFilter !== "Semua" || bmdFilter ? (
+                <>
+                  <span className="font-medium">Filter aktif:</span>
+                  {[
+                    search.trim() ? `Pencarian: ${search.trim()}` : null,
+                    statusFilter !== "Semua" ? `Status: ${statusFilter === "NEGERI" ? "Negeri" : "Swasta"}` : null,
+                    kecamatanFilter !== "Semua" ? `Kec. ${kecamatanFilter}` : null,
+                    bmdFilter ? `BMD: ${bmdFilter === "sudah" ? "Sudah terhubung" : "Belum terhubung"}` : null,
+                  ].filter(Boolean).map((filter) => (
+                    <span key={filter} className="max-w-full break-words rounded-lg border border-amber-200/70 bg-amber-50 px-2.5 py-1 font-medium text-amber-900">{filter}</span>
+                  ))}
+                </>
+              ) : (
+                <span>Semua status sekolah, kecamatan, dan BMD · Hasil diperbarui otomatis saat filter berubah.</span>
+              )}
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={!search && statusFilter === "Semua" && kecamatanFilter === "Semua" && !bmdFilter}
+              onClick={() => {
+                setSearch("");
+                setDebouncedSearch("");
+                setStatusFilter("Semua");
+                setKecamatanFilter("Semua");
+                setBmdFilter("");
+                setPage(1);
+              }}
+              className="shrink-0"
+            >
+              Reset filter
+            </Button>
+          </div>
+        </section>
 
         {/* Tabel Semantik */}
         <div className="w-full overflow-x-auto">

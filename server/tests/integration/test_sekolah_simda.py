@@ -72,3 +72,21 @@ async def test_reject_invalid_or_occupied_upb_and_preserve_unedited_link(setup):
     response = await client.put(f"{BASE}/sch1", json={"simda_upb_id": upb["id"]})
     assert response.status_code == 409
     assert (await client.get(f"{BASE}/sch1")).json()["simda_upb"]["id"] == other["id"]
+
+
+async def test_bmd_filter_includes_shared_school_and_correct_pagination(setup):
+    client, _, upb, _ = setup
+    await client.put(f"{BASE}/sch1", json={"simda_upb_id": upb["id"]})
+    await client.put(f"{BASE}/sch2", json={"simda_upb_id": upb["id"]})
+    linked = await client.get(f"{BASE}?status_bmd=sudah&limit=1&skip=1")
+    assert linked.status_code == 200, linked.text
+    assert linked.json()["total"] == 2
+    assert [s["id"] for s in linked.json()["data"]] == ["sch2"]
+    unlinked = (await client.get(f"{BASE}?status_bmd=belum")).json()
+    assert unlinked["total"] == 1
+    assert [s["id"] for s in unlinked["data"]] == ["sch3"]
+    combined = (await client.get(f"{BASE}?status_bmd=sudah&jenjang=SMP&search=School")).json()
+    assert combined["total"] == 1
+    assert combined["data"][0]["id"] == "sch2"
+    assert (await client.get(BASE)).json()["total"] == 3
+    assert (await client.get(f"{BASE}?status_bmd=invalid")).status_code == 422

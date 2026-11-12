@@ -39,6 +39,12 @@
         "path": "/admin/sarpras/peralatan",
         "icon": "🖥️",
         "children": null
+      },
+      {
+        "title": "Inventaris Aset BMD",
+        "path": "/admin/inventaris-aset",
+        "icon": "📦",
+        "children": null
       }
     ]
   },

@@ -165,3 +165,5 @@ __all__ = [
     "LayananPublik",
     "PesanKontak",
 ]
+
+from app.models.operational.inventaris_aset import InventarisAset, RiwayatKondisiAset  # noqa: F401

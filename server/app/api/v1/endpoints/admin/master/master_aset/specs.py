@@ -20,6 +20,7 @@ from app.models.master.aset import (
     MasterAsetUnit,
 )
 from app.models.master.sekolah import MasterSekolah
+from app.models.operational.inventaris_aset import InventarisAset
 
 KodeBarang = MasterAsetKodeBarang
 Metode = MasterAsetMetodePenyusutan
@@ -58,6 +59,7 @@ async def _guard_kode_barang(db: AsyncSession, obj: Any) -> None:
         (MasaManfaat, "Master Masa Manfaat"),
         (Kapitalisasi, "Master Kapitalisasi"),
         (NilaiMinimum, "Master Nilai Minimum Kapitalisasi"),
+        (InventarisAset, "Inventaris Aset Sekolah"),
     )
     for model, label in used_by:
         if await _count(db, model.kode_barang, obj.kode):
@@ -227,8 +229,15 @@ async def _enrich_unit(db: AsyncSession, rows: list[Row]) -> None:
 
 
 async def _guard_unit(db: AsyncSession, obj: Any) -> None:
+    if await _count(db, InventarisAset.upb_id, obj.id):
+        raise _conflict("UPB masih digunakan Inventaris Aset Sekolah.")
     if await _count(db, Unit.kode_induk, obj.kode):
         raise _conflict("Masih ada sub unit/UPB di bawahnya; hapus turunannya terlebih dahulu.")
+
+
+async def _guard_kondisi(db: AsyncSession, obj: Any) -> None:
+    if await _count(db, InventarisAset.kondisi_kode, obj.kode):
+        raise _conflict("Kondisi masih digunakan Inventaris Aset Sekolah.")
 
 
 # --- nilai-minimum-kapitalisasi ------------------------------------------------------------
@@ -320,6 +329,7 @@ SPECS: dict[str, AsetMasterSpec] = {
         search=lambda q: MasterAsetKondisiBarang.uraian.ilike(_like(q), escape="\\"),
         order_by=(MasterAsetKondisiBarang.kode,),
         lock_fields=("kode",),
+        guard_delete=_guard_kondisi,
     ),
     "status-pemilik": AsetMasterSpec(
         model=MasterAsetStatusPemilik,

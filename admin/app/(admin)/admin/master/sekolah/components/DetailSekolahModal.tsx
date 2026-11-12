@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Badge, Button, Modal } from "../../../../_components/ui";
 import SimdaIdentity from "./SimdaIdentity";
 import { SekolahRecord } from "../types";
@@ -51,7 +52,8 @@ export default function DetailSekolahModal({
               </a>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href={`/admin/inventaris-aset?sekolah_id=${encodeURIComponent(record.id)}`} className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-100">Lihat inventaris</Link>
             <Button variant="outline" size="sm" onClick={onClose}>
               Tutup
             </Button>

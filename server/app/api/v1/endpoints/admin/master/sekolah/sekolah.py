@@ -1,6 +1,6 @@
 """Master Sekolah endpoints powered by sovereign edusetara.master_sekolah dataset."""
 
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import text
@@ -154,6 +154,7 @@ async def read_sekolah(
     status_sekolah: str | None = Query(None, description="Status (NEGERI, SWASTA)"),
     kecamatan: str | None = Query(None, description="Nama Kecamatan"),
     kecamatan_id: int | None = Query(None, description="ID Kecamatan"),
+    status_bmd: Literal["sudah", "belum"] | None = Query(None, description="Status keterhubungan UPB BMD"),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -179,6 +180,15 @@ async def read_sekolah(
     if status_sekolah and status_sekolah.upper() != "SEMUA":
         where_clauses.append("status_sekolah = :status_sekolah")
         params["status_sekolah"] = status_sekolah.upper()
+
+    if status_bmd is not None:
+        exists_upb = """EXISTS (
+            SELECT 1 FROM master_aset_unit AS upb
+            WHERE upb.tingkat = 'upb'
+              AND (upb.sekolah_id = master_sekolah.id
+                   OR upb.sekolah_kedua_id = master_sekolah.id)
+        )"""
+        where_clauses.append(exists_upb if status_bmd == "sudah" else f"NOT {exists_upb}")
 
     if kecamatan_id:
         where_clauses.append("kecamatan_id = :kecamatan_id")

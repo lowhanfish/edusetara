@@ -20,6 +20,7 @@ export const useResponseListSekolah = ({
   statusSekolah = "",
   kecamatan = "",
   kecamatanId = null,
+  statusBmd = "",
 }: {
   page: number;
   pageSize: number;
@@ -28,12 +29,14 @@ export const useResponseListSekolah = ({
   statusSekolah?: string;
   kecamatan?: string;
   kecamatanId?: number | null;
+  statusBmd?: "" | "sudah" | "belum";
 }) => {
   const url = useUrlStore((state) => state.URL.APP);
 
   const queryParams = new URLSearchParams();
   queryParams.set("skip", String((page - 1) * pageSize));
   queryParams.set("limit", String(pageSize));
+  if (statusBmd) queryParams.set("status_bmd", statusBmd);
   if (search) queryParams.set("search", search);
   if (jenjang && jenjang !== "Semua") queryParams.set("jenjang", jenjang);
   if (statusSekolah && statusSekolah !== "Semua") queryParams.set("status_sekolah", statusSekolah);
@@ -57,6 +60,7 @@ export const useResponseListSekolah = ({
       statusSekolah,
       kecamatan,
       kecamatanId,
+      statusBmd,
     ],
   });
 
