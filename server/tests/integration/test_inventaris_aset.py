@@ -1,6 +1,7 @@
 """BMD pilot flow: validated references, shared UPB, exact totals and condition evidence."""
 
 import base64
+from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest_asyncio
@@ -433,3 +434,29 @@ async def test_inventory_year_filter_and_options(inventory):
     assert (await client.get(f"{BASE}?tahun_perolehan=abc")).status_code == 422
     years = (await client.get(f"{BASE}/pilihan-tahun")).json()
     assert years == [{"id": "2025", "value": "2025"}, {"id": "2024", "value": "2024"}]
+
+
+async def test_inventory_summary_groups_by_kib_and_condition(inventory):
+    client, _, _, user = inventory
+    empty = (await client.get(f"{BASE}/rekap")).json()
+    assert empty["total"] == 0 and empty["data"] == []
+    assert Decimal(empty["nilai_total"]) == 0
+    assert empty["kondisi"] == [{"kode": 1, "nama": "Baik"}, {"kode": 2, "nama": "Rusak Ringan"}]
+    await make_asset(client, nilai_perolehan="100.25")
+    await make_asset(client, nomor_register="000002", nilai_perolehan="50.50", kondisi_kode=2)
+    await make_asset(client, nomor_register="000003", nilai_perolehan="1.25", kondisi_kode=2)
+    await make_asset(
+        client, nomor_register="000004", kib="E", kode_barang=BUKU, nilai_perolehan="10.00"
+    )
+    body = (await client.get(f"{BASE}/rekap")).json()
+    assert body["total"] == 4 and body["nilai_total"] == "162.00"
+    rows = {
+        (row["kib"], row["kondisi_kode"]): (row["jumlah"], row["nilai"]) for row in body["data"]
+    }
+    assert rows == {
+        ("B", 1): (1, "100.25"),
+        ("B", 2): (2, "51.75"),
+        ("E", 1): (1, "10.00"),
+    }
+    user.role.name = "user"
+    assert (await client.get(f"{BASE}/rekap")).status_code == 403
