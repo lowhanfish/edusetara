@@ -9,41 +9,7 @@ import {
   TrendSplineChart,
 } from "./chart-presets";
 import { Badge } from "../ui";
-
-const SARPRAS_DATA = {
-  ruang: {
-    subtitle: "Kondisi kelayakan ruang kelas & laboratorium per jenjang",
-    categories: ["TK / PAUD", "Jenjang SD", "Jenjang SMP", "PKBM"],
-    series: [
-      { name: "Baik", data: [142, 1180, 495, 38], color: "#10b981" },
-      { name: "Rusak Ringan", data: [48, 310, 124, 14], color: "#f59e0b" },
-      { name: "Rusak Sedang", data: [19, 96, 42, 6], color: "#f97316" },
-      { name: "Rusak Berat", data: [8, 45, 18, 2], color: "#f43f5e" },
-    ],
-    summary: "81,4% ruang belajar dalam kondisi Baik • 73 ruang prioritas rehabilitasi DAK",
-  },
-  bangunan: {
-    subtitle: "Status fisik gedung utama & penunjang satuan pendidikan",
-    categories: ["TK / PAUD", "Jenjang SD", "Jenjang SMP", "PKBM"],
-    series: [
-      { name: "Baik", data: [95, 520, 210, 22], color: "#10b981" },
-      { name: "Rusak Ringan", data: [28, 140, 58, 8], color: "#f59e0b" },
-      { name: "Rusak Sedang", data: [12, 48, 21, 3], color: "#f97316" },
-      { name: "Rusak Berat", data: [4, 19, 9, 1], color: "#f43f5e" },
-    ],
-    summary: "847 unit bangunan layak pakai • 33 gedung masuk daftar usulan revitalisasi",
-  },
-  peralatan: {
-    subtitle: "Kesiapan aset perangkat TIK, Chromebook & alat peraga",
-    categories: ["TK / PAUD", "Jenjang SD", "Jenjang SMP", "PKBM"],
-    series: [
-      { name: "Berfungsi Baik", data: [210, 2450, 1890, 95], color: "#3b82f6" },
-      { name: "Perlu Perbaikan", data: [35, 320, 215, 18], color: "#f59e0b" },
-      { name: "Rusak / Afkir", data: [12, 110, 74, 6], color: "#f43f5e" },
-    ],
-    summary: "88,9% peralatan TIK siap mendukung pelaksanaan ANBK & pembelajaran digital",
-  },
-} as const;
+import { AssetConditionCard, AssetValueCard } from "./asset-condition-card";
 
 const DEMOGRAFI_DATA = {
   siswa: {
@@ -160,76 +126,21 @@ const USULAN_VERIFIKASI_DATA = {
 };
 
 export function DashboardAnalyticsSection() {
-  const [sarprasTab, setSarprasTab] =
-    useState<keyof typeof SARPRAS_DATA>("ruang");
   const [demografiTab, setDemografiTab] =
     useState<keyof typeof DEMOGRAFI_DATA>("siswa");
   const [usulanTab, setUsulanTab] =
     useState<keyof typeof USULAN_VERIFIKASI_DATA>("semua");
   const [activityMode, setActivityMode] = useState<"jurnal" | "ppdb">("jurnal");
 
-  const activeSarpras = SARPRAS_DATA[sarprasTab];
   const activeDemografi = DEMOGRAFI_DATA[demografiTab];
   const activeUsulan = USULAN_VERIFIKASI_DATA[usulanTab];
 
   return (
     <section className="space-y-6" aria-label="Analitik Visual Portal Admin">
-      {/* Row 1: Sarpras (7 cols) & Distribusi Rombel/Siswa (5 cols) */}
+      {/* Row 1: Kondisi aset (7 cols) & Distribusi Rombel/Siswa (5 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-7">
-          <ChartCard
-            title="Kondisi Sarana & Prasarana Sekolah"
-            subtitle={activeSarpras.subtitle}
-            icon="building"
-            action={
-              <div className="inline-flex rounded-xl bg-amber-950/5 p-1 border border-amber-200/60">
-                {(
-                  [
-                    { key: "ruang", label: "Ruang" },
-                    { key: "bangunan", label: "Bangunan" },
-                    { key: "peralatan", label: "Aset TIK" },
-                  ] as const
-                ).map((tab) => (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    onClick={() => setSarprasTab(tab.key)}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
-                      sarprasTab === tab.key
-                        ? "bg-white text-amber-900 shadow-xs"
-                        : "text-[#7d7152] hover:text-[#2d2410]"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            }
-            footer={
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                <span className="text-[#5e5133] font-medium">
-                  {activeSarpras.summary}
-                </span>
-                <Link
-                  href={`/admin/sarpras/${sarprasTab}`}
-                  className="font-bold text-[#a86a00] hover:text-[#f5b82e] transition-colors"
-                >
-                  Kelola Sarpras →
-                </Link>
-              </div>
-            }
-          >
-            <ColumnBarChart
-              categories={[...activeSarpras.categories]}
-              series={activeSarpras.series.map((s) => ({
-                name: s.name,
-                data: [...s.data],
-                color: s.color,
-              }))}
-              stacking="normal"
-              height={285}
-            />
-          </ChartCard>
+          <AssetConditionCard />
         </div>
 
         <div className="lg:col-span-5">
@@ -285,6 +196,9 @@ export function DashboardAnalyticsSection() {
           </ChartCard>
         </div>
       </div>
+
+      {/* Row 1b: Nilai aset per KIB */}
+      <AssetValueCard />
 
       {/* Row 2: Usulan & Verifikasi (6 cols) & Jurnal V2 / PPDB (6 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

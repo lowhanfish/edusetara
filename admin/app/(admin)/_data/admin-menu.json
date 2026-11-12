@@ -19,24 +19,28 @@
       {
         "title": "Tanah Sekolah",
         "path": "/admin/sarpras/tanah",
+        "hidden": true,
         "icon": "🗺️",
         "children": null
       },
       {
         "title": "Bangunan",
         "path": "/admin/sarpras/bangunan",
+        "hidden": true,
         "icon": "🏫",
         "children": null
       },
       {
         "title": "Ruang",
         "path": "/admin/sarpras/ruang",
+        "hidden": true,
         "icon": "🚪",
         "children": null
       },
       {
         "title": "Peralatan / Aset",
         "path": "/admin/sarpras/peralatan",
+        "hidden": true,
         "icon": "🖥️",
         "children": null
       },

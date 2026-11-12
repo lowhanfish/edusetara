@@ -1,6 +1,7 @@
 """Admin BMD inventory: one register per physical asset, condition history with photos."""
 
 import uuid
+from decimal import Decimal
 from pathlib import Path
 from typing import Literal
 
@@ -15,6 +16,7 @@ from app.api.deps import get_db, require_roles
 from app.db.transaction import commit_or_raise_unique_conflict
 from app.models.auth.user import User
 from app.models.master.aset import MasterAsetKodeBarang as Barang
+from app.models.master.aset import MasterAsetKondisiBarang as Kondisi
 from app.models.master.aset import MasterAsetUnit as Unit
 from app.models.operational.inventaris_aset import InventarisAset as Aset
 from app.models.operational.inventaris_aset import RiwayatKondisiAset as Riwayat
@@ -118,6 +120,36 @@ async def code_options(search: str = Query("", max_length=255), db: AsyncSession
         )
     rows = (await db.execute(query.order_by(Barang.kode).limit(50))).scalars().all()
     return [{"id": item.kode, "value": f"{item.kode} · {item.uraian}"} for item in rows]
+
+
+@router.get("/rekap")
+async def summary(db: AsyncSession = Depends(get_db)):
+    """Rekap dashboard: jumlah register dan nilai perolehan per kelompok KIB dan kondisi."""
+    conditions = (await db.execute(select(Kondisi).order_by(Kondisi.kode))).scalars().all()
+    rows = (
+        await db.execute(
+            select(
+                Aset.kib,
+                Aset.kondisi_kode,
+                func.count().label("jumlah"),
+                func.coalesce(func.sum(Aset.nilai_perolehan), 0).label("nilai"),
+            ).group_by(Aset.kib, Aset.kondisi_kode)
+        )
+    ).all()
+    return {
+        "total": sum(row.jumlah for row in rows),
+        "nilai_total": str(sum((row.nilai for row in rows), Decimal(0))),
+        "kondisi": [{"kode": item.kode, "nama": item.uraian} for item in conditions],
+        "data": [
+            {
+                "kib": row.kib,
+                "kondisi_kode": row.kondisi_kode,
+                "jumlah": row.jumlah,
+                "nilai": str(row.nilai),
+            }
+            for row in rows
+        ],
+    }
 
 
 @router.get("/pilihan-tahun")
