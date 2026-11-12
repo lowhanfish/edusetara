@@ -417,3 +417,19 @@ async def test_inventory_placement_links_dinas_assets_to_a_school(inventory):
     assert (
         await client.put(f"{BASE}/missing/penempatan", json={"upb_id": None})
     ).status_code == 404
+
+
+async def test_inventory_year_filter_and_options(inventory):
+    client, _, _, _ = inventory
+    old = await make_asset(client, tahun_perolehan=2024, nilai_perolehan="100.25")
+    await make_asset(client, nomor_register="000002", tahun_perolehan=2025)
+    await make_asset(client, nomor_register="000003", tahun_perolehan=2025)
+    listed = (await client.get(f"{BASE}?tahun_perolehan=2024")).json()
+    assert listed["total"] == 1 and listed["data"][0]["id"] == old["id"]
+    assert listed["nilai_total"] == "100.25"
+    assert (await client.get(f"{BASE}?tahun_perolehan=2025")).json()["total"] == 2
+    assert (await client.get(f"{BASE}?tahun_perolehan=2023")).json()["total"] == 0
+    assert (await client.get(BASE)).json()["total"] == 3
+    assert (await client.get(f"{BASE}?tahun_perolehan=abc")).status_code == 422
+    years = (await client.get(f"{BASE}/pilihan-tahun")).json()
+    assert years == [{"id": "2025", "value": "2025"}, {"id": "2024", "value": "2024"}]

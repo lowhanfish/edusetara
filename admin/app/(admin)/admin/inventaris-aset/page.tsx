@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button, Card, Input, PageHeader, Pagination, Select } from "@/app/(admin)/_components/ui";
 import LookupField from "../master/master_aset/_shared/LookupField";
 import type { FieldDef } from "../master/master_aset/_shared/types";
-import { useInventory, useInventoryOptions, useInventorySchool, useInventorySubUnits } from "./hooks";
+import { useInventory, useInventoryOptions, useInventorySchool, useInventorySubUnits, useInventoryYears } from "./hooks";
 import { KIB, errorText, rupiah } from "./types";
 import AssetFormModal from "./components/AssetFormModal";
 import AssetDetailModal from "./components/AssetDetailModal";
@@ -21,6 +21,7 @@ export default function InventoryPage() {
   const [text, setText] = useState("");
   const [search, setSearch] = useState("");
   const [kib, setKib] = useState("");
+  const [year, setYear] = useState("");
   const [condition, setCondition] = useState("");
   const [subUnitId, setSubUnitId] = useState("");
   const [page, setPage] = useState(1);
@@ -31,16 +32,17 @@ export default function InventoryPage() {
     const id = new URLSearchParams(window.location.search).get("sekolah_id");
     if (id) setSchoolId(id);
   }, []);
-  const list = useInventory({ page, schoolId, subUnitId, search, kib, condition });
+  const list = useInventory({ page, schoolId, subUnitId, search, kib, year, condition });
   const school = useInventorySchool(schoolId);
   const { conditions } = useInventoryOptions();
   const subUnits = useInventorySubUnits();
+  const years = useInventoryYears();
   useEffect(() => {
     if (school.data) setSchoolName(`${school.data.nama_sekolah} · ${school.data.npsn}`);
   }, [school.data]);
   const upb = school.data?.simda_upb;
   const verified = upb?.status_pencocokan === "manual";
-  const hasItemFilters = Boolean(search || kib || condition || subUnitId);
+  const hasItemFilters = Boolean(search || kib || year || condition || subUnitId);
   const emptyTitle = hasItemFilters
     ? "Tidak ada aset sesuai filter"
     : schoolId ? "Belum ada aset tercatat untuk sekolah ini" : "Belum ada aset tercatat";
@@ -66,8 +68,8 @@ export default function InventoryPage() {
     </div>
     <Card>
       <div className="grid items-end gap-3 border-b border-amber-100 p-4 sm:grid-cols-2 lg:grid-cols-12">
-        <div className="sm:col-span-2 lg:col-span-4"><Input label="Cari barang" type="search" value={text} onChange={(event) => setText(event.target.value)} placeholder="Nama, kode barang, atau nomor register..." /></div>
-        <div className="min-w-0 lg:col-span-3">
+        <div className="sm:col-span-2 lg:col-span-3"><Input label="Cari barang" type="search" value={text} onChange={(event) => setText(event.target.value)} placeholder="Nama, kode barang, atau nomor register..." /></div>
+        <div className="min-w-0 lg:col-span-2">
           <Select label="Sub Unit / UPT" value={subUnitId} disabled={subUnits.isPending || subUnits.isError}
             onChange={(event) => { setSubUnitId(event.target.value); setPage(1); }}>
             <option value="">{subUnits.isPending ? "Memuat sub unit..." : "Semua sub unit"}</option>
@@ -75,9 +77,11 @@ export default function InventoryPage() {
           </Select>
         </div>
         <div className="min-w-0 lg:col-span-2"><Select label="Kelompok KIB" value={kib} onChange={(event) => { setKib(event.target.value); setPage(1); }}><option value="">Semua kelompok</option>{Object.entries(KIB).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</Select></div>
+        <div className="min-w-0 lg:col-span-2"><Select label="Tahun perolehan" value={year} disabled={years.isError || years.isPending} onChange={(event) => { setYear(event.target.value); setPage(1); }}><option value="">{years.isPending ? "Memuat tahun..." : "Semua tahun"}</option>{years.data?.map((item) => <option key={item.id} value={item.id}>{item.value}</option>)}</Select></div>
         <div className="min-w-0 lg:col-span-2"><Select label="Kondisi barang" value={condition} disabled={conditions.isError || conditions.isPending} onChange={(event) => { setCondition(event.target.value); setPage(1); }}><option value="">Semua kondisi</option>{conditions.data?.map((item) => <option key={item.id} value={item.id}>{item.value}</option>)}</Select></div>
-        <Button variant="ghost" disabled={!text && !kib && !condition && !subUnitId} onClick={() => { setText(""); setSearch(""); setKib(""); setCondition(""); setSubUnitId(""); setPage(1); }}>Reset</Button>
+        <Button variant="ghost" disabled={!text && !kib && !year && !condition && !subUnitId} onClick={() => { setText(""); setSearch(""); setKib(""); setYear(""); setCondition(""); setSubUnitId(""); setPage(1); }}>Reset</Button>
         {subUnits.isError && <p role="alert" className="text-xs text-rose-700 sm:col-span-2 lg:col-span-12">Filter sub unit gagal dimuat. <button className="underline" onClick={() => subUnits.refetch()}>Coba lagi</button></p>}
+        {years.isError && <p role="alert" className="text-xs text-rose-700 sm:col-span-2 lg:col-span-12">Filter tahun gagal dimuat. <button className="underline" onClick={() => years.refetch()}>Coba lagi</button></p>}
         {conditions.isError && <p role="alert" className="text-xs text-rose-700 sm:col-span-2 lg:col-span-12">Filter kondisi gagal dimuat. <button className="underline" onClick={() => conditions.refetch()}>Coba lagi</button></p>}
       </div>
       <div className="overflow-x-auto"><table className="w-full text-left text-xs"><thead className="bg-white/40 text-[#7d7152]"><tr>{["Barang / register", "UPB", "Perolehan", "Lokasi", "Kondisi", "Aksi"].map((label) => <th key={label} className="px-4 py-3 font-semibold">{label}</th>)}</tr></thead><tbody className="divide-y divide-amber-100/70">
