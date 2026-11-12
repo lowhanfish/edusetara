@@ -1,6 +1,5 @@
 "use client";
 
-import { AdminPageSkeleton } from "@/app/(admin)/_components/admin-page-skeleton";
 
 import { SkeletonTableRows } from "@/app/(admin)/_components/ui/skeleton";
 
@@ -29,7 +28,7 @@ export default function VerifikasiTunjanganGuruPage() {
     const timer = setTimeout(() => { setDebouncedSearch(search); setPage(1); }, 400);
     return () => clearTimeout(timer);
   }, [search]);
-  if (authLoading) return <AdminPageSkeleton />;
+  if (authLoading) return <p className="p-6 text-sm">Memuat akses pengguna...</p>;
   if (!canVerify) return <Card className="p-6"><p role="alert" className="text-sm text-rose-700">Halaman verifikasi tunjangan guru hanya dapat diakses oleh admin.</p></Card>;
   return (
     <div className="space-y-6">

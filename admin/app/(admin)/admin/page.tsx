@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { AdminPageSkeleton } from "../_components/admin-page-skeleton";
+import { SkeletonTableRows, SkeletonText } from "../_components/ui/skeleton";
 import { fetchData } from "@/lib/api_secure";
 import { Icon } from "../_components/admin-icons";
 import { DashboardAnalyticsSection } from "../_components/chart";
@@ -138,8 +138,6 @@ export default function AdminDashboard() {
     { label: "Layanan Publik", icon: "landmark", href: "/admin/publish/layanan" },
   ];
 
-  if (loading) return <AdminPageSkeleton dashboard />;
-
   return (
     <div className="space-y-6">
       {/* ── Welcome Banner with Friendly AI Edu Mascot ── */}
@@ -255,7 +253,7 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/60">
-                  {recentNews.map((news) => (
+                  {loading ? <SkeletonTableRows cols={4} /> : recentNews.map((news) => (
                     <tr key={news.id} className="hover:bg-white/50 transition-colors">
                       <td className="py-3 px-4 font-semibold text-[#2d2410] max-w-sm truncate">
                         {news.title}
@@ -297,7 +295,11 @@ export default function AdminDashboard() {
               </Link>
             </CardHeader>
             <CardContent className="space-y-3 flex-1">
-              {recentAnnouncements.map((ann) => (
+              {loading ? (
+                <div role="status" aria-label="Memuat pengumuman" className="space-y-4">
+                  {Array.from({ length: 3 }, (_, i) => <SkeletonText key={i} lines={2} />)}
+                </div>
+              ) : recentAnnouncements.map((ann) => (
                 <div
                   key={ann.id}
                   className="p-3.5 rounded-2xl border border-white/85 bg-white/50 backdrop-blur-md hover:bg-white/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors space-y-1.5"
