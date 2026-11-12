@@ -1,5 +1,7 @@
 "use client";
 
+import { SkeletonTableRows } from "@/app/(admin)/_components/ui/skeleton";
+
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Badge, Button, Modal, Select } from "../../../../_components/ui";
@@ -194,11 +196,7 @@ export default function MasterAuthRegistrasiPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="px-5 py-12 text-center text-xs text-slate-500">
-                    Memuat data ASN dari database...
-                  </td>
-                </tr>
+                <SkeletonTableRows cols={5} />
               ) : records.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-5 py-16 text-center text-xs text-slate-500">

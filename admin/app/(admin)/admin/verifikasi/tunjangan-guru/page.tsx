@@ -1,5 +1,9 @@
 "use client";
 
+import { AdminPageSkeleton } from "@/app/(admin)/_components/admin-page-skeleton";
+
+import { SkeletonTableRows } from "@/app/(admin)/_components/ui/skeleton";
+
 import React, { useEffect, useState } from "react";
 import { Button, Card, Input, PageHeader, Pagination } from "@/app/(admin)/_components/ui";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -25,7 +29,7 @@ export default function VerifikasiTunjanganGuruPage() {
     const timer = setTimeout(() => { setDebouncedSearch(search); setPage(1); }, 400);
     return () => clearTimeout(timer);
   }, [search]);
-  if (authLoading) return <p className="p-6 text-sm">Memuat akses pengguna...</p>;
+  if (authLoading) return <AdminPageSkeleton />;
   if (!canVerify) return <Card className="p-6"><p role="alert" className="text-sm text-rose-700">Halaman verifikasi tunjangan guru hanya dapat diakses oleh admin.</p></Card>;
   return (
     <div className="space-y-6">
@@ -42,7 +46,7 @@ export default function VerifikasiTunjanganGuruPage() {
               <th className="p-3">Jenis Tunjangan</th><th className="p-3">Hasil Verifikasi</th><th className="p-3">Pemeriksaan</th>
             </tr></thead>
             <tbody className="divide-y divide-[#ece5d8]">
-              {proposals.isLoading ? <tr><td colSpan={6} className="p-10 text-center">Memuat usulan...</td></tr>
+              {proposals.isLoading ? <SkeletonTableRows cols={6} />
                 : proposals.isError ? <tr><td colSpan={6} role="alert" className="p-10 text-center text-rose-600">{proposals.error?.message || "Gagal memuat usulan. Silakan muat ulang."}</td></tr>
                 : !proposals.data?.data.length ? <tr><td colSpan={6} className="p-10 text-center text-[#7d7152]">Belum ada usulan tunjangan guru untuk diperiksa.</td></tr>
                 : proposals.data.data.map((record, index) => <tr key={record.id} className="hover:bg-amber-50/50">

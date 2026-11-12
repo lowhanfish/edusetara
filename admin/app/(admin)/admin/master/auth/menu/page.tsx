@@ -1,5 +1,7 @@
 "use client";
 
+import { SkeletonTable } from "@/app/(admin)/_components/ui/skeleton";
+
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Badge, Button, Input, Modal, Select } from "../../../../_components/ui";
@@ -457,9 +459,7 @@ export default function MasterAuthMenuPage() {
           </div>
 
           {isLoading ? (
-            <div className="p-8 text-center text-slate-500 text-sm">
-              Memuat data menu dari database...
-            </div>
+            <div role="status" aria-label="Memuat data menu"><SkeletonTable cols={4} /></div>
           ) : visibleMenus.length > 0 ? (
             visibleMenus.map((item) => (
               <MenuTreeRow

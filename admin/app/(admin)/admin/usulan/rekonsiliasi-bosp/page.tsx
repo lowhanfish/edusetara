@@ -1,5 +1,7 @@
 "use client";
 
+import { SkeletonTableRows } from "@/app/(admin)/_components/ui/skeleton";
+
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import ActionIconButton from "./components/ActionIconButton";
@@ -74,7 +76,7 @@ export default function UsulanRekonsiliasiBospPage() {
               <th className="p-3">Semester</th><th className="p-3">Pencatat</th><th className="p-3">Aksi</th>
             </tr></thead>
             <tbody className="divide-y divide-[#ece5d8]">
-              {isLoading ? <tr><td colSpan={6} className="p-10 text-center">Memuat usulan...</td></tr>
+              {isLoading ? <SkeletonTableRows cols={6} />
                 : isError ? <tr><td colSpan={6} className="p-10 text-center text-rose-600">{error?.message || "Gagal memuat usulan. Silakan muat ulang."}</td></tr>
                 : !List?.data.length ? <tr><td colSpan={6} className="p-10 text-center text-[#7d7152]">Belum ada usulan rekonsiliasi.</td></tr>
                 : List.data.map((record, index) => <tr key={record.id} className="hover:bg-amber-50/50">

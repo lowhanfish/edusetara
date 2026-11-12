@@ -1,4 +1,6 @@
 "use client";
+
+import { SkeletonTableRows } from "@/app/(admin)/_components/ui/skeleton";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button, Card, Input, PageHeader, Pagination, Select } from "@/app/(admin)/_components/ui";
@@ -79,7 +81,7 @@ export default function InventoryPage() {
         {conditions.isError && <p role="alert" className="text-xs text-rose-700 sm:col-span-2 lg:col-span-12">Filter kondisi gagal dimuat. <button className="underline" onClick={() => conditions.refetch()}>Coba lagi</button></p>}
       </div>
       <div className="overflow-x-auto"><table className="w-full text-left text-xs"><thead className="bg-white/40 text-[#7d7152]"><tr>{["Barang / register", "UPB", "Perolehan", "Lokasi", "Kondisi", "Aksi"].map((label) => <th key={label} className="px-4 py-3 font-semibold">{label}</th>)}</tr></thead><tbody className="divide-y divide-amber-100/70">
-        {list.isPending ? <tr><td colSpan={6} className="p-10 text-center text-[#7d7152]">Memuat inventaris...</td></tr> : list.isError ? <tr><td colSpan={6} className="p-10 text-center text-rose-700" role="alert">{errorText(list.error)} <button className="underline" onClick={() => list.refetch()}>Coba lagi</button></td></tr> : !list.data?.data.length ? <tr><td colSpan={6} className="p-10 text-center"><p className="font-semibold text-[#2d2410]">{emptyTitle}</p>
+        {list.isPending ? <SkeletonTableRows cols={6} /> : list.isError ? <tr><td colSpan={6} className="p-10 text-center text-rose-700" role="alert">{errorText(list.error)} <button className="underline" onClick={() => list.refetch()}>Coba lagi</button></td></tr> : !list.data?.data.length ? <tr><td colSpan={6} className="p-10 text-center"><p className="font-semibold text-[#2d2410]">{emptyTitle}</p>
           <p className="mx-auto mt-2 max-w-lg leading-relaxed text-[#7d7152]">{emptyDescription}</p>
           {verified ? <Button size="sm" className="mt-4" onClick={() => setCreating(true)}>+ Catat aset pertama</Button>
             : !schoolId ? <p className="mt-3 text-[#7d7152]">Pilih sekolah pada bagian Lingkup inventaris untuk mulai mencatat barang.</p>

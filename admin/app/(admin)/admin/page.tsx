@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { AdminPageSkeleton } from "../_components/admin-page-skeleton";
 import { fetchData } from "@/lib/api_secure";
 import { Icon } from "../_components/admin-icons";
 import { DashboardAnalyticsSection } from "../_components/chart";
@@ -136,6 +137,8 @@ export default function AdminDashboard() {
     { label: "Data Sekolah", icon: "school", href: "/admin/sekolah" },
     { label: "Layanan Publik", icon: "landmark", href: "/admin/publish/layanan" },
   ];
+
+  if (loading) return <AdminPageSkeleton dashboard />;
 
   return (
     <div className="space-y-6">

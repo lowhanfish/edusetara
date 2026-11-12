@@ -1,5 +1,7 @@
 "use client";
 
+import { SkeletonTableRows } from "@/app/(admin)/_components/ui/skeleton";
+
 import React, { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import {
@@ -270,14 +272,7 @@ export default function MasterModelPembelajaranPage() {
             </thead>
             <tbody className="divide-y divide-[#ece5d8]">
               {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="py-12 text-center text-[#7d7152]">
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
-                      <span>Memuat data dari server...</span>
-                    </div>
-                  </td>
-                </tr>
+                <SkeletonTableRows cols={5} />
               ) : isError ? (
                 <tr>
                   <td colSpan={5} className="py-12 text-center text-rose-700">

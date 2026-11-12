@@ -1,5 +1,7 @@
 "use client";
 
+import { SkeletonTableRows } from "@/app/(admin)/_components/ui/skeleton";
+
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Badge, Button, Input, Modal, Select } from "../../../../_components/ui";
@@ -422,11 +424,7 @@ export default function MasterAuthGroupPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {isLoading ? (
-                <tr>
-                  <td colSpan={4} className="py-8 text-center text-slate-500 text-xs">
-                    Memuat data group dari database...
-                  </td>
-                </tr>
+                <SkeletonTableRows cols={4} />
               ) : groups.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-slate-400 text-xs">

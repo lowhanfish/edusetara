@@ -9,7 +9,7 @@ export interface SkeletonProps {
 export function Skeleton({ className = "" }: SkeletonProps) {
   return (
     <div
-      className={`animate-pulse bg-white/40 border border-white/60 rounded-xl ${className}`}
+      className={`motion-safe:animate-pulse bg-white/40 border border-white/60 rounded-xl ${className}`}
     />
   );
 }
@@ -22,7 +22,7 @@ export function SkeletonText({
   className?: string;
 }) {
   return (
-    <div className={`space-y-2 animate-pulse ${className}`}>
+    <div className={`space-y-2 motion-safe:animate-pulse ${className}`}>
       {Array.from({ length: lines }).map((_, i) => (
         <div
           key={i}
@@ -45,7 +45,7 @@ export function SkeletonTable({
   className?: string;
 }) {
   return (
-    <div className={`w-full overflow-hidden animate-pulse ${className}`}>
+    <div className={`w-full overflow-hidden motion-safe:animate-pulse ${className}`}>
       {/* Skeleton Header */}
       <div className="flex items-center gap-3 px-4 py-3 bg-white/30 border-b border-white/60">
         {Array.from({ length: cols }).map((_, i) => (
@@ -80,7 +80,7 @@ export function SkeletonTable({
 export function SkeletonCard({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`p-5 glass rounded-3xl border border-white/70 shadow-xs animate-pulse flex items-center justify-between ${className}`}
+      className={`p-5 glass rounded-3xl border border-white/70 shadow-xs motion-safe:animate-pulse flex items-center justify-between ${className}`}
     >
       <div className="space-y-2 flex-1 mr-4">
         <div className="h-3 w-24 bg-white/40 rounded-md" />
@@ -90,4 +90,17 @@ export function SkeletonCard({ className = "" }: { className?: string }) {
       <div className="w-12 h-12 rounded-2xl bg-white/50 border border-white/70" />
     </div>
   );
+}
+
+/** Valid table rows for loading states inside an existing tbody. */
+export function SkeletonTableRows({ rows = 5, cols = 6 }: { rows?: number; cols?: number }) {
+  return <>{Array.from({ length: rows }, (_, row) => (
+    <tr key={row} className="motion-safe:animate-pulse" aria-busy="true" aria-label={row === 0 ? "Memuat data" : undefined}>
+      {Array.from({ length: cols }, (_, col) => (
+        <td key={col} className="px-4 py-3.5">
+          <Skeleton className={`h-4 bg-amber-200/50 border-0 ${col === 0 ? "w-8" : col === cols - 1 ? "w-20 ml-auto" : row % 2 ? "w-2/3" : "w-3/4"}`} />
+        </td>
+      ))}
+    </tr>
+  ))}</>;
 }
