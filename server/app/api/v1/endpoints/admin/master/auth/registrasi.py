@@ -2,7 +2,7 @@
 
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, or_, select
+from sqlalchemy import case, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -29,7 +29,6 @@ async def read_asn_registrations(
         .options(selectinload(User.group))
         .where(User.nip.is_not(None))  # Only ASN users with NIP
     )
-    count_query = select(func.count(User.id)).where(User.nip.is_not(None))
 
     if search.strip():
         term = f"%{search.strip()}%"
@@ -40,17 +39,23 @@ async def read_asn_registrations(
             User.jabatan.ilike(term),
         )
         query = query.where(filter_clause)
-        count_query = count_query.where(filter_clause)
 
     if group_id.strip():
         if group_id.strip() == "unassigned":
             query = query.where(User.group_id.is_(None))
-            count_query = count_query.where(User.group_id.is_(None))
         elif group_id.strip() != "all":
             query = query.where(User.group_id == group_id.strip())
-            count_query = count_query.where(User.group_id == group_id.strip())
 
-    total = (await db.execute(count_query)).scalar() or 0
+    # Apply the same filters to the summary before pagination.
+    filtered_users = query.with_only_columns(
+        User.id, User.group_id, User.instansi_id
+    ).subquery()
+    summary_row = (await db.execute(select(
+        func.count(filtered_users.c.id),
+        func.count(case((filtered_users.c.group_id.is_not(None), 1))),
+        func.count(func.distinct(func.nullif(func.trim(filtered_users.c.instansi_id), ""))),
+    ))).one()
+    total, assigned, units = summary_row
     query = query.order_by(User.full_name.asc()).offset(skip).limit(limit)
     result = await db.execute(query)
     users = result.scalars().all()
@@ -76,6 +81,11 @@ async def read_asn_registrations(
         "statusCode": 200,
         "message": "Data registrasi ASN berhasil dimuat",
         "total": total,
+        "summary": {
+            "assigned": assigned,
+            "unassigned": total - assigned,
+            "units": units,
+        },
         "data": data,
     }
 

@@ -85,7 +85,7 @@ export const useCreateMaster = () => {
 
   const createMutation = useMutation({
     mutationFn: (body: Partial<ResponseInterface>) =>
-      fetchData(`${url}/api/v1/admin/master/auth/group/create`, {
+      fetchData<{ data: ResponseInterface }>(`${url}/api/v1/admin/master/auth/group/create`, {
         method: "POST",
         body: JSON.stringify(body),
         headers: {
@@ -96,7 +96,6 @@ export const useCreateMaster = () => {
       queryClient.invalidateQueries({
         queryKey: ["master-auth-group"],
       });
-      swallAlert("Role group berhasil ditambahkan", "success");
     },
     onError: (err: any) => {
       swallAlert(`Gagal menambahkan: ${err?.message || err}`, "error");
@@ -126,7 +125,6 @@ export const useUpdateMaster = () => {
       queryClient.invalidateQueries({
         queryKey: ["master-auth-group"],
       });
-      swallAlert("Role group berhasil diperbarui", "success");
     },
     onError: (err: any) => {
       swallAlert(`Gagal memperbarui: ${err?.message || err}`, "error");

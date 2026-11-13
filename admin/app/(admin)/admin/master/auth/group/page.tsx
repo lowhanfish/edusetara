@@ -3,9 +3,11 @@
 import { SkeletonTableRows } from "@/app/(admin)/_components/ui/skeleton";
 
 import Link from "next/link";
+import { fetchData } from "@/lib/api_secure";
+import { useUrlStore } from "@/store/useUrlStore";
 import { useEffect, useMemo, useState } from "react";
 import { Badge, Button, Input, Modal, Select } from "../../../../_components/ui";
-import { GroupRecord, PermissionRule } from "./types";
+import { GroupRecord, GroupPermissionsResponse, PermissionRule } from "./types";
 import {
   useResponseListMaster,
   useCreateMaster,
@@ -175,6 +177,8 @@ export default function MasterAuthGroupPage() {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const visibleMenus = useMemo(
     () => filterPermissionMenus(permissionMenus, query),
@@ -196,6 +200,7 @@ export default function MasterAuthGroupPage() {
   }, [permissionMenus]);
 
   const openAdd = () => {
+    setSaveError("");
     setEditingGroup(null);
     setTitle("");
     setLevel(1);
@@ -215,42 +220,17 @@ export default function MasterAuthGroupPage() {
     setLevel(group.level as 1 | 2);
     setQuery("");
 
-    // Fetch existing permissions matrix for this group from backend API
+    setSaveError("");
     try {
-      const res = await fetch(
-        `http://localhost:8000/api/v1/admin/master/auth/group/${group.id}/permissions`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
-          },
-        },
+      const response = await fetchData<GroupPermissionsResponse>(
+        `${useUrlStore.getState().URL.APP}/api/v1/admin/master/auth/group/${group.id}/permissions`,
       );
-      if (res.ok) {
-        const json = await res.json();
-        const permList: PermissionRule[] = (json as any)?.data?.permissions || [];
-        const pMap: PermissionMap = {};
-        for (const p of permList) {
-          pMap[p.menu_id] = {
-            create: p.create,
-            read: p.read,
-            update: p.update,
-            delete: p.delete,
-          };
-        }
-        setPermissions(pMap);
-      } else {
-        const defaultPerms: PermissionMap = {};
-        for (const m of allPermissionMenus) {
-          defaultPerms[m.id] = { create: false, read: true, update: false, delete: false };
-        }
-        setPermissions(defaultPerms);
-      }
-    } catch {
-      const defaultPerms: PermissionMap = {};
-      for (const m of allPermissionMenus) {
-        defaultPerms[m.id] = { create: false, read: true, update: false, delete: false };
-      }
-      setPermissions(defaultPerms);
+      setPermissions(Object.fromEntries(response.data.permissions.map((p) => [p.menu_id, {
+        create: p.create, read: p.read, update: p.update, delete: p.delete,
+      }])));
+    } catch (error) {
+      await Swal.fire("Gagal memuat hak akses", error instanceof Error ? error.message : "Silakan coba lagi.", "error");
+      return;
     }
 
     setIsModalOpen(true);
@@ -282,10 +262,10 @@ export default function MasterAuthGroupPage() {
     );
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const cleanTitle = title.trim();
-    if (!cleanTitle) return;
+    if (!cleanTitle || isSaving) return;
 
     const formattedPerms: PermissionRule[] = allPermissionMenus.map((m) => {
       const p = permissions[m.id] ?? emptyPermission;
@@ -298,40 +278,34 @@ export default function MasterAuthGroupPage() {
       };
     });
 
-    if (editingGroup) {
-      updateMutation.mutate(
-        {
-          id: editingGroup.id,
-          body: { title: cleanTitle, level },
-        },
-        {
-          onSuccess: () => {
-            updatePermissionsMutation.mutate({
-              groupId: editingGroup.id,
-              permissions: formattedPerms,
-            });
-            setNotice(`Role Group “${cleanTitle}” dan matriks hak akses berhasil disimpan ke database.`);
-            setIsModalOpen(false);
-          },
-        },
-      );
-    } else {
-      createMutation.mutate(
-        { title: cleanTitle, level },
-        {
-          onSuccess: (res: any) => {
-            const newGroupId = res?.data?.id;
-            if (newGroupId) {
-              updatePermissionsMutation.mutate({
-                groupId: newGroupId,
-                permissions: formattedPerms,
-              });
-            }
-            setNotice(`Role Group “${cleanTitle}” berhasil ditambahkan ke database.`);
-            setIsModalOpen(false);
-          },
-        },
-      );
+    setIsSaving(true);
+    setSaveError("");
+    setNotice("");
+    let savedGroup = editingGroup;
+    let groupSaved = false;
+    try {
+      if (savedGroup) {
+        await updateMutation.mutateAsync({ id: savedGroup.id, body: { title: cleanTitle, level } });
+      } else {
+        const response = await createMutation.mutateAsync({ title: cleanTitle, level });
+        savedGroup = response.data;
+        // Preserve the created ID so retrying permissions cannot create a duplicate group.
+        setEditingGroup(savedGroup);
+      }
+      groupSaved = true;
+      await updatePermissionsMutation.mutateAsync({
+        groupId: savedGroup.id,
+        permissions: formattedPerms,
+      });
+      setNotice(`Role Group “${cleanTitle}” dan matriks hak akses berhasil disimpan ke database.`);
+      setIsModalOpen(false);
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : "Silakan coba lagi.";
+      setSaveError(groupSaved
+        ? `Data group sudah tersimpan, tetapi proses simpan belum selesai. Coba simpan kembali. ${detail}`
+        : `Group gagal disimpan. ${detail}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -483,22 +457,22 @@ export default function MasterAuthGroupPage() {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => { if (!isSaving) setIsModalOpen(false); }}
         title={editingGroup ? "Edit Group & Hak Akses" : "Tambah Group & Hak Akses"}
         description="Form identitas group dan matriks izin disimpan secara real-time ke database."
         maxWidth="3xl"
         footer={
           <>
-            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
+            <Button type="button" variant="ghost" disabled={isSaving} onClick={() => setIsModalOpen(false)}>
               Batal
             </Button>
             <Button
               type="submit"
               form="group-form"
               variant="gold"
-              disabled={createMutation.isPending || updateMutation.isPending}
+              disabled={isSaving}
             >
-              {createMutation.isPending || updateMutation.isPending
+              {isSaving
                 ? "Menyimpan..."
                 : editingGroup
                   ? "Simpan Perubahan"
@@ -508,6 +482,8 @@ export default function MasterAuthGroupPage() {
         }
       >
         <form id="group-form" onSubmit={handleSubmit} className="space-y-5">
+          {saveError && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-xs text-rose-700">{saveError}</p>}
+          <fieldset disabled={isSaving} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-[1fr_280px]">
             <Input
               label="Nama Role"
@@ -581,6 +557,7 @@ export default function MasterAuthGroupPage() {
               ))}
             </div>
           </div>
+          </fieldset>
         </form>
       </Modal>
     </div>

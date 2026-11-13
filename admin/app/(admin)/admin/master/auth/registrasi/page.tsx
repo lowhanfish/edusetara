@@ -59,9 +59,7 @@ export default function MasterAuthRegistrasiPage() {
   const rangeStart = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(page * PAGE_SIZE, totalCount);
 
-  // Quick stats
-  const assigned = records.filter((record) => record.group_id).length;
-  const units = new Set(records.map((record) => record.satuan_pendidikan)).size;
+  const summary = List?.summary;
 
   const openAccess = (record: AsnRecord) => {
     setSelectedRecord(record);
@@ -125,9 +123,9 @@ export default function MasterAuthRegistrasiPage() {
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Ringkasan registrasi ASN">
         {[
           { label: "Total ASN", value: totalCount, icon: "🪪", tone: "bg-sky-50 text-sky-700" },
-          { label: "Sudah Memiliki Group", value: assigned, icon: "✓", tone: "bg-emerald-50 text-emerald-700" },
-          { label: "Belum Diatur", value: totalCount - assigned, icon: "!", tone: "bg-rose-50 text-rose-700" },
-          { label: "Satuan Pendidikan", value: units, icon: "🏫", tone: "bg-amber-50 text-amber-700" },
+          { label: "Sudah Memiliki Group", value: summary?.assigned ?? 0, icon: "✓", tone: "bg-emerald-50 text-emerald-700" },
+          { label: "Belum Diatur", value: summary?.unassigned ?? 0, icon: "!", tone: "bg-rose-50 text-rose-700" },
+          { label: "Satuan Pendidikan", value: summary?.units ?? 0, icon: "🏫", tone: "bg-amber-50 text-amber-700" },
         ].map((stat) => (
           <div key={stat.label} className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
             <span className={`grid h-10 w-10 place-items-center rounded-xl text-lg font-black ${stat.tone}`}>{stat.icon}</span>

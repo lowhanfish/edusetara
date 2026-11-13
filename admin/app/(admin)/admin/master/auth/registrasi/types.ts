@@ -18,5 +18,6 @@ export type ResponseListInterface = {
   statusCode: number;
   message: string;
   total: number;
+  summary: { assigned: number; unassigned: number; units: number };
   data: AsnRecord[];
 };

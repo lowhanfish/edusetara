@@ -2,6 +2,13 @@
 .DS_Store
 Thumbs.db
 
+# Generated Python caches and local document tooling
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.pytest_cache/
+admin/scripts/py_modules/
+
 # Root environment
 .env
 .env.*
