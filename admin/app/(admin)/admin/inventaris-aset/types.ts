@@ -23,6 +23,7 @@ export interface ConditionHistory {
 }
 export interface AssetDetail extends Asset { riwayat: ConditionHistory[] }
 export interface AssetList { total: number; skip: number; limit: number; nilai_total: string; data: Asset[] }
+export interface SyncResult { ditambahkan: number; diperbarui: number; sama: number; dikunci: number; ditolak: number }
 export interface Choice { id: string; value: string }
 export const rupiah = (value: string) => {
   const [whole, fraction = ""] = value.split(".");

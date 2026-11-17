@@ -30,7 +30,7 @@ export function usePublicSchools() {
         address: item.alamat_jalan || "", village: item.desa_kelurahan || "",
         district: item.kecamatan || "", level: item.bentuk_pendidikan || "",
         status: item.status_sekolah || "",
-        url: item.npsn ? `https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/${encodeURIComponent(item.npsn)}` : "",
+        url: item.npsn ? `https://referensi.data.kemendikdasmen.go.id/satpen/detail/${encodeURIComponent(item.npsn)}` : "",
       }));
     },
   });

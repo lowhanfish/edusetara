@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button, Card, Input, PageHeader, Pagination, Select } from "@/app/(admin)/_components/ui";
 import LookupField from "../master/master_aset/_shared/LookupField";
 import type { FieldDef } from "../master/master_aset/_shared/types";
-import { useInventory, useInventoryOptions, useInventorySchool, useInventorySubUnits, useInventoryYears } from "./hooks";
+import { useInventory, useInventoryOptions, useInventorySchool, useInventorySubUnits, useInventoryYears, useSyncInventory } from "./hooks";
 import { KIB, errorText, rupiah } from "./types";
 import AssetFormModal from "./components/AssetFormModal";
 import AssetDetailModal from "./components/AssetDetailModal";
@@ -37,6 +37,7 @@ export default function InventoryPage() {
   const { conditions } = useInventoryOptions();
   const subUnits = useInventorySubUnits();
   const years = useInventoryYears();
+  const sync = useSyncInventory();
   useEffect(() => {
     if (school.data) setSchoolName(`${school.data.nama_sekolah} · ${school.data.npsn}`);
   }, [school.data]);
@@ -54,7 +55,19 @@ export default function InventoryPage() {
     <PageHeader title="Inventaris Aset Sekolah" description="Catat barang per register, pantau nilai perolehan, dan dokumentasikan kondisi fisiknya."
       action={<Button onClick={() => setCreating(true)} disabled={!verified || school.isFetching}>+ Catat aset</Button>} />
     <Card className="p-4 sm:p-5 space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-sm font-bold text-[#2d2410]">Lingkup inventaris</h2><p className="mt-1 text-xs text-[#7d7152]">Pilih sekolah untuk melihat UPB dan mencatat barangnya.</p></div><Button variant="outline" size="sm" disabled={list.isFetching} onClick={() => list.refetch()}>{list.isFetching ? "Memuat..." : "Segarkan"}</Button></div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div><h2 className="text-sm font-bold text-[#2d2410]">Lingkup inventaris</h2><p className="mt-1 text-xs text-[#7d7152]">Pilih sekolah untuk melihat UPB dan mencatat barangnya.</p></div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" disabled={sync.isPending} onClick={() => sync.mutate(upb?.kode ?? null)}>
+            {sync.isPending ? "Menyinkronkan..." : upb?.kode ? `Sinkronkan DB Aset (${upb.kode})` : "Sinkronkan DB Aset"}
+          </Button>
+          <Button variant="outline" size="sm" disabled={list.isFetching} onClick={() => list.refetch()}>{list.isFetching ? "Memuat..." : "Segarkan"}</Button>
+        </div>
+      </div>
+      {sync.isSuccess && <p role="status" className="rounded-xl bg-emerald-50 p-3 text-xs text-emerald-800">
+        Sinkronisasi DB Aset selesai: {sync.data.ditambahkan} ditambah, {sync.data.diperbarui} diperbarui, {sync.data.sama} sama, {sync.data.dikunci} dikunci perubahan lokal, {sync.data.ditolak} ditolak.
+      </p>}
+      {sync.isError && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-xs text-rose-700">{errorText(sync.error)}</p>}
       <div className="grid gap-4 lg:grid-cols-2">
         <LookupField field={schoolField} value={schoolId} valueLabel={schoolName} onChange={(id, label) => { setSchoolId(id); setSchoolName(label); setPage(1); }} />
         <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3 text-xs text-amber-900">

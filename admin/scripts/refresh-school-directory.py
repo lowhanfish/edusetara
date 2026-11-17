@@ -8,7 +8,7 @@ import json
 import re
 
 BASE = 'https://referensi.data.kemendikdasmen.go.id'
-SOURCE = BASE + '/pendidikan/dikdas/200500/2'
+SOURCE = BASE + '/satpen/dikdas/200500/2'
 
 def fetch(url):
     with urlopen(url, timeout=30) as response:
@@ -34,7 +34,7 @@ def read_district(item):
             continue
         records.append(dict(npsn=npsn, name=name, address=address, village=village,
                             district=district, level=level, status=status,
-                            url=BASE + '/pendidikan/npsn/' + npsn))
+                            url=BASE + '/satpen/detail/' + npsn))
     if not records:
         raise ValueError('No schools parsed for ' + district)
     return records
@@ -42,7 +42,7 @@ def read_district(item):
 if __name__ == '__main__':
     html = fetch(SOURCE)
     districts = [(url, clean(label)) for url, label in re.findall(
-        r'<a href="(https://referensi\.data\.kemendikdasmen\.go\.id/pendidikan/dikdas/\d+/3)">(.*?)</a>', html, re.S)]
+        r'<a href="(https://referensi\.data\.kemendikdasmen\.go\.id/satpen/dikdas/\d+/3)">(.*?)</a>', html, re.S)]
     if len(districts) != 25:
         raise ValueError('Expected 25 district source links')
     with ThreadPoolExecutor(max_workers=4) as pool:

@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchData } from "@/lib/api_secure";
 import { useUrlStore } from "@/store/useUrlStore";
 import type { SekolahRecord } from "../master/sekolah/types";
-import type { Asset, AssetDetail, AssetList, Choice } from "./types";
+import type { Asset, AssetDetail, AssetList, Choice, SyncResult } from "./types";
 
 export function useInventory(filters: { page: number; schoolId: string; subUnitId: string; search: string; kib: string; year: string; condition: string }) {
   const base = useUrlStore((s) => s.URL.APP);
@@ -50,6 +50,24 @@ export function useUpdateCondition(id: string) {
   const cache = useQueryClient();
   return useMutation({ mutationFn: (body: FormData) => fetchData<AssetDetail>(`${base}/api/v1/admin/inventaris-aset/${id}/kondisi`, { method: "POST", body }), onSuccess: () => cache.invalidateQueries({ queryKey: ["inventaris-aset"] }) });
 }
+export function useUpdateConditionHistory(id: string) {
+  const base = useUrlStore((s) => s.URL.APP);
+  const cache = useQueryClient();
+  return useMutation({
+    mutationFn: ({ riwayatId, body }: { riwayatId: string; body: FormData }) =>
+      fetchData<AssetDetail>(`${base}/api/v1/admin/inventaris-aset/${id}/kondisi/${riwayatId}`, { method: "PATCH", body }),
+    onSuccess: () => cache.invalidateQueries({ queryKey: ["inventaris-aset"] }),
+  });
+}
+export function useDeleteConditionHistory(id: string) {
+  const base = useUrlStore((s) => s.URL.APP);
+  const cache = useQueryClient();
+  return useMutation({
+    mutationFn: (riwayatId: string) =>
+      fetchData<AssetDetail>(`${base}/api/v1/admin/inventaris-aset/${id}/kondisi/${riwayatId}`, { method: "DELETE" }),
+    onSuccess: () => cache.invalidateQueries({ queryKey: ["inventaris-aset"] }),
+  });
+}
 
 export function useInventorySubUnits() {
   const base = useUrlStore((s) => s.URL.APP);
@@ -63,5 +81,17 @@ export function useInventoryYears() {
   return useQuery({
     queryKey: ["inventaris-aset", "pilihan-tahun"],
     queryFn: () => fetchData<Choice[]>(`${base}/api/v1/admin/inventaris-aset/pilihan-tahun`),
+  });
+}
+export function useSyncInventory() {
+  const base = useUrlStore((s) => s.URL.APP);
+  const cache = useQueryClient();
+  return useMutation({
+    mutationFn: (upbKode?: string | null) =>
+      fetchData<SyncResult>(`${base}/api/v1/admin/inventaris-aset/sinkronisasi`, {
+        method: "POST",
+        body: { upb_kode: upbKode ?? null },
+      }),
+    onSuccess: () => cache.invalidateQueries({ queryKey: ["inventaris-aset"] }),
   });
 }

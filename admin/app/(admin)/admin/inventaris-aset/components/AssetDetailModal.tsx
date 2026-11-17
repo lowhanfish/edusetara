@@ -4,7 +4,7 @@ import { Button, Input, Modal, Select } from "@/app/(admin)/_components/ui";
 import { useUrlStore } from "@/store/useUrlStore";
 import LookupField from "../../master/master_aset/_shared/LookupField";
 import type { FieldDef } from "../../master/master_aset/_shared/types";
-import { useInventoryDetail, useInventoryOptions, usePlaceInventory, useUpdateCondition } from "../hooks";
+import { useDeleteConditionHistory, useInventoryDetail, useInventoryOptions, usePlaceInventory, useUpdateCondition, useUpdateConditionHistory } from "../hooks";
 import { KIB, errorText, rupiah } from "../types";
 import AssetFormModal from "./AssetFormModal";
 
@@ -25,9 +25,17 @@ export default function AssetDetailModal({ id, onClose }: { id: string; onClose:
   const [saved, setSaved] = useState(false);
   const [correcting, setCorrecting] = useState(false);
   const place = usePlaceInventory(id);
+  const updateHistory = useUpdateConditionHistory(id);
+  const deleteHistory = useDeleteConditionHistory(id);
   const [placing, setPlacing] = useState(false);
   const [target, setTarget] = useState("");
   const [targetLabel, setTargetLabel] = useState("");
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  const [editNote, setEditNote] = useState("");
+  const [editPhoto, setEditPhoto] = useState<File | null>(null);
+  const [editValidation, setEditValidation] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const busy = update.isPending || updateHistory.isPending || deleteHistory.isPending;
   useEffect(() => {
     if (!photo) { setPreview(""); return; }
     const url = URL.createObjectURL(photo);
@@ -100,12 +108,58 @@ export default function AssetDetailModal({ id, onClose }: { id: string; onClose:
       </form>}
       <section className="border-t border-amber-100 pt-4">
         <h3 className="mb-3 text-sm font-bold text-[#2d2410]">Riwayat kondisi <span className="font-normal text-[#7d7152]">({asset.riwayat.length})</span></h3>
-        <ol className="space-y-3">{asset.riwayat.map((entry) => <li key={entry.id} className="rounded-xl border border-[#efe3c2] bg-white/70 p-3">
-          <div className="flex flex-wrap justify-between gap-2 text-xs"><strong className="text-[#2d2410]">{!entry.kondisi_lama ? `Kondisi awal: ${entry.kondisi_baru.nama}` : entry.kondisi_lama.kode === entry.kondisi_baru.kode && !entry.foto_url ? (entry.catatan.startsWith("Penempatan") ? "Penempatan" : "Koreksi data") : `${entry.kondisi_lama.nama} → ${entry.kondisi_baru.nama}`}</strong><time className="text-[#7d7152]" dateTime={entry.created_at}>{new Date(entry.created_at).toLocaleString("id-ID")}</time></div>
-          <p className="mt-2 whitespace-pre-wrap break-words text-xs text-[#2d2410]">{entry.catatan}</p>
-          <p className="mt-1 text-[11px] text-[#7d7152]">Dicatat oleh {entry.created_by}</p>
-          {entry.foto_url && <a href={`${base}${entry.foto_url}`} target="_blank" rel="noreferrer"><img src={`${base}${entry.foto_url}`} alt={`Bukti pemeriksaan kondisi ${entry.kondisi_baru.nama}`} loading="lazy" className="mt-3 max-h-40 rounded-lg object-contain" /></a>}
-        </li>)}</ol>
+        {asset.riwayat.length === 0 ? <p className="text-xs text-[#7d7152]">Belum ada riwayat kondisi.</p> : <ol className="space-y-3">{asset.riwayat.map((entry) => {
+          const isEditingEntry = editingEntryId === entry.id;
+          const isConfirmingDelete = confirmDeleteId === entry.id;
+          return <li key={entry.id} className="rounded-xl border border-[#efe3c2] bg-white/70 p-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <strong className="text-[#2d2410]">{!entry.kondisi_lama ? `Kondisi awal: ${entry.kondisi_baru.nama}` : entry.kondisi_lama.kode === entry.kondisi_baru.kode && !entry.foto_url ? (entry.catatan.startsWith("Penempatan") ? "Penempatan" : "Koreksi data") : `${entry.kondisi_lama.nama} → ${entry.kondisi_baru.nama}`}</strong>
+              <div className="flex items-center gap-2">
+                <time className="text-[#7d7152]" dateTime={entry.created_at}>{new Date(entry.created_at).toLocaleString("id-ID")}</time>
+                {!isEditingEntry && !isConfirmingDelete && <>
+                  <button type="button" disabled={busy} className="font-medium text-amber-800 hover:underline disabled:opacity-50" onClick={() => {
+                    updateHistory.reset(); deleteHistory.reset(); setConfirmDeleteId(null);
+                    setEditingEntryId(entry.id); setEditNote(entry.catatan); setEditPhoto(null); setEditValidation("");
+                  }}>Edit</button>
+                  <button type="button" disabled={busy} className="font-medium text-rose-700 hover:underline disabled:opacity-50" onClick={() => {
+                    deleteHistory.reset(); setEditingEntryId(null); setConfirmDeleteId(entry.id);
+                  }}>Hapus</button>
+                </>}
+              </div>
+            </div>
+            {isEditingEntry ? <form className="mt-3 space-y-2 rounded-lg border border-amber-200 bg-amber-50/40 p-3" onSubmit={(event) => {
+              event.preventDefault();
+              const trimmed = editNote.trim();
+              if (!trimmed) { setEditValidation("Catatan pemeriksaan wajib diisi."); return; }
+              if (editPhoto && editPhoto.size > 10 * 1024 * 1024) { setEditValidation("Ukuran foto maksimal 10 MB."); return; }
+              const data = new FormData();
+              data.set("catatan", trimmed);
+              if (editPhoto) data.set("foto", editPhoto);
+              setEditValidation("");
+              updateHistory.mutate({ riwayatId: entry.id, body: data }, { onSuccess: () => { setEditingEntryId(null); setEditPhoto(null); } });
+            }}>
+              <Input label="Catatan pemeriksaan" required maxLength={4000} value={editNote} disabled={updateHistory.isPending} onChange={(e) => setEditNote(e.target.value)} />
+              <Input label="Ganti foto bukti (opsional · JPG, PNG, WebP · maks 10 MB)" type="file" accept="image/jpeg,image/png,image/webp" disabled={updateHistory.isPending} onChange={(e) => setEditPhoto(e.target.files?.[0] ?? null)} />
+              {(editValidation || updateHistory.isError) && <p role="alert" className="text-xs text-rose-700">{editValidation || errorText(updateHistory.error)}</p>}
+              <div className="flex justify-end gap-2">
+                <Button type="button" size="sm" variant="outline" disabled={updateHistory.isPending} onClick={() => { setEditingEntryId(null); setEditPhoto(null); setEditValidation(""); }}>Batal</Button>
+                <Button type="submit" size="sm" disabled={updateHistory.isPending}>{updateHistory.isPending ? "Menyimpan..." : "Simpan"}</Button>
+              </div>
+            </form> : <>
+              <p className="mt-2 whitespace-pre-wrap break-words text-xs text-[#2d2410]">{entry.catatan}</p>
+              <p className="mt-1 text-[11px] text-[#7d7152]">Dicatat oleh {entry.created_by}</p>
+              {entry.foto_url && <a href={`${base}${entry.foto_url}`} target="_blank" rel="noreferrer"><img src={`${base}${entry.foto_url}`} alt={`Bukti pemeriksaan kondisi ${entry.kondisi_baru.nama}`} loading="lazy" className="mt-3 max-h-40 rounded-lg object-contain" /></a>}
+            </>}
+            {isConfirmingDelete && <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-rose-200 bg-rose-50 p-2.5 text-xs">
+              <span className="text-rose-900">Hapus riwayat ini secara permanen?</span>
+              <div className="flex gap-2">
+                <Button type="button" size="sm" variant="outline" disabled={deleteHistory.isPending} onClick={() => setConfirmDeleteId(null)}>Batal</Button>
+                <Button type="button" size="sm" disabled={deleteHistory.isPending} className="bg-rose-600 text-white hover:bg-rose-700" onClick={() => deleteHistory.mutate(entry.id, { onSuccess: () => setConfirmDeleteId(null) })}>{deleteHistory.isPending ? "Menghapus..." : "Ya, hapus"}</Button>
+              </div>
+              {deleteHistory.isError && <p role="alert" className="w-full text-rose-700">{errorText(deleteHistory.error)}</p>}
+            </div>}
+          </li>;
+        })}</ol>}
       </section>
     </div>}
     {correcting && asset && <AssetFormModal asset={asset} onClose={() => setCorrecting(false)} />}

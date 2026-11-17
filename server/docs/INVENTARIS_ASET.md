@@ -54,7 +54,9 @@ Seluruh endpoint berikut berawalan `/api/v1/admin/inventaris-aset`.
 
 | Metode / path | Fungsi |
 |---|---|
-| `GET /` | Daftar, jumlah, dan `nilai_total`; filter `sekolah_id` dan `sub_unit_id` mencakup UPB pembukuan maupun penempatan; `search` mencari di nama, kode barang, register, dan keterangan; filter `sekolah_id`, `sub_unit_id`, `search`, `kib`, `kondisi_kode`, `skip`, `limit` |
+| `GET /` | Daftar, jumlah, dan `nilai_total`; filter `sekolah_id` dan `sub_unit_id` mencakup UPB pembukuan maupun penempatan; `search` mencari di nama, kode barang, register, dan keterangan; parameter: `sekolah_id`, `sub_unit_id`, `search`, `kib`, `kondisi_kode`, `tahun_perolehan`, `skip`, `limit` |
+| `GET /rekap` | Rekap dasbor: `total`, `nilai_total`, daftar `kondisi`, serta jumlah register dan nilai perolehan per KIB dan kondisi |
+| `GET /pilihan-tahun` | Tahun perolehan yang ada di inventaris, terbaru dahulu; untuk filter `tahun_perolehan` |
 | `GET /pilihan-sub-unit` | Pilihan semua Sub Unit/UPT, urut kode SIMDA; memakai ID referensi |
 | `GET /pilihan-kode-barang` | Pencarian `search` khusus kode barang level 7 aset tetap KIB A–F, maksimal 50 hasil |
 | `POST /` | Pencatatan awal, JSON sesuai `AsetCreate` |

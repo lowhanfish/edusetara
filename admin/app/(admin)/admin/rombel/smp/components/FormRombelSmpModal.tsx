@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput, Select } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, Select } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
 import { useJenjangOption, useRuangOption } from "../hooks/crud";
 

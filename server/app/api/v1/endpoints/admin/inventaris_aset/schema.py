@@ -112,3 +112,15 @@ class RiwayatResponse(BaseModel):
 
 class AsetDetail(AsetResponse):
     riwayat: list[RiwayatResponse]
+
+
+class SinkronisasiRequest(BaseModel):
+    upb_kode: str | None = Field(default=None, max_length=30)
+
+
+class SinkronisasiResponse(BaseModel):
+    ditambahkan: int
+    diperbarui: int
+    sama: int
+    dikunci: int
+    ditolak: int

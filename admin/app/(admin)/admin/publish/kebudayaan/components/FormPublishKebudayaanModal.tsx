@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Input, Modal, Textarea, FileInput, RichTextEditor } from "@/app/(admin)/_components/ui";
+import { Button, Input, Modal, FileInput, RichTextEditor } from "@/app/(admin)/_components/ui";
 import { ResponseInterface } from "../types";
 
 interface FormPublishKebudayaanModalProps {

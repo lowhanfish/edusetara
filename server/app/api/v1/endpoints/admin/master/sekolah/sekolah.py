@@ -45,7 +45,7 @@ def map_row_to_response(r: Any) -> dict[str, Any]:
     updated_at = r[18]
     simpeg_unit_kerja_nama = r[19] if len(r) > 19 else None
 
-    url = f"https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/{npsn}" if npsn else None
+    url = f"https://referensi.data.kemendikdasmen.go.id/satpen/detail/{npsn}" if npsn else None
 
     return {
         "id": sid,

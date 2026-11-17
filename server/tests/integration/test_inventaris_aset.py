@@ -460,3 +460,111 @@ async def test_inventory_summary_groups_by_kib_and_condition(inventory):
     }
     user.role.name = "user"
     assert (await client.get(f"{BASE}/rekap")).status_code == 403
+
+
+async def test_inventory_condition_history_edit_and_delete(inventory):
+    client, _, folder, _ = inventory
+    asset = await make_asset(client)
+    changed = await client.post(
+        f"{BASE}/{asset['id']}/kondisi",
+        data={"version": 1, "kondisi_kode": 2, "catatan": "Engsel longgar"},
+        files={"foto": ("awal.png", PNG, "image/png")},
+    )
+    assert changed.status_code == 200, changed.text
+    riwayat_id = changed.json()["riwayat"][0]["id"]
+    first_photo = changed.json()["riwayat"][0]["foto_url"]
+    assert len(list(folder.rglob("*.png"))) == 1
+
+    # Blank note rejected
+    blank = await client.patch(
+        f"{BASE}/{asset['id']}/kondisi/{riwayat_id}",
+        data={"catatan": "   "},
+    )
+    assert blank.status_code == 422
+
+    # Edit note only keeps existing photo and condition transition
+    edited_note = await client.patch(
+        f"{BASE}/{asset['id']}/kondisi/{riwayat_id}",
+        data={"catatan": "Engsel longgar dan keyboard aus"},
+    )
+    assert edited_note.status_code == 200, edited_note.text
+    latest = edited_note.json()["riwayat"][0]
+    assert latest["catatan"] == "Engsel longgar dan keyboard aus"
+    assert latest["foto_url"] == first_photo
+    assert latest["kondisi_lama"]["kode"] == 1 and latest["kondisi_baru"]["kode"] == 2
+
+    # Edit note + replace photo removes old photo file
+    edited_photo = await client.patch(
+        f"{BASE}/{asset['id']}/kondisi/{riwayat_id}",
+        data={"catatan": "Foto diperbarui"},
+        files={"foto": ("baru.png", PNG, "image/png")},
+    )
+    assert edited_photo.status_code == 200, edited_photo.text
+    new_photo = edited_photo.json()["riwayat"][0]["foto_url"]
+    assert new_photo != first_photo
+    assert len(list(folder.rglob("*.png"))) == 1
+
+    # Deleting latest condition change reverts asset condition and removes photo file
+    deleted = await client.delete(f"{BASE}/{asset['id']}/kondisi/{riwayat_id}")
+    assert deleted.status_code == 200, deleted.text
+    body = deleted.json()
+    assert body["kondisi_kode"] == 1
+    assert len(body["riwayat"]) == 1
+    assert list(folder.rglob("*.png")) == []
+
+    # Missing riwayat returns 404
+    assert (await client.delete(f"{BASE}/{asset['id']}/kondisi/{riwayat_id}")).status_code == 404
+
+
+async def test_inventory_sync_simda_endpoint(inventory, monkeypatch):
+    client, _, _, _ = inventory
+    from datetime import datetime
+
+    from app.api.v1.endpoints.admin.inventaris_aset import route
+
+    def fake_read(upb):
+        assert upb == (1, 1)
+        return {
+            "A": [],
+            "B": [
+                {
+                    "IDPemda": "9001",
+                    "Kd_Sub": 1,
+                    "Kd_UPB": 1,
+                    "Kd_Aset8": 1,
+                    "Kd_Aset80": 3,
+                    "Kd_Aset81": 2,
+                    "Kd_Aset82": 5,
+                    "Kd_Aset83": 1,
+                    "Kd_Aset84": 5,
+                    "Kd_Aset85": 12,
+                    "No_Reg8": "000099",
+                    "Tgl_Perolehan": datetime(2025, 3, 1),
+                    "Harga": 5000000,
+                    "Asal_usul": "Pembelian",
+                    "Keterangan": "Sync test",
+                    "Kd_Hapus": 0,
+                    "kondisi": 1,
+                    "lokasi": None,
+                    "judul": None,
+                    "merk": "Lenovo",
+                    "tipe": "ThinkPad",
+                    "seri": "SN-99",
+                }
+            ],
+            "C": [],
+            "D": [],
+            "E": [],
+        }
+
+    monkeypatch.setattr(route, "_read_simda_kib", fake_read)
+    missing_upb = await client.post(f"{BASE}/sinkronisasi", json={"upb_kode": "99.99.999.999"})
+    assert missing_upb.status_code == 404
+
+    res = await client.post(f"{BASE}/sinkronisasi", json={"upb_kode": "08.01.001.001"})
+    assert res.status_code == 200, res.text
+    assert res.json() == {"ditambahkan": 1, "diperbarui": 0, "sama": 0, "dikunci": 0, "ditolak": 0}
+
+    again = await client.post(f"{BASE}/sinkronisasi", json={"upb_kode": "08.01.001.001"})
+    assert again.status_code == 200, again.text
+    assert again.json() == {"ditambahkan": 0, "diperbarui": 0, "sama": 1, "dikunci": 0, "ditolak": 0}

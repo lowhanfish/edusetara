@@ -2976,7 +2976,7 @@ Laporan Realisasi Anggaran (LRA): Rekapitulasi penyerapan dan sisa saldo anggara
       "is_active": true,
       "simpeg_unit_kerja_id": "2bm7ule1ag5clatt2xxl",
       "simpeg_unit_kerja_nama": "SD-SMPN SATAP 2 KONSEL",
-      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/40402064",
+      "url": "https://referensi.data.kemendikdasmen.go.id/satpen/detail/40402064",
       "unit_kerja_id": "2bm7ule1ag5clatt2xxl",
       "name": "SD-SMPN SATAP 2 KONSEL",
       "address": "Jl. Poros Desa Sindangkasih",
@@ -3162,3 +3162,5 @@ Modul `/admin/inventaris-aset` memakai API `/api/v1/admin/inventaris-aset`.
 Kontrak, migrasi, alur percontohan, batas akses, dan persiapan pemetaan impor
 tersedia pada `server/docs/INVENTARIS_ASET.md`. Pencatatan per register berbeda dari
 ringkasan jumlah alat pada Sarpras Peralatan; kedua data tidak disalin otomatis.
+Menu Sarpras Tanah, Bangunan, Ruang, dan Peralatan disembunyikan dari sidebar
+(`hidden` pada `admin-menu.json`); halamannya masih dapat dibuka lewat URL.

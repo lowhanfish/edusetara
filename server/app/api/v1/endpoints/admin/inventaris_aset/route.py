@@ -1,10 +1,13 @@
 """Admin BMD inventory: one register per physical asset, condition history with photos."""
 
+import os
+import sys
 import uuid
 from decimal import Decimal
 from pathlib import Path
 from typing import Literal
 
+from dotenv import dotenv_values
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.exc import IntegrityError
@@ -22,7 +25,16 @@ from app.models.operational.inventaris_aset import InventarisAset as Aset
 from app.models.operational.inventaris_aset import RiwayatKondisiAset as Riwayat
 from app.services.upload_service import BASE_UPLOAD_DIR
 
-from .schema import AsetCreate, AsetDetail, AsetList, AsetResponse, AsetUpdate, PenempatanUpdate
+from .schema import (
+    AsetCreate,
+    AsetDetail,
+    AsetList,
+    AsetResponse,
+    AsetUpdate,
+    PenempatanUpdate,
+    SinkronisasiRequest,
+    SinkronisasiResponse,
+)
 from .service import (
     KIB_BY_PREFIX,
     Tempat,
@@ -191,6 +203,87 @@ async def upb_options(search: str = Query("", max_length=255), db: AsyncSession 
         )
     rows = (await db.execute(query.order_by(Unit.kode).limit(50))).scalars().all()
     return [{"id": item.id, "value": f"{item.kode} · {item.nama}"} for item in rows]
+
+
+def _read_simda_kib(upb: tuple[int, int] | None) -> dict[str, list[dict]]:
+    """Read KIB A–E rows synchronously from SIMDA SQL Server using .env credentials."""
+    server_root = Path(__file__).resolve().parents[5]
+    if str(server_root) not in sys.path:
+        sys.path.insert(0, str(server_root))
+    from scripts.import_simda_inventaris import EXTRA, read_kib
+
+    cfg = dotenv_values(server_root / ".env")
+    env = {
+        key: cfg.get(f"SQL_SERVER_{key}") or os.environ.get(f"SQL_SERVER_{key}")
+        for key in ("HOST", "PORT", "DB_NAME", "USERNAME", "PASSWORD")
+    }
+    missing = [f"SQL_SERVER_{k}" for k, v in env.items() if not v]
+    if missing:
+        raise HTTPException(503, f"Konfigurasi database SIMDA belum lengkap: {', '.join(missing)}")
+
+    import pymssql
+
+    try:
+        conn = pymssql.connect(
+            server=env["HOST"],
+            port=int(env["PORT"]),
+            user=env["USERNAME"],
+            password=env["PASSWORD"],
+            database=env["DB_NAME"],
+            login_timeout=15,
+            timeout=120,
+            read_only=True,
+        )
+    except Exception as exc:
+        raise HTTPException(502, f"Gagal terhubung ke database SIMDA: {exc}") from exc
+
+    try:
+        cur = conn.cursor()
+        return {kib: read_kib(cur, kib, upb) for kib in EXTRA}
+    except Exception as exc:
+        raise HTTPException(502, f"Gagal membaca data dari database SIMDA: {exc}") from exc
+    finally:
+        conn.close()
+
+
+@router.post("/sinkronisasi", response_model=SinkronisasiResponse)
+async def sync_simda(
+    payload: SinkronisasiRequest | None = None,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(admin_access),
+):
+    server_root = Path(__file__).resolve().parents[5]
+    if str(server_root) not in sys.path:
+        sys.path.insert(0, str(server_root))
+    from scripts.import_simda_inventaris import load_references, map_all, plan, write
+
+    upb_filter: tuple[int, int] | None = None
+    if payload and payload.upb_kode:
+        row = (
+            await db.execute(
+                select(Unit.kd_sub, Unit.kd_upb).where(
+                    Unit.kode == payload.upb_kode, Unit.tingkat == "upb"
+                )
+            )
+        ).one_or_none()
+        if row is None:
+            raise HTTPException(404, "UPB tidak ditemukan di referensi SIMDA")
+        upb_filter = (int(row[0]), int(row[1]))
+
+    source = await run_in_threadpool(_read_simda_kib, upb_filter)
+    unit_rows, codes, conditions = await load_references(db)
+    units = {key: uid for key, (uid, _) in unit_rows.items()}
+    items, rejects = map_all(source, units, codes, set(conditions))
+    new, changed, counts = await plan(db, items, rejects)
+    if new or changed:
+        await write(db, new, changed, conditions)
+    return SinkronisasiResponse(
+        ditambahkan=len(new),
+        diperbarui=len(changed),
+        sama=counts["sama"],
+        dikunci=counts["dikunci perubahan lokal"],
+        ditolak=len(rejects),
+    )
 
 
 @router.get("/{aset_id}", response_model=AsetDetail)
@@ -449,4 +542,103 @@ async def change_condition(
         await db.rollback()
         await run_in_threadpool(path.unlink, missing_ok=True)
         raise
+    return await detail(aset_id, db)
+
+
+def _photo_path_for(url: str | None) -> Path | None:
+    if not url or not url.startswith("/uploads/inventaris-aset/"):
+        return None
+    name = Path(url).name
+    return (BASE_UPLOAD_DIR / "inventaris-aset" / name) if name else None
+
+
+@router.patch("/{aset_id}/kondisi/{riwayat_id}", response_model=AsetDetail)
+async def update_condition_history(
+    aset_id: str,
+    riwayat_id: str,
+    catatan: str = Form(..., min_length=1, max_length=4000),
+    foto: UploadFile | None = File(None),
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(admin_access),
+):
+    note = catatan.strip()
+    if not note:
+        raise HTTPException(422, "Catatan pemeriksaan wajib diisi")
+    entry = (
+        await db.execute(
+            select(Riwayat).where(Riwayat.id == riwayat_id, Riwayat.aset_id == aset_id).with_for_update()
+        )
+    ).scalar_one_or_none()
+    if entry is None:
+        raise HTTPException(404, "Riwayat kondisi tidak ditemukan")
+
+    old_path = _photo_path_for(entry.foto_url)
+    new_path: Path | None = None
+    if foto is not None and foto.filename:
+        content, extension = await read_photo(foto)
+        folder = BASE_UPLOAD_DIR / "inventaris-aset"
+        new_path = folder / f"{uuid.uuid4().hex}{extension}"
+        await run_in_threadpool(folder.mkdir, parents=True, exist_ok=True)
+        await run_in_threadpool(new_path.write_bytes, content)
+        entry.foto_url = f"/uploads/inventaris-aset/{new_path.name}"
+    elif foto is not None:
+        await foto.close()
+
+    entry.catatan = note
+    try:
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        if new_path is not None:
+            await run_in_threadpool(new_path.unlink, missing_ok=True)
+        raise
+
+    if new_path is not None and old_path is not None and old_path != new_path:
+        await run_in_threadpool(old_path.unlink, missing_ok=True)
+    return await detail(aset_id, db)
+
+
+@router.delete("/{aset_id}/kondisi/{riwayat_id}", response_model=AsetDetail)
+async def delete_condition_history(
+    aset_id: str,
+    riwayat_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(admin_access),
+):
+    obj = (
+        await db.execute(select(Aset).where(Aset.id == aset_id).with_for_update())
+    ).scalar_one_or_none()
+    if obj is None:
+        raise HTTPException(404, "Aset tidak ditemukan")
+    entry = (
+        await db.execute(
+            select(Riwayat).where(Riwayat.id == riwayat_id, Riwayat.aset_id == aset_id).with_for_update()
+        )
+    ).scalar_one_or_none()
+    if entry is None:
+        raise HTTPException(404, "Riwayat kondisi tidak ditemukan")
+
+    latest_id = (
+        await db.execute(
+            select(Riwayat.id)
+            .where(Riwayat.aset_id == aset_id)
+            .order_by(Riwayat.version.desc(), Riwayat.created_at.desc(), Riwayat.id)
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+    if (
+        latest_id == entry.id
+        and isinstance(entry.kondisi_lama, dict)
+        and "kode" in entry.kondisi_lama
+        and entry.kondisi_lama["kode"] != (entry.kondisi_baru or {}).get("kode")
+    ):
+        obj.kondisi_kode = int(entry.kondisi_lama["kode"])
+        obj.version = obj.version + 1
+        obj.updated_at = func.now()
+
+    old_path = _photo_path_for(entry.foto_url)
+    await db.delete(entry)
+    await db.commit()
+    if old_path is not None:
+        await run_in_threadpool(old_path.unlink, missing_ok=True)
     return await detail(aset_id, db)
